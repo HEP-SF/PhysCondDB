@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/task
+        http://www.springframework.org/schema/task/spring-task.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/data/jpa 
+        http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+        http://www.springframework.org/schema/jdbc 
+        http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/tx 
+        http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+	<!-- Uncomment and add your base-package here -->
+	<!-- <mvc:annotation-driven/> -->
+	<import resource="connections-config.xml"/>
+	<import resource="interceptors-config.xml"/>
+	<import resource="aspect-config.xml"/>
+
+	<context:component-scan base-package="conddb" />
+	<context:property-placeholder location="classpath:application.properties" />
+	<!-- JPA repositories -->
+	<jpa:repositories base-package="conddb.dao.repositories"></jpa:repositories>
+
+	<bean id="jdbcCondDBRepository" class="conddb.cool.migutils.JdbcCondDBRepository">
+		<property name="coolDs" ref="coolDataSource" />
+	</bean>
+
+	<!-- Services -->
+	<bean id="coolMigService" class="conddb.cool.migutils.svc.CoolMigrationService">
+		<constructor-arg ref="jdbcCondDBRepository" />
+	</bean>
+	
+	<bean id="conddbClientService" class="conddb.dao.svc.ConddbClientService" />
+
+	<bean id="taskExecutor"
+		class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<property name="corePoolSize" value="5" />
+		<property name="maxPoolSize" value="10" />
+		<property name="queueCapacity" value="25" />
+	</bean>
+	
+	<bean id="profilingAdvisor" class="conddb.utils.aop.ProfilingAdvisor"></bean>
+	<bean id="profilingMethodInterceptor" class="conddb.utils.aop.ProfilingMethodInterceptor"></bean>
+
+	<!-- does not work ? versions problems ??? <task:annotation-driven executor="executor"/> 
+		<task:executor id="executor" pool-size="10"/> -->
+	<!-- <task:annotation-driven executor="executor"/> ￼<task:executor id="executor" 
+		pool-size="10"/> -->
+</beans>
