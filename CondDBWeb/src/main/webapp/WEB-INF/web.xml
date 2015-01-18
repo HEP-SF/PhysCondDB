@@ -13,7 +13,7 @@ http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 		</context-param> -->
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>classpath:spring/application-config.xml</param-value>
+		<param-value>classpath:spring/services-context.xml</param-value>
 	</context-param>
 
 	<listener>
@@ -31,7 +31,7 @@ http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>/WEB-INF/cool-config.xml</param-value>
+			<param-value>classpath:spring/web/cool-config.xml</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 		<async-supported>true</async-supported>		
@@ -63,7 +63,7 @@ http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>/WEB-INF/conddb-web-config.xml</param-value>
+			<param-value>classpath:spring/web/conddb-web-config.xml</param-value>
 		</init-param>
 		<load-on-startup>3</load-on-startup>
 	</servlet>

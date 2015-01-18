@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -40,8 +41,11 @@ public class NodeType implements Serializable {
 	private Long nodeId;
 	@Column(name = "NODE_NAME", length = 255)
 	private String nodeName;
+
+	@Id
 	@Column(name = "NODE_FULLPATH", length = 255)
 	private String nodeFullpath;
+	
 	@Column(name = "NODE_DESCRIPTION", length = 255)
 	private String nodeDescription;
 	@Column(name = "NODE_ISLEAF", precision = 5, scale = 0)

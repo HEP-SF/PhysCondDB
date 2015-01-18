@@ -4,7 +4,7 @@
 	<groupId>org.springframework.samples.service.service</groupId>
 	<artifactId>CondDBWeb</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 
 	<properties>
 
@@ -166,6 +166,14 @@
 			<artifactId>sqlite-jdbc</artifactId>
 			<version>3.8.7</version>
 		</dependency>
+
+		<dependency>
+			<groupId>commons-dbcp</groupId>
+			<artifactId>commons-dbcp</artifactId>
+			<version>1.4</version>
+		</dependency>
+
+
 		<!-- hibernate sqlite dialect <dependency> <groupId>com.applerao</groupId> 
 			<artifactId>hibernatesqlite</artifactId> <version>1.0</version> <exclusions> 
 			<exclusion> <groupId>org.hibernate</groupId> <artifactId>hibernate</artifactId> 
@@ -196,7 +204,12 @@
 			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
-
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-all</artifactId>
+			<version>1.3</version>
+			<scope>test</scope>
+		</dependency>
 		<!-- Embedded web servers -->
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
@@ -214,54 +227,43 @@
 	<!-- <repositories> <repository> <id>hibernatesqlite-maven</id> <url>https://hibernate-sqlite.googlecode.com/svn/trunk/mavenrepo</url> 
 		</repository> </repositories> -->
 	<build>
- 	    <resources>
-            <resource>
-                <targetPath>webapp</targetPath>
-                <directory>src/main/webapp</directory>
-            </resource>
-            <resource>
-                <directory>src/main/resources</directory>
-            </resource>
-        </resources>
+		<resources>
+			<resource>
+				<targetPath>webapp</targetPath>
+				<directory>src/main/webapp</directory>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+		</resources>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>2.1</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-						<configuration>
-							<createDependencyReducedPom>false</createDependencyReducedPom>
-							<transformers>
-								<transformer
-									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>conddb.embedded.EmbeddedJetty</mainClass>
-								</transformer>
-							</transformers>
-							<filters>
-								<filter>
-									<artifact>*:*</artifact>
-									<excludes>
-										<exclude>META-INF/*.SF</exclude>
-										<exclude>META-INF/*.DSA</exclude>
-										<exclude>META-INF/*.RSA</exclude>
-									</excludes>
-								</filter>
-							</filters>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.0</version>
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<classpathPrefix>lib/</classpathPrefix>
+						</manifest>
+					</archive>
+					<webResources>
+						<resource>
+							<!-- this is relative to the pom.xml directory -->
+							<directory>${project.basedir}/src/main/resources
+							</directory>
+						</resource>
+					</webResources>
+					<warName>physconddb</warName>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -273,6 +275,7 @@
 					<url>http://localhost:8080/manager/text</url>
 					<server>TomcatServer</server>
 					<path>/physconddb</path>
+					<warFile>${project.build.directory}/physconddb.war</warFile>
 				</configuration>
 			</plugin>
 

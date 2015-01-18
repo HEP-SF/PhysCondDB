@@ -3,7 +3,7 @@
 <Resource name="java/OraAtlrDB" 
 		  auth="Container" type="javax.sql.DataSource"
           maxActive="100" maxIdle="30" maxWait="10000"
-          username="ATLAS_COND_TOOLS_R" password="xxxxx"
+          username="ATLAS_COND_TOOLS_R" password="C0ndT00ls_r"
           driverClassName="oracle.jdbc.OracleDriver"
                url="jdbc:oracle:thin:@(DESCRIPTION = (ADDRESS= (PROTOCOL=TCP) (HOST=atlr1-s.cern.ch) (PORT=10121) )
         (ADDRESS= (PROTOCOL=TCP) (HOST=atlr2-s.cern.ch) (PORT=10121) )

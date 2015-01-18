@@ -1,13 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:p="http://www.springframework.org/schema/p"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
                            http://www.springframework.org/schema/beans/spring-beans.xsd
                            http://www.springframework.org/schema/context
                            http://www.springframework.org/schema/context/spring-context.xsd">
 
-    <context:component-scan base-package="conddb.dao.svc,conddb.cool.migutils.svc" />
-
+	<context:component-scan base-package="conddb.dao.svc,conddb.cool.migutils" />
+	<!-- Services -->
+	<bean id="conddbClientService" class="conddb.dao.svc.ConddbClientService" />
+	<bean id="coolMigrationService" class="conddb.cool.migutils.svc.CoolMigrationService">
+		<constructor-arg ref="jdbcCondDBRepository" />
+	</bean>
+	<bean id="profilingAdvisor" class="conddb.utils.aop.ProfilingAdvisor"></bean>
+	<bean id="profilingMethodInterceptor" class="conddb.utils.aop.ProfilingMethodInterceptor"></bean>
+	<bean id="taskExecutor"
+		class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<property name="corePoolSize" value="5" />
+		<property name="maxPoolSize" value="10" />
+		<property name="queueCapacity" value="25" />
+	</bean>
 </beans>
