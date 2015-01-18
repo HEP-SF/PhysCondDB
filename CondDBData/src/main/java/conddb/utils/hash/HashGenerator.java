@@ -1,4 +1,4 @@
-package conddb.utils;
+package conddb.utils.hash;
 
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
