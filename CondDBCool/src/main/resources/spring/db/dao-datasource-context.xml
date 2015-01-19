@@ -11,6 +11,15 @@
                              http://www.springframework.org/schema/util/spring-util-4.0.xsd">
 
 	<beans profile="dev">
+		<bean id="daoDataSource" class="org.apache.commons.dbcp.BasicDataSource"
+			destroy-method="close" p:driverClassName="${jdbc.driver.class}"
+			p:url="${jdbc.url}" p:username="${jdbc.username}" p:password="${jdbc.password}"
+			p:initialSize="${jdbc.initial.size}" p:minIdle="${jdbc.min.idle}"
+			p:maxIdle="${jdbc.max.idle}" p:maxActive="${jdbc.max.active}"
+			p:timeBetweenEvictionRunsMillis="${jdbc.time.between.eviction}"
+			p:minEvictableIdleTimeMillis="${jdbc.min.evictable.idle}"
+			p:testOnBorrow="true" p:validationQueryTimeout="${jdbc.validation.query.timeout}"
+			p:validationQuery="${jdbc.validation.query}" />
 		<bean id="coolDataSource" class="org.apache.commons.dbcp.BasicDataSource"
 			destroy-method="close" p:driverClassName="${cool.driver.class}"
 			p:url="${cool.url}" p:username="${cool.username}" p:password="${cool.password}"
@@ -22,9 +31,19 @@
 			p:validationQuery="${cool.validation.query}" />
 	</beans>
 	<beans profile="prod">
+		<bean id="daoDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+			<property name="jndiName" value="${serverMode.localDataSource}" />
+			<property name="proxyInterface" value="javax.sql.DataSource" />
+		</bean>
+	
 		<bean id="coolDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
 			<property name="jndiName" value="${serverMode.coolDataSource}" />
 			<property name="proxyInterface" value="javax.sql.DataSource" />
 		</bean>
 	</beans>
+	
+	<beans profile="hsql">
+		<context:property-placeholder location="classpath:/spring/sql/hsql.properties" />
+	</beans>
+
 </beans>

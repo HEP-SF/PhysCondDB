@@ -18,11 +18,5 @@
 
 	<context:component-scan base-package="conddb.web" />
     <mvc:annotation-driven />
-    <mvc:interceptors>
-		<mvc:interceptor>
-			<mvc:mapping path="/**" />
-			<bean class="conddb.web.interceptors.RequestProcessingFrontierInterceptor" />
-		</mvc:interceptor>
-	</mvc:interceptors>
 	
 </beans>
