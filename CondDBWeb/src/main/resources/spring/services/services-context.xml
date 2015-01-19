@@ -7,12 +7,9 @@
                            http://www.springframework.org/schema/context
                            http://www.springframework.org/schema/context/spring-context.xsd">
 
-	<context:component-scan base-package="conddb.dao.svc,conddb.cool.migutils" />
+	<context:component-scan base-package="conddb.dao.svc" />
 	<!-- Services -->
 	<bean id="conddbClientService" class="conddb.dao.svc.ConddbClientService" />
-	<bean id="coolMigrationService" class="conddb.cool.migutils.svc.CoolMigrationService">
-		<constructor-arg ref="jdbcCondDBRepository" />
-	</bean>
 	<bean id="profilingAdvisor" class="conddb.utils.aop.ProfilingAdvisor"></bean>
 	<bean id="profilingMethodInterceptor" class="conddb.utils.aop.ProfilingMethodInterceptor"></bean>
 	<bean id="taskExecutor"

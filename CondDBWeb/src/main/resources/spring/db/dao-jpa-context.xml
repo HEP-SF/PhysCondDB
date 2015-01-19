@@ -9,7 +9,7 @@
                            http://www.springframework.org/schema/data/jpa
                            http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
 
-	<jpa:repositories base-package="conddb.dao,conddb.cool" />
+	<jpa:repositories base-package="conddb.dao" />
 	<!-- auditing <jpa:auditing auditor-aware-ref="auditorAware" /> <bean id="auditorAware" 
 		class="org.springbyexample.contact.orm.entity.AuditorAwareImpl" /> -->
 	<tx:annotation-driven />
@@ -42,9 +42,5 @@
 				class="org.springframework.jdbc.datasource.init.ResourceDatabasePopulator"
 				p:scripts-ref="databaseScriptsList" p:sqlScriptEncoding="UTF-8" />
 		</property>
-	</bean>
-
-	<bean id="jdbcCondDBRepository" class="conddb.cool.migutils.JdbcCondDBRepository">
-		<property name="coolDs" ref="coolDataSource" />
 	</bean>
 </beans>
