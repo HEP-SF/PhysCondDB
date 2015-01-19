@@ -21,35 +21,25 @@ http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 	</listener>
 
 
-	<!-- - Servlet that dispatches request to repository handlers (Repository 
-		implementations). -->
-	<!-- This init is not working <init-param> <param-name>contextConfigLocation</param-name> 
-		<param-value>/WEB-INF/mvc-config.xml</param-value> </init-param> -->
+	<!-- - Servlet that dispatches request to registered handlers (Controller 
+		implementations). <servlet> <servlet-name>dispatcherServlet</servlet-name> 
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class> 
+		<init-param> <param-name>contextConfigLocation</param-name> <param-value>/WEB-INF/cool-config.xml</param-value> 
+		</init-param> <load-on-startup>1</load-on-startup> </servlet> -->
 	<servlet>
-		<servlet-name>rest</servlet-name>
-		<servlet-class>org.springframework.data.rest.webmvc.RepositoryRestDispatcherServlet</servlet-class>
-		<load-on-startup>2</load-on-startup>
-		<async-supported>true</async-supported>		
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>rest</servlet-name>
-		<url-pattern>/conddb/*</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>conddb-web</servlet-name>
+		<servlet-name>dispatcherServlet</servlet-name>
 		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
 		<init-param>
 			<param-name>contextConfigLocation</param-name>
-			<param-value>classpath:spring/web/conddb-web-config.xml</param-value>
+			<param-value>classpath:spring/web/cool-config.xml</param-value>
 		</init-param>
-		<load-on-startup>3</load-on-startup>
+		<load-on-startup>1</load-on-startup>
+		<async-supported>true</async-supported>		
 	</servlet>
 	<!-- mapping of the servlet -->
 	<servlet-mapping>
-		<servlet-name>conddb-web</servlet-name>
-		<url-pattern>/conddbweb/*</url-pattern>
+		<servlet-name>dispatcherServlet</servlet-name>
+		<url-pattern>/cool/*</url-pattern>
 	</servlet-mapping>
 
 </web-app>

@@ -7,11 +7,11 @@
 	</configSuffixes>
 	<enableImports><![CDATA[false]]></enableImports>
 	<configs>
-		<config>src/main/webapp/WEB-INF/conddb-web-config.xml.old</config>
-		<config>src/main/webapp/WEB-INF/cool-config.xml.old</config>
-		<config>src/main/resources/spring/application-config.xml.old</config>
 	</configs>
 	<autoconfigs>
+		<config>src/main/resources/spring/web/cool-config.xml</config>
+		<config>src/main/resources/spring/web/conddb-web-config.xml</config>
+		<config>src/main/resources/spring/services-context.xml</config>
 	</autoconfigs>
 	<configSets>
 	</configSets>

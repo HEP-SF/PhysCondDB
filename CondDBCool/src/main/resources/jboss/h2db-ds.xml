@@ -1,0 +1,10 @@
+<datasources xmlns="http://www.jboss.org/ironjacamar/schema">
+	<datasource jndi-name="java:jboss/datasources/H2DB" pool-name="H2DBPool" enabled="true" use-java-context="true">
+		<connection-url>jdbc:h2:mem:conddbspring;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE</connection-url>
+		<driver>h2</driver>
+		<security>
+			<user-name>sa</user-name>
+			<password>sa</password>
+		</security>
+	</datasource>
+</datasources>
