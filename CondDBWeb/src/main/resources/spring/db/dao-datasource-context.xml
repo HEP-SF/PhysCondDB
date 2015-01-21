@@ -33,14 +33,27 @@
 	</beans>
 	<beans profile="prod">
 		<bean id="daoDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-			<property name="jndiName" value="${serverMode.localDataSource}" />
+			<property name="jndiName" value="${serverMode.tomcat.localDataSource}" />
 			<property name="proxyInterface" value="javax.sql.DataSource" />
 		</bean>
 		<bean id="coolDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-			<property name="jndiName" value="${serverMode.coolDataSource}" />
+			<property name="jndiName" value="${serverMode.tomcat.coolDataSource}" />
 			<property name="proxyInterface" value="javax.sql.DataSource" />
 		</bean>
 	</beans>
+	<beans profile="wildfly">
+		<bean id="daoDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+			<property name="jndiName" value="${serverMode.wildfly.localDataSource}" />
+			<property name="proxyInterface" value="javax.sql.DataSource" />
+		</bean>
+	
+		<bean id="coolDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+			<property name="jndiName" value="${serverMode.wildfly.coolDataSource}" />
+			<property name="proxyInterface" value="javax.sql.DataSource" />
+		</bean>
+	</beans>
+	
+	
 <!-- 	<beans> -->
 <!-- 	<bean id="propertyConfigurer" -->
 <!--           class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"> -->
@@ -68,7 +81,11 @@
  	<beans profile="postgresql">
 		<context:property-placeholder
 			location="classpath:/spring/sql/postgresql.properties,classpath*:META-INF/config/**/*.properties,file:conddb-app*.properties" />
-		<util:list id="databaseScriptsList" value-type="org.springframework.core.io.Resource" />
+<!-- 		<util:list id="databaseScriptsList" value-type="org.springframework.core.io.Resource" /> -->
 	</beans>
+	<beans profile="h2">
+		<context:property-placeholder location="classpath:/spring/sql/h2.properties" />
+	</beans>
+	
 
 </beans>

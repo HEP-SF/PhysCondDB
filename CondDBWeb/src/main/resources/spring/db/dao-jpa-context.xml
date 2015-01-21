@@ -9,7 +9,7 @@
                            http://www.springframework.org/schema/data/jpa
                            http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
 
-	<jpa:repositories base-package="conddb.dao" />
+	<jpa:repositories base-package="conddb.dao,conddb.web" />
 	<!-- auditing <jpa:auditing auditor-aware-ref="auditorAware" /> <bean id="auditorAware" 
 		class="org.springbyexample.contact.orm.entity.AuditorAwareImpl" /> -->
 	<tx:annotation-driven />
@@ -37,10 +37,10 @@
 	<bean id="dataSourceInitializer"
 		class="org.springframework.jdbc.datasource.init.DataSourceInitializer"
 		p:dataSource-ref="daoDataSource">
-		<property name="databasePopulator">
-			<bean
-				class="org.springframework.jdbc.datasource.init.ResourceDatabasePopulator"
-				p:scripts-ref="databaseScriptsList" p:sqlScriptEncoding="UTF-8" />
-		</property>
+<!-- 		<property name="databasePopulator"> -->
+<!-- 			<bean -->
+<!-- 				class="org.springframework.jdbc.datasource.init.ResourceDatabasePopulator" -->
+<!-- 				p:scripts-ref="databaseScriptsList" p:sqlScriptEncoding="UTF-8" /> -->
+<!-- 		</property> -->
 	</bean>
 </beans>

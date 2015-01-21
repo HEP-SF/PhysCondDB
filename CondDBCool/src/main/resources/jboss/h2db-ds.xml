@@ -7,4 +7,14 @@
 			<password>sa</password>
 		</security>
 	</datasource>
-</datasources>
+	
+<!-- 	<datasource jndi-name="java:jboss/datasources/HSQLDB" pool-name="HSQLDBPool" enabled="true" use-java-context="true">
+		<connection-url>jdbc:hsqldb:mem:pconddb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE</connection-url>
+		<driver>org.hsqldb.jdbcDriver</driver>
+		<security>
+			<user-name>sa</user-name>
+			<password>sa</password>
+		</security>
+	</datasource>
+ -->
+ </datasources>

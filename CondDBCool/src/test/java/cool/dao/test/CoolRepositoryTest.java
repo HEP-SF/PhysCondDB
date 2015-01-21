@@ -24,7 +24,7 @@ import static org.hamcrest.Matchers.greaterThan;
  * @author formica
  *
  */
-@ActiveProfiles({ "dev","hsql"})
+@ActiveProfiles({ "dev","h2"})
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:/spring/services-context.xml" })
 public class CoolRepositoryTest {

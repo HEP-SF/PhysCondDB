@@ -12,6 +12,6 @@
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <property name="java-output-path" value="/CondDBWeb/target/classes"/>
-        <property name="context-root" value="physconddb"/>
+        <property name="context-root" value="CondDBWeb"/>
     </wb-module>
 </project-modules>

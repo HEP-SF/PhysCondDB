@@ -2,18 +2,21 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
 	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+    xmlns:context="http://www.springframework.org/schema/context"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
                            http://www.springframework.org/schema/beans/spring-beans.xsd
                            http://www.springframework.org/schema/tx
                            http://www.springframework.org/schema/tx/spring-tx.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context.xsd
                            http://www.springframework.org/schema/data/jpa
                            http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
 
 	<!-- auditing <jpa:auditing auditor-aware-ref="auditorAware" /> <bean id="auditorAware" 
 		class="org.springbyexample.contact.orm.entity.AuditorAwareImpl" /> -->
+<context:annotation-config />
 	<jpa:repositories base-package="conddb.dao,conddb.cool" />
 
-	<jpa:repositories base-package="conddb.dao" />
 	<!-- auditing <jpa:auditing auditor-aware-ref="auditorAware" /> <bean id="auditorAware" 
 		class="org.springbyexample.contact.orm.entity.AuditorAwareImpl" /> -->
 	<tx:annotation-driven />
@@ -21,7 +24,8 @@
 		p:entityManagerFactory-ref="entityManagerFactory" />
 	<bean id="entityManagerFactory"
 		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
-		p:dataSource-ref="daoDataSource" p:persistenceUnitName="${jpa.persistence.unit.name}"
+		p:dataSource-ref="daoDataSource" 
+		p:persistenceUnitName="${jpa.persistence.unit.name}"
 		depends-on="dataSourceInitializer">
 		<property name="jpaVendorAdapter">
 			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />

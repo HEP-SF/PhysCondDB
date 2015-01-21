@@ -5,31 +5,19 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>org.cea.physconddb</groupId>
+		<groupId>conddb</groupId>
 		<artifactId>PhysCondDBWeb</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 		<relativePath>../../PhysCondDB</relativePath>
 	</parent>
 
-	<groupId>org.cea.physconddb.cool</groupId>
+	<groupId>conddb.cool</groupId>
 	<artifactId>CondDBCool</artifactId>
 	<version>1.0-SNAPSHOT</version>
 	<name>CondDBCool</name>
 	<packaging>war</packaging>
 	<url>http://maven.apache.org</url>
 
-	<dependencies>
-		<dependency>
-			<groupId>conddb.data</groupId>
-			<artifactId>CondDBData</artifactId>
-			<version>1.0-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>conddb.dao</groupId>
-			<artifactId>CondDBServices</artifactId>
-			<version>1.0-SNAPSHOT</version>
-		</dependency>
-	</dependencies>
 
 
 	<build>
@@ -40,6 +28,9 @@
 			</resource>
 			<resource>
 				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>**/persistence.xml</exclude>
+				</excludes>
 			</resource>
 		</resources>
 		<plugins>
@@ -67,10 +58,26 @@
 							<!-- this is relative to the pom.xml directory -->
 							<directory>${project.basedir}/src/main/resources
 							</directory>
+							<excludes>
+								<exclude>**/persistence.xml</exclude>
+							</excludes>
 						</resource>
 					</webResources>
-					<warName>physconddb</warName>
+					<!-- <warName>physconddb</warName> -->
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.wildfly.plugins</groupId>
+				<artifactId>wildfly-maven-plugin</artifactId>
+				<version>1.0.2.Final</version>
+				<executions>
+					<execution>
+						<phase>install</phase>
+						<goals>
+							<goal>deploy</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.tomcat.maven</groupId>
@@ -81,7 +88,7 @@
 					<url>http://localhost:8080/manager/text</url>
 					<server>TomcatServer</server>
 					<path>/physconddbcool</path>
-					<warFile>${project.build.directory}/physconddbcool.war</warFile>
+					<!-- <warFile>${project.build.directory}/physconddbcool.war</warFile> -->
 				</configuration>
 				<executions>
 					<execution>
@@ -111,4 +118,18 @@
 		</plugins>
 		<!-- <finalName>physconddb</finalName> -->
 	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>conddb.data</groupId>
+			<artifactId>CondDBData</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>conddb.dao</groupId>
+			<artifactId>CondDBServices</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+
 </project>
