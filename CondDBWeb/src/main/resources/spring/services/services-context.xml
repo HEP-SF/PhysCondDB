@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/aop 
+                           http://www.springframework.org/schema/aop/spring-aop.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<context:component-scan base-package="conddb.dao.svc" />
+	<!-- Services -->
+	<bean id="conddbClientService" class="conddb.dao.svc.ConddbClientService" />
+	<bean id="profilingAdvisor" class="conddb.utils.aop.ProfilingAdvisor"></bean>
+	<bean id="profilingMethodInterceptor" class="conddb.utils.aop.ProfilingMethodInterceptor"></bean>
+	
+   <!-- this is the actual advice itself -->
+   <bean id="profilingAspect" class="conddb.utils.aop.ProfilingAspect" />
+
+   <aop:config>
+      <aop:aspect ref="profilingAspect">
+         <aop:pointcut id="getGlobalTagTrace"
+                    expression="execution(* conddb.dao.svc.ConddbClientService.getGlobalTagTrace(String))
+                    and args(logAction)"/>
+
+         <aop:around pointcut-ref="getGlobalTagTrace"
+                  method="logAction"/>
+
+      </aop:aspect>
+   </aop:config>
+   
+	<bean id="taskExecutor"
+		class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<property name="corePoolSize" value="5" />
+		<property name="maxPoolSize" value="10" />
+		<property name="queueCapacity" value="25" />
+	</bean>
+</beans>

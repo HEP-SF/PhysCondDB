@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+    xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+                           http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/tx
+                           http://www.springframework.org/schema/tx/spring-tx.xsd
+                           http://www.springframework.org/schema/context
+                           http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/data/jpa
+                           http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+	<!-- auditing <jpa:auditing auditor-aware-ref="auditorAware" /> <bean id="auditorAware" 
+		class="org.springbyexample.contact.orm.entity.AuditorAwareImpl" /> -->
+<context:annotation-config />
+	<jpa:repositories base-package="conddb.dao,conddb.cool" />
+
+	<!-- auditing <jpa:auditing auditor-aware-ref="auditorAware" /> <bean id="auditorAware" 
+		class="org.springbyexample.contact.orm.entity.AuditorAwareImpl" /> -->
+	<tx:annotation-driven />
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"
+		p:entityManagerFactory-ref="entityManagerFactory" />
+	<bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+		p:dataSource-ref="daoDataSource" 
+		p:persistenceUnitName="${jpa.persistence.unit.name}"
+		depends-on="dataSourceInitializer">
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+		</property>
+		<property name="packagesToScan" value="conddb.data" />
+		<property name="jpaProperties">
+			<props>
+				<prop key="hibernate.hbm2ddl.auto">${jpa.hibernateddl}</prop>
+				<prop key="hibernate.show_sql">${jpa.show.sql}</prop>
+				<prop key="hibernate.generate_statistics">false</prop>
+				<prop key="hibernate.cache.use_second_level_cache">${jpa.cache.use_second_level_cache}</prop>
+				<prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.EhCacheRegionFactory
+				</prop>
+			</props>
+		</property>
+	</bean>
+	<bean id="dataSourceInitializer"
+		class="org.springframework.jdbc.datasource.init.DataSourceInitializer"
+		p:dataSource-ref="daoDataSource">
+	</bean>
+
+	<bean id="jdbcCondDBRepository" class="conddb.cool.migutils.JdbcCondDBRepository">
+		<property name="coolDs" ref="coolDataSource" />
+	</bean>
+</beans>

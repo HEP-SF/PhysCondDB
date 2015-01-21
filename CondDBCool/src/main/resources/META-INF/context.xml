@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Context>
+<Resource name="java/OraAtlrDB" 
+		  auth="Container" type="javax.sql.DataSource"
+          maxActive="100" maxIdle="30" maxWait="10000"
+          username="ATLAS_COND_TOOLS_R" password="C0ndT00ls_r"
+          driverClassName="oracle.jdbc.OracleDriver"
+               url="jdbc:oracle:thin:@(DESCRIPTION = (ADDRESS= (PROTOCOL=TCP) (HOST=atlr1-s.cern.ch) (PORT=10121) )
+        (ADDRESS= (PROTOCOL=TCP) (HOST=atlr2-s.cern.ch) (PORT=10121) )
+        (ADDRESS= (PROTOCOL=TCP) (HOST=atlr3-s.cern.ch) (PORT=10121) )
+        (ADDRESS= (PROTOCOL=TCP) (HOST=atlr4-s.cern.ch) (PORT=10121) )
+        (LOAD_BALANCE=on)
+        (ENABLE=BROKEN)
+        (CONNECT_DATA=
+                (SERVER=DEDICATED)
+                (SERVICE_NAME=atlr.cern.ch)
+        )
+)"/>
+<Resource name="java/HSQLDB" 
+		  auth="Container" type="javax.sql.DataSource"
+          maxActive="100" maxIdle="30" maxWait="10000"
+          username="SA" password="" 
+          driverClassName="org.hsqldb.jdbcDriver"
+               url="jdbc:hsqldb:mem:spring-playground"/>
+               
+<Resource name="java/H2DB" 
+		  auth="Container" type="javax.sql.DataSource"
+          maxActive="100" maxIdle="30" maxWait="10000"
+          username="root" password="" 
+          driverClassName="org.h2.Driver"
+               url="jdbc:h2:mem:condspring-testdb"/>
+<!-- e.g. for file based DB               url="jdbc:h2:/tmp/condspringdb"/>   --> 
+               
+<Resource name="java/SQLITEDB" auth="Container" type="javax.sql.DataSource"
+        maxActive="100" maxIdle="30" maxWait="10000"
+        username="test" password="test" driverClassName="org.sqlite.JDBC"
+        url="jdbc:sqlite://Users/formica/MyApp/Servers/conddb.db"/>
+</Context>
