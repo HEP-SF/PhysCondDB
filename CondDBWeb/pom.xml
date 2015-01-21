@@ -33,6 +33,7 @@
 			</resource>
 			<resource>
 				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
 				<excludes>
 					<exclude>**/persistence.xml</exclude>
 				</excludes>
@@ -62,6 +63,7 @@
 						<resource>
 							<!-- this is relative to the pom.xml directory -->
 							<directory>${project.basedir}/src/main/resources/</directory>
+							<filtering>true</filtering>
 							<excludes>
 								<exclude>**/persistence.xml</exclude>
 							</excludes>

@@ -230,7 +230,12 @@
         <module>CondDBWeb</module>
         <module>CondDBData</module>
         <module>CondDBCool</module>
-    <module>CondDBServices</module>
+        <module>CondDBServices</module>
   </modules>
+  <build>
+    <filters>
+      <filter>conddb-filter-values.properties</filter>
+    </filters>
+  </build>
 
 </project>
