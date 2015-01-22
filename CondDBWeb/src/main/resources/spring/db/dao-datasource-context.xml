@@ -41,6 +41,16 @@
 			<property name="proxyInterface" value="javax.sql.DataSource" />
 		</bean>
 	</beans>
+	<beans profile="prod">
+		<bean id="daoDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+			<property name="jndiName" value="${serverMode.jetty.localDataSource}" />
+			<property name="proxyInterface" value="javax.sql.DataSource" />
+		</bean>
+		<bean id="coolDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+			<property name="jndiName" value="${serverMode.jetty.coolDataSource}" />
+			<property name="proxyInterface" value="javax.sql.DataSource" />
+		</bean>
+	</beans>
 	<beans profile="wildfly">
 		<bean id="daoDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
 			<property name="jndiName" value="${serverMode.wildfly.localDataSource}" />

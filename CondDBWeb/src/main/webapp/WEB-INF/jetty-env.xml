@@ -1,0 +1,37 @@
+<?xml version="1.0"  encoding="UTF-8"?>
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://www.eclipse.org/jetty/configure.dtd">
+
+<Configure id ="datadb" class="org.eclipse.jetty.webapp.WebAppContext">
+    <New id="h2Datasource" class="org.eclipse.jetty.plus.jndi.Resource">
+        <Arg>jdbc/H2DB</Arg>
+        <Arg>
+            <New class="com.mchange.v2.c3p0.ComboPooledDataSource">
+                <Set name="driverClass">org.h2.Driver</Set>
+                <Set name="jdbcUrl">jdbc:h2:~/temp/testdb</Set>
+                <Set name="user">sa</Set>
+                <Set name="password"></Set>
+            </New>
+        </Arg>
+    </New>
+    <New id="oradatasource" class="org.eclipse.jetty.plus.jndi.Resource">
+        <Arg>jdbc/OraAtlrDB</Arg>
+        <Arg>
+            <New class="com.mchange.v2.c3p0.ComboPooledDataSource">
+                <Set name="driverClass">oracle.jdbc.OracleDriver</Set>
+                <Set name="jdbcUrl">jdbc:oracle:thin:@(DESCRIPTION = (ADDRESS= (PROTOCOL=TCP) (HOST=atlr1-s.cern.ch) (PORT=10121) )
+        (ADDRESS= (PROTOCOL=TCP) (HOST=atlr2-s.cern.ch) (PORT=10121) )
+        (ADDRESS= (PROTOCOL=TCP) (HOST=atlr3-s.cern.ch) (PORT=10121) )
+        (ADDRESS= (PROTOCOL=TCP) (HOST=atlr4-s.cern.ch) (PORT=10121) )
+        (LOAD_BALANCE=on)
+        (ENABLE=BROKEN)
+        (CONNECT_DATA=
+                (SERVER=DEDICATED)
+                (SERVICE_NAME=atlr.cern.ch)
+        )
+)</Set>
+                <Set name="user">ATLAS_COND_TOOLS_R</Set>
+                <Set name="password">${condreader}</Set>
+            </New>
+        </Arg>
+    </New>
+</Configure>
