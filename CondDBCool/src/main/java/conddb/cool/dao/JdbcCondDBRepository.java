@@ -1,4 +1,4 @@
-package conddb.cool.migutils;
+package conddb.cool.dao;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -13,6 +13,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import conddb.cool.data.CoolIovType;
 import conddb.cool.data.GtagTagType;
 import conddb.cool.data.NodeType;
+import conddb.cool.migutils.CoolIovTypeMapper;
+import conddb.cool.migutils.GtagTagMapper;
+import conddb.cool.migutils.NodeTypeMapper;
 
 public class JdbcCondDBRepository {
 
