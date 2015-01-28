@@ -25,6 +25,7 @@ public interface GlobalTagRepository extends CrudRepository<GlobalTag, String> {
 	
 	List<GlobalTag> findByDescriptionLike(@Param("description")String description);
 	
+	// TODO: Test using orm.xml by commenting....did not work
 	@Query("SELECT p FROM GlobalTag p JOIN FETCH p.globalTagMaps maps WHERE maps.globalTag.name = (:name)")
     public GlobalTag findByNameAndFetchTagsEagerly(@Param("name") String name);
 //	List<GlobalTag> findByInsertionTimeBetween(Date since, Date until);

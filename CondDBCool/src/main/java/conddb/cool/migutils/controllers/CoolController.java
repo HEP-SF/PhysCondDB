@@ -27,6 +27,7 @@ import conddb.cool.migutils.svc.CoolMigrationService;
  *
  */
 @RestController
+@RequestMapping(value="/cool")
 public class CoolController {
 
 	private Logger log = LoggerFactory.getLogger(getClass());

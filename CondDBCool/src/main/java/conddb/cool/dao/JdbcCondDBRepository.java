@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import conddb.cool.data.CoolIovType;
 import conddb.cool.data.GtagTagType;
@@ -17,6 +18,7 @@ import conddb.cool.migutils.CoolIovTypeMapper;
 import conddb.cool.migutils.GtagTagMapper;
 import conddb.cool.migutils.NodeTypeMapper;
 
+@PreAuthorize("hasRole('ROLE_USER')")
 public class JdbcCondDBRepository {
 
 	@Autowired

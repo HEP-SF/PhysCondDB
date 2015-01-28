@@ -132,6 +132,22 @@
 			<artifactId>CondDBServices</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
+   
+    <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-core</artifactId>
+        <version>4.0.0.RC1</version>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-web</artifactId>
+        <version>4.0.0.RC1</version>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-config</artifactId>
+        <version>4.0.0.RC1</version>
+    </dependency>
 	</dependencies>
-
+	
 </project>

@@ -41,7 +41,7 @@
 			<property name="proxyInterface" value="javax.sql.DataSource" />
 		</bean>
 	</beans>
-	<beans profile="prod">
+	<beans profile="jetty">
 		<bean id="daoDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
 			<property name="jndiName" value="${serverMode.jetty.localDataSource}" />
 			<property name="proxyInterface" value="javax.sql.DataSource" />
@@ -78,10 +78,9 @@
 <!--     </beans> -->
 	<beans profile="hsql">
 		<context:property-placeholder location="classpath:/spring/sql/hsql.properties" />
-		<util:list id="databaseScriptsList" value-type="org.springframework.core.io.Resource">
-			<value>classpath:/spring/sql/hsql/drop_database.sql</value>
-			<!-- <value>classpath:/spring/sql/hsql/security_schema.sql</value> -->
-		</util:list>
+<!-- 		<util:list id="databaseScriptsList" value-type="org.springframework.core.io.Resource"> -->
+<!-- 			<value>classpath:/spring/sql/hsql/drop_database.sql</value> -->
+<!-- 		</util:list> -->
 	</beans>
 <!-- 	
     <beans profile="condtools">

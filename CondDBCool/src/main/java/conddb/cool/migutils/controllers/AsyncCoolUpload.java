@@ -24,6 +24,7 @@ import conddb.cool.migutils.svc.CoolMigrationService;
  *
  */
 @RestController
+@RequestMapping(value="/admin")
 public class AsyncCoolUpload {
 
 

@@ -19,5 +19,7 @@
 
     <import resource="classpath*:/spring/db/**/*-context.xml"/>
     <import resource="classpath*:/spring/services/**/*-context.xml"/>
+    <import resource="classpath*:/spring/web/**/*-config.xml"/>
+    <import resource="classpath*:/spring/security/**/*-security.xml"/>
 
 </beans>

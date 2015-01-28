@@ -20,11 +20,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.xml.sax.InputSource;
 
+import conddb.cool.dao.JdbcCondDBRepository;
 import conddb.cool.data.CoolIovType;
 import conddb.cool.data.GtagTagType;
 import conddb.cool.data.NodeType;
 import conddb.cool.migutils.CoolIov;
-import conddb.cool.migutils.JdbcCondDBRepository;
 import conddb.dao.repositories.GlobalTagMapRepository;
 import conddb.dao.repositories.GlobalTagRepository;
 import conddb.dao.repositories.IovRepository;

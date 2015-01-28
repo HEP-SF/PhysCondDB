@@ -47,7 +47,7 @@
 		p:dataSource-ref="daoDataSource">
 	</bean>
 
-	<bean id="jdbcCondDBRepository" class="conddb.cool.migutils.JdbcCondDBRepository">
+	<bean id="jdbcCondDBRepository" class="conddb.cool.dao.JdbcCondDBRepository">
 		<property name="coolDs" ref="coolDataSource" />
 	</bean>
 </beans>

@@ -1,0 +1,40 @@
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:sec="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+		   http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd           
+           http://www.springframework.org/schema/security
+           http://www.springframework.org/schema/security/spring-security.xsd">
+
+	<!-- The usage of beans:beans and xmlns=security allows to avoid -->
+	<!-- writing "security" on xml tags in this file -->
+	<context:component-scan base-package="conddb.security" />
+
+	<http use-expressions="true" entry-point-ref="condDBAuthenticationEntryPoint">
+		<!-- <intercept-url pattern="/cool/**" access="permitAll"/> -->
+		<intercept-url pattern="/rest/admin/**" access="isAuthenticated()" />
+
+		<!-- Use this in form-login if there are path problems login-processing-url="/j_spring_security_check" -->
+		<sec:form-login login-processing-url="/j_spring_security_check" authentication-success-handler-ref="mySuccessHandler"
+			authentication-failure-handler-ref="myFailureHandler" />
+		<csrf disabled="true" />
+		<logout />
+	</http>
+
+	<beans:bean id="mySuccessHandler"
+		class="conddb.security.MySavedRequestAwareAuthenticationSuccessHandler" />
+	<beans:bean id="myFailureHandler"
+		class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler" />
+
+	<authentication-manager alias="authenticationManager">
+		<authentication-provider>
+			<user-service>
+				<user name="temporary" password="temporary" authorities="ROLE_ADMIN" />
+				<user name="user" password="userPass" authorities="ROLE_USER" />
+			</user-service>
+		</authentication-provider>
+	</authentication-manager>
+</beans:beans>   

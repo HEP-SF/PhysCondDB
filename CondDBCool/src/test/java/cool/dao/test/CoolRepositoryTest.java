@@ -15,8 +15,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import conddb.cool.dao.JdbcCondDBRepository;
 import conddb.cool.data.GtagTagType;
-import conddb.cool.migutils.JdbcCondDBRepository;
 import static org.junit.Assert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 
