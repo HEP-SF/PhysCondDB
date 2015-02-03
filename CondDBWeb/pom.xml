@@ -83,6 +83,7 @@
 					<path>/physconddb</path>
 					<!-- <warFile>${project.build.directory}/physconddb.war</warFile> -->
 				</configuration>
+				<!-- 
 				<executions>
 					<execution>
 						<id>deploy</id>
@@ -92,6 +93,7 @@
 						</goals>
 					</execution>
 				</executions>
+				 -->
 			</plugin>
 
 			<!-- Jetty -->

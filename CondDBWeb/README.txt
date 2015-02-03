@@ -1,12 +1,44 @@
-#
-# Prototype project for Conditions Database
-# Authors: A.Formica
-# Date : 2014/12/10
-#
-This project uses maven for build.
-It can be deployed in tomcat or JBoss wildfly.
+#########################################################
+#       CondDBWeb                                      #
+# Author: A.Formica                                     #
+# Date : 2015/01/01                                     #
+#########################################################
+ROOT module directory : <PhysCondDB>/CondDBWeb
+
+This project is based on maven (mvn) so you need 
+to install maven to be able to compile it.
+The project has been tested using java versions 7 and 8.
+
+1) Deployment:
+	tomcat deployment: mvn tomcat7:redeploy
+	jetty deployment for testing: mvn -Dspring.profiles.active=dev,h2,basic jetty:run
+	
+Be careful is you are using authentication that the correct profile is set in "CATALINA_OPTS"
+
+2) List of delivered services
+The PhysCondDB access and data retrieval allows to list tags and global tags, iovs and 
+payload (NOT IMPLEMENTED YET)
+
+ * Automatic discovery of services.
+   The application uses spring HATEOS to implement automatic discovery of delivered services.
+   Use the following URL to navigate in the conditions DB.
+ - http://localhost:8080/physconddb/conddb/alps   GET
+ 
+ * General purpose services
+   In order to deliver more appropriate queries, the application implements a set of high level
+   services which are performing more specific DB queries.
+ - http://localhost:8080/physconddb/conddbweb/tracetags   GET
+   Arguments: ....
+
+2) Refer to ../README.md for instructions on building and deploying this application.
 
 
+OLD INSTRUCTIONS...NOW CHECK ../README.md
+Using Spring Profiles you do not need to change anything at this level.
+
+For the moment we keep the instructions below as a history of the development.
+
+===============================================================
 Tomcat7
 =======
 Update the file in:

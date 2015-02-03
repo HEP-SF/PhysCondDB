@@ -23,13 +23,21 @@
           driverClassName="org.hsqldb.jdbcDriver"
                url="jdbc:hsqldb:mem:spring-playground"/>
                
-<Resource name="java/H2DB" 
+<!-- <Resource name="java/H2DB" 
 		  auth="Container" type="javax.sql.DataSource"
           maxActive="100" maxIdle="30" maxWait="10000"
           username="root" password="" 
           driverClassName="org.h2.Driver"
-               url="jdbc:h2:mem:condspring-testdb"/>
+          url="jdbc:h2:mem:condspring-testdb"
+          />
+ -->         
+ <ResourceLink name="java/H2DB"
+                global="java/H2DB"
+                auth="Container"
+                type="javax.sql.DataSource" />
+                 
 <!-- e.g. for file based DB               url="jdbc:h2:/tmp/condspringdb"/>   --> 
+<!-- e.g. for in memory based DB          url="jdbc:h2:mem:condspring-testdb" -->              
                
 <Resource name="java/SQLITEDB" auth="Container" type="javax.sql.DataSource"
         maxActive="100" maxIdle="30" maxWait="10000"

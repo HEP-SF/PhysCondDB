@@ -14,7 +14,7 @@
         <logger name="org.springframework.web.servlet.mvc" level="WARN" />
         <logger name="org.springframework.security" level="DEBUG" />
 
-        <root level="DEBUG">
+        <root level="INFO">
                 <appender-ref ref="STDOUT" />
         </root>
 
