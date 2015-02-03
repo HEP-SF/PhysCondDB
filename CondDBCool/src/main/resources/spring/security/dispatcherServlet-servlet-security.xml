@@ -10,19 +10,21 @@
            http://www.springframework.org/schema/security
            http://www.springframework.org/schema/security/spring-security.xsd">
 
-	<http use-expressions="true" create-session="stateless">
-		<!-- <intercept-url pattern="/cool/**" access="permitAll"/> -->
-		<intercept-url pattern="/admin/**" access="isAuthenticated()" />
-		<http-basic/>
-		<csrf disabled="true"/>
-	</http>
-	
-	<authentication-manager>
-		<authentication-provider>
-			<user-service>
-				<user name="temporary" password="temporary" authorities="ROLE_ADMIN" />
-				<user name="user" password="userPass" authorities="ROLE_USER" />
-			</user-service>
-		</authentication-provider>
-	</authentication-manager>	
+	<beans:beans profile="basic">
+		<http use-expressions="true" create-session="stateless">
+			<!-- <intercept-url pattern="/cool/**" access="permitAll"/> -->
+			<intercept-url pattern="/admin/**" access="isAuthenticated()" />
+			<http-basic />
+			<csrf disabled="true" />
+		</http>
+
+		<authentication-manager>
+			<authentication-provider>
+				<user-service>
+					<user name="temporary" password="temporary" authorities="ROLE_ADMIN" />
+					<user name="user" password="userPass" authorities="ROLE_USER" />
+				</user-service>
+			</authentication-provider>
+		</authentication-manager>
+	</beans:beans>
 </beans:beans>

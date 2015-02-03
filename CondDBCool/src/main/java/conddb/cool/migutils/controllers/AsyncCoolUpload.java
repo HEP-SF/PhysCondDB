@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,6 +41,7 @@ public class AsyncCoolUpload {
 	@RequestMapping(value = "/loadtags", method = RequestMethod.POST)
 	@ResponseBody
 	@Async
+///// TODO: this is overriden by xml configuration:	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public String loadCoolGtagTags(
 			@RequestParam(value = "name", defaultValue = "ATLAS_COOL%") String schemaName,
 			@RequestParam(value = "dbname", defaultValue = "CONDBR2") String instance,

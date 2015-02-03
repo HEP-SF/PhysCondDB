@@ -114,6 +114,7 @@
 						<host>localhost</host>
 					</httpConnector>
 					<scanIntervalSeconds>10</scanIntervalSeconds>
+					<path>/physconddbcool</path>
 				</configuration>
 			</plugin>
 
@@ -151,6 +152,11 @@
     <dependency>
         <groupId>org.springframework.security</groupId>
         <artifactId>spring-security-config</artifactId>
+        <version>${spring-security.version}</version>
+    </dependency>
+    <dependency>
+        <groupId>org.springframework.security</groupId>
+        <artifactId>spring-security-ldap</artifactId>
         <version>${spring-security.version}</version>
     </dependency>
 	</dependencies>

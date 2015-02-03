@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:sec="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+		   http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd           
+           http://www.springframework.org/schema/security
+           http://www.springframework.org/schema/security/spring-security.xsd">
+
+	<context:component-scan base-package="conddb.security" />
+
+<beans:beans profile="ldap">
+		<http use-expressions="true" create-session="stateless">
+			<!-- <intercept-url pattern="/cool/**" access="permitAll"/> -->
+			<intercept-url pattern="/admin/**" access="hasRole('ROLE_ADMIN')" />
+			<http-basic />
+			<csrf disabled="true" />
+		</http>
+	
+   <beans:bean id="contextSource"
+         class="org.springframework.security.ldap.DefaultSpringSecurityContextSource">
+     <beans:constructor-arg value="ldap://xldap.cern.ch:389"/>
+     <!-- dc=cern,dc=ch -->
+<!--      <beans:property name="anonymousReadOnly" value="true"/> 
+    <beans:property name="userDn" value="cn=formica,OU=Users,OU=Organic Units"/>
+    <beans:property name="password" value="xxxx"/>-->
+   </beans:bean>
+
+   <beans:bean
+         id="userSearch"
+         class="org.springframework.security.ldap.search.FilterBasedLdapUserSearch">
+     <beans:constructor-arg index="0" value="dc=cern,dc=ch"/>
+     <beans:constructor-arg index="1" value="(&amp;(objectClass=user)(sAMAccountName={0}))"/>
+     <beans:constructor-arg index="2" ref="contextSource" />
+     <beans:property name="searchSubtree" value="true" />
+   </beans:bean>
+
+   <beans:bean
+         id="ldapAuthProvider"
+         class="org.springframework.security.ldap.authentication.LdapAuthenticationProvider">
+     <beans:constructor-arg>
+       <beans:bean class="org.springframework.security.ldap.authentication.BindAuthenticator">
+         <beans:constructor-arg ref="contextSource"/>
+<!--          <beans:property name="userSearch" ref="userSearch" /> -->
+        <!--  
+         <beans:property name="userDnPatterns">
+           <beans:list><beans:value>(DN={0})</beans:value></beans:list>
+         </beans:property> -->
+<beans:property name="userDnPatterns">
+      <beans:list>
+        <beans:value>CN={0},ou=Users,dc=cern,dc=ch</beans:value>               
+      </beans:list>
+    </beans:property>        
+       </beans:bean>
+     </beans:constructor-arg>
+     <beans:constructor-arg>
+       <beans:bean class="conddb.security.CustomLdapAuthoritiesPopulator" />
+     </beans:constructor-arg>
+   </beans:bean>
+
+   <authentication-manager>
+     <authentication-provider ref="customAuthenticationProvider" />
+   </authentication-manager>
+
+</beans:beans>
+</beans:beans>

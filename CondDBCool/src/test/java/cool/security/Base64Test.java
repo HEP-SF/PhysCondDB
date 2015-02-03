@@ -6,27 +6,15 @@ package cool.security;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.junit.Assert.assertThat;
 
-import java.util.List;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.encoding.BasePasswordEncoder;
 import org.springframework.security.crypto.codec.Base64;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.util.Base64Utils;
-
-import com.mchange.util.Base64Encoder;
-import com.mchange.util.Base64FormatException;
-
-import conddb.cool.dao.JdbcCondDBRepository;
-import conddb.cool.data.GtagTagType;
-import cool.dao.test.CoolRepositoryTest;
 
 /**
  * @author formica
