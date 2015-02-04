@@ -32,6 +32,9 @@ payload (NOT IMPLEMENTED YET)
 
 2) Refer to ../README.md for instructions on building and deploying this application.
 
+3) Some command examples:
+ * Once the h2 database has been filled, you can:
+   => Query global tags: curl http://localhost:8090/conddb/globalTags/search/findByNameLike\?name=CONDBR2%25
 
 OLD INSTRUCTIONS...NOW CHECK ../README.md
 Using Spring Profiles you do not need to change anything at this level.
