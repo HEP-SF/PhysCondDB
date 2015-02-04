@@ -2,9 +2,9 @@ package conddb.embedded;
 
 import java.io.IOException;
 
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+//import org.eclipse.jetty.server.Server;
+//import org.eclipse.jetty.servlet.ServletContextHandler;
+//import org.eclipse.jetty.servlet.ServletHolder;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.context.ContextLoaderListener;
 import org.springframework.web.context.WebApplicationContext;
@@ -20,7 +20,7 @@ public class EmbeddedJetty {
     private static final String DEFAULT_PROFILE = "hsql";
 
     public static void main(String[] args) throws Exception {
-        new EmbeddedJetty().startJetty(getPortFromArgs(args));
+//        new EmbeddedJetty().startJetty(getPortFromArgs(args));
     }
 
     private static int getPortFromArgs(String[] args) {
@@ -32,7 +32,7 @@ public class EmbeddedJetty {
         }
         return DEFAULT_PORT;
     }
-
+/*
     private void startJetty(int port) throws Exception {
         Server server = new Server(port);
         server.setHandler(getServletContextHandler(getContext()));
@@ -56,5 +56,5 @@ public class EmbeddedJetty {
         context.getEnvironment().setDefaultProfiles(DEFAULT_PROFILE);
         return context;
     }
-
+*/
 }
