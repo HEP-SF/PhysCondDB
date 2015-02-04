@@ -28,7 +28,7 @@
 	<build>
 		<resources>
 			<resource>
-				<directory>src/main/webapp/WEB-INF</directory>
+				<directory>src/main/webapp</directory>
 				<filtering>true</filtering>
 				<targetPath>../jettyFilteredResources</targetPath>
 			</resource>
@@ -113,7 +113,14 @@
 						<port>8080</port>
 						<host>localhost</host>
 					</httpConnector>
-					<jettyEnvXml>${basedir}/target/jettyFilteredResources/jetty-env.xml</jettyEnvXml>
+					<webApp>
+						<contextPath>/</contextPath>
+						<descriptor>${project.basedir}/src/main/webapp/WEB-INF/web.xml</descriptor>
+						<jettyEnvXml>${basedir}/target/jettyFilteredResources/WEB-INF/jetty-env.xml</jettyEnvXml>
+						<baseResource implementation="org.eclipse.jetty.util.resource.ResourceCollection">
+							<resourcesAsCSV>${basedir}/target/jettyFilteredResources</resourcesAsCSV>
+						</baseResource>
+					</webApp>
 					<scanIntervalSeconds>10</scanIntervalSeconds>
 				</configuration>
 			</plugin>
