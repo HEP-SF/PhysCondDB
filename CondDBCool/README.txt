@@ -31,6 +31,10 @@ the PhysCondDB database.
    
  - http://localhost:8080/physconddbcool/admin/loadiovs   POST
    Arguments: ...
+   
+   
+CAVEAT: in case of jetty avoid putting the physconddbcool path in the url.
+ ===>>>  http://localhost:8080/cool/tracetags
 
 3) Refer to ../README.md for instructions on building and deploying this application.
 
