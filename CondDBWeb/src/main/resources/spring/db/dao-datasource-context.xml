@@ -21,23 +21,10 @@
 			p:testOnBorrow="true" p:validationQueryTimeout="${jdbc.validation.query.timeout}"
 			p:validationQuery="${jdbc.validation.query}" />
 
-		<bean id="coolDataSource" class="org.apache.commons.dbcp.BasicDataSource"
-			destroy-method="close" p:driverClassName="${cool.driver.class}"
-			p:url="${cool.url}" p:username="${cool.username}" p:password="${cool.password}"
-			p:initialSize="${jdbc.initial.size}" p:minIdle="${jdbc.min.idle}"
-			p:maxIdle="${jdbc.max.idle}" p:maxActive="${jdbc.max.active}"
-			p:timeBetweenEvictionRunsMillis="${jdbc.time.between.eviction}"
-			p:minEvictableIdleTimeMillis="${jdbc.min.evictable.idle}"
-			p:testOnBorrow="true" p:validationQueryTimeout="${jdbc.validation.query.timeout}"
-			p:validationQuery="${cool.validation.query}" />
 	</beans>
 	<beans profile="prod">
 		<bean id="daoDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
 			<property name="jndiName" value="${serverMode.tomcat.localDataSource}" />
-			<property name="proxyInterface" value="javax.sql.DataSource" />
-		</bean>
-		<bean id="coolDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-			<property name="jndiName" value="${serverMode.tomcat.coolDataSource}" />
 			<property name="proxyInterface" value="javax.sql.DataSource" />
 		</bean>
 	</beans>
@@ -46,19 +33,10 @@
 			<property name="jndiName" value="${serverMode.jetty.localDataSource}" />
 			<property name="proxyInterface" value="javax.sql.DataSource" />
 		</bean>
-		<bean id="coolDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-			<property name="jndiName" value="${serverMode.jetty.coolDataSource}" />
-			<property name="proxyInterface" value="javax.sql.DataSource" />
-		</bean>
 	</beans>
 	<beans profile="wildfly">
 		<bean id="daoDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
 			<property name="jndiName" value="${serverMode.wildfly.localDataSource}" />
-			<property name="proxyInterface" value="javax.sql.DataSource" />
-		</bean>
-	
-		<bean id="coolDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-			<property name="jndiName" value="${serverMode.wildfly.coolDataSource}" />
 			<property name="proxyInterface" value="javax.sql.DataSource" />
 		</bean>
 	</beans>
