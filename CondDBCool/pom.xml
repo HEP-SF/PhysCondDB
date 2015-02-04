@@ -105,10 +105,6 @@
 				<artifactId>jetty-maven-plugin</artifactId>
 				<version>${jetty.version}</version>
 				<configuration>
-					<httpConnector>
-						<port>8080</port>
-						<host>localhost</host>
-					</httpConnector>
 					<webApp>
 						<contextPath>/</contextPath>
 						<descriptor>${project.basedir}/src/main/webapp/WEB-INF/web.xml</descriptor>
