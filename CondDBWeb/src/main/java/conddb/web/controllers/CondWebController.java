@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import conddb.annotations.LogAction;
+import conddb.dao.controllers.GlobalTagController;
 import conddb.dao.svc.ConddbClientService;
 import conddb.data.GlobalTag;
 import conddb.data.Iov;
@@ -34,15 +35,18 @@ public class CondWebController {
 
 	@Autowired
 	private ConddbClientService conddbsvc;
+	@Autowired
+	private GlobalTagController globalTagController;
 
+	
 	@RequestMapping(value = "/gtagtrace", method = RequestMethod.GET)
 	@ResponseBody
-	public GlobalTag getGlobalTag(
-			@RequestParam(value = "name", defaultValue = "CONDB%") String gtagpattern) throws Exception {
+	public GlobalTag getGlobalTagTrace(
+			@RequestParam(value = "name", defaultValue = "CONDB%") String globaltagname) throws Exception {
 		log.info(
-				"CoolController processing request for getGlobalTag: global ...",
-				gtagpattern);
-		GlobalTag gtag = conddbsvc.getGlobalTagTrace(gtagpattern);
+				"CondWebController processing request for getGlobalTagTrace: global tag name ...",
+				globaltagname);
+		GlobalTag gtag = globalTagController.getGlobalTagFetchTags(globaltagname);
 		return gtag;
 	}
 

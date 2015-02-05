@@ -11,7 +11,7 @@ The project has been tested using java versions 7 and 8.
 
 1) Deployment:
 	tomcat deployment: mvn tomcat7:redeploy
-	jetty deployment for testing: mvn -Dspring.profiles.active=dev,h2,basic jetty:run
+	jetty deployment for testing: mvn -Dspring.profiles.active=jetty,h2,basic jetty:run
 	
 Be careful is you are using authentication that the correct profile is set in "CATALINA_OPTS"
 

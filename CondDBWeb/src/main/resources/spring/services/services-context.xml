@@ -10,8 +10,10 @@
                            http://www.springframework.org/schema/context
                            http://www.springframework.org/schema/context/spring-context.xsd">
 
-	<context:component-scan base-package="conddb.dao.svc" />
+	<context:component-scan base-package="conddb.dao.svc,conddb.dao.admin,conddb.dao.controllers" />
 	<!-- Services -->
+	<bean id="globalTagAdminController" class="conddb.dao.admin.controllers.GlobalTagAdminController" />
+	<bean id="globalTagController" class="conddb.dao.controllers.GlobalTagController" />
 	<bean id="conddbClientService" class="conddb.dao.svc.ConddbClientService" />
 	<bean id="profilingAdvisor" class="conddb.utils.aop.ProfilingAdvisor"></bean>
 	<bean id="profilingMethodInterceptor" class="conddb.utils.aop.ProfilingMethodInterceptor"></bean>
