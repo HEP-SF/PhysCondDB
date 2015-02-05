@@ -5,7 +5,7 @@
 
 This project is based on maven (mvn) so you need to install maven to be able to compile it.
 The project has been tested using java versions 7 and 8.
-In the following instruction we are using for project directory : <PhysCondDB>
+In the following instruction we are using for project directory : `<PhysCondDB>`
 
 ## Pre-compilation instructions
 You need to create a property file in your <PhysCondDB> directory and link this file in all modules sub-directories.
@@ -24,11 +24,14 @@ Some of the fields in this file are very important in case of deployment under *
 Execute the following commands from project ROOT directory.
 - To compile the code: `<PhysCondDB>/$ mvn clean compile `
 - To package the code: `<PhysCondDB>/$ mvn package `
-- To install the compiled jars into the user maven repository: `<PhysCondDB>/$ mvn install `
+- To install the compiled jars into the user maven repository: `<PhysCondDB>/$ mvn install `. The installation 
+step uses the directory `~/.m2/...`. 
 
 The previous steps can also be included in the same line
 - `<PhysCondDB>/$ mvn clean install`
 During this phase tests are also executed (the code is contained in `<package>/src/test/...`)
+
+The products of the build are store in the `target` directory of every sub-module.
 
 ## Modules description
 1. CondDBCool => Web application that is used to retrieve data from ATLAS COOL DB (using PL/SQL package)
