@@ -8,7 +8,7 @@
         <Arg>
             <New class="org.apache.commons.dbcp.BasicDataSource">
                 <Set name="driverClassName">org.h2.Driver</Set>
-                <Set name="url">jdbc:h2:~/temp/testdb</Set>
+                <Set name="url">jdbc:h2:${h2.file.name}</Set>
                 <Set name="username">sa</Set>
                 <Set name="password"></Set>
             </New>
@@ -36,4 +36,23 @@
             </New>
         </Arg>
     </New>
+    
+    <New id="oradevdatasource" class="org.eclipse.jetty.plus.jndi.Resource">
+        <Arg>jdbc/OraDev11</Arg>
+        <Arg>
+            <New class="org.apache.commons.dbcp.BasicDataSource">
+                <Set name="driverClassName">oracle.jdbc.OracleDriver</Set>
+                <Set name="url">jdbc:oracle:thin:@(DESCRIPTION = 
+        (ADDRESS= (PROTOCOL=TCP) (HOST=devdb11-s.cern.ch) (PORT=10121) )
+        (ENABLE=BROKEN)
+        (CONNECT_DATA=
+                (SERVICE_NAME=devdb11.cern.ch)
+        )
+)</Set>
+                <Set name="username">${devuser}</Set>
+                <Set name="password">${devpassword}</Set>
+            </New>
+        </Arg>
+    </New>
+    
 </Configure>

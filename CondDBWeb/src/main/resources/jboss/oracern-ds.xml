@@ -2,17 +2,22 @@
 	<datasource jndi-name="java:jboss/datasources/CondDBCoolDs"
 		pool-name="CondDBCoolPool" enabled="true" use-java-context="true">
 		<connection-url>jdbc:oracle:thin:@(DESCRIPTION =
-			(ADDRESS = (PROTOCOL = TCP)(HOST = atlr1-s.cern.ch)(PORT = 10121))
-			(ADDRESS = (PROTOCOL = TCP)(HOST = atlr2-s.cern.ch)(PORT = 10121))
-			(ADDRESS = (PROTOCOL = TCP)(HOST = atlr3-s.cern.ch)(PORT = 10121))
-			(ADDRESS = (PROTOCOL = TCP)(HOST = atlr4-s.cern.ch)(PORT = 10121))
+			(ADDRESS = (PROTOCOL =
+			TCP)(HOST = atlr1-s.cern.ch)(PORT = 10121))
+			(ADDRESS = (PROTOCOL =
+			TCP)(HOST = atlr2-s.cern.ch)(PORT = 10121))
+			(ADDRESS = (PROTOCOL =
+			TCP)(HOST = atlr3-s.cern.ch)(PORT = 10121))
+			(ADDRESS = (PROTOCOL =
+			TCP)(HOST = atlr4-s.cern.ch)(PORT = 10121))
 			(FAILOVER=on)
 			(LOAD_BALANCE=on)
 			(ENABLE=BROKEN)
 			(CONNECT_DATA =
 			(SERVER = DEDICATED)
 			(SERVICE_NAME = atlr.cern.ch)
-			(FAILOVER_MODE = (TYPE = SELECT)(METHOD = BASIC)(RETRIES = 200)(DELAY = 15))
+			(FAILOVER_MODE = (TYPE = SELECT)(METHOD
+			= BASIC)(RETRIES = 200)(DELAY = 15))
 			)
 		</connection-url>
 		<driver>ojdbc6.jar</driver>
@@ -37,4 +42,39 @@
 			<idle-timeout-minutes>5</idle-timeout-minutes>
 		</timeout>
 	</datasource>
+
+	<datasource jndi-name="java:jboss/datasources/OraDevCondDBDs"
+		pool-name="CondDBPool" enabled="true" use-java-context="true">
+		<connection-url>jdbc:oracle:thin:@(DESCRIPTION =
+			(ADDRESS= (PROTOCOL=TCP) (HOST=devdb11-s.cern.ch) (PORT=10121) )
+			(ENABLE=BROKEN)
+			(CONNECT_DATA=
+			(SERVICE_NAME=devdb11.cern.ch)
+			)
+			)
+		</connection-url>
+		<driver>ojdbc6.jar</driver>
+		<pool>
+			<min-pool-size>10</min-pool-size>
+			<max-pool-size>30</max-pool-size>
+			<prefill>true</prefill>
+		</pool>
+		<security>
+			<user-name>${devuser}</user-name>
+			<password>${devpassword}</password>
+		</security>
+		<validation>
+			<valid-connection-checker
+				class-name="org.jboss.jca.adapters.jdbc.extensions.oracle.OracleValidConnectionChecker" />
+			<validate-on-match>false</validate-on-match>
+			<background-validation>false</background-validation>
+			<exception-sorter
+				class-name="org.jboss.jca.adapters.jdbc.extensions.oracle.OracleExceptionSorter" />
+		</validation>
+		<timeout>
+			<blocking-timeout-millis>30000</blocking-timeout-millis>
+			<idle-timeout-minutes>5</idle-timeout-minutes>
+		</timeout>
+	</datasource>
+
 </datasources>

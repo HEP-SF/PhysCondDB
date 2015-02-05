@@ -19,6 +19,19 @@ This password is used in Web modules.
 If you set it to a fake password, all services related to ATLAS COOL data
 retrieval will not be active.
 
+Some fields in this file are very important in case of deployment under
+jetty, tomcat7 or jboss; e.g.
+tomcat.datasource=java/OraDev11 [or java/H2DB]
+h2.file.name=/tmp/h2physconddb
+
+The first will tell the system what is the name of the tomcat datasource, referenced
+from the CATALINA_HOME/conf/server.xml; the selected datasource can be either an Oracle
+DB or H2 database for example.
+The second defines the name of the h2 file that is used instead for local DB storage
+in jetty in case the h2 profile is selected.
+
+
+
 1) Build
 Execute the following commands from project ROOT directory.
 To compile the code:
@@ -30,7 +43,7 @@ To install the compiled jars into maven repository
 
 The previous steps can also be included in the same line
 <PhysCondDB>/$ mvn clean install 
-During this phase tests are also executed.
+During this phase tests are also executed (src/test/...)
 
 
 MODULES:

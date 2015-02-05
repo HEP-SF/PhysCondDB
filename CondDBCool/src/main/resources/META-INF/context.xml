@@ -1,11 +1,9 @@
 <?xml version='1.0' encoding='utf-8'?>
 <Context>
-<Resource name="java/OraAtlrDB" 
-		  auth="Container" type="javax.sql.DataSource"
-          maxActive="100" maxIdle="30" maxWait="10000"
-          username="ATLAS_COND_TOOLS_R" password="${condreader}"
-          driverClassName="oracle.jdbc.OracleDriver"
-               url="jdbc:oracle:thin:@(DESCRIPTION = (ADDRESS= (PROTOCOL=TCP) (HOST=atlr1-s.cern.ch) (PORT=10121) )
+	<Resource name="java/OraAtlrDB" auth="Container" type="javax.sql.DataSource"
+		maxActive="100" maxIdle="30" maxWait="10000" username="ATLAS_COND_TOOLS_R"
+		password="${condreader}" driverClassName="oracle.jdbc.OracleDriver"
+		url="jdbc:oracle:thin:@(DESCRIPTION = (ADDRESS= (PROTOCOL=TCP) (HOST=atlr1-s.cern.ch) (PORT=10121) )
         (ADDRESS= (PROTOCOL=TCP) (HOST=atlr2-s.cern.ch) (PORT=10121) )
         (ADDRESS= (PROTOCOL=TCP) (HOST=atlr3-s.cern.ch) (PORT=10121) )
         (ADDRESS= (PROTOCOL=TCP) (HOST=atlr4-s.cern.ch) (PORT=10121) )
@@ -15,31 +13,40 @@
                 (SERVER=DEDICATED)
                 (SERVICE_NAME=atlr.cern.ch)
         )
-)"/>
-<Resource name="java/HSQLDB" 
-		  auth="Container" type="javax.sql.DataSource"
-          maxActive="100" maxIdle="30" maxWait="10000"
-          username="SA" password="" 
-          driverClassName="org.hsqldb.jdbcDriver"
-               url="jdbc:hsqldb:mem:spring-playground"/>
-               
-<!-- <Resource name="java/H2DB" 
-		  auth="Container" type="javax.sql.DataSource"
-          maxActive="100" maxIdle="30" maxWait="10000"
-          username="root" password="" 
-          driverClassName="org.h2.Driver"
-          url="jdbc:h2:mem:condspring-testdb"
-          />
- -->         
- <ResourceLink name="java/H2DB"
-                global="java/H2DB"
-                auth="Container"
-                type="javax.sql.DataSource" />
-                 
-<!-- e.g. for file based DB               url="jdbc:h2:/tmp/condspringdb"/>   --> 
-<!-- e.g. for in memory based DB          url="jdbc:h2:mem:condspring-testdb" -->              
-<Resource name="java/SQLITEDB" auth="Container" type="javax.sql.DataSource"
-        maxActive="100" maxIdle="30" maxWait="10000"
-        username="test" password="test" driverClassName="org.sqlite.JDBC"
-        url="jdbc:sqlite://Users/formica/MyApp/Servers/conddb.db"/>
+)" />
+
+	<Resource name="java/OraDev11NoShare" auth="Container" type="javax.sql.DataSource"
+		maxActive="100" maxIdle="30" maxWait="10000" username="${devuser}"
+		password="${devpassword}" driverClassName="oracle.jdbc.OracleDriver"
+		url="jdbc:oracle:thin:@(DESCRIPTION = 
+        (ADDRESS= (PROTOCOL=TCP) (HOST=devdb11-s.cern.ch) (PORT=10121) )
+        (ENABLE=BROKEN)
+        (CONNECT_DATA=
+                (SERVICE_NAME=devdb11.cern.ch)
+        )
+)" />
+
+	<Resource name="java/HSQLDB" auth="Container" type="javax.sql.DataSource"
+		maxActive="100" maxIdle="30" maxWait="10000" username="SA" password=""
+		driverClassName="org.hsqldb.jdbcDriver" url="jdbc:hsqldb:mem:spring-playground" />
+
+	<!-- <Resource name="java/H2DB" auth="Container" type="javax.sql.DataSource" 
+		maxActive="100" maxIdle="30" maxWait="10000" username="root" password="" 
+		driverClassName="org.h2.Driver" url="jdbc:h2:mem:condspring-testdb" /> -->
+
+<!-- WARNING -->
+<!-- Tomcat in memory database should be defined inside conf/server.xml???
+     This is true IF we want to share the connection at server level.
+     The variable used is set in the .properties file contained in spring/sql/xxx.properties
+     and depends on the chosen system for persistency.
+-->
+	<ResourceLink name="${tomcat.datasource}" global="${tomcat.datasource}" auth="Container"
+		type="javax.sql.DataSource" />
+
+	<!-- e.g. for file based DB url="jdbc:h2:/tmp/condspringdb"/> -->
+	<!-- e.g. for in memory based DB url="jdbc:h2:mem:condspring-testdb" -->
+
+	<Resource name="java/SQLITEDB" auth="Container" type="javax.sql.DataSource"
+		maxActive="100" maxIdle="30" maxWait="10000" username="test" password="test"
+		driverClassName="org.sqlite.JDBC" url="jdbc:sqlite://Users/formica/MyApp/Servers/conddb.db" />
 </Context>

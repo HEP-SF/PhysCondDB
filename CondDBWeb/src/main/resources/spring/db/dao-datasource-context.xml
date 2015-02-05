@@ -73,6 +73,9 @@
 	<beans profile="h2">
 		<context:property-placeholder location="classpath:/spring/sql/h2.properties" />
 	</beans>
+	<beans profile="oracle">
+		<context:property-placeholder location="classpath:/spring/sql/oracle.properties" />
+	</beans>
 	
 
 </beans>
