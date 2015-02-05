@@ -1,8 +1,7 @@
-#########################################################
-#       PhysCondDB                        #
-# Author: A.Formica                       #
-# Date : 2015/01/01                       #
-#########################################################
+#       PhysCondDB      
+
+#### Author: A.Formica      
+##### Date : 2015/01/01 
 
 This project is based on maven (mvn) so you need to install maven to be able to compile it.
 The project has been tested using java versions 7 and 8.
