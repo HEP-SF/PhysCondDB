@@ -1,73 +1,3 @@
-  309  cp ~/.m2/repository/hsqldb/hsqldb/1.8.0.10/hsqldb-1.8.0.10.jar standalone/deployments/
-  310  cp ~/git/gitcern/PhysCondDB/CondDBCool/src/main/resources/jboss/h2db-ds.xml standalone/deployments/
-  311  ./bin/standalone.sh 
-  312  rm standalone/deployments/h2db-ds.xml.failed 
-  313  rm standalone/deployments/hsqldb-1.8.0.10.jar.failed 
-  314  ./bin/standalone.sh 
-  315  ls
-  316  cd modules/system/layers/base/com/
-  317  ls -al
-  318  ls h2database/
-  319  ls h2database/h2/
-  320  ls h2database/h2/main/
-  321  less h2database/h2/main/module.xml 
-  322  cp -r h2database hsqldb
-  323  cd hsqldb/
-  324  mv h2 hsqldb
-  325  cd hsqldb/
-  326  ls
-  327  cd main/
-  328  ls
-  329  cp ~/.m2/repository/hsqldb/hsqldb/1.8.0.10/hsqldb-1.8.0.10.jar .
-  330  rm h2-1.3.173.jar 
-  331  vi module.xml 
-  332  cd $JBOSS_HOME 
-  333  rm standalone/deployments/hsqldb-1.8.0.10.jar
-  334  rm standalone/deployments/hsqldb-1.8.0.10.jar.deployed 
-  335  rm standalone/deployments/h2db-ds.xml.failed 
-  336  ./bin/standalone.sh 
-  337  ls -al modules/system/or
-  338  ls -al modules/system/layers/base/org/
-  339  less modules/atlas/common/main/module.xml 
-  340  rm standalone/deployments/h2db-ds.xml.failed 
-  341  ./bin/standalone.sh 
-  342  vi setenv.sh 
-  343  vi setenv.sh 
-  344  echo $JAVA_OPTS 
-  345  export JAVA_OPTS=
-  346  echo $JAVA_OPTS 
-  347  source setenv.sh 
-  348  ./bin/standalone.sh 
-  349  rm standalone/deployments/CondDBCool-1.0-SNAPSHOT.war.failed 
-  350  ./bin/standalone.sh 
-  351  vi standalone/configuration/standalone.xml
-  352  rm standalone/deployments/CondDBCool-1.0-SNAPSHOT.war.failed 
-  353  ./bin/standalone.sh 
-  354  rm standalone/deployments/CondDBCool-1.0-SNAPSHOT.war.failed 
-  355  ./bin/standalone.sh 
-  356  less standalone/configuration/standalone.xml
-  357  ./bin/standalone.sh 
-  358  rm standalone/deployments/CondDBCool-1.0-SNAPSHOT.war.failed 
-  359  ./bin/standalone.sh 
-  360  rm standalone/deployments/CondDBCool-1.0-SNAPSHOT.war.failed 
-  361  ./bin/standalone.sh 
-  362  ./bin/standalone.sh 
-  363  rm standalone/deployments/CondDBCool-1.0-SNAPSHOT.war
-  364  rm standalone/deployments/CondDBCool-1.0-SNAPSHOT.war.failed 
-  365  ./bin/standalone.sh 
-  366  rm standalone/deployments/CondDBCool-1.0-SNAPSHOT.war.failed 
-  367  rm standalone/deployments/CondDBCool-1.0-SNAPSHOT.war
-  368  ./bin/standalone.sh 
-  369  rm standalone/deployments/CondDBCool-1.0-SNAPSHOT.war
-  370  rm standalone/deployments/CondDBCool-1.0-SNAPSHOT.war.failed 
-  371  ./bin/standalone.sh 
-  372  rm standalone/deployments/CondDB*
-  373  ./bin/standalone.sh 
-  374  rm standalone/deployments/CondDBCool-1.0-SNAPSHOT.war.failed 
-  375  ./bin/standalone.sh 
-  376  ./bin/standalone.sh 
-  377  ./bin/standalone.sh 
-  378  ./bin/standalone.sh 
   379  curl http://localhost:8080/CondDBWeb-0.0.1-SNAPSHOT/conddb/
   380  curl http://localhost:8080/CondDBWeb-0.0.1-SNAPSHOT/
   381  curl http://localhost:8080/CondDBWeb-0.0.1-SNAPSHOT/conddbweb
@@ -76,93 +6,6 @@
   384  curl http://localhost:8080/conddb/
   385  curl -v -X GET -H"Accept: application/xml" http://localhost:8080/
   386  curl -v -X GET -H"Accept: application/xml" http://localhost:8080/conddb/
-  387  curl -v -X GET -H"Accept: application/xml" http://127.0.0.1:8080/conddb/
-  388  curl -v -X GET -H"Accept: application/json" http://127.0.0.1:8080/conddb/
-  389  curl -v -X GET -H"Accept: application/json" http://127.0.0.1:8080/conddb/globalTags
-  390  cd
-  391  cd git/local/EndcapDAQ/
-  392  ls -al EndcapDim/
-  393  ls -al EndcapDim/target/
-  394  ls -al EndcapDim/target/EndcapDim-0.0.1-SNAPSHOT-bin/
-  395  ls -al EndcapDim/target/EndcapDim-0.0.1-SNAPSHOT-bin/EndcapDim-0.0.1-SNAPSHOT/
-  396  ls dist/
-  397  ls dist/ecgit_v1/
-  398  ls dist/ecgit_v1/EndcapDim-0.0.1-SNAPSHOT/
-  399  vi scripts/runAllServers.sh 
-  400  cd ../../
-  401  cd ../MyApp/Library/
-  402  ls
-  403  cd svom-externals/
-  404  ls -al
-  405  find . -name "*displaytag*""
-  406  find . -name "*displaytag*"
-  407  cd ../jalign/
-  408  ls
-  409  cd lib/
-  410  ls -al displaytag-*
-  411  cp displaytag-1.1.1.jar ../../external/share/java/utils/
-  412  cp uploadbean.jar ../../external/share/java/utils/
-  413  ls 
-  414  jar tvf jboss-javaee.jar
-  415  find ../../external/share/java/ -name "servlet*"
-  416  cp displaytag-export-poi-1.1.1.jar ../../external/share/java/utils/
-  417  cp displaytag-portlet-1.1.1.jar ../../external/share/java/utils/
-  418  find ../../external/share/java/ -name "servlet*"
-  419  jar tvf ../../external/share/java//jfreechart/servlet.jar
-  420  jar jfreechart-1.0.13-swt.jar 
-  421  jar tvf jfreechart-1.0.13-swt.jar 
-  422  jar tvf jfreechart-1.0.13.jar 
-  423  jar tvf jfreechart-1.0.13-experimental.jar 
-  424  alljars=`ls -1 *jar` ; for ajar in $alljars; do echo $ajar; jar tvf $ajar | egrep PublicClonable;done
-  425  alljars=`ls -1 *jar` ; for ajar in $alljars; do echo $ajar; jar tvf $ajar | egrep PublicCloneable;done
-  426  alljars=`ls -1 *jar` ; for ajar in $alljars; do echo $ajar; jar tvf $ajar | egrep ServiceLoca ;done
-  427  alljars=`ls -1 *jar` ; for ajar in $alljars; do echo $ajar; jar tvf $ajar | egrep ServerLoca ;done
-  428  alljars=`ls -1 *jar` ; for ajar in $alljars; do echo $ajar; jar tvf $ajar | egrep MBeanServer  ;done
-  429  curl http://repository.jboss.org/nexus/content/groups/public/
-  430  history
-  431  alljars=`ls -1 *jar` ; for ajar in $alljars; do echo $ajar; jar tvf $ajar | egrep MBeanServer  ;done
-  432  cd
-  433  cd git/gitcern/PhysCondDB/
-  434  mvn install
-  435  mvn install
-  436  cd CondDBCool/
-  437  mvn package
-  438  mvn tomcat7:redeploy
-  439  cd
-  440  cd Public/Atlas/Alignment/atlasgroups/JBAlignMonitoring/
-  441  ls -al
-  442  svn status
-  443  ant -f muonalign-ant.xml clean-all
-  444  export JBOSS_HOME=/Users/formica/MyApp/Servers/jboss-5.1.0.GA/
-  445  ant -f muonalign-ant.xml clean-all
-  446  ant -f muonalign-ant.xml 
-  447  jar tvf /Users/formica/Public/Atlas/Alignment/atlasgroups/JBAlignMonitoring/AlignServerWAR/build/lib/AlignServerWAR.war
-  448  cd AlignServerWAR/
-  449  ls -al
-  450  less build.xml.orig 
-  451  less build.xml
-  452  vi build.xml
-  453  ant
-  454  jar tvf /Users/formica/Public/Atlas/Alignment/atlasgroups/JBAlignMonitoring/AlignServerWAR/build/lib/AlignServerWAR.war
-  455  cd ../
-  456  ant -f muonalign-ant.xml clean-all
-  457  ant -f muonalign-ant.xml
-  458  svn status
-  459  svn commit -m "Add css styles to WAR file and png files." AlignServerWAR/build.xml
-  460  cd
-  461  cd MyApp/Servers/
-  462  ls -al
-  463  mkdir CALDB
-  464  cd CALDB/
-  465  export CALDB=$PWD
-  466  wget http://heasarc.gsfc.nasa.gov/FTP/caldb/software/tools/caldb_setup_files.tar.Z
-  467  ls -al
-  468  tar zxf caldb_setup_files.tar.Z 
-  469  ls
-  470  cd software/
-  471  ls
-  472  ls -al tools/
-  473  less tools/caldb.config 
   474  curl http://localhost:8080/physconddbcool/cool/tracetags
   475  curl http://localhost:8080/physconddbcool/login
   476  curl -X POST -d j_usname=jimi  password=jimispassword  http://localhost:8080/physconddbcool/login
@@ -187,135 +30,10 @@
   495  curl -i -X POST -d j_username=temporary -d j_password=temporary -c /tmp/cookies.txt http://localhost:8080/physconddbcool/cool/j_spring_security_check
   496  curl -i -X POST -d j_username=temporary -d j_password=temporary -c /tmp/cookies.txt http://localhost:8080/physconddbcool/j_spring_security_check
   497  curl -i -X POST -d j_username=temporary -d j_password=temporary -c /tmp/cookies.txt http://localhost:8080/physconddbcool/j_spring_security_check
-  498  ls -al /tmp/
-  499  less /tmp/cookies.txt 
   500  curl -i --header "Accept:application/json" -X GET -b /opt/cookies.txt http://localhost:8080/physconddbcool/cool/tracetags
-  501  ssh aformic@lxplus.cern.ch -L20144:devdb11-s.cern.ch:10121
   502  telnet localhost:20144
-  503  man telnet
   504  telnet localhost 20144
-  505  ssh aformic@lxplus.cern.ch -L20145:devdb11-s.cern.ch:10121
-  506  ssh aformic@lxplus.cern.ch -L20145:devdb11-v.cern.ch:10121
-  507  ssh aformic@lxplus.cern.ch -L20145:db-rac-133.cern.ch:10121
-  508  ssh aformic@lxplus.cern.ch -L20145:db-rac-133.cern.ch:10121
-  509  ssh lxplus.cern.ch
-  510  ssh lxplus.cern.ch
-  511  /usr/bin/ldapsearch -x -h xldap.cern.ch  -b "CN=ormancey,OU=Users,OU=Organic Units,DC=cern,DC=ch" "(memberOf=CN=it-dep-ois,OU=e-groups,OU=Workgroups,DC=cern,DC=ch)" cn
-  512  /usr/bin/ldapsearch -x -h xldap.cern.ch  -b "CN=formica,OU=Users,OU=Organic Units,DC=cern,DC=ch" "(OU=e-groups,OU=Workgroups,DC=cern,DC=ch)" cn
-  513  /usr/bin/ldapsearch -x -h xldap.cern.ch  -b "CN=formica,OU=Users,OU=Organic Units,DC=cern,DC=ch" "(OU=e-groups,OU=Workgroups,DC=cern,DC=ch)" dn
-  514  /usr/bin/ldapsearch -x -h xldap.cern.ch -b "OU=Workgroups,DC=cern,DC=ch" "(member:1.2.840.113556.1.4.1941:=cn=timbell,ou=users,ou=organic units,DC=cern,dc=ch)" 
-  515  /usr/bin/ldapsearch -x -h xldap.cern.ch -b "OU=Workgroups,DC=cern,DC=ch" "(member:1.2.840.113556.1.4.1941:=cn=timbell,ou=users,ou=organic units,DC=cern,dc=ch)" cn
-  516  /usr/bin/ldapsearch -x -h xldap.cern.ch -b "DC=cern,DC=ch" "(sAMAccountName=formica)" cn
-  517  /usr/bin/ldapsearch -x -h xldap.cern.ch -b "DC=cern,DC=ch" "(sAMAccountName=formica)" 
-  518  /usr/bin/ldapsearch -x -h xldap.cern.ch -b "DC=cern,DC=ch" "(sAMAccountName=formica)" -w Ish6seiT
-  519  /usr/bin/ldapsearch -x -h xldap.cern.ch -w Ish6seiT -b "DC=cern,DC=ch" "(sAMAccountName=formica)" 
-  520  /usr/bin/ldapsearch -x -h xldap.cern.ch -b "DC=cern,DC=ch" "(sAMAccountName=formica)" 
-  521  /usr/bin/ldapsearch -x -h xldap.cern.ch -b "DC=cern,DC=ch" "(sAMAccountName=formica)" | egrep uid
-  522  /usr/bin/ldapsearch -x -h xldap.cern.ch -b "DC=cern,DC=ch" "(sAMAccountName=formica)" dn
-  523  /usr/bin/ldapsearch -x -h xldap.cern.ch -w Ish6seiT -b "DC=cern,DC=ch" "(sAMAccountName=formica)" dn
-  524  /usr/bin/ldapsearch -x -h xldap.cern.ch -w -b "DC=cern,DC=ch" "(sAMAccountName=formica)" 
-  525  /usr/bin/ldapsearch -x -h xldap.cern.ch -W -b "DC=cern,DC=ch" "(sAMAccountName=formica)" 
-  526  /usr/bin/ldapsearch -x -h xldap.cern.ch -W -b "DC=cern,DC=ch" "(sAMAccountName=formica)" 
-  527  /usr/bin/ldapsearch -x -h ldap.cern.ch -p 636 -W -b "DC=cern,DC=ch" "(sAMAccountName=formica)" 
-  528  /usr/bin/ldapsearch -x -h ldap.cern.ch -p 636 -W -b "DC=cern,DC=ch" "(sAMAccountName=formica)" 
-  529  /usr/bin/ldapsearch -x -h ldap.cern.ch -p 636 -W -b "DC=cern,DC=ch" "(sAMAccountName=formica)" 
-  530  /usr/bin/ldapsearch -x -h ldap.cern.ch -p 389 -W -b "DC=cern,DC=ch" "(sAMAccountName=formica)" 
-  531  /usr/bin/ldapsearch -x -h ldap.cern.ch -p 389 -W -b "DC=cern,DC=ch" "(sAMAccountName=formica)" 
-  532  /usr/bin/ldapsearch -x -h ldap.cern.ch -p 389 -W -b "o=cern,c=ch" "(sAMAccountName=formica)" 
-  533  /usr/bin/ldapsearch -x -h ldap.cern.ch -p 389 -W -b "o=cern,c=ch" "cn=formica,ou=users,o=cern,c=ch" 
-  534  /usr/bin/ldapsearch -x -h ldap.cern.ch -p 389 -W -b "o=cern,c=ch" "cn=formica,ou=users,o=cern,c=ch" 
-  535  /usr/bin/ldapsearch -x -h ldap.cern.ch -p 636 -W -b "o=cern,c=ch" "cn=formica,ou=users,o=cern,c=ch" 
-  536  /usr/bin/ldapsearch -x -h xldap.cern.ch -W -b "DC=cern,DC=ch" "" 
-  537  /usr/bin/ldapsearch -x -h xldap.cern.ch -W -b "DC=cern,DC=ch" "(uid=formica)" 
-  538  /usr/bin/ldapsearch -x -H xldap.cern.ch  -W -b "DC=cern,DC=ch" "(sAMAccountName=formica)" 
-  539  /usr/bin/ldapsearch -x -H ldap://xldap.cern.ch  -W -b "DC=cern,DC=ch" "(sAMAccountName=formica)" 
-  540  /usr/bin/ldapsearch -x -H ldap://xldap.cern.ch  -W -b "DC=cern,DC=ch" "(sAMAccountName=formica)" 
-  541  /usr/bin/ldapsearch -x -H ldap://xldap.cern.ch  -W -b "DC=cern,DC=ch" "(sAMAccountName=formica)" 
-  542  cd git/gitcern/JBCool/python/
-  543  python jbcooldb.py --schema="ATLAS_COOLONL_MUONALIGN" listnodes CONDBR2
-  544  python jbcooldb.py --schema="ATLAS_COOLONL_MUONALIGN" listtags CONDBR2
-  545  python jbcooldb.py --schema="ATLAS_COOLONL_MUONALIGN" tracetags CONDBR2 COMCOND-HLTP-004-03
-  546  python jbcooldb.py --schema="ATLAS_COOLONL_MUONALIGN" tracetags CONDBR2 COMCOND-HLTP-004-02
-  547  python jbcooldb.py --schema="ATLAS_COOLONL_MUONALIGN" listgtags CONDBR2 
-  548  python jbcooldb.py --schema="ATLAS_COOLONL_MUONALIGN" listgtags CONDBR2 CONDBR2
-  549  python jbcooldb.py --schema="ATLAS_COOLONL_MUONALIGN" tracetags CONDBR2 CONDBR2-HLTP-2015-01
-  550  python jbcooldb.py --schema="ATLAS_COOLONL_MUONALIGN" tracetags COMP200 COMCOND-HLTP-004-03
-  551  python jbcooldb.py --schema="ATLAS_COOLONL_MUONALIGN" listnodes COMP200
-  552  python jbcooldb.py --schema="ATLAS_COOLONL_MUONALIGN" listnodes COMP200
-  553  python jbcooldb.py --schema="ATLAS_COOLOFL_MUONALIGN" listnodes COMP200
-  554  python jbcooldb.py --schema="ATLAS_COOLOFL_MUONALIGN" --socks listtags COMP200
-  555  python jbcooldb.py --schema="ATLAS_COOLOFL_MUONALIGN" --socks listtags COMP200
-  556  python jbcooldb.py --schema="ATLAS_COOLOFL_MUONALIGN" --socks listtags COMP200
-  557  python jbcooldb.py --schema="ATLAS_COOLOFL_MUONALIGN" --socks listtags COMP200
-  558  python jbcooldb.py --schema="ATLAS_COOLOFL_MUONALIGN" --socks listtags COMP200
-  559  python jbcooldb.py --schema="ATLAS_COOLOFL_MUONALIGN" --socks listtags COMP200
-  560  python jbcooldb.py --schema="ATLAS_COOLOFL_MUONALIGN" listtags COMP200
-  561  python jbcooldb.py --schema="ATLAS_COOLOFL_MUONALIGN" listtags COMP200
-  562  python jbcooldb.py --schema="ATLAS_COOLONL_PIXEL" listtags COMP200
-  563  python jbcooldb.py --schema="ATLAS_COOLONL_PIXEL" listnodes COMP200
-  564  python jbcooldb.py --schema="ATLAS_COOLONL_INDET" listnodes COMP200
-  565  python jbcooldb.py --schema="ATLAS_COOLONL_PIXEL" listnodes CONDBR2
-  566  python jbcooldb.py --schema="ATLAS_COOLONL_PIXEL" --folder="/PIXEL/ReadoutSpeed" listiovs CONDBR2
-  567  python jbcooldb.py --schema="ATLAS_COOLONL_PIXEL" --folder="/PIXEL/ReadoutSpeed" --t0=0 --tMax=Inf --iovspan=runlb listiovs CONDBR2 none
-  568  python jbcooldb.py --schema="ATLAS_COOLONL_INDET" listnodes CONDBR2
-  569  python jbcooldb.py --schema="ATLAS_COOLONL_INDET" --folder="/Indet/Onl/Beampos" --t0=0 --tMax=Inf --iovspan=runlb listiovs CONDBR2 none
-  570  python jbcooldb.py --schema="ATLAS_COOLONL_LAR" listnodes CONDBR2
-  571  python jbcooldb.py --schema="ATLAS_COOLONL_LAR" listnodes CONDBR2 | egrep "/LAR/BadChannels/MissingFEBs"
-  572  python jbcooldb.py --schema="ATLAS_COOLONL_LAR" --folder="/LAR/BadChannels/MissingFEBs" --t0=0 --tMax=Inf --iovspan=runlb listiovs CONDBR2 none
-  573  python jbcooldb.py --schema="ATLAS_COOLONL_LAR" listtags CONDBR2 | egrep "/LAR/BadChannels/MissingFEBs"
-  574  python jbcooldb.py --schema="ATLAS_COOLONL_LAR" --folder="/LAR/BadChannels/MissingFEBs" --t0=0 --tMax=Inf --iovspan=runlb listiovs CONDBR2 LARBadChannelsMissingFEBs-RUN2-UPD1-01
-  575  python jbcooldb.py --schema="ATLAS_COOLONL_LAR" listnodes CONDBR2 | egrep "LVL1/BunchGroup"
-  576  python jbcooldb.py --schema="ATLAS_COOLONL_TRIGGER" listnodes CONDBR2 | egrep "LVL1/BunchGroup"
-  577  python jbcooldb.py --schema="ATLAS_COOLONL_TRIGGER" --folder="/TRIGGER/LVL1/BunchGroupContent" --t0=0 --tMax=Inf --iovspan=runlb listiovs CONDBR2 none
-  578  python jbcooldb.py --schema="ATLAS_COOLONL_TRIGGER" listtags CONDBR2 | egrep "LVL1/BunchGroup"
-  579  python jbcooldb.py --schema="ATLAS_COOLONL_TRIGGER" --folder="/TRIGGER/LVL1/BunchGroupContent" --t0=0 --tMax=Inf --iovspan=runlb listiovs CONDBR2 none
-  580  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" listtags CONDBR2 | egrep "HadCalib"
-  581  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" tracetags CONDBR2 CONDBR2-HLTP-2014-03 
-  582  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" listgtags CONDBR2 
-  583  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" listgtags CONDBR2 CONDBR2
-  584  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" tracetags CONDBR2 CONDBR2-HLTP-2015-01
-  585  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" --folder="/CALO/HadCalibration2/CaloEMFrac" --t0=0 --tMax=Inf --iovspan=runlb listiovs CONDBR2 CaloEMFrac2-RUN2-GEO18-QGSP-BERT-UPD1-00
-  586  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" tracetags CONDBR2 CONDBR2-HLTP-2015-01
-  587  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" tracetags CONDBR2 CONDBR2-HLTP-2015-01 | egrep "/H1ClusterCellWeights"
-  588  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" --folder="/CALO/HadCalibration2/H1ClusterCellWeights" --t0=0 --tMax=Inf --iovspan=runlb listiovs CONDBR2 CaloH1CellWeights2-RUN2-GEO18-QGSP-BERT-UPD1-00
-  589  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" tracetags CONDBR2 CONDBR2-HLTP-2015-01 | egrep "/python jbcooldb.py --schema="ATLAS_COOLONL_INDET" --folder="/Indet/Onl/Beampos" --t0=0 --tMax=Inf --iovspan=runlb listiovs CONDBR2 none"
-  590  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" tracetags CONDBR2 CONDBR2-HLTP-2015-01 | egrep "/python jbcooldb.py --schema="ATLAS_COOLONL_INDET" --folder="/Indet/Onl/Beampos" listtags CONDBR2 
-  591  python jbcooldb.py --schema="ATLAS_COOLONL_INDET" --folder="/Indet/Onl/Beampos" listtags CONDBR2
-  592  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" tracetags CONDBR2 CONDBR2-HLTP-2015-01 | egrep "/python jbcooldb.py --schema="ATLAS_COOLONL_INDET" --folder="/Indet/Onl/Beampos" listiovs CONDBR2 IndetBeamposOnl-RUN2-HLT-UPD1-001-00
-  593  python jbcooldb.py --schema="ATLAS_COOLONL_INDET" --folder="/Indet/Onl/Beampos" listiovs CONDBR2 IndetBeamposOnl-RUN2-HLT-UPD1-001-00
-  594  history
-  595  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" tracetags CONDBR2 CONDBR2-HLTP-2015-01 | egrep "/aloDMCorr2"
-  596  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" tracetags CONDBR2 CONDBR2-HLTP-2015-01 | egrep "aloDMCorr2""
-  597  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" tracetags CONDBR2 CONDBR2-HLTP-2015-01 | egrep "aloDMCorr2"
-  598  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" --folder="/CALO/HadCalibration2/CaloEMFrac" --t0=0 --tMax=Inf --iovspan=runlb listiovs CONDBR2 CaloEMFrac2-RUN2-GEO18-QGSP-BERT-UPD1-00
-  599  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" --folder="/CALO/HadCalibration2/CaloEMFrac" --t0=0 --tMax=Inf --iovspan=runlb listiovs CONDBR2 b.py --schema="ATLAS_COOLONL_CALO" tracetags CONDBR2 CONDBR2-HLTP-2015-01
-  600  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" tracetags CONDBR2 CONDBR2-HLTP-2015-01 | egrep "aloDMCorr2"
-  601  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" --folder="/CALO/HadCalibration2/CaloEMFrac" --t0=0 --tMax=Inf --iovspan=runlb listiovs CONDBR2 b.py --schema="ATLAS_COOLONL_CALO" tracetags CONDBR2 CONDBR2-HLTP-2015-01
-  602  CaloHadDMCorr2-RUN2-GEO18-QGSP-BERT-UPD1-00
-  603  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" --folder="/CALO/HadCalibration2/CaloDMCorr2" --t0=0 --tMax=Inf --iovspan=runlb listiovs CONDBR2 CaloHadDMCorr2-RUN2-GEO18-QGSP-BERT-UPD1-00 
-  604  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" tracetags CONDBR2 CONDBR2-HLTP-2015-01 | egrep "/CALO/HadCalibration2/CaloOutOfClusterPi0 "
-  605  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" --folder="/CALO/HadCalibration2/CaloOutOfClusterPi0" --t0=0 --tMax=Inf --iovspan=runlb listiovs CONDBR2 CaloHadOOCCorrPi02-RUN2-GEO18-QGSP-BERT-UPD1-00
-  606  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" tracetags CONDBR2 CONDBR2-HLTP-2015-01 | egrep "/CALO/HadCalibration2/CaloOutOfClu"
-  607  python jbcooldb.py --schema="ATLAS_COOLONL_CALO" --folder="/CALO/HadCalibration2/CaloOutOfCluster" --t0=0 --tMax=Inf --iovspan=runlb listiovs CONDBR2 CaloHadOOCCorr2-RUN2-GEO18-QGSP-BERT-UPD1-00
-  608  python jbcooldb.py --schema="ATLAS_COOLOFL_TRIGGER" listnodes CONDBR2 
-  609  python jbcooldb.py --schema="ATLAS_COOLONL_TRIGGER" listnodes CONDBR2 
-  610  cd
-  611  cd MyApp/
-  612  ls
-  613  cd Tools/
-  614  ls
-  615  brew info    Arguments: ...
-  616  brew info  cocoa-rest-client
-  617  ls -al
-  618  git clone https://github.com/mmattozzi/cocoa-rest-client/releases
-  619  brew info httpie
-  620  brew install httpie
-  621  httpie -h
-  622  ls -al /usr/local/homebrew/homebrew/Cellar/httpie/0.8.0
-  623  ls -al /usr/local/homebrew/homebrew/Cellar/httpie/0.8.0/bin/
-  624  /usr/local/homebrew/homebrew/Cellar/httpie/0.8.0/bin/http 
   625  http localhost:8080/physconddbcool/cool/tracetags
-  626  /usr/local/homebrew/homebrew/Cellar/httpie/0.8.0/bin/http 
   627  http POST localhost:8080/physconddbcool/admin/loadtags
   628  http POST --auth temporary:temporary localhost:8080/physconddbcool/admin/loadtags
   629  http --auth temporary:temporary POST localhost:8080/physconddbcool/admin/loadtags
@@ -331,7 +49,6 @@
   639  http localhost:8080/physconddb/conddb/globalTags
   640  http localhost:8080/physconddb/conddb/globalTags/search
   641  http localhost:8080/physconddb/conddb/globalTags/search/findByNameLike?name=CONDBR2%25
-  642  history
   643  http localhost:8080/physconddb/conddb/globalTags/search/findByNameLike
   644  http localhost:8080/physconddb/conddb/globalTags/search/findByNameLike?name=CONDBR2%25
   645  http --auth temporary:temporary POST localhost:8080/physconddbcool/admin/loadtags
@@ -364,8 +81,6 @@
   672  http localhost:8080/cool/tracetags
   673  http localhost:8080/cool/tracetags
   674  http localhost:8080/cool/tracetags
-  675  ls -al ~/te
-  676  ls -al ~/temp/
   677  http localhost:8080/
   678  http localhost:8080/cool
   679  http localhost:8080/cool/tracetags
@@ -380,25 +95,11 @@
   688  http localhost:8080/conddb/alps
   689  http localhost:8080/conddb/globalTags
   690  http localhost:8080/conddb/globalTags/search
-  691  ls -al ~/git/gitcern/PhysCondDB/CondDBWeb/
-  692  ls -al ~/git/gitcern/PhysCondDB/CondDBWeb/src/
   693  http localhost:8080/conddb/globalTags/search
-  694  ls -al ~/git/gitcern/PhysCondDB/CondDBWeb/src/
-  695  ls -al ~/git/gitcern/PhysCondDB/CondDBWeb/
   696  http localhost:8080/cool/tracetags
   697  http localhost:8080/cool/tracetags
   698  http localhost:8080/cool/tracetags
   699  http localhost:8080/cool/tracetags
-  700  brew info tree
-  701  brew install tree
-  702  tree
-  703  tree -h
-  704  tree help
-  705  man tree
-  706  tree -L
-  707  tree -L 2
-  708  man tree
-  709  tree -L 2 -C
   710  http localhost:8080/cool/tracetags
   711  http localhost:8080/cool/tracetags
   712  http localhost:8080/cool/tracetags
@@ -435,30 +136,6 @@
   743  http localhost:8080/CondDBCool-1.0-SNAPSHOT/admin/loadtags --auth temporary:temporary
   744  http POST localhost:8080/CondDBCool-1.0-SNAPSHOT/admin/loadtags --auth temporary:temporary
   745  http POST localhost:8080/CondDBCool-1.0-SNAPSHOT/admin/loadtags --auth temporary:temporary
-  746  http POST 127.0.0.1:8080/CondDBCool-1.0-SNAPSHOT/admin/loadtags --auth temporary:temporary
-  747  http POST 127.0.0.1:8080/CondDBCool-1.0-SNAPSHOT/cool/tags --auth temporary:temporary
-  748  http POST 127.0.0.1:8080/CondDBCool-1.0-SNAPSHOT/cool/tracetags --auth temporary:temporary
-  749  http  127.0.0.1:8080/CondDBCool-1.0-SNAPSHOT/cool/tracetags --auth temporary:temporary
-  750  http POST 127.0.0.1:8080/CondDBCool-1.0-SNAPSHOT/loadtags --auth temporary:temporary
-  751  http 127.0.0.1:8080/CondDBCool-1.0-SNAPSHOT/admin/loadtags --auth temporary:temporary
-  752  http PUT 127.0.0.1:8080/CondDBCool-1.0-SNAPSHOT/loadtags --auth temporary:temporary
-  753  http PUT 127.0.0.1:8080/CondDBCool-1.0-SNAPSHOT/admin/loadtags --auth temporary:temporary
-  754  http POST 127.0.0.1:8080/CondDBCool-1.0-SNAPSHOT/admin/loadtags --auth temporary:temporary
-  755  curl -i -X POST http://127.0.0.1:8080/CondDBCool-1.0-SNAPSHOT/admin/loadtags
-  756  http -h
-  757  http POST 127.0.0.1:8080/CondDBCool-1.0-SNAPSHOT/admin/loadtags --auth temporary:temporary --check-status
-  758  http POST 127.0.0.1:8080/CondDBCool-1.0-SNAPSHOT/loadtags --auth temporary:temporary --check-status
-  759  http POST 127.0.0.1:8080/CondDBCool-1.0-SNAPSHOT/ --auth temporary:temporary --check-status
-  760  http POST 127.0.0.1:8080/CondDBCool-1.0-SNASHOT/ --auth temporary:temporary --check-status
-  761  http POST 127.0.0.1:8080/CondDBCool-1.0-SNAPSHOT/loags --auth temporary:temporary --check-status
-  762  http POST 127.0.0.1:8080/CondDBCool-1.0-SNAPSHOT/admin/loadtags --auth temporary:temporary --check-status
-  763  http 127.0.0.1:8080/CondDBWeb-1.0-SNAPSHOT/alps --auth temporary:temporary
-  764  http 127.0.0.1:8080/CondDBWeb-0.0.1-SNAPSHOT/alps --auth temporary:temporary
-  765  http 127.0.0.1:8080/CondDBWeb-0.0.1-SNAPSHOT/conddb/alps --auth temporary:temporary
-  766  http 127.0.0.1:8080/CondDBWeb-0.0.1-SNAPSHOT/conddb/globalTags --auth temporary:temporary
-  767  cd
-  768  find . -name "coolutils.py"
-  769  http 127.0.0.1:8080/CondDBWeb-0.0.1-SNAPSHOT/conddb/globalTags --auth temporary:temporary
   770  http localhost:8080/cool/tracetags
   771  http POST localhost:8080/admin/loadtags --auth temporary:temporary
   772  http POST localhost:8080/conddb/alps
@@ -468,26 +145,17 @@
   776  http localhost:8080/conddb/globalTags/search/findByNameLike?name=CONDBR%25
   777  http POST localhost:8080/conddb/alps/globalTags
   778  http localhost:8080/conddb/alps/globalTags
-  779  http help
-  780* http 
-  781  http --help
-  782  pwd
-  783  cd git/gitcern/PhysCondDB/
   784  http POST localhost:8080/conddb/globalTags =@./globalTags.json
-  785  ls
   786  http POST localhost:8080/conddb/globalTags =@./globalTagObjs.json
   787  http POST localhost:8080/conddb/globalTags =@./globalTagObj.json
-  788  cat globalTagObj.json 
   789  curl -i -X POST -H "Content-Type:application/json" -d '{ "name" : "MYGTAG_01", "validity" : 0, "description" : "First test gtag", "release" : "1.0", "insertionTime" : "2014-11-30", "snapshotTime" : "2014-11-25"}' localhost:8080/conddb/globalTags
   790  curl -i -X POST -H "Content-Type:application/json" -d '{ "name" : "MYGTAG_01", "validity" : 0, "description" : "First test gtag", "release" : "1.0", "insertionTime" : "2014-11-30", "snapshotTime" : "2014-11-25"}' localhost:8080/conddb/globalTags
   791  curl -i -X POST -H "Content-Type:application/json" localhost:8080/conddb/cloneGlobalTag\?sourcegtag=MYGTAG_01\;destgtag=MYGTAG_02
   792  curl -i -X POST -H "Content-Type:application/json" localhost:8080/conddbweb/cloneGlobalTag\?sourcegtag=MYGTAG_01\;destgtag=MYGTAG_02
-  793  cat curl-commands.txt 
   794  curl -i -X POST -H "Content-Type:application/json" -d '{ "name" : "atag_01", "timeType" : "time", "objectType" : "test", "synchronization" : "none", "description" : "Fake object for test tag", "lastValidatedTime" : 10000, "endOfValidity" : -1, "insertionTime" : "2014-11-20", "modificationTime" : "2014-11-11" }' localhost:8080/conddb/tags
   795  curl -i -X POST -H "Content-Type:application/json" -d '{ "name" : "atag_02", "timeType" : "time", "objectType" : "test", "synchronization" : "none", "description" : "Fake object for test tag", "lastValidatedTime" : 10000, "endOfValidity" : -1, "insertionTime" : "2014-11-20", "modificationTime" : "2014-11-11" }' localhost:8080/conddb/tags
   796  http localhost:8080/conddb/tags
   797  http localhost:8080/conddb/tags/1
-  798  cat curl-commands.txt 
   799  curl -i -X POST -H "Content-Type:application/json" -d '{ "globalTag" : "http://localhost:8080/conddb/globalTags/MYGTAG_01", "systemTag" : "http://localhost:8080/conddb/tags/atag_01", "record" : "none", "label" : "none"}' localhost:8080/conddb/globalTagMaps
   800  curl -i -X POST -H "Content-Type:application/json" -d '{ "globalTag" : "http://localhost:8080/conddb/globalTags/MYGTAG_01", "systemTag" : "http://localhost:8080/conddb/tags/1", "record" : "none", "label" : "none"}' localhost:8080/conddb/globalTagMaps
   801  curl -i -X POST -H "Content-Type:application/json" -d '{ "globalTag" : "http://localhost:8080/conddb/globalTags/MYGTAG_01", "systemTag" : "http://localhost:8080/conddb/tags/2", "record" : "none", "label" : "none"}' localhost:8080/conddb/globalTagMaps
@@ -496,5 +164,37 @@
   804  http localhost:8080/conddb/globalTagMaps/2/systemTag
   805  http localhost:8080/conddb/globalTagMaps/1/systemTag
   806  http localhost:8080/conddb/globalTagMaps/1/globalTag
-  807  history
-  808  history > curl_commands_1.0-SNAPSHOT.txt
+  809  curl -i -X POST -H "Content-Type:application/json" localhost:8080/conddbweb/cloneGlobalTag\?sourcegtag=MYGTAG_01\;destgtag=MYGTAG_02
+  810  curl -i -X POST -H "Content-Type:application/json" localhost:8080/conddbweb/cloneGlobalTag\?sourcegtag=MYGTAG_01\&destgtag=MYGTAG_02
+  811  curl -i -X POST -H "Content-Type:application/json" localhost:8080/conddbweb/cloneGlobalTag\?sourcegtag=MYGTAG_01\&destgtag=MYGTAG_02
+  812  curl -i -X POST -H "Content-Type:application/json" localhost:8080/conddbweb/cloneGlobalTag\?sourcegtag=MYGTAG_01\&destgtag=MYGTAG_02
+  813  curl -i -X POST -H "Content-Type:application/json" -d '{ "name" : "MYGTAG_01", "validity" : 0, "description" : "First test gtag", "release" : "1.0", "insertionTime" : "2014-11-30", "snapshotTime" : "2014-11-25"}' localhost:8080/conddb/globalTags
+  814  curl -i -X POST -H "Content-Type:application/json" -d '{ "name" : "atag_01", "timeType" : "time", "objectType" : "test", "synchronization" : "none", "description" : "Fake object for test tag", "lastValidatedTime" : 10000, "endOfValidity" : -1, "insertionTime" : "2014-11-20", "modificationTime" : "2014-11-11" }' localhost:8080/conddb/tags
+  815  curl -i -X POST -H "Content-Type:application/json" localhost:8080/conddbweb/cloneGlobalTag\?sourcegtag=MYGTAG_01\&destgtag=MYGTAG_02
+  816  http localhost:8080/conddb/globalTags
+  817  http localhost:8080/conddb/tags
+  818  http localhost:8080/conddb/globalTags
+  819  curl -i -X POST -H "Content-Type:application/json" localhost:8080/conddbweb/cloneGlobalTag\?sourcegtag=MYGTAG_01\&destgtag=MYGTAG_02
+  821  http localhost:8080/conddb/globalTags
+  822  curl -i -X POST -H "Content-Type:application/json" localhost:8080/conddbweb/cloneGlobalTag\?sourcegtag=MYGTAG_01\&destgtag=MYGTAG_02
+  823  http localhost:8080/conddb/globalTags
+  824  http localhost:8080/conddb/globalTags/MYGTAG_02/globalTagMaps
+  825  curl -i -X POST -H "Content-Type:application/json" localhost:8080/conddbweb/cloneGlobalTag\?sourcegtag=MYGTAG_01\&destgtag=MYGTAG_02
+  826  http localhost:8080/conddb/globalTags
+  827  http localhost:8080/conddb/globalTags/MYGTAG_02/globalTagMaps
+  828  http localhost:8080/conddb/globalTagMaps/3/globalTag
+  829  http localhost:8080/conddb/globalTagMaps/4/globalTag
+  830  http localhost:8080/conddb/globalTagMaps/4/tag
+  831  http localhost:8080/conddb/globalTagMaps/4/systemTag
+  832  http localhost:8080/conddb/globalTagMaps/3/systemTag
+  833  http localhost:8080/conddb/globalTagMaps/3/systemTag
+  834  http localhost:8080/conddb/globalTagMaps/3/systemTag
+  835  http localhost:8080/conddbweb/gtagtrace\?name=MYTEST_01
+  836  http localhost:8080/conddb/globalTags
+  837  http localhost:8080/conddbweb/gtagtrace\?name=MYGTAG_02
+  838  http localhost:8080/conddbweb/gtagtrace\?name=MYGTAG_02
+  839  curl -i -X POST -H "Content-Type:application/json" -d '{ "name" : "atag_03", "timeType" : "time", "objectType" : "test", "synchronization" : "none", "description" : "Fake object for test tag", "lastValidatedTime" : 10000, "endOfValidity" : -1, "insertionTime" : "2014-11-20", "modificationTime" : "2014-11-11" }' localhost:8080/conddb/tags
+  840  curl -i -X POST -H "Content-Type:application/json" localhost:8080/conddbweb/updateGlobalTagMap\?sourcegtag=MYGTAG_01\&oldtag=atag_01\&newtag=atag_03
+  841  http localhost:8080/conddbweb/gtagtrace\?name=MYGTAG_01
+  843  history | egrep localhost
+  844  history | egrep localhost > curl_commands_1.0-SNAPSHOT.txt 
