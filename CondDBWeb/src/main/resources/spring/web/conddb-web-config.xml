@@ -17,12 +17,33 @@
         http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
 
 	<context:component-scan base-package="conddb.web" />
-    <mvc:annotation-driven />
+<!--     <mvc:annotation-driven /> -->
+	<mvc:annotation-driven>
+		<mvc:message-converters>
+			<bean id="jsonConverter"
+				class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+				<property name="supportedMediaTypes" value="application/json" />
+				<property name="objectMapper">
+					<bean class="conddb.utils.json.HibernateAwareObjectMapper" />
+				</property>
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+
     <mvc:interceptors>
 		<mvc:interceptor>
 			<mvc:mapping path="/**" />
 			<bean class="conddb.web.interceptors.RequestProcessingFrontierInterceptor" />
 		</mvc:interceptor>
 	</mvc:interceptors>
-	
+
+<!-- 			<bean -->
+<!-- 				class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter"> -->
+<!-- 				<property name="messageConverters"> -->
+<!-- 					<list> -->
+<!-- 						<ref bean="jsonConverter" /> -->
+<!-- 					</list> -->
+<!-- 				</property> -->
+<!-- 			</bean> -->
+
 </beans>

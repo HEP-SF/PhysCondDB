@@ -19,18 +19,18 @@
 	<context:component-scan base-package="conddb.dao,conddb.web" />
     <mvc:annotation-driven />
     
-	<bean
-		class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
-		<property name="messageConverters">
-			<list>
-				<ref bean="jsonConverter" />
-			</list>
-		</property>
-	</bean>
+<!-- 	<bean -->
+<!-- 		class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter"> -->
+<!-- 		<property name="messageConverters"> -->
+<!-- 			<list> -->
+<!-- 				<ref bean="jsonConverter" /> -->
+<!-- 			</list> -->
+<!-- 		</property> -->
+<!-- 	</bean> -->
 
-	<bean id="jsonConverter"
-		class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
-		<property name="supportedMediaTypes" value="application/json" />
-	</bean>
+<!-- 	<bean id="jsonConverter" -->
+<!-- 		class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter"> -->
+<!-- 		<property name="supportedMediaTypes" value="application/json" /> -->
+<!-- 	</bean> -->
 	
 </beans>

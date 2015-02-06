@@ -141,6 +141,7 @@ public class CondWebController {
 	ResponseEntity<?> handleExceptions(Exception ex) {
 		ResponseEntity<?> responseEntity = null;
 		if (ex instanceof Exception) {
+			log.debug(ex.getMessage());
 			responseEntity = new ResponseEntity(
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
