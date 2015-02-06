@@ -1,8 +1,11 @@
 /**
- * 
+ *
  */
 package conddb.web.controllers;
 
+import java.sql.Timestamp;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -31,62 +34,112 @@ import conddb.data.Tag;
 @RestController
 public class CondWebController {
 
-	private Logger log = LoggerFactory.getLogger(getClass());
+	private Logger log = LoggerFactory.getLogger(this.getClass());
+	private DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+
+	// TODO: this does not work
+	// private DateTimeFormatter formatter = DateTimeFormatter
+    //			.ofPattern("yyyyMMddHHmmss");
 
 	@Autowired
 	private ConddbClientService conddbsvc;
 	@Autowired
 	private GlobalTagController globalTagController;
 
-	
 	@RequestMapping(value = "/gtagtrace", method = RequestMethod.GET)
 	@ResponseBody
 	public GlobalTag getGlobalTagTrace(
-			@RequestParam(value = "name", defaultValue = "CONDB%") String globaltagname) throws Exception {
-		log.info(
-				"CondWebController processing request for getGlobalTagTrace: global tag name ...",
-				globaltagname);
-		GlobalTag gtag = globalTagController.getGlobalTagFetchTags(globaltagname);
+			@RequestParam(value = "name", defaultValue = "CONDBR2-01") String globaltagname)
+			throws Exception {
+		this.log.info("CondWebController processing request for getGlobalTagTrace: global tag name ..."
+				+ globaltagname);
+		GlobalTag gtag = this.globalTagController
+				.getGlobalTagFetchTags(globaltagname);
 		return gtag;
+	}
+
+	@RequestMapping(value = "/gtagliketrace", method = RequestMethod.GET)
+	@ResponseBody
+	public List<GlobalTag> getGlobalTagLikeTrace(
+			@RequestParam(value = "namepattern", defaultValue = "CONDB%") String globaltagnamepattern)
+			throws Exception {
+		this.log.info("CondWebController processing request for getGlobalTagLikeTrace: global tag name pattern..."
+				+ globaltagnamepattern);
+		List<GlobalTag> gtaglist = this.globalTagController
+				.getGlobalTagByNameLikeFetchTags(globaltagnamepattern);
+		return gtaglist;
+	}
+
+	@RequestMapping(value = "/gtagbetween", method = RequestMethod.GET)
+	@ResponseBody
+	public List<GlobalTag> getGlobalTagBetweenTime(
+			@RequestParam(value = "sincetime", defaultValue = "2007-12-03T10:15:30+01:00") String since,
+			@RequestParam(value = "untiltime", defaultValue = "2015-12-03T10:15:30+01:00") String until)
+			throws Exception {
+
+		this.log.info("CondWebController processing request for getGlobalTagBetweenTime: since until..."
+				+ since + " " + until);
+
+		try {
+			ZonedDateTime sincedate = ZonedDateTime.parse(since, this.formatter);
+			ZonedDateTime untildate = ZonedDateTime.parse(until, this.formatter);
+
+			this.log.info("CondWebController sending request using dates..."
+					+ sincedate + " " + untildate);
+
+			Timestamp dsince = Timestamp.valueOf(sincedate.toLocalDateTime());
+			Timestamp duntil = Timestamp.valueOf(untildate.toLocalDateTime());
+			
+			List<GlobalTag> gtaglist = this.globalTagController
+					.getGlobalTagByInsertionTimeBetween(dsince, duntil);
+			return gtaglist;
+		} catch (Exception e) {
+			this.log.error("Error in method getGlobalTagBetweenTime "
+					+ e.getMessage());
+		}
+		return null;
 	}
 
 	@RequestMapping(value = "/tag", method = RequestMethod.GET)
 	@ResponseBody
-	@LogAction(actionPerformed="getTag")
+	@LogAction(actionPerformed = "getTag")
 	public Tag getTag(
-			@RequestParam(value = "name", defaultValue = "none") String tagname) throws Exception {
-		log.info(
+			@RequestParam(value = "name", defaultValue = "none") String tagname)
+			throws Exception {
+		this.log.info(
 				"CondWebController processing request for getTag: name ...",
 				tagname);
-		Tag tag = conddbsvc.getTagIovs(tagname);
+		Tag tag = this.conddbsvc.getTagIovs(tagname);
 		return tag;
 	}
 
 	@RequestMapping(value = "/iovs", method = RequestMethod.GET)
 	@ResponseBody
 	public List<Iov> getIovs(
-			@RequestParam(value = "name", defaultValue = "none") String tagname) throws Exception {
-		log.info(
+			@RequestParam(value = "name", defaultValue = "none") String tagname)
+			throws Exception {
+		this.log.info(
 				"CondWebController processing request for getIovs: tag name ...",
 				tagname);
-		List<Iov> iovlist = conddbsvc.getIovsForTag(tagname);
+		List<Iov> iovlist = this.conddbsvc.getIovsForTag(tagname);
 		return iovlist;
 	}
 
 	@RequestMapping(value = "/iovspayload", method = RequestMethod.GET)
 	@ResponseBody
 	public List<Iov> getIovsFetchPayload(
-			@RequestParam(value = "name", defaultValue = "none") String tagname) throws Exception {
-		log.info(
+			@RequestParam(value = "name", defaultValue = "none") String tagname)
+			throws Exception {
+		this.log.info(
 				"CondWebController processing request for getIovsFetchPayload: tag name ...",
 				tagname);
-		List<Iov> iovlist = conddbsvc.getIovsForTagFetchPayload(tagname);
+		List<Iov> iovlist = this.conddbsvc.getIovsForTagFetchPayload(tagname);
 		return iovlist;
 	}
 
 	@ExceptionHandler
-	ResponseEntity handleExceptions(Exception ex) {
-		ResponseEntity responseEntity = null;
+	ResponseEntity<?> handleExceptions(Exception ex) {
+		ResponseEntity<?> responseEntity = null;
 		if (ex instanceof Exception) {
 			responseEntity = new ResponseEntity(
 					HttpStatus.INTERNAL_SERVER_ERROR);

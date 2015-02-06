@@ -87,8 +87,8 @@ public class CoolMigrationService {
 
 			// create global tag
 			GlobalTag conddbgtag = new GlobalTag(cooltag.getGtagName(),
-					new BigDecimal(0), description, "1.0", instimestr,
-					new Date());
+					new BigDecimal(0), description, "1.0", new java.sql.Timestamp(instimestr.getTime()),
+					new java.sql.Timestamp(new Date().getTime()));
 			
 			// set tagdescription
 			String tagdescription = (cooltag.getTagDescription() != null) ? cooltag

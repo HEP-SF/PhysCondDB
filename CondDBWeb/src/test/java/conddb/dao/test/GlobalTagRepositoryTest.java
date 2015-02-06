@@ -4,6 +4,7 @@
 package conddb.dao.test;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
@@ -23,7 +24,7 @@ import conddb.data.GlobalTag;
  * @author formica
  *
  */
-@ActiveProfiles({ "dev","hsql" })
+@ActiveProfiles({ "dev","h2" })
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:/spring/services-context.xml" })
 public class GlobalTagRepositoryTest {
@@ -39,7 +40,7 @@ public class GlobalTagRepositoryTest {
 	
 	@Test
 	public void insertGlobalTag() {
-		GlobalTag gtag = new GlobalTag("TEST_01",new BigDecimal(0),"test global tag","test",new Date(),new Date());
+		GlobalTag gtag = new GlobalTag("TEST_01",new BigDecimal(0),"test global tag","test",new Timestamp(new Date().getTime()),new Timestamp(new Date().getTime()));
 		repo.save(gtag);
 		List<GlobalTag> gtags = (List<GlobalTag>) repo.findAll();
 		assertThat(gtags.size(), is(1));

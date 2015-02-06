@@ -3,7 +3,7 @@ package conddb.data;
 // Generated Aug 25, 2014 4:52:00 PM by Hibernate Tools 3.4.0.CR1
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -13,8 +13,6 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -26,19 +24,19 @@ import com.fasterxml.jackson.databind.ser.std.DateSerializer;
  */
 @Entity
 @Table(name = "GLOBAL_TAG")
-@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="name")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "name")
 public class GlobalTag implements java.io.Serializable {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 996548260134268579L;
 	private String name;
 	private BigDecimal validity;
 	private String description;
 	private String release;
-	private Date insertionTime;
-	private Date snapshotTime;
+	private Timestamp insertionTime;
+	private Timestamp snapshotTime;
 	private Set<GlobalTagMap> globalTagMaps = new HashSet<GlobalTagMap>(0);
 
 	public GlobalTag() {
@@ -53,7 +51,7 @@ public class GlobalTag implements java.io.Serializable {
 	}
 
 	public GlobalTag(String name, BigDecimal validity, String description,
-			String release, Date insertionTime, Date snapshotTime) {
+			String release, Timestamp insertionTime, Timestamp snapshotTime) {
 		this.name = name;
 		this.validity = validity;
 		this.description = description;
@@ -63,7 +61,7 @@ public class GlobalTag implements java.io.Serializable {
 	}
 
 	public GlobalTag(String name, BigDecimal validity, String description,
-			String release, Date insertionTime, Date snapshotTime,
+			String release, Timestamp insertionTime, Timestamp snapshotTime,
 			Set<GlobalTagMap> globalTagMaps) {
 		this.name = name;
 		this.validity = validity;
@@ -111,31 +109,31 @@ public class GlobalTag implements java.io.Serializable {
 		this.release = release;
 	}
 
-	@JsonSerialize(using=DateSerializer.class)
-	@Temporal(TemporalType.TIMESTAMP)
+	@JsonSerialize(using = DateSerializer.class)
+	// @Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "INSERTION_TIME", nullable = false)
-	public Date getInsertionTime() {
+	public Timestamp getInsertionTime() {
 		return this.insertionTime;
 	}
 
-	public void setInsertionTime(Date insertionTime) {
+	public void setInsertionTime(Timestamp insertionTime) {
 		this.insertionTime = insertionTime;
 	}
 
-	@JsonSerialize(using=DateSerializer.class)
-	@Temporal(TemporalType.TIMESTAMP)
+	@JsonSerialize(using = DateSerializer.class)
+	// @Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "SNAPSHOT_TIME", nullable = false)
-	public Date getSnapshotTime() {
+	public Timestamp getSnapshotTime() {
 		return this.snapshotTime;
 	}
 
-	public void setSnapshotTime(Date snapshotTime) {
+	public void setSnapshotTime(Timestamp snapshotTime) {
 		this.snapshotTime = snapshotTime;
 	}
 
-//	@//JsonManagedReference(value="gtag-map")
+	// @//JsonManagedReference(value="gtag-map")
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "globalTag")
-	@Column(nullable=true)
+	@Column(nullable = true)
 	public Set<GlobalTagMap> getGlobalTagMaps() {
 		return this.globalTagMaps;
 	}

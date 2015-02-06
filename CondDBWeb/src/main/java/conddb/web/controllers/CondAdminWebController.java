@@ -11,10 +11,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import conddb.dao.admin.controllers.GlobalTagAdminController;
 
+/**
+ * @author formica
+ *
+ */
 @RestController
 public class CondAdminWebController {
-	
-	private Logger log = LoggerFactory.getLogger(getClass());
+
+	private Logger log = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	private GlobalTagAdminController globalTagAdminController;
@@ -23,11 +27,11 @@ public class CondAdminWebController {
 	@ResponseBody
 	public String cloneGlobalTag(
 			@RequestParam(value = "sourcegtag", defaultValue = "CONDBR2-TEST-01") String sourcegtag,
-			@RequestParam(value = "destgtag", defaultValue = "CONDBR2-TEST-02") String destgtag
-			) throws Exception {
-		log.info(
-				"CondAdminWebController processing request for cloning "+sourcegtag+" into "+destgtag);
-		globalTagAdminController.cloneGlobalTag(sourcegtag, destgtag);
+			@RequestParam(value = "destgtag", defaultValue = "CONDBR2-TEST-02") String destgtag)
+			throws Exception {
+		this.log.info("CondAdminWebController processing request for cloning "
+				+ sourcegtag + " into " + destgtag);
+		this.globalTagAdminController.cloneGlobalTag(sourcegtag, destgtag);
 		return "Success";
 	}
 
@@ -36,11 +40,12 @@ public class CondAdminWebController {
 	public String cloneGlobalTag(
 			@RequestParam(value = "sourcegtag", defaultValue = "CONDBR2-TEST-01") String sourcegtag,
 			@RequestParam(value = "oldtag", defaultValue = "NONE") String oldtag,
-			@RequestParam(value = "newtag", defaultValue = "NONE") String newtag
-			) throws Exception {
-		log.info(
-				"CondAdminWebController processing request for updating mapping "+sourcegtag+" from "+oldtag+" to "+newtag);
-		globalTagAdminController.updateTagMapping(sourcegtag, oldtag, newtag);
+			@RequestParam(value = "newtag", defaultValue = "NONE") String newtag)
+			throws Exception {
+		this.log.info("CondAdminWebController processing request for updating mapping "
+				+ sourcegtag + " from " + oldtag + " to " + newtag);
+		this.globalTagAdminController.updateTagMapping(sourcegtag, oldtag,
+				newtag);
 		return "Success";
 	}
 
