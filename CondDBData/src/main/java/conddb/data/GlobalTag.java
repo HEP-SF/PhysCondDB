@@ -13,6 +13,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -35,6 +36,7 @@ public class GlobalTag implements java.io.Serializable {
 	private BigDecimal validity;
 	private String description;
 	private String release;
+	private String lockstatus;
 	private Timestamp insertionTime;
 	private Timestamp snapshotTime;
 	private Set<GlobalTagMap> globalTagMaps = new HashSet<GlobalTagMap>(0);
@@ -58,6 +60,7 @@ public class GlobalTag implements java.io.Serializable {
 		this.release = release;
 		this.insertionTime = insertionTime;
 		this.snapshotTime = snapshotTime;
+		this.lockstatus="unlocked";
 	}
 
 	public GlobalTag(String name, BigDecimal validity, String description,
@@ -70,6 +73,7 @@ public class GlobalTag implements java.io.Serializable {
 		this.insertionTime = insertionTime;
 		this.snapshotTime = snapshotTime;
 		this.globalTagMaps = globalTagMaps;
+		this.lockstatus="unlocked";
 	}
 
 	@Id
@@ -109,6 +113,29 @@ public class GlobalTag implements java.io.Serializable {
 		this.release = release;
 	}
 
+	@Column(name = "LOCKSTATUS", nullable = false, length = 20)
+	public String getLockstatus() {
+		return lockstatus;
+	}
+
+	public void setLockstatus(String lockstatus) {
+		this.lockstatus = lockstatus;
+	}
+
+	@Transient
+	public boolean islocked() {
+		if (this.lockstatus.equals("unlocked")) {
+			return false; 
+		} else {
+			return true;
+		}
+	}
+	
+	@Transient
+	public void lock() {
+		this.lockstatus = "locked";
+	}
+	
 	@JsonSerialize(using = DateSerializer.class)
 	// @Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "INSERTION_TIME", nullable = false)

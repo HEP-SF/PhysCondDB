@@ -51,7 +51,7 @@ public class GlobalTagMap implements java.io.Serializable {
 	 * @param record
 	 * @param label
 	 */
-	public GlobalTagMap(Tag systemTag, GlobalTag globalTag, String record,
+	public GlobalTagMap(GlobalTag globalTag, Tag systemTag, String record,
 			String label) {
 		super();
 		this.systemTag = systemTag;

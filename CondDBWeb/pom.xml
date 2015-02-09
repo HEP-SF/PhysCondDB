@@ -23,6 +23,21 @@
 			<artifactId>CondDBServices</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.3.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpmime</artifactId>
+			<version>4.3.5</version>
+		</dependency>
+		<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>1.3.1</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -36,7 +51,7 @@
 				<targetPath>webapp</targetPath>
 				<directory>src/main/webapp</directory>
 				<filtering>true</filtering>
-				
+
 			</resource>
 			<resource>
 				<directory>src/main/resources</directory>
@@ -76,7 +91,7 @@
 							</excludes>
 						</resource>
 					</webResources>
-<!-- 					<warName>physconddb</warName> -->
+					<!-- <warName>physconddb</warName> -->
 				</configuration>
 			</plugin>
 			<plugin>
@@ -90,19 +105,10 @@
 					<path>/physconddb</path>
 					<!-- <warFile>${project.build.directory}/physconddb.war</warFile> -->
 				</configuration>
-				<!-- 
-				<executions>
-					<execution>
-						<id>deploy</id>
-						<phase>pre-integration-test</phase>
-						<goals>
-							<goal>deploy</goal>
-						</goals>
-					</execution>
-				</executions>
-				 -->
+				<!-- <executions> <execution> <id>deploy</id> <phase>pre-integration-test</phase> 
+					<goals> <goal>deploy</goal> </goals> </execution> </executions> -->
 			</plugin>
-			
+
 			<plugin>
 				<groupId>org.wildfly.plugins</groupId>
 				<artifactId>wildfly-maven-plugin</artifactId>

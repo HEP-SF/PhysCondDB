@@ -3,6 +3,7 @@ package conddb.data;
 // Generated Aug 25, 2014 4:52:00 PM by Hibernate Tools 3.4.0.CR1
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -42,14 +43,14 @@ public class Iov implements java.io.Serializable {
 	private Long id;
 	private BigDecimal since;
 	private String sinceString;
-	private Date insertionTime;
+	private Timestamp insertionTime;
 	private Payload payload;
 	private Tag tag;
 
 	public Iov() {
 	}
 
-	public Iov(BigDecimal since, String sincestr, Date insertiontime,
+	public Iov(BigDecimal since, String sincestr, Timestamp insertiontime,
 			Payload payload, Tag tag) {
 		this.since = since;
 		this.sinceString = sincestr;
@@ -87,18 +88,18 @@ public class Iov implements java.io.Serializable {
 	}
 
 	@JsonSerialize(using = DateSerializer.class)
-	@Temporal(TemporalType.TIMESTAMP)
+//	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "INSERTION_TIME", nullable = false)
-	public Date getInsertionTime() {
+	public Timestamp getInsertionTime() {
 		return this.insertionTime;
 	}
 
-	public void setInsertionTime(Date insertionTime) {
+	public void setInsertionTime(Timestamp insertionTime) {
 		this.insertionTime = insertionTime;
 	}
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "PAYLOAD_HASH", nullable = false)
+	@JoinColumn(name = "PAYLOAD_HASH", nullable = false, updatable = false)
 	@JsonSerialize(using = PayloadSerializer.class)
 	public Payload getPayload() {
 		return this.payload;

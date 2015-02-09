@@ -35,11 +35,10 @@ import conddb.data.Tag;
 public class CondWebController {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
-	private DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+//	private DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 
 	// TODO: this does not work
-	// private DateTimeFormatter formatter = DateTimeFormatter
-    //			.ofPattern("yyyyMMddHHmmss");
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss:z");
 
 	@Autowired
 	private ConddbClientService conddbsvc;
@@ -73,16 +72,19 @@ public class CondWebController {
 	@RequestMapping(value = "/gtagbetween", method = RequestMethod.GET)
 	@ResponseBody
 	public List<GlobalTag> getGlobalTagBetweenTime(
-			@RequestParam(value = "sincetime", defaultValue = "2007-12-03T10:15:30+01:00") String since,
-			@RequestParam(value = "untiltime", defaultValue = "2015-12-03T10:15:30+01:00") String until)
+			@RequestParam(value = "sincetime", defaultValue = "20071203101530:GMT") String since,
+			@RequestParam(value = "untiltime", defaultValue = "20151203101530:GMT") String until,
+			@RequestParam(value = "format", defaultValue = "yyyyMMddHHmmss:z") String format)
 			throws Exception {
 
 		this.log.info("CondWebController processing request for getGlobalTagBetweenTime: since until..."
 				+ since + " " + until);
 
 		try {
-			ZonedDateTime sincedate = ZonedDateTime.parse(since, this.formatter);
-			ZonedDateTime untildate = ZonedDateTime.parse(until, this.formatter);
+			DateTimeFormatter locformatter = DateTimeFormatter.ofPattern(format);
+			
+			ZonedDateTime sincedate = ZonedDateTime.parse(since, locformatter);
+			ZonedDateTime untildate = ZonedDateTime.parse(until, locformatter);
 
 			this.log.info("CondWebController sending request using dates..."
 					+ sincedate + " " + untildate);

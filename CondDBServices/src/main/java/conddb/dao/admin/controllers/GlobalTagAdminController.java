@@ -1,7 +1,5 @@
 package conddb.dao.admin.controllers;
 
-import java.sql.Timestamp;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,6 +15,7 @@ import conddb.dao.repositories.TagRepository;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.Tag;
+import conddb.data.handler.GlobalTagHandler;
 
 public class GlobalTagAdminController {
 
@@ -36,14 +35,9 @@ public class GlobalTagAdminController {
 				.findByNameAndFetchTagsEagerly(sourcegtag);
 		this.log.debug("Retrieved globaltag for cloning: " + sgtag
 				+ " linked to " + sgtag.getGlobalTagMaps().size() + " tags");
-		GlobalTag newgtag = new GlobalTag(destgtag);
+		GlobalTag newgtag = new GlobalTagHandler().cloneObject(sgtag,destgtag);
 		Set<GlobalTagMap> sgtagmap = sgtag.getGlobalTagMaps();
-		newgtag.setDescription(sgtag.getDescription() + " - Cloned from "
-				+ sourcegtag);
-		newgtag.setValidity(sgtag.getValidity());
-		newgtag.setRelease(sgtag.getRelease());
-		newgtag.setSnapshotTime(sgtag.getSnapshotTime());
-		newgtag.setInsertionTime(new Timestamp(new Date().getTime()));
+		
 		this.gtagRepository.save(newgtag);
 
 		Set<GlobalTagMap> newmaps = new HashSet<GlobalTagMap>();
@@ -60,8 +54,22 @@ public class GlobalTagAdminController {
 			throws ConddbServiceException {
 		GlobalTagMap map = this.gtagMapRepository.findByGlobalTagAndTagName(
 				sourcegtag, oldtag);
+		GlobalTag gtag = map.getGlobalTag();
+		if (gtag.islocked()) {
+			throw new ConddbServiceException("Cannot update mapping on locked global tag");
+		}
 		Tag tag = this.tagRepository.findByName(newtag);
 		map.setSystemTag(tag);
 		this.gtagMapRepository.save(map);
 	}
+	
+	@Transactional
+	public void updateGlobalTagLocking(String sourcegtag, String locking)
+			throws ConddbServiceException {
+
+		GlobalTag gtag = gtagRepository.findOne(sourcegtag);
+		gtag.setLockstatus(locking);
+		this.gtagRepository.save(gtag);
+	}
+
 }

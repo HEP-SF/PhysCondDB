@@ -3,7 +3,7 @@ package conddb.data;
 // Generated Aug 25, 2014 4:52:00 PM by Hibernate Tools 3.4.0.CR1
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,8 +14,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -44,8 +42,8 @@ public class Tag implements java.io.Serializable {
 	private String description;
 	private BigDecimal lastValidatedTime;
 	private BigDecimal endOfValidity;
-	private Date insertionTime;
-	private Date modificationTime;
+	private Timestamp insertionTime;
+	private Timestamp modificationTime;
 	private Set<Iov> iovs = new HashSet<Iov>(0);
 	private Set<GlobalTagMap> globalTagMaps = new HashSet<GlobalTagMap>(0);
 
@@ -62,7 +60,7 @@ public class Tag implements java.io.Serializable {
 
 	public Tag(String name, String timeType, String objectType,
 			String synchronization, String description, BigDecimal lastValidatedTime,
-			BigDecimal endOfValidity, Date insertionTime, Date modificationTime) {
+			BigDecimal endOfValidity, Timestamp insertionTime, Timestamp modificationTime) {
 		this.name = name;
 		this.timeType = timeType;
 		this.objectType = objectType;
@@ -76,8 +74,8 @@ public class Tag implements java.io.Serializable {
 
 	public Tag(String name, String timeType, String objectType,
 			String synchronization, String description, BigDecimal lastValidatedTime,
-			BigDecimal endOfValidity, Date insertionTime,
-			Date modificationTime, Set<Iov> iovs,
+			BigDecimal endOfValidity, Timestamp insertionTime,
+			Timestamp modificationTime, Set<Iov> iovs,
 			Set<GlobalTagMap> globalTagMaps) {
 		this.name = name;
 		this.timeType = timeType;
@@ -167,23 +165,23 @@ public class Tag implements java.io.Serializable {
 		this.endOfValidity = endOfValidity;
 	}
 
-	@Temporal(TemporalType.TIMESTAMP)
+//	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "INSERTION_TIME", nullable = false)
-	public Date getInsertionTime() {
+	public Timestamp getInsertionTime() {
 		return this.insertionTime;
 	}
 
-	public void setInsertionTime(Date insertionTime) {
+	public void setInsertionTime(Timestamp insertionTime) {
 		this.insertionTime = insertionTime;
 	}
 
-	@Temporal(TemporalType.TIMESTAMP)
+//	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "MODIFICATION_TIME", nullable = false)
-	public Date getModificationTime() {
+	public Timestamp getModificationTime() {
 		return this.modificationTime;
 	}
 
-	public void setModificationTime(Date modificationTime) {
+	public void setModificationTime(Timestamp modificationTime) {
 		this.modificationTime = modificationTime;
 	}
 

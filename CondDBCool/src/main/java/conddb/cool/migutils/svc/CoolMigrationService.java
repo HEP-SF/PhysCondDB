@@ -5,6 +5,7 @@ package conddb.cool.migutils.svc;
 
 import java.io.StringReader;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -118,8 +119,8 @@ public class CoolMigrationService {
 			// Create tag object for storage
 			Tag conddbtag = new Tag(cooltag.getTagName(), iovtype, "MY_OBJECT",
 					"SYNCHRO -" + cooltag.getNodeFullpath(), tagdescription,
-					new BigDecimal(0), new BigDecimal(0), instimestr,
-					new Date());
+					new BigDecimal(0), new BigDecimal(0), new Timestamp(instimestr.getTime()),
+					new Timestamp(new Date().getTime()));
 			// Check if tag name already exists
 			Tag dbtag = tagRepository.findByName(cooltag.getTagName());
 			if (dbtag != null) {
@@ -158,7 +159,7 @@ public class CoolMigrationService {
 					.getName(), "%", new BigDecimal(0), new BigDecimal(
 					CoolIov.COOL_MAX_DATE));
 
-			Date now = new Date();
+			Timestamp now = new Timestamp(new Date().getTime());
 			for (CoolIovType ciov : cooliovs) {
 				// Use default empty payload for the moment...
 				// TODO modify this code to use real data

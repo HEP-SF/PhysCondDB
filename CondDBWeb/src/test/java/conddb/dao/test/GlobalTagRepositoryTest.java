@@ -1,7 +1,10 @@
 /**
- * 
+ *
  */
 package conddb.dao.test;
+
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -15,8 +18,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.assertThat;
-import static org.hamcrest.Matchers.is;
+import conddb.dao.admin.controllers.GlobalTagAdminController;
+import conddb.dao.exceptions.ConddbServiceException;
 import conddb.dao.repositories.GlobalTagRepository;
 import conddb.data.GlobalTag;
 
@@ -24,28 +27,51 @@ import conddb.data.GlobalTag;
  * @author formica
  *
  */
-@ActiveProfiles({ "dev","h2" })
+@ActiveProfiles({ "dev", "h2" })
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = { "classpath:/spring/services-context.xml" })
 public class GlobalTagRepositoryTest {
 
 	@Autowired
 	private GlobalTagRepository repo;
+	@Autowired
+	private GlobalTagAdminController gtagadmin;
 
-	@Test
-	public void searchAllGlobalTags_ShouldReturnEmptyList() {
-		List<GlobalTag> gtags = (List<GlobalTag>) repo.findAll();
-		assertThat(gtags.size(), is(0));
-	}
+	private String gtagtestname = "TEST_01";
 	
 	@Test
+	public void searchAllGlobalTags_ShouldReturnEmptyList() {
+		List<GlobalTag> gtags = (List<GlobalTag>) this.repo.findAll();
+		assertThat(gtags.size(), is(0));
+	}
+
+	protected void initGlobalTag() {
+		GlobalTag gtag = new GlobalTag(gtagtestname, new BigDecimal(0),
+				"test global tag", "test", new Timestamp(new Date().getTime()),
+				new Timestamp(new Date().getTime()));
+		this.repo.save(gtag);
+	}
+	
+	protected void cleanGlobalTag() {
+		this.repo.deleteAll();
+	}
+
+	@Test
 	public void insertGlobalTag() {
-		GlobalTag gtag = new GlobalTag("TEST_01",new BigDecimal(0),"test global tag","test",new Timestamp(new Date().getTime()),new Timestamp(new Date().getTime()));
-		repo.save(gtag);
-		List<GlobalTag> gtags = (List<GlobalTag>) repo.findAll();
+		initGlobalTag();
+		List<GlobalTag> gtags = (List<GlobalTag>) this.repo.findByNameLike(gtagtestname);
 		assertThat(gtags.size(), is(1));
-		
-		repo.deleteAll();
+	}
+	@Test
+	public void updateGlobalTagLocking() {
+		try {
+			gtagadmin.updateGlobalTagLocking(gtagtestname, "locked");
+			GlobalTag gtag = repo.findOne(gtagtestname);
+			assertThat(gtag.getLockstatus(), is("locked"));
+		} catch (ConddbServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }
