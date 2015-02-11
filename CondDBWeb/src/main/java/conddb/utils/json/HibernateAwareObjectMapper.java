@@ -22,6 +22,7 @@ public class HibernateAwareObjectMapper extends ObjectMapper {
 		System.out.println("INITIALIZE OBJECT MAPPER FOR HIBERNATE");
 		Hibernate4Module hm = new Hibernate4Module();
 		this.setDateFormat(dateFormat);
+//		hm.enable(Hibernate4Module.Feature.FORCE_LAZY_LOADING);
 		registerModule(hm);
 	}
 }

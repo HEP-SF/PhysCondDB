@@ -34,5 +34,10 @@ public class ConddbClientService {
 	public List<Iov> getIovsForTagFetchPayload(String tagname) {
 		return iovRepository.findByTagNameAndFetchPayloadEagerly(tagname);
 	}
-
+	public GlobalTag getGlobalTag(String gtagname) {
+		return gtagRepository.findOne(gtagname);
+	}
+	public Tag getTag(String tagname) {
+		return tagRepository.findByName(tagname);
+	}
 }

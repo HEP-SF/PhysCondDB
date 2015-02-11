@@ -6,6 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -23,7 +24,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 @Table(name = "GLOBAL_TAG_MAP",
 	uniqueConstraints=@UniqueConstraint(columnNames={"TAG_ID", "GLOBAL_TAG_NAME"}))
 //)
-@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id")
+@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class, property="@id")
 public class GlobalTagMap implements java.io.Serializable {
 
 	/**
@@ -61,7 +62,7 @@ public class GlobalTagMap implements java.io.Serializable {
 	}
 
 	@Id
-	@GeneratedValue
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	public Long getId() {
 		return this.id;
 	}
@@ -71,7 +72,7 @@ public class GlobalTagMap implements java.io.Serializable {
 	}
 	
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "GLOBAL_TAG_NAME")
+	@JoinColumn(name = "GLOBAL_TAG_NAME", nullable=false)
 	public GlobalTag getGlobalTag() {
 		return this.globalTag;
 	}
@@ -82,7 +83,7 @@ public class GlobalTagMap implements java.io.Serializable {
 	}
 	
 	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "TAG_ID")
+	@JoinColumn(name = "TAG_ID", nullable=false)
 	public Tag getSystemTag() {
 		return systemTag;
 	}

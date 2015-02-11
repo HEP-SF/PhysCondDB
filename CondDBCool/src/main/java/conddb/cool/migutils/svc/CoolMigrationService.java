@@ -119,8 +119,7 @@ public class CoolMigrationService {
 			// Create tag object for storage
 			Tag conddbtag = new Tag(cooltag.getTagName(), iovtype, "MY_OBJECT",
 					"SYNCHRO -" + cooltag.getNodeFullpath(), tagdescription,
-					new BigDecimal(0), new BigDecimal(0), new Timestamp(instimestr.getTime()),
-					new Timestamp(new Date().getTime()));
+					new BigDecimal(0), new BigDecimal(0));
 			// Check if tag name already exists
 			Tag dbtag = tagRepository.findByName(cooltag.getTagName());
 			if (dbtag != null) {

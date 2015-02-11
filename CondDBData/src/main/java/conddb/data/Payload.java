@@ -5,6 +5,7 @@ package conddb.data;
 //import conddb.data.deserialiser.*;
 //import conddb.mappers.deserializers.PayloadDeserializer;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -15,14 +16,13 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.OneToMany;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+import conddb.data.exceptions.PayloadEncodingException;
 import conddb.utils.hash.HashGenerator;
 
 /**
@@ -42,27 +42,30 @@ public class Payload implements java.io.Serializable {
 	private String hash;
 	private String version;
 	private String objectType;
-	private String data;
+	private byte[]  data;
+	private Integer datasize; // size in bytes of the payload
 	private String streamerInfo;
-	private Date insertionTime;
+	private Timestamp insertionTime;
 	private Set<Iov> iovs = new HashSet<Iov>(0);
 
-	private String dataBuf;
-	private String streamerInfoBuf;
-	
 	public Payload() {
 		//default constructor creates an empty payload with only 
 		// a String saying EMPTY
 		this.objectType="DEFAULT";
-		this.data = "EMPTY";
+		this.data = "EMPTY".getBytes();
+		this.datasize = this.data.length;
 		this.streamerInfo = "String";
-		this.insertionTime = new Date();
 		this.version = "0.0";
-		this.hash = HashGenerator.md5Spring("EMPTY_LOB");
+		try {
+			this.hash = HashGenerator.md5Spring("EMPTY");
+		} catch (PayloadEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
-	public Payload(String hash, String objectType, String data,
-			String streamerInfo, Date insertionTime, String version) {
+	public Payload(String hash, String objectType, byte[] data,
+			String streamerInfo, Timestamp insertionTime, String version) {
 		this.hash = hash;
 		this.objectType = objectType;
 		this.data = data;
@@ -71,8 +74,8 @@ public class Payload implements java.io.Serializable {
 		this.version = version;
 	}
 
-	public Payload(String hash, String objectType, String data,
-			String streamerInfo, Date insertionTime,  String version, Set<Iov> iovs) {
+	public Payload(String hash, String objectType, byte[] data,
+			String streamerInfo, Timestamp insertionTime,  String version, Set<Iov> iovs) {
 		this.hash = hash;
 		this.objectType = objectType;
 		this.data = data;
@@ -80,26 +83,6 @@ public class Payload implements java.io.Serializable {
 		this.insertionTime = insertionTime;
 		this.version = version;
 		this.iovs = iovs;
-	}
-
-	
-	/**
-	 * @param hash
-	 * @param version
-	 * @param objectType
-	 * @param insertionTime
-	 * @param dataBuf
-	 * @param streamerInfoBuf
-	 */
-	public Payload(String hash, String version, String objectType,
-			Date insertionTime, String dataBuf, String streamerInfoBuf) {
-		super();
-		this.hash = hash;
-		this.version = version;
-		this.objectType = objectType;
-		this.insertionTime = insertionTime;
-		this.dataBuf = dataBuf;
-		this.streamerInfoBuf = streamerInfoBuf;
 	}
 
 	@Id
@@ -132,15 +115,15 @@ public class Payload implements java.io.Serializable {
 
 	@Column(name = "DATA", nullable = false)
 	@Lob
-	public String getData() {
+	public byte[] getData() {
 		return this.data;
 	}
 
-	public void setData(String data) {
+	public void setData(byte[]  data) {
 		this.data = data;
 	}
 
-	@Column(name = "STREAMER_INFO", nullable = false)
+	@Column(name = "STREAMER_INFO", nullable = true)
 	@Lob
 	public String getStreamerInfo() {
 		return this.streamerInfo;
@@ -149,14 +132,23 @@ public class Payload implements java.io.Serializable {
 	public void setStreamerInfo(String streamerInfo) {
 		this.streamerInfo = streamerInfo;
 	}
+	
+	@Column(name = "DATA_SIZE", nullable = false, precision = 12, scale = 0)
+	public Integer getDatasize() {
+		return datasize;
+	}
 
-	@Temporal(TemporalType.TIMESTAMP)
+	public void setDatasize(Integer datasize) {
+		this.datasize = datasize;
+	}
+
+	//	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "INSERTION_TIME", nullable = false)
-	public Date getInsertionTime() {
+	public Timestamp getInsertionTime() {
 		return this.insertionTime;
 	}
 
-	public void setInsertionTime(Date insertionTime) {
+	public void setInsertionTime(Timestamp insertionTime) {
 		this.insertionTime = insertionTime;
 	}
 
@@ -169,21 +161,10 @@ public class Payload implements java.io.Serializable {
 		this.iovs = iovs;
 	}
 
-	@Transient
-	public String getDataBuf() {
-		return dataBuf;
-	}
+	@PrePersist
+    public void prePersist() {
+        Timestamp now = new Timestamp(new Date().getTime());
+        this.insertionTime = now;
+    }
 
-	public void setDataBuf(String dataBuf) {
-		this.dataBuf = dataBuf;
-	}
-
-	@Transient
-	public String getStreamerInfoBuf() {
-		return streamerInfoBuf;
-	}
-
-	public void setStreamerInfoBuf(String streamerInfoBuf) {
-		this.streamerInfoBuf = streamerInfoBuf;
-	}
 }

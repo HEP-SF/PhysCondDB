@@ -4,8 +4,9 @@
 package conddb.dao.repositories;
 
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.rest.core.annotation.RestResource;
 
+import conddb.dao.baserepository.PayloadBaseRepository;
 import conddb.data.Payload;
 
 /**
@@ -13,8 +14,8 @@ import conddb.data.Payload;
  *
  */
 //@RepositoryRestResource(collectionResourceRel = "payloads", path = "payloads")
-@Repository
-public interface PayloadRepository extends CrudRepository<Payload, String> {
+@RestResource(exported = false)
+public interface PayloadRepository extends CrudRepository<Payload, String>, PayloadBaseRepository {
 
 	
 }
