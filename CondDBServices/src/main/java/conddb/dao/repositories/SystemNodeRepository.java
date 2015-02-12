@@ -16,7 +16,17 @@ import conddb.data.SystemDescription;
 @RestResource(exported = false)
 public interface SystemNodeRepository extends CrudRepository<SystemDescription, Long>,SystemNodeBaseRepository {
 
-//	public List<SystemDescription> findByTagNameRootLike(@Param("tagNameRoot") String tagNameRoot);
-//
-//	public SystemDescription findByNodeFullpath(@Param("node") String node);
+    @Override
+    @RestResource(exported = false)
+    void delete(Long id);
+
+    @Override
+    @RestResource(exported = false)
+    void delete(SystemDescription entity);
+
+    @SuppressWarnings("unchecked")
+	@Override
+    @RestResource(exported = false)
+    SystemDescription save(SystemDescription entity);
+
 }

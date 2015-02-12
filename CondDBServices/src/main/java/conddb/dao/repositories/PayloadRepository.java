@@ -13,9 +13,20 @@ import conddb.data.Payload;
  * @author formica
  *
  */
-//@RepositoryRestResource(collectionResourceRel = "payloads", path = "payloads")
 @RestResource(exported = false)
 public interface PayloadRepository extends CrudRepository<Payload, String>, PayloadBaseRepository {
 
+    @Override
+    @RestResource(exported = false)
+    void delete(String id);
+
+    @Override
+    @RestResource(exported = false)
+    void delete(Payload entity);
+
+    @SuppressWarnings("unchecked")
+	@Override
+    @RestResource(exported = false)
+    Payload save(Payload entity);
 	
 }

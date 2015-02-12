@@ -4,6 +4,7 @@
 package conddb.dao.controllers;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -117,6 +118,13 @@ public class GlobalTagController {
 			pyld = payloadRepository.save(entity.getPayload());
 		}
 		entity.setPayload(pyld);
+		/* Now search for existing since */
+		List<Iov> oldiov = iovRepository.findBySinceAndTagAndInsertionTimeLessThanOrderByInsertionTimeDesc(
+				atag.getName(), entity.getSince(), Timestamp.from(Instant.now()));
+		if (oldiov != null && oldiov.size()>0) {
+			log.info("Found a list of existing iovs..."+oldiov.get(0).getSince()
+					+" - "+oldiov.get(0).getInsertionTime());
+		}
 		return iovRepository.save(entity);
 	}
 

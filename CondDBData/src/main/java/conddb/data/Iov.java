@@ -4,6 +4,7 @@ package conddb.data;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -112,8 +113,8 @@ public class Iov implements java.io.Serializable {
 		this.payload = payload;
 	}
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "TAG_ID", nullable = false)
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "TAG_ID", nullable = false, updatable = false)
 //	@//JsonBackReference(value = "tag-iov")
 	public Tag getTag() {
 		return this.tag;
@@ -125,8 +126,9 @@ public class Iov implements java.io.Serializable {
 
 	@PrePersist
     public void prePersist() {
-        Timestamp now = new Timestamp(new Date().getTime());
-        this.insertionTime = now;
+		Instant now = Instant.now();
+        Timestamp nowt = Timestamp.from(now);
+        this.insertionTime = nowt;
     }
 
 }
