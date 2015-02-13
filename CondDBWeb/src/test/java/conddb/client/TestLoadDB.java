@@ -45,10 +45,10 @@ public class TestLoadDB {
 		// TODO Auto-generated method stub
 		TestLoadDB tdbload = new TestLoadDB();
 		try {
-			tdbload.loadGlobalTags();
-			tdbload.loadTags();
-			System.out.println("Create mappings");
-    		tdbload.doMappings();
+//			tdbload.loadGlobalTags();
+//			tdbload.loadTags();
+//			System.out.println("Create mappings");
+//    		tdbload.doMappings();
 			System.out.println("Create iovs");
 			tdbload.loadIovs();
 		} catch (ClientProtocolException e) {
@@ -184,7 +184,7 @@ public class TestLoadDB {
 	public List<Iov> generateIov(int size) {
 		List<Iov> iovlist = new ArrayList<Iov>();
 		Payload pyld = new Payload();
-		Tag atag = new Tag("tagtest_7");
+		Tag atag = new Tag("tagtest_5");
 		for (int i = 0; i < size; i++) {
 			Timestamp now = new Timestamp(new Date().getTime());
 			Iov iov = new Iov(new BigDecimal(i*1000L),"this should be a time",now,pyld,atag);

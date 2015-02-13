@@ -114,6 +114,19 @@ public class CondWebController {
 		Tag tag = this.conddbsvc.getTagIovs(tagname);
 		return tag;
 	}
+	
+	@RequestMapping(value = "/globaltag", method = RequestMethod.GET)
+	@ResponseBody
+	@LogAction(actionPerformed = "getGlobalTag")
+	public GlobalTag getGlobalTag(
+			@RequestParam(value = "name", defaultValue = "none") String gtagname)
+			throws Exception {
+		this.log.info(
+				"CondWebController processing request for getGlobalTag: name ...",
+				gtagname);
+		GlobalTag gtag = this.conddbsvc.getGlobalTag(gtagname);
+		return gtag;
+	}
 
 	@RequestMapping(value = "/iovs", method = RequestMethod.GET)
 	@ResponseBody

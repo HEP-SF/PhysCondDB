@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import conddb.dao.controllers.GlobalTagController;
+import conddb.dao.controllers.IovController;
 import conddb.dao.svc.ConddbClientService;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
@@ -32,6 +33,8 @@ public class CondExpertWebController {
 	@Autowired
 	private GlobalTagController globalTagController;
 	@Autowired
+	private IovController iovController;
+	@Autowired
 	private ConddbClientService clientservice;
 
 	@RequestMapping(value = "/gtagAdd", method = RequestMethod.POST)
@@ -39,7 +42,7 @@ public class CondExpertWebController {
 	public GlobalTag insertGlobalTag(
 			@RequestBody GlobalTag jsonString)
 			throws Exception {
-		this.log.info("CondWebController processing request for insertGlobalTag ...");
+		this.log.info("CondExpertWebController processing request for insertGlobalTag ...");
 		GlobalTag gtag = this.globalTagController.insertGlobalTag(jsonString);
 		return gtag;
 	}
@@ -49,7 +52,7 @@ public class CondExpertWebController {
 	public Tag insertTag(
 			@RequestBody Tag jsonString)
 			throws Exception {
-		this.log.info("CondWebController processing request for insertTag ...");
+		this.log.info("CondExpertWebController processing request for insertTag ...");
 		Tag tag = this.globalTagController.insertTag(jsonString);
 		return tag;
 	}
@@ -59,7 +62,7 @@ public class CondExpertWebController {
 	public GlobalTagMap insertGlobalTagMap(
 			@RequestBody GlobalTagMap jsonString)
 			throws Exception {
-		this.log.info("CondWebController processing request for insertGlobalTagMap ...");
+		this.log.info("CondExpertWebController processing request for insertGlobalTagMap ...");
 		GlobalTagMap gtagmap = this.globalTagController.insertGlobalTagMap(jsonString);
 		return gtagmap;
 	}
@@ -69,8 +72,8 @@ public class CondExpertWebController {
 	public Iov insertIov(
 			@RequestBody Iov jsonString)
 			throws Exception {
-		this.log.info("CondWebController processing request for insertIov using tag..."+jsonString.getTag().getName());
-		Iov iov = this.globalTagController.insertIov(jsonString);
+		this.log.info("CondExpertWebController processing request for insertIov using tag..."+jsonString.getTag().getName());
+		Iov iov = this.iovController.insertIov(jsonString);
 		return iov;
 	}
 
@@ -80,10 +83,10 @@ public class CondExpertWebController {
 			@RequestParam(value = "globaltagname", defaultValue = "CONDBR2-01") String globaltagname,
 			@RequestParam(value = "tagname", defaultValue = "ATAG-01") String tagname)
 			throws Exception {
-		this.log.info("CondWebController processing request for mapTagToGtag ...");
+		this.log.info("CondExpertWebController processing request for mapTagToGtag ...");
 		GlobalTag gtag = clientservice.getGlobalTag(globaltagname);
 		Tag atag = clientservice.getTag(tagname);
-		this.log.info("CondWebController processing request for mapTagToGtag using "+gtag+" "+atag);
+		this.log.info("CondExpertWebController processing request for mapTagToGtag using "+gtag+" "+atag);
 		GlobalTagMap gtagmap = this.globalTagController.mapTagToGlobalTag(atag, gtag);
 		return gtagmap;
 	}

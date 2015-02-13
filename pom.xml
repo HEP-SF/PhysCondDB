@@ -17,7 +17,8 @@
 		<!-- Web -->
 		<jsp.version>2.2</jsp.version>
 		<jstl.version>1.2</jstl.version>
-		<servlet.version>2.5</servlet.version>
+<!-- 		<servlet.version>2.5</servlet.version> -->
+		<servlet.version>3.1.0</servlet.version>
 
 		<!-- Servers -->
 		<jetty.version>9.3.0.M1</jetty.version>
@@ -110,9 +111,15 @@
 			<artifactId>jstl</artifactId>
 			<version>${jstl.version}</version>
 		</dependency>
-		<dependency>
+<!--        	<dependency> -->
+<!-- 			<groupId>javax.servlet</groupId> -->
+<!-- 			<artifactId>servlet-api</artifactId> -->
+<!-- 			<version>${servlet.version}</version> -->
+<!-- 			<scope>provided</scope> -->
+<!-- 		</dependency> -->
+       	<dependency>
 			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
+			<artifactId>javax.servlet-api</artifactId>
 			<version>${servlet.version}</version>
 			<scope>provided</scope>
 		</dependency>

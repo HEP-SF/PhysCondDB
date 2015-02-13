@@ -44,6 +44,11 @@
 			<artifactId>commons-fileupload</artifactId>
 			<version>${apache.commons.version}</version>
 		</dependency>
+<dependency>
+	<groupId>org.mockito</groupId>
+	<artifactId>mockito-all</artifactId>
+	<version>1.10.8</version>
+</dependency>		
 	</dependencies>
 
 	<build>

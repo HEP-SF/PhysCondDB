@@ -25,6 +25,7 @@ public class ConddbClientService {
 	public GlobalTag getGlobalTagTrace(String gtagname) {
 		return gtagRepository.findByNameAndFetchTagsEagerly(gtagname);
 	}
+	@ProfileExecution
 	public Tag getTagIovs(String tagname) {
 		return tagRepository.findByNameAndFetchIovsEagerly(tagname);
 	}
