@@ -123,4 +123,21 @@ public interface IovBaseRepository extends
 			@Param("until") BigDecimal until, 
 			@Param("instime") Timestamp instime);
 
+	/**
+	 * @param tagname
+	 * @param since
+	 * @param until
+	 * @param instime.
+	 * 		Use yyyy-MM-dd hh:mm:ss in local time as format.
+	 * @return list of IOVs.
+	 */
+	@Query("SELECT p FROM Iov p WHERE "
+			+ "p.tag.name = (:tag) AND (p.since >= (:since) AND p.since < (:until)) "
+			+ "AND p.insertionTime = ANY("
+			+ "SELECT max(p2.insertionTime) FROM Iov p2 WHERE "
+			+ "p2.insertionTime < (:instime))")
+	List<Iov> findGroupsByTag(
+			@Param("tag") String tagname);
+
+	
 }

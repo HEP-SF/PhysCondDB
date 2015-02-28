@@ -23,8 +23,12 @@ public class SystemDescription {
 	private Long id;
 	private String nodeFullpath;
 	private String schemaName;
+	/**
+	 * This is very similar to the usage of record in CMS
+	 */
 	private String tagNameRoot;
 	private String nodeDescription;
+	private Integer groupSize=1000;
 	/**
 	 * 
 	 */
@@ -85,6 +89,15 @@ public class SystemDescription {
 	
 	public void setTagNameRoot(String tagNameRoot) {
 		this.tagNameRoot = tagNameRoot;
+	}
+	
+	@Column(name = "IOVGROUP_SIZE", nullable = false)
+	public Integer getGroupSize() {
+		return groupSize;
+	}
+	
+	public void setGroupSize(Integer groupSize) {
+		this.groupSize = groupSize;
 	}
 
 	

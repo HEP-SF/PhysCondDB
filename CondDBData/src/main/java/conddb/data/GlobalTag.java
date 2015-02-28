@@ -40,7 +40,11 @@ public class GlobalTag implements java.io.Serializable {
 	private String name;
 	private BigDecimal validity;
 	private String description;
-	private String release;
+	
+	/**
+	 * Global tags can be related to a given software release
+	 */
+	private String release; 
 	private String lockstatus;
 	private Timestamp insertionTime;
 	private Timestamp snapshotTime;
