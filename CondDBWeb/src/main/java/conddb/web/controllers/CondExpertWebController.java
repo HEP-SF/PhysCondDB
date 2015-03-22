@@ -83,7 +83,7 @@ public class CondExpertWebController {
 			@RequestParam(value = "globaltagname", defaultValue = "CONDBR2-01") String globaltagname,
 			@RequestParam(value = "tagname", defaultValue = "ATAG-01") String tagname)
 			throws Exception {
-		this.log.info("CondExpertWebController processing request for mapTagToGtag ...");
+		this.log.info("CondExpertWebController processing request for mapTagToGtag ..."+globaltagname+" "+tagname);
 		GlobalTag gtag = clientservice.getGlobalTag(globaltagname);
 		Tag atag = clientservice.getTag(tagname);
 		this.log.info("CondExpertWebController processing request for mapTagToGtag using "+gtag+" "+atag);

@@ -27,10 +27,10 @@ public interface GlobalTagBaseRepository extends CondDBPageAndSortingRepository<
 			@Param("description") String description);
 
 	// TODO: Test using orm.xml by commenting....did not work
-	@Query("SELECT p FROM GlobalTag p JOIN FETCH p.globalTagMaps maps WHERE maps.globalTag.name = (:name)")
+	@Query("SELECT distinct p FROM GlobalTag p JOIN FETCH p.globalTagMaps maps WHERE maps.globalTag.name = (:name)")
 	public GlobalTag findByNameAndFetchTagsEagerly(@Param("name") String name);
 
-	@Query("SELECT p FROM GlobalTag p JOIN FETCH p.globalTagMaps maps WHERE maps.globalTag.name like (:name)")
+	@Query("SELECT distinct p FROM GlobalTag p JOIN FETCH p.globalTagMaps maps WHERE maps.globalTag.name like (:name)")
 	public List<GlobalTag> findByNameLikeAndFetchTagsEagerly(
 			@Param("name") String name);
 

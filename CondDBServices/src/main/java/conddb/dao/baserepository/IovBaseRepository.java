@@ -41,7 +41,7 @@ public interface IovBaseRepository extends
 	 * @param inserttime
 	 * @return A single IOV.
 	 */
-	@Query("SELECT p FROM Iov p WHERE "
+	@Query("SELECT distinct p FROM Iov p WHERE "
 			+ "p.tag.name = (:name) AND p.since = (:since) AND p.insertionTime=(:instime)")
 	Iov fetchBySinceAndInsertionTimeAndTagName(
 			@Param("name") String tagname,
@@ -55,7 +55,7 @@ public interface IovBaseRepository extends
 	 * @param tagname
 	 * @return All IOVs for given tag including payloads.
 	 */
-	@Query("SELECT p FROM Iov p JOIN FETCH p.payload pylds WHERE "
+	@Query("SELECT distinct p FROM Iov p JOIN FETCH p.payload pylds WHERE "
 			+ "p.tag.name = (:name)")
 	List<Iov> findByTagNameAndFetchPayloadEagerly(
 			@Param("name") String tagname);
@@ -66,7 +66,7 @@ public interface IovBaseRepository extends
 	 * @param until
 	 * @return list of IOVs.
 	 */
-	@Query("SELECT p FROM Iov p WHERE "
+	@Query("SELECT distinct p FROM Iov p WHERE "
 			+ "p.tag.name = (:tag) AND (p.since >= (:since) AND p.since < (:until))")
 	List<Iov> findByRangeAndTag(
 			@Param("tag") String tagname,
@@ -80,7 +80,7 @@ public interface IovBaseRepository extends
 	 * 		Use yyyy-MM-dd hh:mm:ss in local time as format.
 	 * @return list of IOVs.
 	 */
-	@Query("SELECT p FROM Iov p WHERE "
+	@Query("SELECT distinct p FROM Iov p WHERE "
 			+ "p.tag.name = (:tag) AND (p.since = (:since) AND p.insertionTime < (:instime)) "
 			+ "ORDER BY p.insertionTime desc")
 	List<Iov> findBySinceAndTagAndInsertionTimeLessThanOrderByInsertionTimeDesc(
@@ -94,7 +94,7 @@ public interface IovBaseRepository extends
 	 * @param until
 	 * @return list of IOVs.
 	 */
-	@Query("SELECT p FROM Iov p WHERE "
+	@Query("SELECT distinct p FROM Iov p WHERE "
 			+ "p.tag.name = (:tag) AND (p.since >= (:since) AND p.since < (:until)) "
 			+ "AND p.insertionTime >= ALL("
 			+ "SELECT p2.insertionTime FROM Iov p2 WHERE "
@@ -112,7 +112,7 @@ public interface IovBaseRepository extends
 	 * 		Use yyyy-MM-dd hh:mm:ss in local time as format.
 	 * @return list of IOVs.
 	 */
-	@Query("SELECT p FROM Iov p WHERE "
+	@Query("SELECT distinct p FROM Iov p WHERE "
 			+ "p.tag.name = (:tag) AND (p.since >= (:since) AND p.since < (:until)) "
 			+ "AND p.insertionTime = ANY("
 			+ "SELECT max(p2.insertionTime) FROM Iov p2 WHERE "
@@ -131,7 +131,7 @@ public interface IovBaseRepository extends
 	 * 		Use yyyy-MM-dd hh:mm:ss in local time as format.
 	 * @return list of IOVs.
 	 */
-	@Query("SELECT p FROM Iov p WHERE "
+	@Query("SELECT distinct p FROM Iov p WHERE "
 			+ "p.tag.name = (:tag) AND (p.since >= (:since) AND p.since < (:until)) "
 			+ "AND p.insertionTime = ANY("
 			+ "SELECT max(p2.insertionTime) FROM Iov p2 WHERE "

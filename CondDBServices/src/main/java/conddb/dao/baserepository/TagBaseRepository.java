@@ -22,6 +22,6 @@ public interface TagBaseRepository extends CondDBPageAndSortingRepository<Tag, L
 
 	public Tag findByName(@Param("name") String name);
 	
-	@Query("SELECT p FROM Tag p JOIN FETCH p.iovs iovs WHERE p.name = (:name)")
+	@Query("SELECT distinct p FROM Tag p JOIN FETCH p.iovs iovs WHERE p.name = (:name)")
     public Tag findByNameAndFetchIovsEagerly(@Param("name") String name);
 }

@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,6 +26,7 @@ import conddb.dao.controllers.GlobalTagController;
 import conddb.dao.svc.ConddbClientService;
 import conddb.data.GlobalTag;
 import conddb.data.Iov;
+import conddb.data.Payload;
 import conddb.data.Tag;
 
 /**
@@ -140,6 +142,7 @@ public class CondWebController {
 		return iovlist;
 	}
 
+	// TODO: this method should be removed or masked
 	@RequestMapping(value = "/iovspayload", method = RequestMethod.GET)
 	@ResponseBody
 	public List<Iov> getIovsFetchPayload(
@@ -150,6 +153,30 @@ public class CondWebController {
 				tagname);
 		List<Iov> iovlist = this.conddbsvc.getIovsForTagFetchPayload(tagname);
 		return iovlist;
+	}
+
+	@RequestMapping(value = "/payload", method = RequestMethod.GET)
+	@ResponseBody
+	public Payload getPayload(
+			@RequestParam(value = "hash", defaultValue = "none") String hash)
+			throws Exception {
+		this.log.info(
+				"CondWebController processing request for getPayload: hash ...",
+				hash);
+		Payload pyld = this.conddbsvc.getPayload(hash);
+		return pyld;
+	}
+
+	@RequestMapping(value = "/payload/sizegt/{size}", method = RequestMethod.GET)
+	@ResponseBody
+	public List<Payload> getPayloadSizeGt(
+			@PathVariable("size") Integer size)
+			throws Exception {
+		this.log.info(
+				"CondWebController processing request for getPayloadSizeGt: size ...",
+				size);
+		List<Payload> pyld = this.conddbsvc.getPayloadSizeGt(size);
+		return pyld;
 	}
 
 	@ExceptionHandler

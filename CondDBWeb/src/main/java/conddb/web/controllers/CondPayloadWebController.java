@@ -32,25 +32,36 @@ public class CondPayloadWebController {
 	
 	@RequestMapping(value="/uploadPayload", method=RequestMethod.POST)
     public @ResponseBody String handleFileUpload( 
-            @RequestParam("file") MultipartFile file){
-            String name = "/tmp/test11";
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("type") String objtype,
+            @RequestParam("streamer") String strinfo,
+            @RequestParam("version") String version){
+		
+        String name = file.getOriginalFilename();
+            
         if (!file.isEmpty()) {
             try {
                 byte[] bytes = file.getBytes();
+                String outfname = file.getOriginalFilename()+"-uploaded";
                 BufferedOutputStream stream = 
-                        new BufferedOutputStream(new FileOutputStream(new File(name + "-uploaded")));
+                        new BufferedOutputStream(new FileOutputStream(new File("/tmp/"+outfname)));
                 stream.write(bytes);
                 stream.close();
                 Payload apayload = new Payload();
                 apayload.setData(bytes);
-                apayload.setVersion("0.1-SNAPSHOT");
-                apayload.setObjectType("image");
-                apayload.setStreamerInfo("none");
+                apayload.setVersion(version);
+                apayload.setObjectType(objtype);
+                apayload.setStreamerInfo(strinfo);
                 apayload.setDatasize(bytes.length);
+
                 PayloadHandler phandler = new PayloadHandler(apayload);
                 Payload storable = phandler.getPayloadWithHash();
-                payloadrepo.save(storable);
-                return "You successfully uploaded " + name + " into " + name + "-uploaded !";
+                if (payloadrepo.findOne(storable.getHash()) == null) {
+                	payloadrepo.save(storable);
+                } else {
+                	return "Payload with hash " + storable.getHash() + " already exists...skip update ";
+                }
+                return "You successfully uploaded " + name + " into " + outfname + ", with hash "+storable.getHash();
             } catch (Exception e) {
                 return "You failed to upload " + name + " => " + e.getMessage();
             }

@@ -1,6 +1,5 @@
 package conddb.dao.baserepository;
 
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -10,12 +9,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
-import conddb.data.Iov;
 import conddb.data.mappers.IovGroupsMapper;
 import conddb.data.view.IovGroups;
 
 
+@Repository
 public class JdbcRepository {
 
 	@Autowired
@@ -36,12 +36,11 @@ public class JdbcRepository {
 		try {
 			String sqlquery = "select   "
 					+ " max(tag.tag_name) as tagname, "
-					+ " FLOOR(since/node.iovgroup_size)* node.iovgroup_size as since, "
+					+ " FLOOR(since/node.iovgroup_size) * node.iovgroup_size as since, "
 					+ " count(*) as niovs, "
 					+ " iov.insertionTime as insertionTime "
 					+ "from IOV iov, TAG tag, SYSTEM_NODE node where "
-					+ "tag.tag_name=(:tagname) ";
-
+					+ "tag.tag_name=(:tagname) group by FLOOR(since/node.iovgroup_size) * node.iovgroup_size ";
 			return jdbcTemplate.query(sqlquery, 
 					new Object[] { tagname, insertionTime }, 
 					new IovGroupsMapper());
