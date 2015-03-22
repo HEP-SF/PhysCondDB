@@ -6,17 +6,23 @@ package conddb.data;
 //import conddb.mappers.deserializers.PayloadDeserializer;
 
 import java.sql.Timestamp;
-import java.util.Date;
+import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
+import javax.persistence.NamedEntityGraph;
+import javax.persistence.NamedAttributeNode;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
+import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -30,6 +36,13 @@ import conddb.utils.hash.HashGenerator;
  */
 @Entity
 @Table(name = "PAYLOAD")
+@NamedEntityGraph(name = "graph.detailed.payload", attributeNodes = { 
+		  @NamedAttributeNode("hash"),
+		  @NamedAttributeNode("version"),
+		  @NamedAttributeNode("objectType"),
+		  @NamedAttributeNode("datasize")
+		  })
+
 @JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="hash")
 //@JsonDeserialize(using=PayloadDeserializer.class)
 //@JsonSerialize(using = PayloadSerializer.class)
@@ -42,7 +55,8 @@ public class Payload implements java.io.Serializable {
 	private String hash;
 	private String version;
 	private String objectType;
-	private byte[]  data;
+//	private byte[]  data;
+	private PayloadData data;
 	private Integer datasize; // size in bytes of the payload
 	private String streamerInfo;
 	private Timestamp insertionTime;
@@ -52,19 +66,21 @@ public class Payload implements java.io.Serializable {
 		//default constructor creates an empty payload with only 
 		// a String saying EMPTY
 		this.objectType="DEFAULT";
-		this.data = "EMPTY".getBytes();
-		this.datasize = this.data.length;
+		this.data = new PayloadData();
+		this.datasize = this.data.getData().length;
 		this.streamerInfo = "String";
 		this.version = "0.0";
+		this.prePersist();
 		try {
 			this.hash = HashGenerator.md5Spring("EMPTY");
+			this.data.setHash(hash);
 		} catch (PayloadEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	public Payload(String hash, String objectType, byte[] data,
+	public Payload(String hash, String objectType, PayloadData data,
 			String streamerInfo, Timestamp insertionTime, String version) {
 		this.hash = hash;
 		this.objectType = objectType;
@@ -74,7 +90,7 @@ public class Payload implements java.io.Serializable {
 		this.version = version;
 	}
 
-	public Payload(String hash, String objectType, byte[] data,
+	public Payload(String hash, String objectType, PayloadData data,
 			String streamerInfo, Timestamp insertionTime,  String version, Set<Iov> iovs) {
 		this.hash = hash;
 		this.objectType = objectType;
@@ -114,17 +130,18 @@ public class Payload implements java.io.Serializable {
 	}
 
 	@Column(name = "DATA", nullable = false)
-	@Lob
-	public byte[] getData() {
+	@PrimaryKeyJoinColumn
+	@OneToOne(fetch=FetchType.LAZY, cascade = CascadeType.ALL)
+	public PayloadData getData() {
 		return this.data;
 	}
 
-	public void setData(byte[]  data) {
+	public void setData(PayloadData  data) {
 		this.data = data;
 	}
 
 	@Column(name = "STREAMER_INFO", nullable = true)
-	@Lob
+	@Lob @Basic(fetch=FetchType.LAZY)
 	public String getStreamerInfo() {
 		return this.streamerInfo;
 	}
@@ -163,8 +180,9 @@ public class Payload implements java.io.Serializable {
 
 	@PrePersist
     public void prePersist() {
-        Timestamp now = new Timestamp(new Date().getTime());
-        this.insertionTime = now;
+		Instant now = Instant.now();
+        Timestamp nowt = Timestamp.from(now);
+        this.insertionTime = nowt;
     }
 
 }

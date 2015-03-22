@@ -33,9 +33,10 @@ public class IovGroupsMapper implements RowMapper<IovGroups> {
 	@Override
 	public IovGroups mapRow(ResultSet rs, int rownum) throws SQLException {
 		IovGroups nt = new IovGroups();
-		nt.setId(rs.getLong("iovid"));
+		nt.setTagname(rs.getString("tagname"));
 		nt.setSince(rs.getBigDecimal("since"));
 		nt.setSinceString(rs.getString("since_string"));
+		nt.setNiovs(rs.getInt("niovs"));
 		return nt;
 	}
 

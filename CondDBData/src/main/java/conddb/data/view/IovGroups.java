@@ -30,31 +30,45 @@ public class IovGroups implements java.io.Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -8700232195277325799L;
-	private Long id;
+//	private Long id;
+	private String tagname;
 	private BigDecimal since;
 	private String sinceString;
+	private Integer niovs;
 	/**
 	 * 
 	 */
 	public IovGroups() {
 		super();
 	}
+	
+	
 	/**
 	 * @param since
 	 * @param sinceString
+	 * @param niovs
 	 */
-	public IovGroups(BigDecimal since, String sinceString) {
+	public IovGroups(BigDecimal since, String sinceString, Integer niovs) {
 		super();
 		this.since = since;
 		this.sinceString = sinceString;
+		this.niovs = niovs;
 	}
 	
-	public Long getId() {
-		return id;
+	/**
+	 * @return
+	 */
+	public String getTagname() {
+		return tagname;
 	}
-	public void setId(Long id) {
-		this.id = id;
+
+	/**
+	 * @param tagname
+	 */
+	public void setTagname(String tagname) {
+		this.tagname = tagname;
 	}
+
 	public BigDecimal getSince() {
 		return since;
 	}
@@ -67,4 +81,19 @@ public class IovGroups implements java.io.Serializable {
 	public void setSinceString(String sinceString) {
 		this.sinceString = sinceString;
 	}
+
+	/**
+	 * @return
+	 */
+	public Integer getNiovs() {
+		return niovs;
+	}
+
+	/**
+	 * @param niovs
+	 */
+	public void setNiovs(Integer niovs) {
+		this.niovs = niovs;
+	}
+	
 }
