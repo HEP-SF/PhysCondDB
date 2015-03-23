@@ -6,6 +6,7 @@ package conddb.web.controllers;
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -47,27 +48,26 @@ public class CondWebController {
 	@Autowired
 	private GlobalTagController globalTagController;
 
-	@RequestMapping(value = "/gtagtrace", method = RequestMethod.GET)
+	@RequestMapping(value = "/globaltag/{gtag}/{method}", method = RequestMethod.GET)
 	@ResponseBody
-	public GlobalTag getGlobalTagTrace(
-			@RequestParam(value = "name", defaultValue = "CONDBR2-01") String globaltagname)
-			throws Exception {
-		this.log.info("CondWebController processing request for getGlobalTagTrace: global tag name ..."
-				+ globaltagname);
-		GlobalTag gtag = this.globalTagController
-				.getGlobalTagFetchTags(globaltagname);
-		return gtag;
-	}
-
-	@RequestMapping(value = "/gtagliketrace", method = RequestMethod.GET)
-	@ResponseBody
-	public List<GlobalTag> getGlobalTagLikeTrace(
-			@RequestParam(value = "namepattern", defaultValue = "CONDB%") String globaltagnamepattern)
+	public List<GlobalTag> getGlobalTag(
+			@PathVariable("gtag") String globaltagname,
+			@PathVariable("method") String method)
 			throws Exception {
 		this.log.info("CondWebController processing request for getGlobalTagLikeTrace: global tag name pattern..."
-				+ globaltagnamepattern);
-		List<GlobalTag> gtaglist = this.globalTagController
-				.getGlobalTagByNameLikeFetchTags(globaltagnamepattern);
+				+ globaltagname);
+		List<GlobalTag> gtaglist = new ArrayList<GlobalTag>();
+		if (method.equals("like")) {
+			gtaglist = this.conddbsvc.getGlobalTagLike(globaltagname);
+		} else if (method.equals("one")) {
+			GlobalTag gtag = this.conddbsvc.getGlobalTag(globaltagname);
+			gtaglist.add(gtag);
+		} else if (method.equals("trace")) {
+			GlobalTag gtag = this.conddbsvc.getGlobalTagTrace(globaltagname);
+			gtaglist.add(gtag);
+		} else {
+			throw new Exception("Cannot find method "+method);
+		}
 		return gtaglist;
 	}
 
@@ -104,61 +104,53 @@ public class CondWebController {
 		return null;
 	}
 
-	@RequestMapping(value = "/tag", method = RequestMethod.GET)
+	@RequestMapping(value = "/tag/{tag}/{method}", method = RequestMethod.GET)
 	@ResponseBody
 	@LogAction(actionPerformed = "getTag")
-	public Tag getTag(
-			@RequestParam(value = "name", defaultValue = "none") String tagname)
+	public List<Tag> getTag(
+			@PathVariable("tag") String tagname,
+			@PathVariable("method") String method)
 			throws Exception {
 		this.log.info(
-				"CondWebController processing request for getTag: name ...",
+				"CondWebController processing request for getTag: name ..."+
 				tagname);
-		Tag tag = this.conddbsvc.getTagIovs(tagname);
-		return tag;
-	}
-	
-	@RequestMapping(value = "/globaltag", method = RequestMethod.GET)
-	@ResponseBody
-	@LogAction(actionPerformed = "getGlobalTag")
-	public GlobalTag getGlobalTag(
-			@RequestParam(value = "name", defaultValue = "none") String gtagname)
-			throws Exception {
-		this.log.info(
-				"CondWebController processing request for getGlobalTag: name ...",
-				gtagname);
-		GlobalTag gtag = this.conddbsvc.getGlobalTag(gtagname);
-		return gtag;
+		List<Tag> taglist = new ArrayList<Tag>();
+		if (method.equals("like")) {
+			taglist = this.conddbsvc.getTagLike(tagname);
+		} else if (method.equals("one")) {
+			Tag tag = this.conddbsvc.getTag(tagname);
+			taglist.add(tag);
+		} else {
+			throw new Exception ("Cannot find method "+method);
+		}
+		return taglist;
 	}
 
-	@RequestMapping(value = "/iovs", method = RequestMethod.GET)
+	@RequestMapping(value = "/iovs/{tag}/{method}", method = RequestMethod.GET)
 	@ResponseBody
 	public List<Iov> getIovs(
-			@RequestParam(value = "name", defaultValue = "none") String tagname)
+			@PathVariable("tag") String tagname,
+			@PathVariable("method") String method)
 			throws Exception {
 		this.log.info(
 				"CondWebController processing request for getIovs: tag name ...",
 				tagname);
-		List<Iov> iovlist = this.conddbsvc.getIovsForTag(tagname);
+		List<Iov> iovlist = new ArrayList<Iov>();
+		if (method.equals("list")) {
+			iovlist = this.conddbsvc.getIovsForTag(tagname);
+		} else if (method.equals("listpayload")) {
+			iovlist = this.conddbsvc.getIovsForTagFetchPayload(tagname);
+		} else {
+			throw new Exception ("Cannot find method "+method);
+		}
 		return iovlist;
 	}
 
-	// TODO: this method should be removed or masked
-	@RequestMapping(value = "/iovspayload", method = RequestMethod.GET)
-	@ResponseBody
-	public List<Iov> getIovsFetchPayload(
-			@RequestParam(value = "name", defaultValue = "none") String tagname)
-			throws Exception {
-		this.log.info(
-				"CondWebController processing request for getIovsFetchPayload: tag name ...",
-				tagname);
-		List<Iov> iovlist = this.conddbsvc.getIovsForTagFetchPayload(tagname);
-		return iovlist;
-	}
 
-	@RequestMapping(value = "/payload", method = RequestMethod.GET)
+	@RequestMapping(value = "/payload/{hash}", method = RequestMethod.GET)
 	@ResponseBody
 	public Payload getPayload(
-			@RequestParam(value = "hash", defaultValue = "none") String hash)
+			@PathVariable("hash") String hash)
 			throws Exception {
 		this.log.info(
 				"CondWebController processing request for getPayload: hash ...",
@@ -167,9 +159,9 @@ public class CondWebController {
 		return pyld;
 	}
 
-	@RequestMapping(value = "/payload/sizegt/{size}", method = RequestMethod.GET)
+	@RequestMapping(value = "/payloadfilter/sizegt/{size}", method = RequestMethod.GET)
 	@ResponseBody
-	public List<Payload> getPayloadSizeGt(
+	public List<Payload> getPayloadFiltered(
 			@PathVariable("size") Integer size)
 			throws Exception {
 		this.log.info(

@@ -61,6 +61,8 @@ public class IovController {
 			pyld = payloadRepository.save(entity.getPayload());
 		}
 		entity.setPayload(pyld);
+		/* Verify that IOV ID does not exists : this method is for insertions ONLY */
+		entity.setId(null);
 		/* Now search for existing since */
 		List<Iov> oldiov = iovRepository.findBySinceAndTagAndInsertionTimeLessThanOrderByInsertionTimeDesc(
 				atag.getName(), entity.getSince(), Timestamp.from(Instant.now()));

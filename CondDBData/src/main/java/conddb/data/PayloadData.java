@@ -41,7 +41,7 @@ public class PayloadData implements java.io.Serializable {
 	private byte[]  data;
 
 	public PayloadData() {
-		data = "EMPTY".getBytes();
+		this.data = "EMPTY".getBytes();
 	}
 
 	public PayloadData(String hash, byte[] data) {

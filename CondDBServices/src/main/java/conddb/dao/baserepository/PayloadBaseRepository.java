@@ -6,11 +6,9 @@ package conddb.dao.baserepository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-import conddb.data.Iov;
 import conddb.data.Payload;
 
 /**
@@ -35,11 +33,18 @@ public interface PayloadBaseRepository extends CondDBPageAndSortingRepository<Pa
 	List<Payload> findByVersion(
 			@Param("version") String version);
 
+	
+	/* (non-Javadoc)
+	 * @see conddb.dao.baserepository.CondDBPageAndSortingRepository#findOne(java.io.Serializable)
+	 */
+	@EntityGraph(value="graph.detailed.payload",type = EntityGraph.EntityGraphType.FETCH)
+	Payload findByHash(@Param("hash") String hash);
+	
 	/**
 	 * @param tagname
 	 * @return payload have a given object type.
 	 */
-	@EntityGraph(value="graph.light.payload",type = EntityGraph.EntityGraphType.FETCH)
+////	@///EntityGraph(value="graph.detailed.payload",type = EntityGraph.EntityGraphType.FETCH)
 	List<Payload> findByDatasizeGreaterThan(
 			@Param("datasize") Integer dsize);
 

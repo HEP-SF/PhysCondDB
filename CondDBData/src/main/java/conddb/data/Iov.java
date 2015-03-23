@@ -5,7 +5,6 @@ package conddb.data;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,9 +21,6 @@ import javax.persistence.UniqueConstraint;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
-import conddb.utils.json.serializers.PayloadSerializer;
 import conddb.utils.json.serializers.TimestampDeserializer;
 
 /**
@@ -102,9 +98,10 @@ public class Iov implements java.io.Serializable {
 		this.insertionTime = insertionTime;
 	}
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "PAYLOAD_HASH", nullable = false, updatable = false)
-	@JsonSerialize(using = PayloadSerializer.class)
+	//@//JsonSerialize(using = PayloadSerializer.class)
+	//@//JsonIgnore
 	public Payload getPayload() {
 		return this.payload;
 	}
