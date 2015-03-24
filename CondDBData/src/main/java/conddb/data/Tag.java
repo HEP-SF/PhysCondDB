@@ -20,7 +20,6 @@ import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
@@ -31,7 +30,7 @@ import conddb.utils.json.serializers.TimestampDeserializer;
  */
 @Entity
 @Table(name = "TAG")
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Tag implements java.io.Serializable {
 
 	/**
@@ -191,8 +190,8 @@ public class Tag implements java.io.Serializable {
 		this.modificationTime = modificationTime;
 	}
 
-//	@//JsonManagedReference(value="tag-iov")
-	@JsonIgnore
+//	@JsonManagedReference
+//	@JsonIgnore
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "tag")
 	public Set<Iov> getIovs() {
 		return this.iovs;
@@ -203,7 +202,7 @@ public class Tag implements java.io.Serializable {
 	}
 
 	// @//JsonManagedReference(value="tag-map")
-	@JsonIgnore
+//	@JsonIgnore
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "systemTag")
 	public Set<GlobalTagMap> getGlobalTagMaps() {
 		return this.globalTagMaps;

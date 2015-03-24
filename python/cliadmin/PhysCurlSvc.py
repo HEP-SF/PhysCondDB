@@ -175,8 +175,8 @@ class GlobalTag(PhysCond):
  
 class Tag(PhysCond):
     ''' classdoc '''
-    _dictkeys = ['name','timeType','objectType','synchronization','description','lastValidatedTime','endOfValidity']
-    _dicttypes = ['String','String','String','String','String','BigDecimal','BigDecimal']
+    _dictkeys = ['name','timeType','objectType','synchronization','description','lastValidatedTime','endOfValidity','iovs']
+    _dicttypes = ['String','String','String','String','String','BigDecimal','BigDecimal','[]']
     _example = '''
 { "name" : "atag_02", "timeType" : "time", "objectType" : "test", 
   "synchronization" : "none", "description" : "Fake object for test tag", 

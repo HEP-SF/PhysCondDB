@@ -21,6 +21,7 @@ import javax.persistence.UniqueConstraint;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 import conddb.utils.json.serializers.TimestampDeserializer;
 
 /**
@@ -29,7 +30,8 @@ import conddb.utils.json.serializers.TimestampDeserializer;
 @Entity
 @Table(name = "IOV", uniqueConstraints = { @UniqueConstraint(columnNames = {
 		"SINCE", "INSERTION_TIME", "TAG_ID" }) })
-@JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
+//@//JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Iov implements java.io.Serializable {
 
 	/**
@@ -102,6 +104,7 @@ public class Iov implements java.io.Serializable {
 	@JoinColumn(name = "PAYLOAD_HASH", nullable = false, updatable = false)
 	//@//JsonSerialize(using = PayloadSerializer.class)
 	//@//JsonIgnore
+	//@JsonManagedReference
 	public Payload getPayload() {
 		return this.payload;
 	}
@@ -112,7 +115,8 @@ public class Iov implements java.io.Serializable {
 
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "TAG_ID", nullable = false, updatable = false)
-//	@//JsonBackReference(value = "tag-iov")
+//	@JsonIgnore
+	//@JsonBackReference
 	public Tag getTag() {
 		return this.tag;
 	}

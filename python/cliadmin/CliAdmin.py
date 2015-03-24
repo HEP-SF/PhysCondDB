@@ -59,7 +59,7 @@ class PhysDBDriver():
         print "DBurl is needed in order to provide the system with the base url"
         print "Action determines which rest method to call"
         print "Subcommands are:"
-        print " - FIND <type> <id> <opt> [payload, iov, tag, globaltag] [like]"
+        print " - FIND <type> <id> <opt> [payload, iovs, tag, globaltag] [like]"
         print "        ex: globaltag MY% like : retrieve list of global tags following pattern name"
         print "        ex: globaltag MYTAG trace : retrieve one global tag and associated leaf tags"
         print "        ex: payload <mypyldhash> one : retrieve the full payload corresponding to the hash"
@@ -164,9 +164,9 @@ class PhysDBDriver():
                 for atag in pyld:
                     mpobj = GlobalTag(atag)
                     print mpobj.toJson()  
-            elif params['type'] == 'iov':
-                for atag in pyld:
-                    mpobj = Iov(atag)
+            elif params['type'] == 'iovs':
+                for aiov in pyld:
+                    mpobj = Iov(aiov)
                     print mpobj.toJson()  
             else:
                 print pyld
@@ -252,6 +252,10 @@ class PhysDBDriver():
                             val = json.loads(keyval)
                             print 'Parsing json from user input',val
                             data[akey]=val
+                        elif "[" in keyval: # this is json input
+                            val = json.loads(keyval)
+                            print 'Parsing json from user input',val
+                            data[akey]=val                        
                         elif "Payload" in thetype:
                             val = json.loads('{ "hash" : "'+keyval+'"}')
                             data[akey]=val

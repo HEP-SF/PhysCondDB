@@ -120,6 +120,9 @@ public class CondWebController {
 		} else if (method.equals("one")) {
 			Tag tag = this.conddbsvc.getTag(tagname);
 			taglist.add(tag);
+		} else if (method.equals("iovs")) {
+			Tag tag = this.conddbsvc.getTagIovs(tagname);
+			taglist.add(tag);
 		} else {
 			throw new Exception ("Cannot find method "+method);
 		}
