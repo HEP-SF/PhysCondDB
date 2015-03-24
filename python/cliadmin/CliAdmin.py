@@ -178,6 +178,7 @@ class PhysDBDriver():
             print mapt
             
         elif (self.action=='ADDFROMFILE'):
+            resp="No response"
             try:
                 file = self.args[0]
                 object=self.args[1]
