@@ -226,8 +226,19 @@ class PhysDBDriver():
                     if row == "help":
                         print mobj.getKeys()
                         return
-                    print 'Load data using ', row
-                    data = json.loads(row)
+                    try:
+                        print 'Load data using ', row
+                        data = json.loads(row)
+                    except:
+                        print 'Error in loading json...'
+                        print 'For Global Tags use : '
+                        print GlobalTag({}).help()
+                        print 'For Tags use : '
+                        print Tag({}).help()
+                        print 'For Iovs use : '
+                        print Iov({}).help()
+                        return
+                        
                 elif len(self.args) < 2:
                     keys = mobj.getKeys()
                     types = mobj.getTypes()
@@ -236,9 +247,16 @@ class PhysDBDriver():
                         keyval = raw_input('Insert '+akey+'['+thetype+'] : ')
                         if keyval == '':
                             keyval = None
-                        if "{" in keyval: # this is json input
+                            data[akey]=keyval
+                        elif "{" in keyval: # this is json input
                             val = json.loads(keyval)
                             print 'Parsing json from user input',val
+                            data[akey]=val
+                        elif "Payload" in thetype:
+                            val = json.loads('{ "hash" : "'+keyval+'"}')
+                            data[akey]=val
+                        elif "Tag" in thetype:
+                            val = json.loads('{ "name" : "'+keyval+'"}')
                             data[akey]=val
                         else:
                             data[akey]=keyval

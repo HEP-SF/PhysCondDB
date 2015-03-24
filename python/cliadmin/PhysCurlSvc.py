@@ -143,6 +143,9 @@ class PhysCond(object):
     _dictkeys = []
     _dictval = {}
     _dicttypes = []
+    _example = ''' 
+    Generic object...
+    '''
     def __init__(self,jsonobj):
         self._dictval = jsonobj
     def getKeys(self):
@@ -157,26 +160,44 @@ class PhysCond(object):
         return json.dumps(self._dictval, indent=4)
     def parseJson(self,jsonobj):
         self._dictval = json.loads(jsonobj)
+    def help(self):
+        return self._example
         
 class GlobalTag(PhysCond):
     ''' classdoc '''
-    _dictkeys = ['name','validity','description','release','lockstatus','insertionTime','snapshotTime']
-    _dicttypes = ['String','BigDecimal','String','String','String','Timestamp','Timestamp']
-  
+    _dictkeys = ['name','validity','description','release','lockstatus','snapshotTime']
+    _dicttypes = ['String','BigDecimal','String','String','String','Timestamp']
+    _example = '''
+{ "name" : "MYTEST_01", "lockstatus" : "unlocked","validity" : 0, 
+  "description" : "First test gtag", "release" : "1.0", 
+  "snapshotTime" : "20141212010010:GMT"}
+    '''
+ 
 class Tag(PhysCond):
     ''' classdoc '''
-    _dictkeys = ['name','timeType','objectType','synchronization','description','lastValidatedTime','endOfValidity','insertionTime','modificationTime']
-    _dicttypes = ['String','String','String','String','String','Timestamp','Timestamp','Timestamp','Timestamp']
+    _dictkeys = ['name','timeType','objectType','synchronization','description','lastValidatedTime','endOfValidity']
+    _dicttypes = ['String','String','String','String','String','BigDecimal','BigDecimal']
+    _example = '''
+{ "name" : "atag_02", "timeType" : "time", "objectType" : "test", 
+  "synchronization" : "none", "description" : "Fake object for test tag", 
+  "lastValidatedTime" : 10000,
+  "endOfValidity" : -1 }    
+    '''
 
 class Iov(PhysCond):
     ''' classdoc '''
-    _dictkeys = ['since','sinceString','insertionTime','payload','tag']
-    _dicttypes = ['BigDecimal','String','Timestamp','PayloadHash','{ "name" : "xxx"}']
+    _dictkeys = ['since','sinceString','payload','tag']
+    _dicttypes = ['BigDecimal','String','PayloadHash','TagName']
+    _example = '''
+{ "since" : 5000, "sinceString" : "20141130100000:GMT", 
+  "payload" : { "hash" : "f86eddd4f742ed61978e51c64e844004"},
+  "tag" : { "name" : "atag_03" }}  
+    '''
    
 class Payload(PhysCond):
     ''' classdoc '''
-    _dictkeys = ['hash','version','objectType','data','datasize','streamerInfo','insertionTime','iovs']
-    _dicttypes = ['String','String','String','PayloadDataHash','Integer','String','Timestamp','IovList']
+    _dictkeys = ['hash','version','objectType','data','datasize','streamerInfo']
+    _dicttypes = ['String','String','String','PayloadDataHash','Integer','String']
 
 class PayloadData(PhysCond):
     ''' classdoc '''
