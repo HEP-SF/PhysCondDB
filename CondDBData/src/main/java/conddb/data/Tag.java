@@ -95,7 +95,7 @@ public class Tag implements java.io.Serializable {
 	}
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@GeneratedValue(strategy=GenerationType.AUTO)
 	@Column(name = "TAG_ID")
 	public Long getId() {
 		return this.id;

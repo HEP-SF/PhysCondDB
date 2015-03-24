@@ -58,7 +58,7 @@ public class Iov implements java.io.Serializable {
 	}
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@GeneratedValue(strategy=GenerationType.AUTO)
 	@Column(name = "IOV_ID", nullable=false, precision = 22, scale = 0)
 	public Long getId() {
 		return this.id;
