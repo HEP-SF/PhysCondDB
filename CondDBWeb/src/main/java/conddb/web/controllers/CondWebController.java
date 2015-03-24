@@ -83,7 +83,7 @@ public class CondWebController {
 			@RequestParam(value = "sincetime", defaultValue = "20071203101530:GMT") String since,
 			@RequestParam(value = "untiltime", defaultValue = "20151203101530:GMT") String until,
 			@RequestParam(value = "format", defaultValue = "yyyyMMddHHmmss:z") String format)
-			throws Exception {
+			throws ConddbWebException {
 
 		this.log.info("CondWebController processing request for getGlobalTagBetweenTime: since until..."
 				+ since + " " + until);
@@ -107,70 +107,87 @@ public class CondWebController {
 		} catch (Exception e) {
 			this.log.error("Error in method getGlobalTagBetweenTime "
 					+ e.getMessage());
+			throw new ConddbWebException(e.getMessage());
 		}
-		return null;
 	}
 
 	@RequestMapping(value = "/tag/{tag}/{method}", method = RequestMethod.GET)
 	@ResponseBody
 	@LogAction(actionPerformed = "getTag")
 	public List<Tag> getTag(@PathVariable("tag") String tagname,
-			@PathVariable("method") String method) throws Exception {
+			@PathVariable("method") String method) throws ConddbWebException {
 		this.log.info("CondWebController processing request for getTag: name ..."
 				+ tagname);
 		List<Tag> taglist = new ArrayList<Tag>();
-		if (method.equals("like")) {
-			taglist = this.conddbsvc.getTagLike(tagname);
-		} else if (method.equals("one")) {
-			Tag tag = this.conddbsvc.getTag(tagname);
-			taglist.add(tag);
-		} else if (method.equals("iovs")) {
-			Tag tag = this.conddbsvc.getTagIovs(tagname);
-			taglist.add(tag);
-		} else {
-			throw new Exception("Cannot find method " + method);
+		try {
+
+			if (method.equals("like")) {
+				taglist = this.conddbsvc.getTagLike(tagname);
+			} else if (method.equals("one")) {
+				Tag tag = this.conddbsvc.getTag(tagname);
+				taglist.add(tag);
+			} else if (method.equals("iovs")) {
+				Tag tag = this.conddbsvc.getTagIovs(tagname);
+				taglist.add(tag);
+			} else {
+				throw new ConddbWebException("Cannot find method " + method);
+			}
+			return taglist;
+		} catch (Exception e) {
+			throw new ConddbWebException(e.getMessage());
 		}
-		return taglist;
 	}
 
 	@RequestMapping(value = "/iovs/{tag}/{method}", method = RequestMethod.GET)
 	@ResponseBody
 	public List<Iov> getIovs(@PathVariable("tag") String tagname,
-			@PathVariable("method") String method) throws Exception {
+			@PathVariable("method") String method) throws ConddbWebException {
 		this.log.info(
 				"CondWebController processing request for getIovs: tag name ...",
 				tagname);
 		List<Iov> iovlist = new ArrayList<Iov>();
-		if (method.equals("list")) {
-			iovlist = this.conddbsvc.getIovsForTag(tagname);
-		} else if (method.equals("listpayload")) {
-			iovlist = this.conddbsvc.getIovsForTagFetchPayload(tagname);
-		} else {
-			throw new Exception("Cannot find method " + method);
+		try {
+			if (method.equals("list")) {
+				iovlist = this.conddbsvc.getIovsForTag(tagname);
+			} else if (method.equals("listpayload")) {
+				iovlist = this.conddbsvc.getIovsForTagFetchPayload(tagname);
+			} else {
+				throw new Exception("Cannot find method " + method);
+			}
+			return iovlist;
+		} catch (Exception e) {
+			throw new ConddbWebException(e.getMessage());
 		}
-		return iovlist;
 	}
 
 	@RequestMapping(value = "/payload/{hash}", method = RequestMethod.GET)
 	@ResponseBody
 	public Payload getPayload(@PathVariable("hash") String hash)
-			throws Exception {
+			throws ConddbWebException {
 		this.log.info(
 				"CondWebController processing request for getPayload: hash ...",
 				hash);
-		Payload pyld = this.conddbsvc.getPayload(hash);
-		return pyld;
+		try {
+			Payload pyld = this.conddbsvc.getPayload(hash);
+			return pyld;
+		} catch (Exception e) {
+			throw new ConddbWebException(e.getMessage());
+		}
 	}
 
 	@RequestMapping(value = "/payloadfilter/sizegt/{size}", method = RequestMethod.GET)
 	@ResponseBody
 	public List<Payload> getPayloadFiltered(@PathVariable("size") Integer size)
-			throws Exception {
+			throws ConddbWebException {
 		this.log.info(
 				"CondWebController processing request for getPayloadSizeGt: size ...",
 				size);
-		List<Payload> pyld = this.conddbsvc.getPayloadSizeGt(size);
-		return pyld;
+		try {
+			List<Payload> pyld = this.conddbsvc.getPayloadSizeGt(size);
+			return pyld;
+		} catch (Exception e) {
+			throw new ConddbWebException(e.getMessage());
+		}
 	}
 
 	@ExceptionHandler
