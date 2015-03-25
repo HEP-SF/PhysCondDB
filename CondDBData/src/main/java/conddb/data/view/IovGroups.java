@@ -19,7 +19,6 @@ package conddb.data.view;
 
 import java.math.BigDecimal;
 
-
 /**
  * @author formica
  *
@@ -30,19 +29,18 @@ public class IovGroups implements java.io.Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -8700232195277325799L;
-//	private Long id;
 	private String tagname;
 	private BigDecimal since;
 	private String sinceString;
 	private Integer niovs;
+
 	/**
 	 * 
 	 */
 	public IovGroups() {
 		super();
 	}
-	
-	
+
 	/**
 	 * @param since
 	 * @param sinceString
@@ -54,9 +52,9 @@ public class IovGroups implements java.io.Serializable {
 		this.sinceString = sinceString;
 		this.niovs = niovs;
 	}
-	
+
 	/**
-	 * @return
+	 * @return The tag name
 	 */
 	public String getTagname() {
 		return tagname;
@@ -69,21 +67,36 @@ public class IovGroups implements java.io.Serializable {
 		this.tagname = tagname;
 	}
 
+	/**
+	 * @return The since time
+	 */
 	public BigDecimal getSince() {
 		return since;
 	}
+
+	/**
+	 * @param since
+	 */
 	public void setSince(BigDecimal since) {
 		this.since = since;
 	}
+
+	/**
+	 * @return The string representation of the since time.
+	 */
 	public String getSinceString() {
 		return sinceString;
 	}
+
+	/**
+	 * @param sinceString
+	 */
 	public void setSinceString(String sinceString) {
 		this.sinceString = sinceString;
 	}
 
 	/**
-	 * @return
+	 * @return Number of Iovs.
 	 */
 	public Integer getNiovs() {
 		return niovs;
@@ -95,5 +108,5 @@ public class IovGroups implements java.io.Serializable {
 	public void setNiovs(Integer niovs) {
 		this.niovs = niovs;
 	}
-	
+
 }

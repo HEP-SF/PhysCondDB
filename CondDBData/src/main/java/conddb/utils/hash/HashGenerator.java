@@ -10,6 +10,10 @@ import org.springframework.util.DigestUtils;
 
 import conddb.data.exceptions.PayloadEncodingException;
 
+/**
+ * @author formica
+ *
+ */
 public class HashGenerator {
 	
 	private static Logger log = LoggerFactory.getLogger("HashGenerator");
@@ -22,6 +26,9 @@ public class HashGenerator {
 	 * Generally MD5 has are represented as Hex String so each of this function *
 	 * will return MD5 hash in hex format.  
 	 * @author Javin Paul
+	 * 
+	 * @param message
+	 * @throws PayloadEncodingException
 	 **/	
 	public static String md5Java(String message) throws PayloadEncodingException {
 		try {
@@ -32,6 +39,11 @@ public class HashGenerator {
 		} 
 	}
 	
+	/**
+	 * @param message
+	 * @return
+	 * @throws PayloadEncodingException
+	 */
 	public static String md5Java(byte[] message) throws PayloadEncodingException {
 		String digest = null;
 		try {
@@ -55,7 +67,10 @@ public class HashGenerator {
 	 * Spring framework also provides overloaded md5 methods. You can pass input
 	 * as String or byte array and Spring can return hash or digest either as
 	 * byte array or Hex String. Here we are passing String as input and getting
-	 * MD5 hash as hex String. @
+	 * MD5 hash as hex String. 
+	 * 
+	 * @param text.
+	 * @throws PayloadEncodingException
 	 **/
 	public static String md5Spring(String text) throws PayloadEncodingException {
 		try {
@@ -66,6 +81,11 @@ public class HashGenerator {
 			throw new PayloadEncodingException(e);
 		}
 	}
+	
+	/**
+	 * @param text
+	 * @return The M5 representation of text.
+	 */
 	public static String md5Spring(byte[] text) {
 		return DigestUtils.md5DigestAsHex(text);
 	}

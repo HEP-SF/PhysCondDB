@@ -87,8 +87,6 @@ public class FrontierBase64Coder {
 	 * 
 	 * @param in
 	 *            an array containing the data bytes to be encoded.
-	 * @param inoff
-	 *            number of bytes to process in <code>in</code>.
 	 * @param iLen
 	 *            number of bytes to process in <code>in</code>.
 	 * @return A byte array with the Base64 encoded data.

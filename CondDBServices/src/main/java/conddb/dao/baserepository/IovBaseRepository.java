@@ -26,19 +26,28 @@ public interface IovBaseRepository extends
 	 * TODO:
 	 * May be hide this method to clients.
 	 * @param tagname
+	 * 	The name of the tag.
+	 * 
 	 * @return List of IOVs for a given tag name.
 	 */
 	List<Iov> findByTagName(@Param("tag_name") String tagname);
+	
+	
 	/**
 	 * @param payloadhash
+	 * 	The payload Hash.
 	 * @return List of IOVs containing the payload_hash as reference.
 	 */
 	List<Iov> findByPayloadHash(@Param("payload_hash") String payloadhash);
 
 	/**
 	 * @param tagname
+	 * 	The name of the tag.
 	 * @param since
+	 * 	The since time of the interval.
 	 * @param inserttime
+	 * 	The insertion time.
+	 * 
 	 * @return A single IOV.
 	 */
 	@Query("SELECT distinct p FROM Iov p WHERE "
@@ -53,6 +62,7 @@ public interface IovBaseRepository extends
 	 * This is a test only method.
 	 * Should be then hidden to clients.
 	 * @param tagname
+	 * 	The name of the tag.
 	 * @return All IOVs for given tag including payloads.
 	 */
 	@Query("SELECT distinct p FROM Iov p JOIN FETCH p.payload pylds WHERE "
@@ -62,8 +72,11 @@ public interface IovBaseRepository extends
 
 	/**
 	 * @param tagname
+	 * 	The name of the tag.
 	 * @param since
+	 * 	The since time of the interval.
 	 * @param until
+	 * 	The until time of the selected interva.
 	 * @return list of IOVs.
 	 */
 	@Query("SELECT distinct p FROM Iov p WHERE "
@@ -73,11 +86,15 @@ public interface IovBaseRepository extends
 			@Param("since") BigDecimal since, 
 			@Param("until") BigDecimal until);
 
+
 	/**
 	 * @param tagname
+	 * 	The name of the tag.
 	 * @param since
-	 * @param instime.
-	 * 		Use yyyy-MM-dd hh:mm:ss in local time as format.
+	 * 	The since time of the interval.
+	 * @param instime
+	 * 	The insertion time.
+	 * 	Use yyyy-MM-dd hh:mm:ss in local time as format.
 	 * @return list of IOVs.
 	 */
 	@Query("SELECT distinct p FROM Iov p WHERE "
@@ -90,8 +107,11 @@ public interface IovBaseRepository extends
 
 	/**
 	 * @param tagname
+	 * 	The name of the tag.
 	 * @param since
+	 * 	The since time of the interval.
 	 * @param until
+	 * 	The until time of the selected interva.
 	 * @return list of IOVs.
 	 */
 	@Query("SELECT distinct p FROM Iov p WHERE "
@@ -99,6 +119,7 @@ public interface IovBaseRepository extends
 			+ "AND p.insertionTime >= ALL("
 			+ "SELECT p2.insertionTime FROM Iov p2 WHERE "
 			+ "p2.tag.name = (:tag) AND (p2.since = p.since))")
+	
 	List<Iov> findByRangeAndTagAndInsertionTimeMax(
 			@Param("tag") String tagname, 
 			@Param("since") BigDecimal since, 
@@ -106,9 +127,13 @@ public interface IovBaseRepository extends
 
 	/**
 	 * @param tagname
+	 * 	The name of the tag.
 	 * @param since
+	 * 	The since time of the interval.
 	 * @param until
+	 * 	The until time of the selected interval.
 	 * @param instime.
+	 * 	The insertion time.
 	 * 		Use yyyy-MM-dd hh:mm:ss in local time as format.
 	 * @return list of IOVs.
 	 */
@@ -125,10 +150,8 @@ public interface IovBaseRepository extends
 
 	/**
 	 * @param tagname
-	 * @param since
-	 * @param until
-	 * @param instime.
-	 * 		Use yyyy-MM-dd hh:mm:ss in local time as format.
+	 * 	The name of the tag.
+	 * 
 	 * @return list of IOVs.
 	 */
 	@Query("SELECT distinct p FROM Iov p WHERE "

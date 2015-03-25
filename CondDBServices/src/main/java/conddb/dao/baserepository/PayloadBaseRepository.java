@@ -20,15 +20,18 @@ import conddb.data.Payload;
 public interface PayloadBaseRepository extends CondDBPageAndSortingRepository<Payload, String> {
 
 	/**
-	 * @param objtype
+	 * @param otype
+	 * 	The object type (used to determina the payload data.
+	 * 
 	 * @return payload have a given object type.
 	 */
 	List<Payload> findByObjectType(
 			@Param("name") String otype);
 
 	/**
-	 * @param tagname
-	 * @return payload have a given object type.
+	 * @param version
+	 * 	The name of the tag.
+	 * @return payload list.
 	 */
 	List<Payload> findByVersion(
 			@Param("version") String version);
@@ -41,10 +44,11 @@ public interface PayloadBaseRepository extends CondDBPageAndSortingRepository<Pa
 	Payload findByHash(@Param("hash") String hash);
 	
 	/**
-	 * @param tagname
+	 * @param  dsize
+	 * 	The data size.
+	 * 
 	 * @return payload have a given object type.
 	 */
-////	@///EntityGraph(value="graph.detailed.payload",type = EntityGraph.EntityGraphType.FETCH)
 	List<Payload> findByDatasizeGreaterThan(
 			@Param("datasize") Integer dsize);
 
