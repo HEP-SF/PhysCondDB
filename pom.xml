@@ -36,8 +36,8 @@
 		<spring.data.rest.version>2.2.2.RELEASE</spring.data.rest.version>
 
 		<!-- Hibernate / JPA -->
-<!-- 		<hibernate.version>4.2.1.Final</hibernate.version> -->
-        <!--  for JPA 2.1 use 4.3.8.Final for hibernate -->
+		<!-- <hibernate.version>4.2.1.Final</hibernate.version> -->
+		<!-- for JPA 2.1 use 4.3.8.Final for hibernate -->
 		<hibernate.version>4.3.8.Final</hibernate.version>
 
 		<!-- Logging -->
@@ -49,6 +49,11 @@
 
 		<!-- AOP -->
 		<aspectj.version>1.8.2</aspectj.version>
+
+		<!-- JMETER -->
+		<performancetest.webservice.host>localhost</performancetest.webservice.host>
+		<performancetest.webservice.port>8080</performancetest.webservice.port>
+
 	</properties>
 
 	<dependencies>
@@ -293,8 +298,23 @@
 					<target>${java.version}</target>
 				</configuration>
 			</plugin>
-
 		</plugins>
 	</build>
+	<profiles>
+		<profile>
+			<id>local</id>
+			<properties>
+				<performancetest.webservice.host>localhost</performancetest.webservice.host>
+				<performancetest.webservice.port>8080</performancetest.webservice.port>
+			</properties>
+		</profile>
+		<profile>
+			<id>jenkins</id>
+			<properties>
+				<performancetest.webservice.host>my.test.system</performancetest.webservice.host>
+				<performancetest.webservice.port>80</performancetest.webservice.port>
+			</properties>
+		</profile>
+	</profiles>
 
 </project>
