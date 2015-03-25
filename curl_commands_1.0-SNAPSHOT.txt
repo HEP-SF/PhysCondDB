@@ -198,3 +198,7 @@
   841  http localhost:8080/conddbweb/gtagtrace\?name=MYGTAG_01
   843  history | egrep localhost
   844  history | egrep localhost > curl_commands_1.0-SNAPSHOT.txt 
+
+
+#### Working on end of Feb 2015
+curl -i -X POST -H "Content-Type:application/json" -H "Accept:application/json" http://localhost:8080/physconddb/conddbweb/gtagAdd -d @./globalTagObj.json
