@@ -14,10 +14,20 @@ import conddb.data.GlobalTagMap;
  * @author formica
  *
  */
-//@RepositoryRestResource
 @RestResource(exported = false)
 public interface GlobalTagMapRepository extends CrudRepository<GlobalTagMap, Long>, GlobalTagMapBaseRepository {
 
-//	@Query("SELECT p FROM GlobalTagMap p WHERE p.globalTag.name = (:globaltag) and p.systemTag.name = (:tag)")
-//	GlobalTagMap findByGlobalTagAndTagName(@Param("globaltag")String gtag, @Param("tag") String tag);
+    @Override
+    @RestResource(exported = false)
+    void delete(Long id);
+
+    @Override
+    @RestResource(exported = false)
+    void delete(GlobalTagMap entity);
+
+    @SuppressWarnings("unchecked")
+	@Override
+    @RestResource(exported = false)
+    GlobalTagMap save(GlobalTagMap entity);
+
 }

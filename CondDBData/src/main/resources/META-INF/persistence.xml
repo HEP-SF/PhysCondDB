@@ -10,10 +10,9 @@
 		<provider>org.hibernate.ejb.HibernatePersistence</provider>
 	    <class>conddb.data.GlobalTag</class>
 	    <class>conddb.data.GlobalTagMap</class>
-	    <class>conddb.data.GlobalTagMapId</class>
 	    <class>conddb.data.Iov</class>
-	    <class>conddb.data.IovId</class>
 	    <class>conddb.data.Payload</class>
+	    <class>conddb.data.PayloadData</class>
 	    <class>conddb.data.SystemDescription</class>
 	    <class>conddb.data.Tag</class>
 		<exclude-unlisted-classes>false</exclude-unlisted-classes>

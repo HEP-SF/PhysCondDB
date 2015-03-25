@@ -8,29 +8,48 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.DigestUtils;
 
+import conddb.data.exceptions.PayloadEncodingException;
+
 public class HashGenerator {
 	
 	private static Logger log = LoggerFactory.getLogger("HashGenerator");
 
 
-	public static String md5Java(String message) {
+	/**
+	 * Java program to generate MD5 hash or digest for String. In this example  *
+	 * we will see 3 ways to create MD5 hash or digest using standard Java API, *
+	 * Spring framework and open source library, Apache commons codec utilities.*
+	 * Generally MD5 has are represented as Hex String so each of this function *
+	 * will return MD5 hash in hex format.  
+	 * @author Javin Paul
+	 **/	
+	public static String md5Java(String message) throws PayloadEncodingException {
+		try {
+			return md5Java(message.getBytes("UTF-8"));
+		} catch (UnsupportedEncodingException ex) {
+			log.error(ex.getMessage());
+			throw new PayloadEncodingException(ex);
+		} 
+	}
+	
+	public static String md5Java(byte[] message) throws PayloadEncodingException {
 		String digest = null;
 		try {
 			MessageDigest md = MessageDigest.getInstance("MD5");
-			byte[] hash = md.digest(message.getBytes("UTF-8"));
+			byte[] hash = md.digest(message);
 			// converting byte array to Hexadecimal String
 			StringBuilder sb = new StringBuilder(2 * hash.length);
 			for (byte b : hash) {
 				sb.append(String.format("%02x", b & 0xff));
 			}
 			digest = sb.toString();
-		} catch (UnsupportedEncodingException ex) {
-			log.error(ex.getMessage());
 		} catch (NoSuchAlgorithmException ex) {
 			log.error(ex.getMessage());
+			throw new PayloadEncodingException(ex);
 		}
 		return digest;
 	}
+	
 
 	/**
 	 * Spring framework also provides overloaded md5 methods. You can pass input
@@ -38,14 +57,17 @@ public class HashGenerator {
 	 * byte array or Hex String. Here we are passing String as input and getting
 	 * MD5 hash as hex String. @
 	 **/
-	public static String md5Spring(String text) {
+	public static String md5Spring(String text) throws PayloadEncodingException {
 		try {
 			return DigestUtils.md5DigestAsHex(text.getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			throw new PayloadEncodingException(e);
 		}
-		return null;
+	}
+	public static String md5Spring(byte[] text) {
+		return DigestUtils.md5DigestAsHex(text);
 	}
 	
 	/*

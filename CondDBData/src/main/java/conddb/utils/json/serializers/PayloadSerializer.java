@@ -24,11 +24,23 @@ public class PayloadSerializer extends JsonSerializer<Payload> {
 			JsonProcessingException {
 		
 		String hashpayload = "NO_PAYLOAD";
+		String streamer = "NO_STREAMER";
+		String objtype = "NO_TYPE";
+		String version = "NO_VERSION";
+		Integer size = new Integer(0);
 		if (pyld != null) {
 			hashpayload = pyld.getHash();
+			streamer = pyld.getStreamerInfo();
+			objtype = pyld.getObjectType();
+			size = pyld.getDatasize();
+			version = pyld.getVersion();
 		} 
 		jgen.writeStartObject();
 		jgen.writeStringField("hash", hashpayload);
+		jgen.writeStringField("streamerInfo", streamer);
+		jgen.writeStringField("objectType", objtype);
+		jgen.writeStringField("version", version);
+		jgen.writeNumberField("datasize", size);
 		jgen.writeEndObject();
 	}
 

@@ -38,7 +38,7 @@ public class TestCondDBPayload {
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 
 		try {
-            HttpPost httppost = new HttpPost("http://localhost:8080/conddbweb/uploadPayload");
+            HttpPost httppost = new HttpPost("http://localhost:8080/physconddb/conddbweb/uploadPayload");
 
 //            FileBody bin = new FileBody(new File(args[0]));
     	    File file = new File("/tmp/test.png");

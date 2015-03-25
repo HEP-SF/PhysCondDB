@@ -117,4 +117,16 @@ We can then use an environment variable to set the appropriate profile:
    `spring.profiles.active`
    
 The variable can be set at command line level or using `JAVA_OPTS` or `CATALINA_OPTS` variables.
-   
+
+## Skip tests for maven
+In order to skip tests when compiling and installing libraries you can use the following option:
+```
+mvn -Dmaven.test.skip=true     
+```   
+test are not executed and not compiled
+or
+```
+mvn -DskipTests=true
+```
+test are not executed
+
