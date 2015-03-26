@@ -26,6 +26,7 @@ public class TestCondDBPayload {
 
 	/**
 	 * @param args
+	 * 	Empty argument list.
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub

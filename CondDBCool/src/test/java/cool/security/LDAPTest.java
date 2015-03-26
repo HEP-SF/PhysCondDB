@@ -14,12 +14,14 @@ import javax.naming.ldap.LdapContext;
  * Example code for retrieving a Users Primary Group
  * from Microsoft Active Directory via. its LDAP API
  * 
- * @author Adam Retter <adam.retter@googlemail.com>
+ * @author Adam Retter adam.retter@googlemail.com
  */
 public class LDAPTest {
 
     /**
      * @param args the command line arguments
+     * @throws NamingException
+ 	 * 	The exception thrown.
      */
     public static void main(String[] args) throws NamingException {
         
@@ -135,13 +137,16 @@ public class LDAPTest {
      * The binary data is in the form:
      * byte[0] - revision level
      * byte[1] - count of sub-authorities
-     * byte[2-7] - 48 bit authority (big-endian)
-     * and then count x 32 bit sub authorities (little-endian)
+     * byte[2-7] - 48 bit authority (big-endian) and then count x 32 bit sub authorities (little-endian).
      * 
-     * The String value is: S-Revision-Authority-SubAuthority[n]...
+     * The String value is: S-Revision-Authority-SubAuthority[n].
      * 
-     * Based on code from here - http://forums.oracle.com/forums/thread.jspa?threadID=1155740&tstart=0
+     * @param sid
+     * 	List of bytes.
+     * @return
+     * 	The decoded string.
      */
+////Based on code from here: "http://forums.oracle.com/forums/thread.jspa?threadID=1155740&tstart=0" .
     public static String decodeSID(byte[] sid) {
         
         final StringBuilder strSid = new StringBuilder("S-");

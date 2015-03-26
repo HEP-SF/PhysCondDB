@@ -40,6 +40,7 @@ public class TestLoadDB {
 
 	/**
 	 * @param args
+	 * 	Arguments for main program. Not needed.
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -61,6 +62,12 @@ public class TestLoadDB {
 	}
 
 	// @Test
+	/**
+	 * @throws ClientProtocolException
+	 * 	The exception thrown.
+	 * @throws IOException
+	 * 	The exception thrown.
+	 */
 	public void loadGlobalTags() throws ClientProtocolException, IOException {
 
 		ObjectMapper mapper = new ObjectMapper();
@@ -82,6 +89,12 @@ public class TestLoadDB {
 		}
 	}
 
+	/**
+	 * @throws ClientProtocolException
+	 * 	The exception thrown.
+	 * @throws IOException
+	 * 	The exception thrown.
+	 */
 	public void loadTags() throws ClientProtocolException, IOException {
 
 		ObjectMapper mapper = new ObjectMapper();
@@ -103,6 +116,12 @@ public class TestLoadDB {
 		}
 	}
 
+	/**
+	 * @throws ClientProtocolException
+	 * 	The exception thrown.
+	 * @throws IOException
+	 * 	The exception thrown.
+	 */
 	public void doMappings() throws ClientProtocolException, IOException {
 
 		Map<String, ArrayList<String>> maps = generateMap("TEST_5", 8);
@@ -124,6 +143,12 @@ public class TestLoadDB {
 		}
 	}
 
+	/**
+	 * @throws ClientProtocolException
+	 * 	The exception thrown.
+	 * @throws IOException
+	 * 	The exception thrown.
+	 */
 	public void loadIovs() throws ClientProtocolException, IOException {
 
 		ObjectMapper mapper = new ObjectMapper();
@@ -145,6 +170,12 @@ public class TestLoadDB {
 		}
 	}
 
+	/**
+	 * @param size
+	 * 	The size of the generated list.
+	 * @return
+	 * 	List of global tags.
+	 */
 	public List<GlobalTag> generateGlobalTag(int size) {
 		List<GlobalTag> gtaglist = new ArrayList<GlobalTag>();
 		for (int i = 1; i < size; i++) {
@@ -157,6 +188,14 @@ public class TestLoadDB {
 		return gtaglist;
 	}
 
+	/**
+	 * @param gtag
+	 * 	The global tag name.
+	 * @param size
+	 * 	The size of the list of attached tag names.
+	 * @return
+	 * 	A map of global tag to tag list.
+	 */
 	public Map<String, ArrayList<String>> generateMap(String gtag, int size) {
 		Map<String, ArrayList<String>> maps = new HashMap<String, ArrayList<String>>();
 		String gtagname = gtag;
@@ -170,6 +209,12 @@ public class TestLoadDB {
 		return maps;
 	}
 
+	/**
+	 * @param size
+	 * 	The size of the list of tags.
+	 * @return
+	 * 	A list of tags.
+	 */
 	public List<Tag> generateTag(int size) {
 		List<Tag> taglist = new ArrayList<Tag>();
 		for (int i = 1; i < size; i++) {
@@ -181,6 +226,12 @@ public class TestLoadDB {
 		return taglist;
 	}
 	
+	/**
+	 * @param size
+	 * 	The size of the list of IOVs to generate.
+	 * @return
+	 * 	A list of IOVs.
+	 */
 	public List<Iov> generateIov(int size) {
 		List<Iov> iovlist = new ArrayList<Iov>();
 		Payload pyld = new Payload();

@@ -18,6 +18,7 @@ public class TestDate {
 			DateTimeFormatter.ofPattern("yyyyMMddHHmmss:z");
 	/**
 	 * @param args
+	 * 	No arguments.
 	 */
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
