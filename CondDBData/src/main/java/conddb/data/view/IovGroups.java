@@ -35,7 +35,7 @@ public class IovGroups implements java.io.Serializable {
 	private Integer niovs;
 
 	/**
-	 * 
+	 * Default ctor.
 	 */
 	public IovGroups() {
 		super();
@@ -43,8 +43,11 @@ public class IovGroups implements java.io.Serializable {
 
 	/**
 	 * @param since
+	 * 	The since time.
 	 * @param sinceString
+	 * 	The string representation of the since time.
 	 * @param niovs
+	 * 	The number of iovs.
 	 */
 	public IovGroups(BigDecimal since, String sinceString, Integer niovs) {
 		super();
@@ -62,6 +65,7 @@ public class IovGroups implements java.io.Serializable {
 
 	/**
 	 * @param tagname
+	 * 	The tag name to set.
 	 */
 	public void setTagname(String tagname) {
 		this.tagname = tagname;
@@ -76,6 +80,7 @@ public class IovGroups implements java.io.Serializable {
 
 	/**
 	 * @param since
+	 * 	The since time as BigDecimal to set.
 	 */
 	public void setSince(BigDecimal since) {
 		this.since = since;
@@ -90,6 +95,7 @@ public class IovGroups implements java.io.Serializable {
 
 	/**
 	 * @param sinceString
+	 * 	The since time as string to set.
 	 */
 	public void setSinceString(String sinceString) {
 		this.sinceString = sinceString;
@@ -104,6 +110,7 @@ public class IovGroups implements java.io.Serializable {
 
 	/**
 	 * @param niovs
+	 * 	The number of iovs to set.
 	 */
 	public void setNiovs(Integer niovs) {
 		this.niovs = niovs;

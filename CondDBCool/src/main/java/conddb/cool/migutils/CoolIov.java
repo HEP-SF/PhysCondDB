@@ -34,6 +34,9 @@ public final class CoolIov implements Serializable {
 	public static long TO_MILLISECONDS = 1000L;
 
 
+	/**
+	 * Conversion from COOL time (in nanoseconds) to time in milliseconds.
+	 */
 	public static float COOL_TO_MILLISECONDS = new Float(1./1000000L);
 
 	/**
@@ -55,16 +58,16 @@ public final class CoolIov implements Serializable {
 	public static long COOL_MAX_LUMIBLOCK = 4294967295L;
 
 	/**
-	 * 
+	 * For runlb the run is shifted by 32 bits.
 	 */
 	private static int cooliov_run_mask = 32;
 
 	/**
-	 * 
+	 * Mask to extract the luminosity part of COOL time.
 	 */
 	public static BigInteger lumimask = new BigInteger("00000000FFFFFFFF", 16);
 	/**
-	 * 
+	 * Nanoseconds in BigDecimal.
 	 */
 	public static BigDecimal toNanoSeconds = new BigDecimal(1000000L);
 
@@ -307,7 +310,10 @@ public final class CoolIov implements Serializable {
 	}
 
 	/**
-	 * @param adate
+	 * @param runortime
+	 * 	The COOL time as long.
+	 * @param iovBase
+	 * 	The string representing the time type.
 	 * @return The cool time in nanoseconds.
 	 */
 	public static BigDecimal getCoolTime(final Long runortime, final String iovBase) {

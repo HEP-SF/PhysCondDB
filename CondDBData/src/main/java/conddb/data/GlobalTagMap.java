@@ -48,9 +48,13 @@ public class GlobalTagMap implements java.io.Serializable {
 
 	/**
 	 * @param systemTag
+	 * 	The system tag.
 	 * @param globalTag
+	 * 	The global tag.
 	 * @param record
+	 * 	The record.
 	 * @param label
+	 * 	The label.
 	 */
 	public GlobalTagMap(GlobalTag globalTag, Tag systemTag, String record,
 			String label) {
@@ -61,16 +65,27 @@ public class GlobalTagMap implements java.io.Serializable {
 		this.label = label;
 	}
 
+	/**
+	 * @return the ID of the map.
+	 */
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	public Long getId() {
 		return this.id;
 	}
 
+	/**
+	 * @param id
+	 * 	The ID to set.
+	 */
 	public void setId(Long id) {
 		this.id = id;
 	}
 	
+	/**
+	 * @return
+	 * 	The global tag object.
+	 */
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "GLOBAL_TAG_NAME", nullable=false)
 	public GlobalTag getGlobalTag() {
@@ -78,43 +93,79 @@ public class GlobalTagMap implements java.io.Serializable {
 	}
 	
 	
+	/**
+	 * @param globalTag
+	 * 	The global tag to set.
+	 */
 	public void setGlobalTag(GlobalTag globalTag) {
 		this.globalTag = globalTag;
 	}
 	
+	/**
+	 * @return
+	 * 	The tag object.
+	 */
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "TAG_ID", nullable=false)
 	public Tag getSystemTag() {
 		return systemTag;
 	}
 	
+	/**
+	 * @param systemTag
+	 * 	The system tag to set.
+	 */
 	public void setSystemTag(Tag systemTag) {
 		this.systemTag = systemTag;
 	}
 
+	/**
+	 * @return
+	 * 	The record.
+	 */
 	@Column(name = "RECORD", nullable = false, length = 100)
 	public String getRecord() {
 		return this.record;
 	}
 
+	/**
+	 * @param record
+	 * 	The record to set.
+	 */
 	public void setRecord(String record) {
 		this.record = record;
 	}
 
+	/**
+	 * @return
+	 * 	The label.
+	 */
 	@Column(name = "LABEL", nullable = false, length = 100)
 	public String getLabel() {
 		return this.label;
 	}
 
+	/**
+	 * @param label
+	 * 	The label to set.
+	 */
 	public void setLabel(String label) {
 		this.label = label;
 	}
 
+	/**
+	 * @return
+	 * 	The tag name.
+	 */
 	@Transient
 	public String getTagName() {
 		return this.systemTag.getName();
 	}
 	
+	/**
+	 * @return
+	 * 	The global tag name.
+	 */
 	@Transient
 	public String getGlobalTagName() {
 		return this.globalTag.getName();

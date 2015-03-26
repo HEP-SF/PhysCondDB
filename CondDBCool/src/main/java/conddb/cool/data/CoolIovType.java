@@ -125,16 +125,27 @@ public class CoolIovType implements Serializable {
 
 	/**
 	 * @param objectId
+	 * 	The object ID.
 	 * @param channelId
+	 *  The channel ID.
 	 * @param channelName
+	 *  The channel name.
 	 * @param iovSince
+	 *  The since time.
 	 * @param iovUntil
+	 * 	The until time.
 	 * @param tagId
+	 * 	The tag ID.
 	 * @param sysInstime
+	 * 	The system insertion time.
 	 * @param lastmodDate
+	 * 	The last modified date.
 	 * @param newHeadId
+	 * 	The new head ID.
 	 * @param tagName
+	 * 	The tag name.
 	 * @param iovBase
+	 * 	The time type.
 	 */
 	public CoolIovType(final BigDecimal objectId, final Long channelId,
 			final String channelName, final BigDecimal iovSince,

@@ -22,8 +22,11 @@ public class TimestampStringFormatter {
 
 	/**
 	 * @param format
+	 *  The time format string.
 	 * @param adate
+	 *  The date in input.
 	 * @return
+	 * 	The formated string representing time.
 	 */
 	public static String format(final String format, final Date adate) {
 		try {
@@ -41,8 +44,11 @@ public class TimestampStringFormatter {
 
 	/**
 	 * @param format
+	 *  The time format string.
 	 * @param adate
+	 *  The timestamp in input.
 	 * @return
+	 * 	The formated string representing time.
 	 */
 	public static String formatTs(final String format, final Timestamp adate) {
 		try {

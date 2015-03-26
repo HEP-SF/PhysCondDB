@@ -52,17 +52,38 @@ public class Tag implements java.io.Serializable {
 	private Set<Iov> iovs = new HashSet<Iov>(0);
 	private Set<GlobalTagMap> globalTagMaps = new HashSet<GlobalTagMap>(0);
 
+	/**
+	 * Default ctor.
+	 */
 	public Tag() {
 	}
 
 	/**
+	 * Constructor using tag name.
 	 * @param name
+	 * 	The tag name.
 	 */
 	public Tag(String name) {
 		super();
 		this.name = name;
 	}
 
+	/**
+	 * @param name
+	 * 	The tag name.
+	 * @param timeType
+	 * 	The time type.
+	 * @param objectType
+	 * 	The object type.
+	 * @param synchronization
+	 * 	The synchronization parameter.
+	 * @param description
+	 * 	The tag description.
+	 * @param lastValidatedTime
+	 * 	The last validated time.
+	 * @param endOfValidity
+	 * 	The end of validity.
+	 */
 	public Tag(String name, String timeType, String objectType,
 			String synchronization, String description, BigDecimal lastValidatedTime,
 			BigDecimal endOfValidity) {
@@ -75,6 +96,30 @@ public class Tag implements java.io.Serializable {
 		this.endOfValidity = endOfValidity;
 	}
 
+	/**
+	 * @param name
+	 * 	The tag name.
+	 * @param timeType
+	 * 	The time type.
+	 * @param objectType
+	 * 	The object type.
+	 * @param synchronization
+	 * 	The synchronization parameter.
+	 * @param description
+	 * 	The tag description.
+	 * @param lastValidatedTime
+	 * 	The last validated time.
+	 * @param endOfValidity
+	 * 	The end of validity.
+	 * @param modificationTime
+	 * 	The modification time.
+	 * @param insertionTime
+	 * 	The insertion time.
+	 * @param iovs
+	 * 	The list of iovs associated.
+	 * @param globalTagMaps
+	 * 	The list of tags associated.
+	 */
 	public Tag(String name, String timeType, String objectType,
 			String synchronization, String description, BigDecimal lastValidatedTime,
 			BigDecimal endOfValidity, Timestamp insertionTime,
@@ -93,6 +138,10 @@ public class Tag implements java.io.Serializable {
 		this.globalTagMaps = globalTagMaps;
 	}
 
+	/**
+	 * @return
+	 * 	The ID.
+	 */
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
 	@Column(name = "TAG_ID")
@@ -100,28 +149,52 @@ public class Tag implements java.io.Serializable {
 		return this.id;
 	}
 
+	/**
+	 * @param id
+	 * 	the ID to set.
+	 */
 	public void setId(Long id) {
 		this.id = id;
 	}
 
+	/**
+	 * @return
+	 * 	The tag name.
+	 */
 	@Column(name = "NAME", unique = true, nullable = false, length = 255)
 	public String getName() {
 		return this.name;
 	}
 
+	/**
+	 * @param name
+	 * 	The tag name to set.
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * @return
+	 * 	The time type.
+	 */
 	@Column(name = "TIME_TYPE", nullable = false, length = 20)
 	public String getTimeType() {
 		return this.timeType;
 	}
 
+	/**
+	 * @param timeType
+	 * 	The time type to set.
+	 */
 	public void setTimeType(String timeType) {
 		this.timeType = timeType;
 	}
 
+	/**
+	 * @return
+	 * 	The object type used in the BLOB.
+	 */
 	@Column(name = "OBJECT_TYPE", nullable = false, length = 255)
 	public String getObjectType() {
 		return this.objectType;

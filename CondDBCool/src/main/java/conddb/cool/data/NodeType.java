@@ -311,7 +311,7 @@ public class NodeType implements Serializable {
 	}
 
 	/**
-	 * @return
+	 * @return the node insertion time as string.
 	 */
 	public String getNodeTinstimeStr() {
 		if (nodeTinstime == null) {
@@ -324,7 +324,9 @@ public class NodeType implements Serializable {
 	}
 
 	/**
-	 * @return
+	 * @param tinstimstr
+	 * 	The insertion time string to set.
+	 *  This method is not implemented.
 	 */
 	public void setNodeTinstimeStr(final String tinstimstr) {
 		// Ignore this method

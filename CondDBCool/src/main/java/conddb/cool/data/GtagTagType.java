@@ -235,6 +235,7 @@ public class GtagTagType implements Serializable {
 
 	/**
 	 * @return
+	 * 	the node description.
 	 */
 	public String getNodeDescription() {
 		return nodeDescription;
@@ -242,15 +243,24 @@ public class GtagTagType implements Serializable {
 
 	/**
 	 * @param nodeDescription
+	 * 	the node description to set.
 	 */
 	public void setNodeDescription(String nodeDescription) {
 		this.nodeDescription = nodeDescription;
 	}
 
+	/**
+	 * @return
+	 * 	the schema name.
+	 */
 	public String getSchemaName() {
 		return schemaName;
 	}
 
+	/**
+	 * @param schemaName
+	 * 	The schema name to set.
+	 */
 	public void setSchemaName(String schemaName) {
 		this.schemaName = schemaName;
 	}
