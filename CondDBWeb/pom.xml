@@ -13,11 +13,11 @@
 	</parent>
 
 	<properties>
-
 		<!-- Apache dependencies versions -->
 		<apache.http.version>4.3.5</apache.http.version>
 		<apache.commons.version>1.3.1</apache.commons.version>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>conddb.data</groupId>
@@ -49,6 +49,13 @@
 	<artifactId>mockito-all</artifactId>
 	<version>1.10.8</version>
 </dependency>		
+		<!-- InfluxDB -->
+		<dependency>
+            <groupId>org.influxdb</groupId>
+            <artifactId>influxdb-java</artifactId>
+            <version>1.5</version>
+        </dependency>
+
 	</dependencies>
 
 	<build>

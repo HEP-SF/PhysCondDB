@@ -11,6 +11,7 @@
 
 	<context:component-scan
 		base-package="conddb.dao.svc,conddb.dao.admin,conddb.dao.controllers,conddb.dao.repositories" />
+
 	<!-- Services -->
 	<bean id="globalTagAdminController" class="conddb.dao.admin.controllers.GlobalTagAdminController" />
 	<bean id="globalTagController" class="conddb.dao.controllers.GlobalTagController" />
@@ -18,6 +19,7 @@
 	<bean id="conddbClientService" class="conddb.dao.svc.ConddbClientService" />
 	<bean id="profilingAdvisor" class="conddb.utils.aop.ProfilingAdvisor"></bean>
 	<bean id="profilingMethodInterceptor" class="conddb.utils.aop.ProfilingMethodInterceptor"></bean>
+	<bean id="influxRepository" class="conddb.monitoring.influx.InfluxRepository"></bean>
 
 	<!-- this is the actual advice itself -->
 	<bean id="profilingAspect" class="conddb.utils.aop.ProfilingAspect" />
@@ -27,9 +29,7 @@
 			<aop:pointcut id="getGlobalTagTrace"
 				expression="execution(* conddb.dao.svc.ConddbClientService.getGlobalTagTrace(String))
                     and args(logAction)" />
-
 			<aop:around pointcut-ref="getGlobalTagTrace" method="logAction" />
-
 		</aop:aspect>
 	</aop:config>
 

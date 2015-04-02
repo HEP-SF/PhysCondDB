@@ -29,7 +29,6 @@ public class ConddbClientService {
 	@Autowired
 	private PayloadRepository payloadRepository;
 
-	@ProfileExecution
 	public GlobalTag getGlobalTagTrace(String gtagname) throws Exception {
 		return gtagRepository.findByNameAndFetchTagsEagerly(gtagname);
 	}
@@ -57,6 +56,7 @@ public class ConddbClientService {
 		return iovRepository.findByTagNameAndFetchPayloadEagerly(tagname);
 	}
 
+	@ProfileExecution
 	public GlobalTag getGlobalTag(String gtagname) throws Exception {
 		return gtagRepository.findOne(gtagname);
 	}

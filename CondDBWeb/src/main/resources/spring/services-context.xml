@@ -16,8 +16,6 @@
 
 <!--  tell spring to use annotation based configurations -->
 <context:annotation-config />
-
     <import resource="classpath*:/spring/db/**/*-context.xml"/>
     <import resource="classpath*:/spring/services/**/*-context.xml"/>
-
 </beans>
