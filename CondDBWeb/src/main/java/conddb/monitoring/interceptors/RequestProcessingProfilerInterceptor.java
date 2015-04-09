@@ -34,26 +34,27 @@ public class RequestProcessingProfilerInterceptor extends HandlerInterceptorAdap
 
         Long startTime = System.currentTimeMillis();
         request.setAttribute("startTime", startTime);
-        String urlparsing = request.getRequestURL().toString();
-        //TODO : define serie name as the URL
         return true;
     }
  
  
     @Override
+    //TODO : define serie name as the URL
     public void afterCompletion(HttpServletRequest request,
             HttpServletResponse response, Object handler, Exception ex)
             throws Exception {
     	
     	Long endtime = System.currentTimeMillis();
     	Long starttime = (Long) request.getAttribute("startTime");
+    	Integer code = (Integer) response.getStatus();
+
     	Long xmill = endtime - starttime;
     	String seriename = request.getRequestURL().toString();
     	Serie profserie = new Serie.Builder("request_handler")
-        .columns("timeUsed","url")
-        .values(xmill,seriename)
+        .columns("start","timeUsed","code","url")
+        .values(starttime,xmill,code,seriename)
         .build();
     	
-    	influxrep.writeToDb("log_requests", profserie);
+    	influxrep.writeToDb("physconddb_site", profserie);
     }
 }

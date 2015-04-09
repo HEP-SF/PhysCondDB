@@ -1,6 +1,5 @@
 package conddb.monitoring.influx;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.influxdb.InfluxDB;
