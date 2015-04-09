@@ -16,7 +16,7 @@ import javax.persistence.UniqueConstraint;
  *
  */
 @Entity
-@Table(name = "SYSTEM_NODE", uniqueConstraints = { @UniqueConstraint(columnNames = {
+@Table(name = "PHCOND_SYSTEM_NODE", uniqueConstraints = { @UniqueConstraint(columnNames = {
 		"NODE_FULLPATH"}) })
 public class SystemDescription {
 
