@@ -47,7 +47,6 @@ public class RequestProcessingProfilerInterceptor extends HandlerInterceptorAdap
     	Long endtime = System.currentTimeMillis();
     	Long starttime = (Long) request.getAttribute("startTime");
     	Integer code = (Integer) response.getStatus();
-
     	Long xmill = endtime - starttime;
     	String seriename = request.getRequestURL().toString();
     	Serie profserie = new Serie.Builder("request_handler")

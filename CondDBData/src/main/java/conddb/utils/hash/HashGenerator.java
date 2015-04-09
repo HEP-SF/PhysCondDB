@@ -67,6 +67,31 @@ public class HashGenerator {
 		return digest;
 	}
 	
+	/**
+	 * @param message
+	 * 	The message byte[] from which to generate md5.
+	 * @return
+	 * 	The MD5 representation of the message string.
+	 * @throws PayloadEncodingException
+	 */
+	public static String shaJava(byte[] message) throws PayloadEncodingException {
+		String digest = null;
+		try {
+			MessageDigest md = MessageDigest.getInstance("SHA-256");
+			byte[] hash = md.digest(message);
+			// converting byte array to Hexadecimal String
+			StringBuilder sb = new StringBuilder(2 * hash.length);
+			for (byte b : hash) {
+				sb.append(String.format("%02x", b & 0xff));
+			}
+			digest = sb.toString();
+		} catch (NoSuchAlgorithmException ex) {
+			log.error(ex.getMessage());
+			throw new PayloadEncodingException(ex);
+		}
+		return digest;
+	}
+	
 
 	/**
 	 * Spring framework also provides overloaded md5 methods. You can pass input

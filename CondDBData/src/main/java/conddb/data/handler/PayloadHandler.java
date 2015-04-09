@@ -24,8 +24,8 @@ public class PayloadHandler {
 	public PayloadData getPayloadWithHash() {
 		try {
 			if (this.payload.getHash() == null) {
-				this.payload.setHash(this.createSpringHashFromBytes());
-			} else if (!this.payload.getHash().equals(this.createSpringHashFromBytes())) {
+				this.payload.setHash(this.createJavaShaHashFromBytes());
+			} else if (!this.payload.getHash().equals(this.createJavaShaHashFromBytes())) {
 				throw new PayloadEncodingException("The hash does not correspond to the payload !!!");
 			}
 		
@@ -40,6 +40,12 @@ public class PayloadHandler {
 	public String createJavaHashFromBytes() throws PayloadEncodingException {
 		String hash = "ERROR_IN_HASH";
 		hash = HashGenerator.md5Java(this.payload.getData());
+		return hash;
+	}
+
+	public String createJavaShaHashFromBytes() throws PayloadEncodingException {
+		String hash = "ERROR_IN_HASH";
+		hash = HashGenerator.shaJava(this.payload.getData());
 		return hash;
 	}
 
