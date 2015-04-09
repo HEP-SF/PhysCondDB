@@ -32,10 +32,10 @@
 			<mvc:mapping path="/**" />
 			<bean class="conddb.web.interceptors.RequestProcessingFrontierInterceptor" />
 		</mvc:interceptor>
-		<mvc:interceptor>
-			<mvc:mapping path="/tag/**" />
-				<bean class="conddb.monitoring.interceptors.RequestProcessingProfilerInterceptor" />
-		</mvc:interceptor>		
+<!-- 		<mvc:interceptor> -->
+<!-- 			<mvc:mapping path="/tag/**" /> -->
+<!-- 				<bean class="conddb.monitoring.interceptors.RequestProcessingProfilerInterceptor" /> -->
+<!-- 		</mvc:interceptor>		 -->
 	</mvc:interceptors>
 	
 	<!-- Use multipart for payload uploads -->

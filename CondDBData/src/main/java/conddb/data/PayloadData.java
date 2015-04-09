@@ -41,7 +41,7 @@ public class PayloadData implements java.io.Serializable {
 	}
 
 	@Id
-	@Column(name = "HASH", unique = true, nullable = false, length = 50)
+	@Column(name = "HASH", unique = true, nullable = false, length = 256)
 	public String getHash() {
 		return this.hash;
 	}

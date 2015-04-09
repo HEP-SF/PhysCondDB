@@ -27,7 +27,7 @@ from xml.dom import minidom
 from clint.textui import colored
 from datetime import datetime
 
-from PhysCurlSvc import PhysCurl,GlobalTag,Tag,Iov
+from PhysCurlSvc import PhysCurl,GlobalTag,Tag,Iov,Payload,PayloadData
 
 class PhysDBDriver():
     def __init__(self):
@@ -184,8 +184,10 @@ class PhysDBDriver():
                 object=self.args[1]
                 f = open(file,"r")
                 data = json.loads(f.read())
-            except:
+            except ValueError as e:
+                print "error({0}): {1}".format(e.errno, e.strerror)
                 print "problem loading file or missing arguments"
+
             if (object == "globaltag"):
                 resp = restserver.addGlobalTag(data)
             elif (object == "tag"):
@@ -271,7 +273,8 @@ class PhysDBDriver():
                     print "Missing data for ADD method"
                     return
                 
-            except:
+            except ValueError as e:
+                print "error({0}): {1}".format(e.errno, e.strerror)
                 print "problem uploading or missing arguments: ", sys.exc_info()[0]
                 raise
 

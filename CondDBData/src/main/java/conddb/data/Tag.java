@@ -242,7 +242,7 @@ public class Tag implements java.io.Serializable {
 	}
 
 //	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "INSERTION_TIME", nullable = false)
+	@Column(name = "INSERTION_TIME", nullable = true)
 	@JsonDeserialize(using = TimestampDeserializer.class)
 	public Timestamp getInsertionTime() {
 		return this.insertionTime;
@@ -253,7 +253,7 @@ public class Tag implements java.io.Serializable {
 	}
 
 //	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "MODIFICATION_TIME", nullable = false)
+	@Column(name = "MODIFICATION_TIME", nullable = true)
 	@JsonDeserialize(using = TimestampDeserializer.class)
 	public Timestamp getModificationTime() {
 		return this.modificationTime;

@@ -118,6 +118,8 @@ class PhysRestConnection:
         self.__curl.setopt(self.__curl.POST,1)
         self.__curl.setopt(self.__curl.HTTPPOST,post_data)
         self.__curl.setopt(self.__curl.VERBOSE, True)
+        self.__curl.setopt(self.__curl.WRITEFUNCTION, self.write_out) # now passing own method
+
         try:
             self.__curl.perform()
             response = self.__curl.getinfo(self.__curl.RESPONSE_CODE)
@@ -125,17 +127,24 @@ class PhysRestConnection:
             print('Status: %d' % response)
         # Elapsed time for the transfer.
             print('Status: %f' % self.__curl.getinfo(self.__curl.TOTAL_TIME))
-            return { 'response' : response }
+            return { 'response' : response, 'data' : self.dataresponse }
         except pycurl.error, error:
              errno, errstr = error
              print 'An error occurred: ', errstr
  
+    
+    def write_out(self,data):
+        print 'Data len', len(data)
+        print 'Data content : ', data
+        self.dataresponse = data
+        return len(data)
     
     def __init__(self):
         self.__curl = pycurl.Curl()
         self.__curl.setopt(self.__curl.TIMEOUT, self.__timeout)
         self.__curl.setopt(self.__curl.FAILONERROR, True)
         self.__curl.setopt(self.__curl.CONNECTTIMEOUT, 5)
+        self.dataresponse = "none"
 
    
 class PhysCond(object):
@@ -156,6 +165,8 @@ class PhysCond(object):
         return self._dicttypes
     def getParameter(self,field):
         return self._dictval[field]
+    def setParameter(self,field,value):
+        self._dictval[field] = value
     def toJson(self):
         return json.dumps(self._dictval, indent=4)
     def parseJson(self,jsonobj):
