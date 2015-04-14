@@ -69,7 +69,8 @@ public class CondWebController {
 						.getGlobalTagTrace(globaltagname);
 				gtaglist.add(gtag);
 			} else {
-				throw new ConddbWebException("Cannot find method " + method);
+				String help = " use : /like, /one, /trace instead !";
+				throw new ConddbWebException("Cannot find method " + method+" "+help);
 			}
 		} catch (Exception e) {
 			throw new ConddbWebException(e.getMessage());
@@ -130,7 +131,8 @@ public class CondWebController {
 				Tag tag = this.conddbsvc.getTagIovs(tagname);
 				taglist.add(tag);
 			} else {
-				throw new ConddbWebException("Cannot find method " + method);
+				String help = " use : /like, /one, /iovs instead !";
+				throw new ConddbWebException("Cannot find method " + method+" "+help);
 			}
 			return taglist;
 		} catch (Exception e) {
@@ -152,7 +154,8 @@ public class CondWebController {
 			} else if (method.equals("listpayload")) {
 				iovlist = this.conddbsvc.getIovsForTagFetchPayload(tagname);
 			} else {
-				throw new Exception("Cannot find method " + method);
+				String help = " use : /list, /listpayload instead !";
+				throw new ConddbWebException("Cannot find method " + method+" "+help);
 			}
 			return iovlist;
 		} catch (Exception e) {

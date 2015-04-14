@@ -29,7 +29,7 @@ class PhysRestConnection:
     __baseurl = 'localhost:8080/'
     __debug = True
     __header = None
-    __timeout = 10
+    __timeout = 100
     
     def getBaseUrl(self):
         return self.__baseurl
