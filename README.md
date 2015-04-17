@@ -29,13 +29,44 @@ In the following instruction we are using for project directory : `<PhysCondDB>`
 You need to create a property file in your <PhysCondDB> directory and link this file in all modules sub-directories.
 The file is named: `conddb-filter-values.properties`
 It contains a set of parameters which are used to set user names and passwords. Depending on the testing that you want to perform, you do not need all these parameters. Here is a list of the parameters which can be set for the moment. 
-- `condreader=xxxxxx` : password for an Oracle account containing PL/SQL code for accessing COOL tables.
+- `condreader=xxxxxx` : password for an Oracle account containing PL/SQL code for accessing COOL tables (used only for ATLAS).
 - `tomcat.datasource=java/MYDS` : _datasource_ used in tomcat, and declared in `$CATALINA_HOME/conf/server.xml` file where _datasources_ can be defined in order to _share_ them among different applications.
 - `h2.file.name=/tmp/h2physconddb` : name of the file containing the h2 database on local disk (used for *jetty* testing for example).
-- `devuser=xxxxxx` : user name which can be used for Oracle DB connection for testing under `devdb11`.
-- `devpassword=xxxxxx` : password which can be used for Oracle DB connection for testing under `devdb11`.
+- `devuser=xxxxxx` : user name which can be used for Oracle DB connection for testing under `devdb11`  (used only for testing environment in ATLAS/CMS).
+- `devpassword=xxxxxx` : password which can be used for Oracle DB connection for testing under `devdb11`  (used only for testing environment in ATLAS/CMS).
 
-These passwords are used in the Web modules (e.g.: CondDBWeb and CondDBCool).
+These passwords (condreder, devuser, devpassword) are used in the Web modules (e.g.: CondDBWeb and CondDBCool). You should change the relative configuration files of CondDBWeb module in order to write your own DB connection. 
+For example in case of jetty deployment you can modify the content of `CondDBWeb/src/main/webabb/WEV-INF/jett-env.xml`, if you intend to set a connection to a DB server which is not a local H2 database. The external server connection is something like this for Oracle:
+
+```
+<New id="oradevdatasource" class="org.eclipse.jetty.plus.jndi.Resource">
+        <Arg>jdbc/OraDB</Arg>
+        <Arg>
+            <New class="org.apache.commons.dbcp.BasicDataSource">
+                <Set name="driverClassName">oracle.jdbc.OracleDriver</Set>
+                <Set name="url">jdbc:oracle:thin:@(DESCRIPTION = 
+        (ADDRESS= (PROTOCOL=TCP) (HOST=mydbhostname) (PORT=aportnumber) )
+        (ENABLE=BROKEN)
+        (CONNECT_DATA=
+                (SERVICE_NAME=aservicename)
+        )
+)</Set>
+                <Set name="username">${devuser}</Set>
+                <Set name="password">${devpassword}</Set>
+            </New>
+        </Arg>
+</New>
+```
+The important configuration here (a part from the DB connection string) consists in the JNDI
+name of the connection: `jdbc/OraDB`.
+This name should be the same as the one defined in spring configuration files: `CondDBWeb/src/main/resourcer/spring/sql/oracle.properties`.
+Here you can find a variable called: `serverMode.jetty.localDataSource`, which should then be set equal to `jdbc/OraDB`. In the case of other deployments (like tomcat), the system is using
+other variables (e.g. `serverMode.tomcat.localDataSource`). In this case the name has to match the definition of the connection that you will configure in your tomcat server. This can be done in 2 ways: either for all applications (inside `$CATALINA_HOME/conf/xxx.xml` configuration files) or via a self-contained `context.xml` file, that you can find in `CondDBWeb/src/main/resources/META-INF/context.xml`. Be careful since the JNDI name will be different if you are in tomcat or JBoss server. The name examples can be find in the provided files (`adatabase.properties`). The name of the selected properties file that spring will pick up is drived via a spring profile: `h2` or `oracle` will load `h2.properties` or `oracle.properties`.
+
+If you use in addition the `dev` spring profile (instead of `prod`) you may define directly via properties, inside the `database.properties` file, those properties that will activate a connection for your application. The definition of the datasources is inside the
+`CondDBWeb/src/main/resources/spring/db/dao-datasources-context.xml` file.
+
+
 Some of the fields in this file are very important in case of deployment under *jetty*, *tomcat7* or *jboss*.
 
 ## Build instructions

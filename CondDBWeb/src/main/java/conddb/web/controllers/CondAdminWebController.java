@@ -61,5 +61,17 @@ public class CondAdminWebController {
 		this.globalTagAdminController.updateGlobalTagLocking(sourcegtag, locking);
 		return "Success";
 	}
+	
+	@RequestMapping(value = "/deleteGlobalTag", method = RequestMethod.DELETE)
+	@ResponseBody
+	public String deleteGlobalTag(
+			@RequestParam(value = "sourcegtag", defaultValue = "CONDBR2-TEST-01") String sourcegtag)
+			throws Exception {
+		this.log.info("CondAdminWebController processing request for removing full global tag "
+				+ sourcegtag );
+		this.globalTagAdminController.deleteGlobalTag(sourcegtag);
+		return "Success";
+	}
+
 
 }

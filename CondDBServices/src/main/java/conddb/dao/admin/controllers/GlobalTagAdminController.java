@@ -72,4 +72,15 @@ public class GlobalTagAdminController {
 		this.gtagRepository.save(gtag);
 	}
 
+	@Transactional
+	public void deleteGlobalTag(String sourcegtag)
+			throws ConddbServiceException {
+		GlobalTag sgtag = this.gtagRepository
+				.findByNameAndFetchTagsEagerly(sourcegtag);
+		this.log.debug("Retrieved globaltag for removal operation: " + sgtag
+				+ " linked to " + sgtag.getGlobalTagMaps().size() + " tags");
+				
+		this.gtagRepository.delete(sgtag);
+	}
+
 }

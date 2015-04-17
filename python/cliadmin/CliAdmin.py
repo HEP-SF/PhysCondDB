@@ -40,9 +40,11 @@ class PhysDBDriver():
             self.iovspan = 'time'
             self.jsondump=False
             self.dump=False
+            self.user='none'
+            self.passwd='none'
             self.outfilename=''
             self.urlsvc='localhost:8080'
-            longopts=['help','socks','out=','jsondump','t0=','tMax=','iovspan=']
+            longopts=['help','socks','out=','jsondump','t0=','tMax=','iovspan=','user=','pass=']
             opts,args=getopt.getopt(sys.argv[1:],'',longopts)
             print opts, args
         except getopt.GetoptError,e:
@@ -73,6 +75,9 @@ class PhysDBDriver():
         print "       Time format to use in timestamp types: YYYYMMddHHmmss:GMT, e.g. 20141130100000:GMT"
         print " "
         print " - MAPTAG2GLOBALTAG <tag name> <globaltag name>"
+        print " "
+        print " - DELETE <type> <id>: remove object <type> using id <id>"
+        print "         ex: globaltag MYTEST_01"
         print " "
         print "Options: "
         print "  --socks activate socks proxy on localhost 3129 "
@@ -106,6 +111,10 @@ class PhysDBDriver():
                 self.t0=a
             if (o=='--tMax'):
                 self.tMax=a
+            if (o=='--user'):
+                self.user=a
+            if (o=='--pass'):
+                self.passwd=a
             if (o=='--iovspan'):
                 self.iovspan=a
                 
@@ -170,6 +179,14 @@ class PhysDBDriver():
                     print mpobj.toJson()  
             else:
                 print pyld
+                
+        elif (self.action=='DELETE'):
+            type = self.args[0]
+            id = self.args[1]
+            params['type'] = type
+            params['id'] = id
+            restserver.setUserPassword(self.user,self.passwd)
+            pyld = restserver.delete(params)
             
         elif (self.action=='MAPTAG2GLOBALTAG'):
             tagname = self.args[0]

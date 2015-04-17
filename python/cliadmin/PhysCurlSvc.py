@@ -30,12 +30,17 @@ class PhysRestConnection:
     __debug = True
     __header = None
     __timeout = 100
+    __username = ''
+    __password = ''
     
     def getBaseUrl(self):
         return self.__baseurl
     def setBaseUrl(self,baseurl):
         self.__baseurl=baseurl
-    
+    def setUserPassword(self,user,password):
+        self.__username = user
+        self.__password = password
+        
     def setSocks(self, host, port):
         self.__host = host
         self.__port = port
@@ -71,6 +76,26 @@ class PhysRestConnection:
         except json, e:
             print e
             return {}
+        
+    def deleteData(self):
+        print "Delete data using url ", self.__url
+        
+        self.__curl.setopt(self.__curl.CUSTOMREQUEST,'DELETE')
+        self.__curl.setopt(self.__curl.USERNAME, self.__username)
+        self.__curl.setopt(self.__curl.PASSWORD, self.__password)
+        self.__curl.setopt(self.__curl.VERBOSE, True)
+        try:
+            self.__curl.perform()
+            response = self.__curl.getinfo(self.__curl.RESPONSE_CODE)
+        # HTTP response code, e.g. 200.
+            print('Status: %d' % response)
+        # Elapsed time for the transfer.
+            print('Status: %f' % self.__curl.getinfo(self.__curl.TOTAL_TIME))
+            return { 'response' : response }
+        except pycurl.error, error:
+             errno, errstr = error
+             print 'An error occurred: ', errstr
+
         
     def setTimeout(self,to):
         self.__timeout=to
@@ -298,6 +323,18 @@ class PhysCurl(object):
         self.__curl.setUrl(urlquoted)
         return self.__curl.getData()
 
+    def delete(self,params,servicebase="/conddbweb/admin"):
+
+        print 'Search ',params['type'],' using parameter ',params['id']
+        url = servicebase
+        if params['type'] == 'globaltag':
+            urlparams = [('sourcegtag',params['id'])]
+            pairs = urllib.urlencode(urlparams)
+            self.__curl.setUrl(url+'/deleteGlobalTag?'+pairs)
+            return self.__curl.deleteData()
+        else:
+            print 'Cannot delete object type ',params['type']
+
     def traceGlobalTags(self,params,servicebase="/conddbweb/gtagliketrace"):
 
         url = servicebase
@@ -314,6 +351,8 @@ class PhysCurl(object):
         self.__curl.setHeader(['Content-Type:application/x-www-form-urlencoded'])
         return self.__curl.postData(pairs)
         
+    def setUserPassword(self,user,passwd):
+        self.__curl.setUserPassword(user, passwd)
 
     def __init__(self, servicepath, usesocks=False):
         '''
