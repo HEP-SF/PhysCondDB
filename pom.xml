@@ -21,8 +21,8 @@
 		<servlet.version>3.1.0</servlet.version>
 
 		<!-- Servers -->
-		<jetty.version>9.3.0.M1</jetty.version>
-
+		<jetty.version>9.2.7.v20150116</jetty.version>
+<!-- try versions of jetty: 9.2.7.v20150116, 9.3.0.M1 -->
 		<!-- Spring -->
 		<!-- <spring-framework.version>3.2.3.RELEASE</spring-framework.version> -->
 		<!-- <spring-framework.version>4.1.1.RELEASE</spring-framework.version> -->

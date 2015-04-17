@@ -32,11 +32,14 @@
 			<mvc:mapping path="/**" />
 			<bean class="conddb.web.interceptors.RequestProcessingFrontierInterceptor" />
 		</mvc:interceptor>
-		<mvc:interceptor>
+<!--
+This is a INFLUXDB based interceptor for minitoring time spent in different queries
+ 		<mvc:interceptor>
 			<mvc:mapping path="/**" />
 			<bean class="conddb.monitoring.interceptors.RequestProcessingProfilerInterceptor" />
 		</mvc:interceptor>		
-	</mvc:interceptors>
+ -->
+ 	</mvc:interceptors>
 	
 	<!-- Use multipart for payload uploads -->
 	<bean id="multipartResolver"
