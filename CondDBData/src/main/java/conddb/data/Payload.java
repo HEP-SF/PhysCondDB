@@ -56,6 +56,7 @@ public class Payload implements java.io.Serializable {
 	private PayloadData data;
 	private Integer datasize; // size in bytes of the payload
 	private String streamerInfo;
+	private String backendInfo="db://PHCOND_PAYLOAD_DATA";
 	private Timestamp insertionTime;
 	private Set<Iov> iovs = new HashSet<Iov>(0);
 

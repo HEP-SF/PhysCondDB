@@ -8,3 +8,8 @@ SpringSA.java
 PhysCurlSvc.pyc
 target
 test.*
+${release.javadoc.root.path}PhysCondDBWeb-0.0.1
+CondDBCool/${release.javadoc.root.path}CondDBCool-1.0
+CondDBData/${release.javadoc.root.path}CondDBData-1.0
+CondDBServices/${release.javadoc.root.path}CondDBServices-1.0
+CondDBWeb/${release.javadoc.root.path}CondDBWeb-0.0.1
