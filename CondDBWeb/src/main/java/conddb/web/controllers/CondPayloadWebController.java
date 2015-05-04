@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import conddb.dao.baserepository.PayloadDataBaseCustom;
 import conddb.dao.repositories.PayloadRepository;
+import conddb.dao.repositories.impl.PayloadDataDBImpl;
 import conddb.data.Payload;
 import conddb.data.PayloadData;
 import conddb.data.handler.PayloadHandler;
@@ -34,6 +36,8 @@ public class CondPayloadWebController {
 
 	@Autowired
 	private PayloadRepository payloadrepo;
+	@Autowired
+	private PayloadDataBaseCustom payloaddatarepo;
 
 	
 	@RequestMapping(value="/uploadPayload", method=RequestMethod.POST)
@@ -64,7 +68,8 @@ public class CondPayloadWebController {
 
                 PayloadHandler phandler = new PayloadHandler(pylddata);
                 PayloadData storable = phandler.getPayloadWithHash();
-                apayload.setData(storable);
+                payloaddatarepo.save(storable);
+                
                 apayload.setHash(storable.getHash());
                 log.info("Uploaded object has hash "+storable.getHash());
                 log.info("Uploaded object has data size "+apayload.getDatasize());

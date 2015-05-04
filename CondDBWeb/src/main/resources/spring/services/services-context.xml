@@ -20,6 +20,7 @@
 	<bean id="profilingAdvisor" class="conddb.utils.aop.ProfilingAdvisor"></bean>
 	<bean id="profilingMethodInterceptor" class="conddb.utils.aop.ProfilingMethodInterceptor"></bean>
 	<bean id="influxRepository" class="conddb.monitoring.influx.InfluxRepository"></bean>
+	<bean id="payloaddatarepo" class="conddb.dao.repositories.impl.PayloadDataDBImpl"></bean>
 
 	<!-- this is the actual advice itself -->
 	<bean id="profilingAspect" class="conddb.utils.aop.ProfilingAspect" />
