@@ -16,8 +16,6 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
-import javax.persistence.NamedAttributeNode;
-import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
@@ -34,7 +32,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 //		  @NamedAttributeNode("data")
 //		  })
 
-@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="hash")
+@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="hash", scope = Payload.class)
 public class Payload implements java.io.Serializable {
 
 	/**
