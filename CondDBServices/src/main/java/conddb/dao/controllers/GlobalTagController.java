@@ -64,6 +64,17 @@ public class GlobalTagController {
 	}
 
 	@ProfileExecution
+	public GlobalTag getGlobalTag(String globaltagname)
+			throws ConddbServiceException {
+
+		GlobalTag gtag = this.gtagRepository
+				.findOne(globaltagname);
+		this.log.debug("Found global tag " + gtag);
+
+		return gtag;
+	}
+
+	@ProfileExecution
 	public List<GlobalTag> getGlobalTagByNameLikeFetchTags(
 			String globaltagnamepattern) throws ConddbServiceException {
 

@@ -3,6 +3,8 @@
  */
 package conddb.web.controllers;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -84,8 +86,9 @@ public class CondExpertWebController {
 			@RequestParam(value = "tagname", defaultValue = "ATAG-01") String tagname)
 			throws Exception {
 		this.log.info("CondExpertWebController processing request for mapTagToGtag ..."+globaltagname+" "+tagname);
-		GlobalTag gtag = clientservice.getGlobalTag(globaltagname);
-		Tag atag = clientservice.getTag(tagname);
+		GlobalTag gtag = globalTagController.getGlobalTag(globaltagname);
+		List<Tag> list = clientservice.getTagOne(tagname);
+		Tag atag = list.get(0);
 		this.log.info("CondExpertWebController processing request for mapTagToGtag using "+gtag+" "+atag);
 		GlobalTagMap gtagmap = this.globalTagController.mapTagToGlobalTag(atag, gtag);
 		return gtagmap;

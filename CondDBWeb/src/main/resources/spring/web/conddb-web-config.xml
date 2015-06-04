@@ -21,7 +21,7 @@
 				class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
 				<property name="supportedMediaTypes" value="application/json" />
 				<property name="objectMapper">
-					<bean class="conddb.utils.json.HibernateAwareObjectMapper" />
+					<ref bean="hibernateAwareObjectMapper" />
 				</property>
 			</bean>
 		</mvc:message-converters>
@@ -46,14 +46,5 @@ This is a INFLUXDB based interceptor for minitoring time spent in different quer
 		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
 		<property name="maxUploadSize" value="268435456" /> <!-- 256 megs -->
 	</bean>
-
-	<!-- <bean -->
-	<!-- class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter"> -->
-	<!-- <property name="messageConverters"> -->
-	<!-- <list> -->
-	<!-- <ref bean="jsonConverter" /> -->
-	<!-- </list> -->
-	<!-- </property> -->
-	<!-- </bean> -->
 
 </beans>

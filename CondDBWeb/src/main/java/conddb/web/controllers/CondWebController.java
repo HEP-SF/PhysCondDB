@@ -28,6 +28,7 @@ import conddb.dao.svc.ConddbClientService;
 import conddb.data.GlobalTag;
 import conddb.data.Iov;
 import conddb.data.Payload;
+import conddb.data.PayloadData;
 import conddb.data.Tag;
 import conddb.web.exceptions.ConddbWebException;
 
@@ -62,12 +63,10 @@ public class CondWebController {
 			if (method.equals("like")) {
 				gtaglist = this.conddbsvc.getGlobalTagLike(globaltagname);
 			} else if (method.equals("one")) {
-				GlobalTag gtag = this.conddbsvc.getGlobalTag(globaltagname);
-				gtaglist.add(gtag);
+				gtaglist = this.conddbsvc.getGlobalTagOne(globaltagname);
 			} else if (method.equals("trace")) {
-				GlobalTag gtag = this.conddbsvc
+				gtaglist = this.conddbsvc
 						.getGlobalTagTrace(globaltagname);
-				gtaglist.add(gtag);
 			} else {
 				String help = " use : /like, /one, /trace instead !";
 				throw new ConddbWebException("Cannot find method " + method+" "+help);
@@ -125,11 +124,11 @@ public class CondWebController {
 			if (method.equals("like")) {
 				taglist = this.conddbsvc.getTagLike(tagname);
 			} else if (method.equals("one")) {
-				Tag tag = this.conddbsvc.getTag(tagname);
-				taglist.add(tag);
+				taglist = this.conddbsvc.getTagOne(tagname);
 			} else if (method.equals("iovs")) {
-				Tag tag = this.conddbsvc.getTagIovs(tagname);
-				taglist.add(tag);
+				taglist = this.conddbsvc.getTagIovs(tagname);
+			} else if (method.equals("backtrace")) {
+				taglist = this.conddbsvc.getTagBackTrace(tagname);
 			} else {
 				String help = " use : /like, /one, /iovs instead !";
 				throw new ConddbWebException("Cannot find method " + method+" "+help);
@@ -168,10 +167,23 @@ public class CondWebController {
 	public Payload getPayload(@PathVariable("hash") String hash)
 			throws ConddbWebException {
 		this.log.info(
-				"CondWebController processing request for getPayload: hash ...",
-				hash);
+				"CondWebController processing request for getPayload: hash ..."+hash);
 		try {
 			Payload pyld = this.conddbsvc.getPayload(hash);
+			return pyld;
+		} catch (Exception e) {
+			throw new ConddbWebException(e.getMessage());
+		}
+	}
+
+	@RequestMapping(value = "/payloaddata/{hash}", method = RequestMethod.GET)
+	@ResponseBody
+	public PayloadData getPayloadBlob(@PathVariable("hash") String hash)
+			throws ConddbWebException {
+		this.log.info(
+				"CondWebController processing request for getPayloadBlob: hash ..."+hash);
+		try {
+			PayloadData pyld = this.conddbsvc.getPayloadData(hash);
 			return pyld;
 		} catch (Exception e) {
 			throw new ConddbWebException(e.getMessage());

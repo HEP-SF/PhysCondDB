@@ -22,7 +22,7 @@
 
 		<!-- Servers -->
 		<jetty.version>9.2.7.v20150116</jetty.version>
-<!-- try versions of jetty: 9.2.7.v20150116, 9.3.0.M1 -->
+		<!-- try versions of jetty: 9.2.7.v20150116, 9.3.0.M1 -->
 		<!-- Spring -->
 		<!-- <spring-framework.version>3.2.3.RELEASE</spring-framework.version> -->
 		<!-- <spring-framework.version>4.1.1.RELEASE</spring-framework.version> -->
@@ -54,12 +54,9 @@
 		<!-- JMETER -->
 		<performancetest.webservice.host>localhost</performancetest.webservice.host>
 		<performancetest.webservice.port>8080</performancetest.webservice.port>
-<!--
-Path to the root directory of the documentation web application.
-This example assumes that the documentation web application
-is located in the same Tomcat instance as the Jenkins build
-server runs.
--->
+		<!-- Path to the root directory of the documentation web application. This 
+			example assumes that the documentation web application is located in the 
+			same Tomcat instance as the Jenkins build server runs. -->
 		<release.javadoc.root.path>${catalina.home}/webapps/api-documentation/</release.javadoc.root.path>
 	</properties>
 
@@ -147,11 +144,11 @@ server runs.
 			<artifactId>spring-jdbc</artifactId>
 			<version>${spring-framework.version}</version>
 		</dependency>
-<!-- 		<dependency> -->
-<!-- 			<groupId>org.springframework</groupId> -->
-<!-- 			<artifactId>spring-aop</artifactId> -->
-<!-- 			<version>${spring-framework.version}</version> -->
-<!-- 		</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>org.springframework</groupId> -->
+		<!-- <artifactId>spring-aop</artifactId> -->
+		<!-- <version>${spring-framework.version}</version> -->
+		<!-- </dependency> -->
 		<!-- Other Web dependencies -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -229,7 +226,11 @@ server runs.
 			<artifactId>jackson-core</artifactId>
 			<version>2.4.5</version>
 		</dependency>
-
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+   			 <artifactId>jackson-datatype-jsr310</artifactId>
+			<version>2.4.5</version>
+		</dependency>
 		<!-- Database drivers -->
 		<dependency>
 			<groupId>com.oracle</groupId>
@@ -355,16 +356,16 @@ server runs.
 					<xmlOutput>true</xmlOutput>
 					<findbugsXmlOutputDirectory>${project.build.directory}/findbugs</findbugsXmlOutputDirectory>
 				</configuration>
-<!-- 				<executions> -->
-<!-- 					Ensures that FindBugs inspects source code when project is compiled. -->
-<!-- 					<execution> -->
-<!-- 						<id>analyze-compile</id> -->
-<!-- 						<phase>compile</phase> -->
-<!-- 						<goals> -->
-<!-- 							<goal>check</goal> -->
-<!-- 						</goals> -->
-<!-- 					</execution> -->
-<!-- 				</executions> -->
+				<!-- <executions> -->
+				<!-- Ensures that FindBugs inspects source code when project is compiled. -->
+				<!-- <execution> -->
+				<!-- <id>analyze-compile</id> -->
+				<!-- <phase>compile</phase> -->
+				<!-- <goals> -->
+				<!-- <goal>check</goal> -->
+				<!-- </goals> -->
+				<!-- </execution> -->
+				<!-- </executions> -->
 			</plugin>
 		</plugins>
 	</build>
@@ -383,125 +384,105 @@ server runs.
 				<performancetest.webservice.port>80</performancetest.webservice.port>
 			</properties>
 		</profile>
-		
-<!-- TEST documentation profile.... -->		
-		
-<!--
-Profile for generation and publishing of release JavaDoc
-documentation.
-Use: mvn -P releaseDocumentation site
-References: http://maven.apache.org/guides/introduction/introduction-to-profiles.html
--->
-<profile>
-<!--
-Name of the Maven build profile.
-Used in project's Jenkins job configuration.
--->
-<id>releaseDocumentation</id>
-<build>
-<plugins>
-<!--
-In preparation of site generation, extract the release
-version number to a maven property.
-Performed during pre-site phase.
--->
-<plugin>
-<groupId>org.codehaus.mojo</groupId>
-<artifactId>build-helper-maven-plugin</artifactId>
-<version>1.8</version>
-<executions>
-<execution>
-<phase>pre-site</phase>
-<id>regex-property</id>
-<goals>
-<goal>regex-property</goal>
-</goals>
-<configuration>
-<name>release_version</name>
-<value>${project.version}</value>
-<regex>-SNAPSHOT</regex>
-<replacement />
-<failIfNoMatch>false</failIfNoMatch>
-</configuration>
-</execution>
-</executions>
-</plugin>
-<!--
-JavaDoc generation.
-JavaDoc is generated during pre-site phase.
--->
-<plugin>
-<groupId>org.apache.maven.plugins</groupId>
-<artifactId>maven-javadoc-plugin</artifactId>
-<version>2.9.1</version>
-<executions>
-<execution>
-<phase>pre-site</phase>
-<goals>
-<goal>javadoc</goal>
-</goals>
-</execution>
-</executions>
-<configuration>
-<show>private</show>
-</configuration>
-</plugin>
-<!--
-Copy JavaDoc to publish directory.
-Performed during the site phase.
-If changing the phase, make sure that copying the
-documentation is performed after having generated
-the JavaDoc.
--->
-<plugin>
-<groupId>org.apache.maven.plugins</groupId>
-<artifactId>maven-resources-plugin</artifactId>
-<version>2.6</version>
-<executions>
-<execution>
-<id>copy-resources</id>
-<phase>site</phase>
-<goals>
-<goal>copy-resources</goal>
-</goals>
-<configuration>
-<generateProjectInfo>false</generateProjectInfo>
-<generateReports>false</generateReports>
-<outputDirectory>${release.javadoc.root.path}${project.artifactId}-${release_version}/</outputDirectory>
-<resources>
-<resource>
-<directory>${project.build.directory}/site/</directory>
-<filtering>true</filtering>
-</resource>
-</resources>
-</configuration>
-</execution>
-</executions>
-</plugin>
-</plugins>
-</build>
-<!--
-Include this section to disable, or configure, generation
-of project info report(s).
-In this case, all project info reports have been disabled.
--->
-<reporting>
-<plugins>
-<plugin>
-<groupId>org.apache.maven.plugins</groupId>
-<artifactId>maven-project-info-reports-plugin</artifactId>
-<version>2.7</version>
-<reportSets>
-<reportSet>
-<reports>
-</reports>
-</reportSet>
-</reportSets>
-</plugin>
-</plugins>
-</reporting>
-</profile>		
-<!-- END OF TEST -->
+
+		<!-- TEST documentation profile.... -->
+
+		<!-- Profile for generation and publishing of release JavaDoc documentation. 
+			Use: mvn -P releaseDocumentation site References: http://maven.apache.org/guides/introduction/introduction-to-profiles.html -->
+		<profile>
+			<!-- Name of the Maven build profile. Used in project's Jenkins job configuration. -->
+			<id>releaseDocumentation</id>
+			<build>
+				<plugins>
+					<!-- In preparation of site generation, extract the release version 
+						number to a maven property. Performed during pre-site phase. -->
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>build-helper-maven-plugin</artifactId>
+						<version>1.8</version>
+						<executions>
+							<execution>
+								<phase>pre-site</phase>
+								<id>regex-property</id>
+								<goals>
+									<goal>regex-property</goal>
+								</goals>
+								<configuration>
+									<name>release_version</name>
+									<value>${project.version}</value>
+									<regex>-SNAPSHOT</regex>
+									<replacement />
+									<failIfNoMatch>false</failIfNoMatch>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- JavaDoc generation. JavaDoc is generated during pre-site phase. -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>2.9.1</version>
+						<executions>
+							<execution>
+								<phase>pre-site</phase>
+								<goals>
+									<goal>javadoc</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<show>private</show>
+						</configuration>
+					</plugin>
+					<!-- Copy JavaDoc to publish directory. Performed during the site phase. 
+						If changing the phase, make sure that copying the documentation is performed 
+						after having generated the JavaDoc. -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<version>2.6</version>
+						<executions>
+							<execution>
+								<id>copy-resources</id>
+								<phase>site</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<generateProjectInfo>false</generateProjectInfo>
+									<generateReports>false</generateReports>
+									<outputDirectory>${release.javadoc.root.path}${project.artifactId}-${release_version}/</outputDirectory>
+									<resources>
+										<resource>
+											<directory>${project.build.directory}/site/</directory>
+											<filtering>true</filtering>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+			<!-- Include this section to disable, or configure, generation of project 
+				info report(s). In this case, all project info reports have been disabled. -->
+			<reporting>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-project-info-reports-plugin</artifactId>
+						<version>2.7</version>
+						<reportSets>
+							<reportSet>
+								<reports>
+								</reports>
+							</reportSet>
+						</reportSets>
+					</plugin>
+				</plugins>
+			</reporting>
+		</profile>
+		<!-- END OF TEST -->
 	</profiles>
 
 	<reporting>

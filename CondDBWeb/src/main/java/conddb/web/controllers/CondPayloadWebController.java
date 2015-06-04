@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -19,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import conddb.dao.baserepository.PayloadDataBaseCustom;
 import conddb.dao.repositories.PayloadRepository;
-import conddb.dao.repositories.impl.PayloadDataDBImpl;
 import conddb.data.Payload;
 import conddb.data.PayloadData;
 import conddb.data.handler.PayloadHandler;
@@ -37,6 +37,7 @@ public class CondPayloadWebController {
 	@Autowired
 	private PayloadRepository payloadrepo;
 	@Autowired
+	@Qualifier("payloaddatajcrrepo")
 	private PayloadDataBaseCustom payloaddatarepo;
 
 	
@@ -119,6 +120,7 @@ public class CondPayloadWebController {
                 PayloadData storable = phandler.getPayloadWithHash();
 
                 log.info("Uploaded object has hash "+storable.getHash());
+                log.warn("This method does not perform insertions");
 
                 return storable.getHash();
             } catch (Exception e) {

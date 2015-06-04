@@ -20,9 +20,12 @@ package conddb.dao.repositories.impl;
 
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
 import conddb.dao.baserepository.PayloadDataBaseCustom;
 import conddb.data.PayloadData;
@@ -33,6 +36,8 @@ import conddb.data.mappers.PayloadDataMapper;
  *
  */
 public class PayloadDataDBImpl implements PayloadDataBaseCustom {
+
+	private Logger log = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
 	@Qualifier("daoDataSource")
@@ -45,10 +50,12 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 	 * conddb.dao.baserepository.PayloadDataBaseCustom#find(java.lang.String)
 	 */
 	@Override
+	@Transactional
 	public PayloadData find(String id) {
+		log.info("Find payload "+id+" using JDBCTEMPLATE");
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		return jdbcTemplate.queryForObject(
-				"select HASH,DATA from PHCOND_PAYLOAD_DATA where HASH=:hash",
+				"select HASH,DATA from PHCOND_PAYLOAD_DATA where PHCOND_PAYLOAD_DATA.HASH=?",
 				new Object[] { id }, new PayloadDataMapper());
 	}
 
@@ -60,13 +67,16 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 	 * )
 	 */
 	@Override
+	@Transactional
 	public PayloadData save(PayloadData entity) {
 		String sql = "INSERT INTO PHCOND_PAYLOAD_DATA "
 				+ "(HASH, DATA) VALUES (?, ?)";
+		log.info("Insert payload "+entity.getHash()+" using JDBCTEMPLATE");
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		jdbcTemplate.update(sql,
 				new Object[] { entity.getHash(), entity.getData() });
-		return this.find(entity.getHash());
+		log.info("Insertion done...");
+		return entity;
 	}
 
 }

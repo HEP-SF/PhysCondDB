@@ -38,7 +38,7 @@ public interface IovBaseRepository extends
 	 * 	The payload Hash.
 	 * @return List of IOVs containing the payload_hash as reference.
 	 */
-	List<Iov> findByPayloadHash(@Param("payload_hash") String payloadhash);
+	List<Iov> findByPayloadHashOrderByIdAsc(@Param("payload_hash") String payloadhash);
 
 	/**
 	 * @param tagname

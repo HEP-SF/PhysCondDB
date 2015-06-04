@@ -20,8 +20,14 @@ package conddb.utils.json.serializers;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
+
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -31,27 +37,57 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
  * @author formica
  *
  */
+@Component
 public class TimestampDeserializer extends JsonDeserializer<Timestamp> {
 
-	// DateTimeFormatter locformatter =
-	// DateTimeFormatter.ofPattern("yyyyMMddHHmmss:z");
-	DateTimeFormatter locformatter = DateTimeFormatter
-			.ofPattern("yyyyMMddHHmmss:z");
+	@Autowired
+	TimestampFormat tsformat;
+
+	private Logger log = LoggerFactory.getLogger(this.getClass());
+
+	public TimestampDeserializer() {
+		SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);
+	}
 
 	@Override
 	public Timestamp deserialize(JsonParser jp, DeserializationContext dc)
 			throws IOException, JsonProcessingException {
-		Timestamp tstamp  =  null;
+		Timestamp tstamp = null;
 		try {
-		ZonedDateTime zdt = ZonedDateTime.parse(jp.getText(), locformatter);
-		tstamp  = new Timestamp(zdt.toInstant().toEpochMilli());
+			if (tsformat == null) {
+				log.warn("Get an instance of the format here if no autowiring...but the pattern can be different!!");
+				tsformat = new TimestampFormat();
+			}
+			log.debug("Use private version of deserializer...."
+					+ tsformat.getLocformatter().toString());
+			ZonedDateTime zdt = ZonedDateTime.parse(jp.getText(),
+					tsformat.getLocformatter());
+			tstamp = new Timestamp(zdt.toInstant().toEpochMilli());
 		} catch (Exception ex) {
-			// If an exception is catched on parsing, try as if it was milliseconds
-			ex.printStackTrace();
-			System.out.println("try with milliseconds");
-			String millisec = jp.getText();
-			tstamp = new Timestamp(new Long(millisec));
+			// If an exception is catch on parsing, try as if it was
+			// milliseconds
+			log.error(ex.getMessage());
+			log.warn("Failed parsing date, try with milliseconds: "
+					+ jp.getText());
+			log.error("Failed to deserialize using format "+tsformat.getLocformatter().toString());
+			try {
+				String millisec = jp.getText();
+				tstamp = new Timestamp(new Long(millisec));
+			} catch (Exception e) {
+				log.error("Failed to deserialize using format "+tsformat.getLocformatter().toString());
+				throw new JsonParseException(e.getMessage(),
+						jp.getCurrentLocation());
+			}
 		}
 		return tstamp;
 	}
+
+	public TimestampFormat getTsformat() {
+		return tsformat;
+	}
+
+	public void setTsformat(TimestampFormat tsformat) {
+		this.tsformat = tsformat;
+	}
+
 }

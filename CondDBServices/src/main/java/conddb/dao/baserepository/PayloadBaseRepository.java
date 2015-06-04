@@ -40,7 +40,7 @@ public interface PayloadBaseRepository extends CondDBPageAndSortingRepository<Pa
 	/* (non-Javadoc)
 	 * @see conddb.dao.baserepository.CondDBPageAndSortingRepository#findOne(java.io.Serializable)
 	 */
-	@EntityGraph(value="graph.detailed.payload",type = EntityGraph.EntityGraphType.FETCH)
+//	@EntityGraph(value="graph.detailed.payload",type = EntityGraph.EntityGraphType.FETCH)
 	Payload findByHash(@Param("hash") String hash);
 	
 	/**
