@@ -8,6 +8,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -39,7 +40,7 @@ public class CondExpertWebController {
 	@Autowired
 	private ConddbClientService clientservice;
 
-	@RequestMapping(value = "/gtagAdd", method = RequestMethod.POST)
+	@RequestMapping(value = "/globaltag/add", method = RequestMethod.POST)
 	@ResponseBody
 	public GlobalTag insertGlobalTag(
 			@RequestBody GlobalTag jsonString)
@@ -49,7 +50,34 @@ public class CondExpertWebController {
 		return gtag;
 	}
 	
-	@RequestMapping(value = "/tagAdd", method = RequestMethod.POST)
+	@RequestMapping(value = "/globaltag/update/{id}", method = RequestMethod.PUT)
+	@ResponseBody
+	public GlobalTag updateGlobalTag(
+			@PathVariable("id") String id,
+			@RequestBody GlobalTag jsonString)
+			throws Exception {
+		this.log.info("CondExpertWebController processing request for updateGlobalTag ...");
+		GlobalTag stored = this.globalTagController.getGlobalTag(id);
+		if (stored != null) {
+			if (jsonString.getDescription() != null) {
+				stored.setDescription(jsonString.getDescription());
+			}
+			if (jsonString.getLockstatus() != null) {
+				stored.setLockstatus(jsonString.getLockstatus());
+			}
+			if (jsonString.getRelease() != null) {
+				stored.setRelease(jsonString.getRelease());
+			}
+			if (jsonString.getSnapshotTime() != null) {
+				stored.setSnapshotTime(jsonString.getSnapshotTime());
+			}
+			GlobalTag gtag = this.globalTagController.insertGlobalTag(stored);
+			return gtag;
+		}
+		return null;
+	}
+
+	@RequestMapping(value = "/tag/add", method = RequestMethod.POST)
 	@ResponseBody
 	public Tag insertTag(
 			@RequestBody Tag jsonString)
@@ -59,7 +87,7 @@ public class CondExpertWebController {
 		return tag;
 	}
 
-	@RequestMapping(value = "/mapAdd", method = RequestMethod.POST)
+	@RequestMapping(value = "/map/add", method = RequestMethod.POST)
 	@ResponseBody
 	public GlobalTagMap insertGlobalTagMap(
 			@RequestBody GlobalTagMap jsonString)
@@ -69,7 +97,7 @@ public class CondExpertWebController {
 		return gtagmap;
 	}
 	
-	@RequestMapping(value = "/iovAdd", method = RequestMethod.POST)
+	@RequestMapping(value = "/iov/add", method = RequestMethod.POST)
 	@ResponseBody
 	public Iov insertIov(
 			@RequestBody Iov jsonString)
@@ -79,7 +107,7 @@ public class CondExpertWebController {
 		return iov;
 	}
 
-	@RequestMapping(value = "/mapTagToGtag", method = RequestMethod.POST)
+	@RequestMapping(value = "/map/tag2gtag", method = RequestMethod.POST)
 	@ResponseBody
 	public GlobalTagMap mapTagToGtag(
 			@RequestParam(value = "globaltagname", defaultValue = "CONDBR2-01") String globaltagname,

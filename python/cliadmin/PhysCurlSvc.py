@@ -245,7 +245,7 @@ class PhysCurl(object):
     classdocs
     '''
 
-    def addGlobalTag(self,params,servicebase="/conddbweb/gtagAdd"):
+    def addGlobalTag(self,params,servicebase="/conddbweb/globaltag/add"):
 
         print 'Add global tag using input '
         print params
@@ -258,7 +258,7 @@ class PhysCurl(object):
         print jsonobj
         return self.__curl.postData(jsonobj)
 
-    def addTag(self,params,servicebase="/conddbweb/tagAdd"):
+    def addTag(self,params,servicebase="/conddbweb/tag/add"):
 
         print 'Add tag using input '
         print params
@@ -270,7 +270,7 @@ class PhysCurl(object):
         print jsonobj
         return self.__curl.postData(jsonobj)
 
-    def addIov(self,params,servicebase="/conddbweb/iovAdd"):
+    def addIov(self,params,servicebase="/conddbweb/iov/add"):
 
         print 'Add iov using input '
         print params
