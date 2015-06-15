@@ -228,7 +228,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
-   			 <artifactId>jackson-datatype-jsr310</artifactId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
 			<version>2.4.5</version>
 		</dependency>
 		<!-- Database drivers -->
@@ -303,6 +303,13 @@
 			<scope>provided</scope> </dependency> -->
 		<!-- Jetty embedded <dependency> <groupId>org.eclipse.jetty</groupId> <artifactId>jetty-servlet</artifactId> 
 			<version>${jetty.version}</version> </dependency> -->
+
+	<!-- Swagger springfox documentation for REST API -->
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>2.0.0</version>
+		</dependency>
 	</dependencies>
 
 	<repositories>
@@ -313,6 +320,13 @@
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
+		</repository>
+
+		<!-- Repository for swagger springfox: REST API documentation -->
+		<repository>
+			<id>jcenter-snapshots</id>
+			<name>jcenter</name>
+			<url>https://jcenter.bintray.com/</url>
 		</repository>
 	</repositories>
 

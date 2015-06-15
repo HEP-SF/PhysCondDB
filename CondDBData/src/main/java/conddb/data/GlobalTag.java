@@ -147,7 +147,7 @@ public class GlobalTag implements java.io.Serializable {
 	
   	@JsonSerialize(using = TimestampSerializer.class)
   	@JsonDeserialize(using = TimestampDeserializer.class)
-	@Column(name = "INSERTION_TIME", nullable = true)
+	@Column(name = "INSERTION_TIME", nullable = true, updatable=false)
 	public Timestamp getInsertionTime() {
 		return this.insertionTime;
 	}

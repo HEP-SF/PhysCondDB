@@ -11,6 +11,7 @@
 
 	<context:component-scan
 		base-package="conddb.dao.svc,conddb.dao.admin,conddb.dao.controllers,conddb.dao.repositories,conddb.utils" />
+	<mvc:annotation-driven/>
 
 	<!-- Services -->
 	<bean id="globalTagAdminController" class="conddb.dao.admin.controllers.GlobalTagAdminController" />

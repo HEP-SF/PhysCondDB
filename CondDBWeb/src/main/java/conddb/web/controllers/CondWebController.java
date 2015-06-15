@@ -77,7 +77,7 @@ public class CondWebController {
 		return gtaglist;
 	}
 
-	@RequestMapping(value = "/gtagbetween", method = RequestMethod.GET)
+	@RequestMapping(value = "/globaltag/between", method = RequestMethod.GET)
 	@ResponseBody
 	public List<GlobalTag> getGlobalTagBetweenTime(
 			@RequestParam(value = "sincetime", defaultValue = "20071203101530:GMT") String since,

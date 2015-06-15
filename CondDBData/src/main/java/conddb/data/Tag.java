@@ -163,7 +163,7 @@ public class Tag implements java.io.Serializable {
 	 * @return
 	 * 	The tag name.
 	 */
-	@Column(name = "NAME", unique = true, nullable = false, length = 255)
+	@Column(name = "NAME", unique = true, nullable = false, updatable=false, length = 255)
 	public String getName() {
 		return this.name;
 	}
@@ -244,7 +244,7 @@ public class Tag implements java.io.Serializable {
 	}
 
 //	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "INSERTION_TIME", nullable = true)
+	@Column(name = "INSERTION_TIME", nullable = true,updatable=false)
   	@JsonSerialize(using = TimestampSerializer.class)
   	@JsonDeserialize(using = TimestampDeserializer.class)
 	public Timestamp getInsertionTime() {

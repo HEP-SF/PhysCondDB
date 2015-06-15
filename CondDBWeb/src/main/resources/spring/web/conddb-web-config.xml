@@ -16,6 +16,7 @@
 	<context:component-scan base-package="conddb.web" />
 	<!-- <mvc:annotation-driven /> -->
 	<mvc:annotation-driven>
+	
 		<mvc:message-converters>
 			<bean id="jsonConverter"
 				class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">

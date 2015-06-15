@@ -44,18 +44,23 @@
 			<artifactId>commons-fileupload</artifactId>
 			<version>${apache.commons.version}</version>
 		</dependency>
-<dependency>
-	<groupId>org.mockito</groupId>
-	<artifactId>mockito-all</artifactId>
-	<version>1.10.8</version>
-</dependency>		
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<version>1.10.8</version>
+		</dependency>
 		<!-- InfluxDB -->
 		<dependency>
-            <groupId>org.influxdb</groupId>
-            <artifactId>influxdb-java</artifactId>
-            <version>1.5</version>
-        </dependency>
-
+			<groupId>org.influxdb</groupId>
+			<artifactId>influxdb-java</artifactId>
+			<version>1.5</version>
+		</dependency>
+	<!--   springfox ui application...-->
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>2.0.1</version>
+		</dependency>		
 	</dependencies>
 
 	<build>
@@ -80,14 +85,14 @@
 			</resource>
 		</resources>
 		<plugins>
-<!-- 			<plugin> -->
-<!-- 				<artifactId>maven-compiler-plugin</artifactId> -->
-<!-- 				<version>3.0</version> -->
-<!-- 				<configuration> -->
-<!-- 					<source>${java.version}</source> -->
-<!-- 					<target>${java.version}</target> -->
-<!-- 				</configuration> -->
-<!-- 			</plugin> -->
+			<!-- <plugin> -->
+			<!-- <artifactId>maven-compiler-plugin</artifactId> -->
+			<!-- <version>3.0</version> -->
+			<!-- <configuration> -->
+			<!-- <source>${java.version}</source> -->
+			<!-- <target>${java.version}</target> -->
+			<!-- </configuration> -->
+			<!-- </plugin> -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
@@ -152,7 +157,7 @@
 					<scanIntervalSeconds>10</scanIntervalSeconds>
 				</configuration>
 			</plugin>
-			<!--  Jmeter -->
+			<!-- Jmeter -->
 			<plugin>
 				<groupId>com.lazerycode.jmeter</groupId>
 				<artifactId>jmeter-maven-plugin</artifactId>
@@ -177,10 +182,10 @@
 						anymore). We want to create graphs from test-results, no matter if some requests 
 						failed or not, so we ignore jmeter failures. -->
 					<ignoreResultFailures>true</ignoreResultFailures>
-					
+
 					<propertiesUser>
-							<webservice.host>${performancetest.webservice.host}</webservice.host>
-							<webservice.port>${performancetest.webservice.port}</webservice.port>
+						<webservice.host>${performancetest.webservice.host}</webservice.host>
+						<webservice.port>${performancetest.webservice.port}</webservice.port>
 					</propertiesUser>
 				</configuration>
 				<dependencies>
