@@ -1,0 +1,260 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>conddb.client</groupId>
+	<artifactId>CondDBRestClient</artifactId>
+	<packaging>jar</packaging>
+	<version>1.0-SNAPSHOT</version>
+	<name>CondDBRestClient</name>
+	<url>http://maven.apache.org</url>
+
+	<parent>
+		<groupId>conddb</groupId>
+		<artifactId>PhysCondDBWeb</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../../PhysCondDB</relativePath>
+	</parent>
+
+	<properties>
+		<!-- Apache dependencies versions -->
+		<apache.commons.cli>1.3</apache.commons.cli>
+		<apache.commons.httpclient>4.4.1</apache.commons.httpclient>
+		<aspectj.version>1.8.2</aspectj.version>
+	</properties>
+
+
+	<dependencies>
+		<dependency>
+			<groupId>commons-cli</groupId>
+			<artifactId>commons-cli</artifactId>
+			<version>${apache.commons.cli}</version>
+		</dependency>
+		<dependency>
+			<groupId>conddb.data</groupId>
+			<artifactId>CondDBData</artifactId>
+			<version>1.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>${apache.commons.httpclient}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aspects</artifactId>
+			<version>${spring-framework.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjrt</artifactId>
+			<version>${aspectj.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjtools</artifactId>
+			<version>${aspectj.version}</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<!-- <excludes> -->
+				<!-- <exclude>**/persistence.xml</exclude> -->
+				<!-- </excludes> -->
+			</resource>
+		</resources>
+		<!-- <pluginManagement/> -->
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>aspectj-maven-plugin</artifactId>
+				<version>1.7</version>
+				<configuration>
+					<showWeaveInfo>true</showWeaveInfo>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+					<Xlint>ignore</Xlint>
+					<complianceLevel>${java.version}</complianceLevel>
+					<encoding>UTF-8</encoding>
+					<verbose>false</verbose>
+					<aspectLibraries>
+						<aspectLibrary>
+							<groupId>org.springframework</groupId>
+							<artifactId>spring-aspects</artifactId>
+						</aspectLibrary>
+					</aspectLibraries>
+				</configuration>
+				<executions>
+					<execution>
+					<phase>compile</phase>
+						<goals>
+							<goal>compile</goal>
+							<goal>test-compile</goal>
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.aspectj</groupId>
+						<artifactId>aspectjrt</artifactId>
+						<version>${aspectj.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>org.aspectj</groupId>
+						<artifactId>aspectjtools</artifactId>
+						<version>${aspectj.version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.5</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<mainClass>conddb.client.CondDBClientCLI</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<mainClass>conddb.client.CondDBClientCLI</mainClass>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>2.3</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<minimizeJar>false</minimizeJar>
+							<shadedArtifactAttached>true</shadedArtifactAttached>
+							<shadedClassifierName>jar-with-dependencies</shadedClassifierName>
+							<transformers>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>conddb.client.CondDBClientCLI</mainClass>
+								</transformer>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+									<resource>META-INF/spring.handlers</resource>
+								</transformer>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+									<resource>META-INF/spring.schemas</resource>
+								</transformer>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+									<resource>META-INF/spring.tooling</resource>
+								</transformer>
+							</transformers>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+
+			<!-- <plugin> <groupId>org.springframework.boot</groupId> <artifactId>spring-boot-maven-plugin</artifactId> 
+				<version>1.2.3.RELEASE</version> <executions> <execution> <goals> <goal>repackage</goal> 
+				</goals> </execution> </executions> </plugin> -->
+		</plugins>
+
+		<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-shade-plugin</artifactId> 
+			<version>2.3</version> <executions> <execution> <phase>package</phase> <goals> 
+			<goal>shade</goal> </goals> <configuration> <minimizeJar>false</minimizeJar> 
+			<shadedArtifactAttached>true</shadedArtifactAttached> <shadedClassifierName>jar-with-dependencies</shadedClassifierName> 
+			<transformers> <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer"> 
+			<mainClass>conddb.client.CondDBClientCLI</mainClass> </transformer> <transformer 
+			implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer"> 
+			<resource>META-INF/spring.handlers</resource> </transformer> <transformer 
+			implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer"> 
+			<resource>META-INF/spring.schemas</resource> </transformer> <transformer 
+			implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer"> 
+			<resource>META-INF/spring.tooling</resource> </transformer> </transformers> 
+			</configuration> </execution> </executions> </plugin> -->
+		<!-- <pluginManagement> -->
+		<!-- <plugins> -->
+		<!-- This plugin's configuration is used to store Eclipse m2e settings -->
+		<!-- only. It has no influence on the Maven build itself. -->
+		<!-- <plugin> -->
+		<!-- <groupId>org.eclipse.m2e</groupId> -->
+		<!-- <artifactId>lifecycle-mapping</artifactId> -->
+		<!-- <version>1.0.0</version> -->
+		<!-- <configuration> -->
+		<!-- <lifecycleMappingMetadata> -->
+		<!-- <pluginExecutions> -->
+		<!-- <pluginExecution> -->
+		<!-- <pluginExecutionFilter> -->
+		<!-- <groupId> -->
+		<!-- org.codehaus.mojo -->
+		<!-- </groupId> -->
+		<!-- <artifactId> -->
+		<!-- aspectj-maven-plugin -->
+		<!-- </artifactId> -->
+		<!-- <versionRange> -->
+		<!-- [1.7,) -->
+		<!-- </versionRange> -->
+		<!-- <goals> -->
+		<!-- <goal>compile</goal> -->
+		<!-- <goal>test-compile</goal> -->
+		<!-- </goals> -->
+		<!-- </pluginExecutionFilter> -->
+		<!-- <action> -->
+		<!-- <ignore></ignore> -->
+		<!-- </action> -->
+		<!-- </pluginExecution> -->
+		<!-- </pluginExecutions> -->
+		<!-- </lifecycleMappingMetadata> -->
+		<!-- </configuration> -->
+		<!-- </plugin> -->
+		<!-- </plugins> -->
+		<!-- </pluginManagement> -->
+
+		<!-- <plugin> <groupId>org.dstovall</groupId> <artifactId>onejar-maven-plugin</artifactId> 
+			<version>1.4.4</version> <executions> <execution> <configuration> Optional 
+			<onejarVersion>0.97</onejarVersion> Optional, use only if you need to include 
+			native libraries (dll's) <binlibs> <fileSet> <directory>${project.build.directory}/dllextract</directory> 
+			<includes> <include>test.dll</include> </includes> </fileSet> </binlibs> 
+			Optional, default is false <attachToBuild>false</attachToBuild> Optional, 
+			default is "onejar" <classifier>onejar</classifier> </configuration> <goals> 
+			<goal>one-jar</goal> </goals> </execution> </executions> </plugin> -->
+
+		<!-- <pluginManagement> <plugins> This plugin's configuration is used to 
+			store Eclipse m2e settings only. It has no influence on the Maven build itself. 
+			<plugin> <groupId>org.eclipse.m2e</groupId> <artifactId>lifecycle-mapping</artifactId> 
+			<version>1.0.0</version> <configuration> <lifecycleMappingMetadata> <pluginExecutions> 
+			<pluginExecution> <pluginExecutionFilter> <groupId> org.codehaus.mojo </groupId> 
+			<artifactId> aspectj-maven-plugin </artifactId> <versionRange> [1.7,) </versionRange> 
+			<goals> <goal>compile</goal> <goal>test-compile</goal> </goals> </pluginExecutionFilter> 
+			<action> <ignore></ignore> </action> </pluginExecution> </pluginExecutions> 
+			</lifecycleMappingMetadata> </configuration> </plugin> </plugins> </pluginManagement> -->
+	</build>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>onejar-maven-plugin.googlecode.com</id>
+			<url>http://onejar-maven-plugin.googlecode.com/svn/mavenrepo</url>
+		</pluginRepository>
+	</pluginRepositories>
+</project>

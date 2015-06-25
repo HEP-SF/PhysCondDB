@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+	<context:spring-configured/>
+	<context:annotation-config/>
+	<context:component-scan
+		base-package="conddb.cli,conddb.client,conddb.utils.json,conddb.cli.action,conddb.client.actions" />
+    <context:property-placeholder location="classpath:/spring/cli.properties"/>
+
+<!-- This does not work with maven assembly plugin -->
+    <util:properties id="restProperties"
+                      location="conddb/client/ws.properties" />
+                     
+	<bean id="restTemplate" class="org.springframework.web.client.RestTemplate">
+		<property name="messageConverters">
+			<list>
+				<ref bean="jsonConverter" />
+			</list>
+		</property>
+	</bean>
+
+	<!-- This is needed in case of xml only configuration... but it works only with
+	maven assembly plugin? 
+	No now also with shade plugin...this is worrying -->
+<!-- 	<bean id="clibase" class="conddb.cli.CliBase" abstract="true"> -->
+<!-- 		<property name="restclient" ref="restTemplate" /> -->
+<!-- 		<property name="clijsonprinter" ref="cliJsonPrinter" /> -->
+<!-- 	</bean> -->
+<!-- 	<bean class="conddb.cli.action.TestAction" scope="prototype" parent="clibase"> -->
+<!-- 		<property name="tag" value="TESTTAG"/> -->
+<!-- 	</bean> -->
+<!-- 	<bean class="conddb.client.actions.FindDataAction" scope="prototype" parent="clibase"> -->
+<!-- 	</bean> -->
+
+<!-- This one is not needed -->
+<!-- 	<bean id="cliJsonPrinter" class="conddb.cli.CliJsonPrinter"/> --> 
+	
+	<!-- Timestamp serializer and deserializer formatting methods -->
+	<bean id="timestampFormat" class="conddb.utils.json.serializers.TimestampFormat">
+		<property name="pattern" value="${physconddb.time.format}"/>
+	</bean>
+	<bean class="conddb.cli.action.AtestClass" scope="prototype">
+		<property name="tsformat" ref="timestampFormat" />
+	</bean>
+
+<!-- 	<bean id="objectMapper" class="conddb.utils.json.HibernateAwareObjectMapper"></bean> -->
+
+	<bean id="jsonConverter"
+		class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+		<property name="supportedMediaTypes" value="application/json" />
+		<property name="objectMapper"> 
+			<ref bean="hibernateAwareObjectMapper"/>
+		</property>
+	</bean>
+</beans>
