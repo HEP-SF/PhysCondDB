@@ -1,6 +1,7 @@
 package conddb.dao.admin.controllers;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -76,11 +77,39 @@ public class GlobalTagAdminController {
 	public void deleteGlobalTag(String sourcegtag)
 			throws ConddbServiceException {
 		GlobalTag sgtag = this.gtagRepository
-				.findByNameAndFetchTagsEagerly(sourcegtag);
+				.findOne(sourcegtag);
+		int ntags = 0;
+		if (sgtag != null && sgtag.getGlobalTagMaps() != null) {
+			ntags = sgtag.getGlobalTagMaps().size();
+		} else {
+			log.info("Cannot find global tag corresponding to "+sourcegtag);
+			throw new ConddbServiceException("Null global tag retrieved");
+		}
 		this.log.debug("Retrieved globaltag for removal operation: " + sgtag
-				+ " linked to " + sgtag.getGlobalTagMaps().size() + " tags");
-				
+				+ " linked to " + ntags + " tags: cascade deleting ALL tags and iovs ");
 		this.gtagRepository.delete(sgtag);
+	}
+	
+	@Transactional
+	public void deleteTagLike(String tag)
+			throws ConddbServiceException {
+		List<Tag> stags = this.tagRepository
+				.findByNameLike(tag);
+		int ntags = 0;
+		if (stags != null) {
+			ntags = stags.size();
+		} else {
+			log.info("Cannot find tags corresponding to "+tag);
+			throw new ConddbServiceException("Null tag list retrieved");
+		}
+		log.debug("Removing list of "+ntags+" tags....");
+		int counter = 0;
+		for (Tag atag : stags) {
+			this.log.debug("Retrieved tag for removal operation: " + atag);
+			this.tagRepository.delete(atag);
+			counter++;
+		}
+		log.info("Remove "+counter+" tags");
 	}
 
 }

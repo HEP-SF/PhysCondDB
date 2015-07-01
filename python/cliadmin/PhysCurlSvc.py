@@ -129,6 +129,30 @@ class PhysRestConnection:
              print 'An error occurred: ', errstr
 
 # This function should set appropriate values for POST type
+    def postAction(self, actionparams):
+        print "Set data using url ", self.__url
+# Sets request method to POST,
+# Content-Type header to application/x-www-form-urlencoded
+# and data to send in request body.
+#        self.__curl.setopt(self.__curl.POST,1)
+        print actionparams
+        self.__curl.setopt(self.__curl.POSTFIELDS,actionparams)
+        self.__curl.setopt(self.__curl.VERBOSE, True)
+        self.__curl.setopt(self.__curl.TIMEOUT, 30)
+        try:
+            self.__curl.perform()
+            response = self.__curl.getinfo(self.__curl.RESPONSE_CODE)
+        # HTTP response code, e.g. 200.
+            print('Status: %d' % response)
+        # Elapsed time for the transfer.
+            print('Status: %f' % self.__curl.getinfo(self.__curl.TOTAL_TIME))
+            return { 'response' : response }
+        except pycurl.error, error:
+             errno, errstr = error
+             print 'An error occurred: ', errstr
+
+
+# This function should set appropriate values for POST type
     def postPayload(self, params):
         print "Post file using url ", self.__url
         post_data = [("file", (self.__curl.FORM_FILE, params['file'])),
@@ -244,12 +268,13 @@ class PhysCurl(object):
     '''
     classdocs
     '''
-
-    def addGlobalTag(self,params,servicebase="/conddbweb/globaltag/add"):
+    baseurl='/conddbweb/rest/expert'
+    userbaseurl='/conddbweb/rest/user'
+    def addGlobalTag(self,params,servicebase="/globaltag/add"):
 
         print 'Add global tag using input '
         print params
-        url = servicebase
+        url = (self.baseurl + servicebase)
         self.__curl.setUrl(url)
         self.__curl.setHeader(['Content-Type:application/json', 'Accept:application/json'])
 #      globalTag = GlobalTag(params)
@@ -258,11 +283,11 @@ class PhysCurl(object):
         print jsonobj
         return self.__curl.postData(jsonobj)
 
-    def addTag(self,params,servicebase="/conddbweb/tag/add"):
+    def addTag(self,params,servicebase="/tag/add"):
 
         print 'Add tag using input '
         print params
-        url = servicebase
+        url = (self.baseurl + servicebase)
         self.__curl.setUrl(url)
         self.__curl.setHeader(['Content-Type:application/json', 'Accept:application/json'])
         print 'Try to serialize in json '
@@ -270,11 +295,11 @@ class PhysCurl(object):
         print jsonobj
         return self.__curl.postData(jsonobj)
 
-    def addIov(self,params,servicebase="/conddbweb/iov/add"):
+    def addIov(self,params,servicebase="/iov/add"):
 
         print 'Add iov using input '
         print params
-        url = servicebase
+        url = (self.baseurl + servicebase)
         self.__curl.setUrl(url)
         self.__curl.setHeader(['Content-Type:application/json', 'Accept:application/json'])
         print 'Try to serialize in json '
@@ -282,36 +307,36 @@ class PhysCurl(object):
         print jsonobj
         return self.__curl.postData(jsonobj)
 
-    def addPayload(self,params,servicebase="/conddbweb/uploadPayload"):
+    def addPayload(self,params,servicebase="/uploadPayload"):
 
         print 'Add payload using input '
         print params
-        url = servicebase
+        url = (self.baseurl + servicebase)
         self.__curl.setUrl(url)
         self.__curl.setHeader(['Content-Type:multipart/form'])
         return self.__curl.postPayload(params)
 
-    def getGlobalTag(self,params,servicebase="/conddbweb/globaltag"):
+    def getGlobalTag(self,params,servicebase="/globaltag"):
 
         print 'Search global tag using parameter '
         print params
-        url = servicebase
+        url = (self.userbaseurl + servicebase)
         params = [('name',params)]
         pairs = urllib.urlencode(params)
         self.__curl.setUrl(url+'?'+pairs)
         return self.__curl.getData()
 
-    def getPayload(self,params,servicebase="/conddbweb/payload"):
+    def getPayload(self,params,servicebase="/payload"):
 
         print 'Search payload using parameter '
         print params
-        url = servicebase
+        url = (self.userbaseurl + servicebase)
         params = [('hash',params)]
 #        pairs = urllib.urlencode(params)
         self.__curl.setUrl(url+'/'+params)
         return self.__curl.getData()
 
-    def find(self,params,servicebase="/conddbweb"):
+    def find(self,params,servicebase="/conddbweb/rest/user"):
 
         print 'Search ',params['type'],' using parameter ',params['id']
         url = servicebase+'/'+params['type']+'/'+params['id']+params['opt']
@@ -323,7 +348,7 @@ class PhysCurl(object):
         self.__curl.setUrl(urlquoted)
         return self.__curl.getData()
 
-    def delete(self,params,servicebase="/conddbweb/admin"):
+    def delete(self,params,servicebase="/conddbweb/rest/admin"):
 
         print 'Search ',params['type'],' using parameter ',params['id']
         url = servicebase
@@ -332,24 +357,33 @@ class PhysCurl(object):
             pairs = urllib.urlencode(urlparams)
             self.__curl.setUrl(url+'/deleteGlobalTag?'+pairs)
             return self.__curl.deleteData()
+        elif params['type'] == 'tag':
+            urlparams = [('sourcetag',params['id'])]
+            pairs = urllib.urlencode(urlparams)
+            self.__curl.setUrl(url+'/deleteTagLike?'+pairs)
+            return self.__curl.deleteData()            
         else:
             print 'Cannot delete object type ',params['type']
 
-    def traceGlobalTags(self,params,servicebase="/conddbweb/gtagliketrace"):
-
-        url = servicebase
+    def traceGlobalTags(self,params,servicebase="/globaltag"):
+        print 'Not supported anymore'
+        url = (self.userbaseurl + servicebase)
         params = [('namepattern',params)]
         pairs = urllib.urlencode(params)
         self.__curl.setUrl(url+'?'+pairs)
         return self.__curl.getData()
 
-    def mapTag2GlobalTag(self,tagname,gtagname,servicebase="/conddbweb/mapTagToGtag"):
-        url = servicebase
-        params = [('globaltagname', gtagname),('tagname' , tagname)]
+    def mapTag2GlobalTag(self,tagname,gtagname,servicebase="/map/tag2gtag"):
+
+        url = (self.baseurl + servicebase)
+#        url = servicebase
+        params = (('globaltagname', gtagname),('tagname' , tagname))
         pairs = urllib.urlencode(params)
-        self.__curl.setUrl(url)
+        print 'Use arguments ',pairs
+        self.__curl.setUrl(url+'?'+pairs)
+#        self.__curl.setUrl(url)
         self.__curl.setHeader(['Content-Type:application/x-www-form-urlencoded'])
-        return self.__curl.postData(pairs)
+        return self.__curl.postAction(pairs)
         
     def setUserPassword(self,user,passwd):
         self.__curl.setUserPassword(user, passwd)

@@ -14,14 +14,15 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<!-- Web -->
+		<!-- Web Java -->
 		<jsp.version>2.2</jsp.version>
 		<jstl.version>1.2</jstl.version>
 		<!-- <servlet.version>2.5</servlet.version> -->
 		<servlet.version>3.1.0</servlet.version>
+		<jaxrs.version>2.0.1</jaxrs.version>
 
 		<!-- Servers -->
-		<jetty.version>9.2.7.v20150116</jetty.version>
+		<jetty.version>9.3.0.v20150612</jetty.version>
 		<!-- try versions of jetty: 9.2.7.v20150116, 9.3.0.M1 -->
 		<!-- Spring -->
 		<!-- <spring-framework.version>3.2.3.RELEASE</spring-framework.version> -->
@@ -173,6 +174,12 @@
 			<version>${jsp.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>javax.ws.rs-api</artifactId>
+			<version>${jaxrs.version}</version>
+		</dependency>
+
 
 		<!-- Logging with SLF4J & LogBack -->
 		<!-- <dependency> <groupId>org.slf4j</groupId> <artifactId>slf4j-api</artifactId> 
@@ -297,6 +304,12 @@
 			<artifactId>hamcrest-all</artifactId>
 			<version>1.3</version>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>io.springfox</groupId>
+					<artifactId>springfox-swagger2</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<!-- Embedded web servers <dependency> <groupId>org.eclipse.jetty</groupId> 
 			<artifactId>jetty-webapp</artifactId> <version>${jetty.version}</version> 
@@ -304,12 +317,8 @@
 		<!-- Jetty embedded <dependency> <groupId>org.eclipse.jetty</groupId> <artifactId>jetty-servlet</artifactId> 
 			<version>${jetty.version}</version> </dependency> -->
 
-	<!-- Swagger springfox documentation for REST API -->
-		<dependency>
-			<groupId>io.springfox</groupId>
-			<artifactId>springfox-swagger2</artifactId>
-			<version>2.0.0</version>
-		</dependency>
+		<!-- Swagger springfox documentation for REST API <dependency> <groupId>io.springfox</groupId> 
+			<artifactId>springfox-swagger2</artifactId> <version>2.0.0</version> </dependency> -->
 	</dependencies>
 
 	<repositories>
