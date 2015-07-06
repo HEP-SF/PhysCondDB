@@ -8,6 +8,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import conddb.data.ErrorMessage;
@@ -20,8 +22,12 @@ import conddb.data.ErrorMessage;
 @Component
 public class CondDBExceptionMapper implements ExceptionMapper<ConddbWebException> {
 
+	private Logger log = LoggerFactory.getLogger(this.getClass());
+
 	@Override
 	public Response toResponse(ConddbWebException ex) {
+		
+		log.debug("Calling Exception mapper on exception "+ex.getMessage());
 		return Response.status(ex.getStatus())
 				.entity(new ErrorMessage(ex.getMessage()))
 				.type(MediaType.APPLICATION_JSON).

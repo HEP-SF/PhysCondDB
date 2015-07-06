@@ -32,6 +32,7 @@ import io.swagger.models.Info;
 
 
 import org.glassfish.jersey.jackson.JacksonFeature;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 //import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
@@ -47,6 +48,7 @@ import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import conddb.utils.json.HibernateAwareObjectMapper;
 import conddb.web.controllers.CondAdminWebController;
 import conddb.web.controllers.CondExpertWebController;
+import conddb.web.controllers.CondPayloadWebController;
 import conddb.web.controllers.CondWebController;
 import conddb.web.exceptions.CondDBExceptionMapper;
 
@@ -73,6 +75,7 @@ public class JaxRsApplication extends ResourceConfig {
 		register(CondWebController.class);
 		register(CondExpertWebController.class);
 		register(CondAdminWebController.class);
+		register(CondPayloadWebController.class);
 
 		// register json provider
 		log.info("Register JacksonJsonProvide using object mapper "+hibernateAwareObjectMapper);
@@ -86,6 +89,7 @@ public class JaxRsApplication extends ResourceConfig {
         register(CondDBExceptionMapper.class);
 		// register features
 		register(JacksonFeature.class);
+		register(MultiPartFeature.class);
 		
 		initSwagger();
 

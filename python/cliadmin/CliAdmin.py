@@ -193,7 +193,15 @@ class PhysDBDriver():
             gtagname = self.args[1]
             mapt = restserver.mapTag2GlobalTag(tagname,gtagname)
             print mapt
-            
+
+        elif (self.action=='MAKEHASH'):
+            file = self.args[0]
+            #f = open(file,"r")
+            #data = json.loads(f.read())
+            dict = { 'file' : file }
+            result = restserver.makehash(dict)
+            print result
+
         elif (self.action=='ADDFROMFILE'):
             resp="No response"
             try:

@@ -52,89 +52,102 @@ public class CondExpertWebController {
 	@Path("/globaltag/add")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public GlobalTag insertGlobalTag(GlobalTag jsonString) throws Exception {
-		this.log.info("CondExpertWebController processing request for insertGlobalTag ...");
-		GlobalTag gtag = this.globalTagController.insertGlobalTag(jsonString);
-		return gtag;
+	public GlobalTag insertGlobalTag(GlobalTag jsonString) throws ConddbWebException {
+		try {
+			this.log.info("CondExpertWebController processing request for insertGlobalTag ...");
+			GlobalTag gtag = this.globalTagController.insertGlobalTag(jsonString);
+			return gtag;
+		} catch (Exception e) {
+			throw new ConddbWebException(e);
+		}
 	}
 
 	@PUT
 	@Path("/globaltag/update/{id}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public GlobalTag updateGlobalTag(@PathParam("id") String id,
-			GlobalTag jsonString) throws Exception {
-		this.log.info("CondExpertWebController processing request for updateGlobalTag ...");
-		GlobalTag stored = this.globalTagController.getGlobalTag(id);
-		if (stored != null) {
-			if (jsonString.getDescription() != null) {
-				stored.setDescription(jsonString.getDescription());
+	public GlobalTag updateGlobalTag(@PathParam("id") String id, GlobalTag jsonString) throws ConddbWebException {
+		try {
+			this.log.info("CondExpertWebController processing request for updateGlobalTag ...");
+			GlobalTag stored = this.globalTagController.getGlobalTag(id);
+			if (stored != null) {
+				if (jsonString.getDescription() != null) {
+					stored.setDescription(jsonString.getDescription());
+				}
+				if (jsonString.getLockstatus() != null) {
+					stored.setLockstatus(jsonString.getLockstatus());
+				}
+				if (jsonString.getRelease() != null) {
+					stored.setRelease(jsonString.getRelease());
+				}
+				if (jsonString.getSnapshotTime() != null) {
+					stored.setSnapshotTime(jsonString.getSnapshotTime());
+				}
+				GlobalTag gtag = this.globalTagController.insertGlobalTag(stored);
+				return gtag;
 			}
-			if (jsonString.getLockstatus() != null) {
-				stored.setLockstatus(jsonString.getLockstatus());
-			}
-			if (jsonString.getRelease() != null) {
-				stored.setRelease(jsonString.getRelease());
-			}
-			if (jsonString.getSnapshotTime() != null) {
-				stored.setSnapshotTime(jsonString.getSnapshotTime());
-			}
-			GlobalTag gtag = this.globalTagController.insertGlobalTag(stored);
-			return gtag;
+			return null;
+		} catch (Exception e) {
+			throw new ConddbWebException(e);
 		}
-		return null;
 	}
 
 	@POST
 	@Path("/tag/add")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Tag insertTag(Tag jsonString) throws Exception {
-		this.log.info("CondExpertWebController processing request for insertTag ...");
-		Tag tag = this.globalTagController.insertTag(jsonString);
-		return tag;
+	public Tag insertTag(Tag jsonString) throws ConddbWebException {
+		try {
+			this.log.info("CondExpertWebController processing request for insertTag ...");
+			Tag tag = this.globalTagController.insertTag(jsonString);
+			return tag;
+		} catch (Exception e) {
+			throw new ConddbWebException(e);
+		}
 	}
 
 	@POST
 	@Path("/map/add")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public GlobalTagMap insertGlobalTagMap(GlobalTagMap jsonString)
-			throws Exception {
-		this.log.info("CondExpertWebController processing request for insertGlobalTagMap ...");
-		GlobalTagMap gtagmap = this.globalTagController
-				.insertGlobalTagMap(jsonString);
-		return gtagmap;
+	public GlobalTagMap insertGlobalTagMap(GlobalTagMap jsonString) throws ConddbWebException {
+		try {
+			this.log.info("CondExpertWebController processing request for insertGlobalTagMap ...");
+			GlobalTagMap gtagmap = this.globalTagController.insertGlobalTagMap(jsonString);
+			return gtagmap;
+		} catch (Exception e) {
+			throw new ConddbWebException(e);
+		}
 	}
 
 	@POST
 	@Path("/iov/add")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public Iov insertIov(Iov jsonString) throws Exception {
-		this.log.info("CondExpertWebController processing request for insertIov using tag..."
-				+ jsonString.getTag().getName());
-		Iov iov = this.iovController.insertIov(jsonString);
-		return iov;
+	public Iov insertIov(Iov jsonString) throws ConddbWebException {
+		try {
+			this.log.info("CondExpertWebController processing request for insertIov using tag..."
+					+ jsonString.getTag().getName());
+			Iov iov = this.iovController.insertIov(jsonString);
+			return iov;
+		} catch (Exception e) {
+			throw new ConddbWebException(e);
+		}
 	}
 
 	@POST
 	@Path("/map/tag2gtag")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public GlobalTagMap mapTagToGtag(
-			@QueryParam(value = "globaltagname") String globaltagname,
-			@QueryParam(value = "tagname") String tagname)
-			throws ConddbWebException {
+	public GlobalTagMap mapTagToGtag(@QueryParam(value = "globaltagname") String globaltagname,
+			@QueryParam(value = "tagname") String tagname) throws ConddbWebException {
 		try {
-			this.log.info("CondExpertWebController processing request for mapTagToGtag ..."
-					+ globaltagname + " " + tagname);
+			this.log.info(
+					"CondExpertWebController processing request for mapTagToGtag ..." + globaltagname + " " + tagname);
 			GlobalTag gtag = globalTagController.getGlobalTag(globaltagname);
 			List<Tag> list = clientservice.getTagOne(tagname);
 			Tag atag = list.get(0);
-			this.log.info("CondExpertWebController processing request for mapTagToGtag using "
-					+ gtag + " " + atag);
-			GlobalTagMap gtagmap = this.globalTagController.mapTagToGlobalTag(
-					atag, gtag);
+			this.log.info("CondExpertWebController processing request for mapTagToGtag using " + gtag + " " + atag);
+			GlobalTagMap gtagmap = this.globalTagController.mapTagToGlobalTag(atag, gtag);
 			return gtagmap;
 		} catch (Exception e) {
 			throw new ConddbWebException(e);
