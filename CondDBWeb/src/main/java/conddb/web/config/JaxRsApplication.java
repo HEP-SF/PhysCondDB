@@ -18,18 +18,6 @@
 package conddb.web.config;
 
 import javax.inject.Inject;
-import javax.ws.rs.ApplicationPath;
-
-import io.swagger.jaxrs.config.BeanConfig;
-import io.swagger.models.Info;
-
-
-
-
-
-
-
-
 
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
@@ -38,9 +26,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
@@ -51,6 +36,8 @@ import conddb.web.controllers.CondExpertWebController;
 import conddb.web.controllers.CondPayloadWebController;
 import conddb.web.controllers.CondWebController;
 import conddb.web.exceptions.CondDBExceptionMapper;
+import io.swagger.jaxrs.config.BeanConfig;
+import io.swagger.models.Info;
 
 
 /**

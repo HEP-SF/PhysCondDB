@@ -73,6 +73,10 @@ class PhysDBDriver():
         print "       <object type>      : this will ask directly for fields "
         print "       <object type> help : this will dump needed fields "
         print "       Time format to use in timestamp types: YYYYMMddHHmmss:GMT, e.g. 20141130100000:GMT"
+        print " - UPD <object type> [globaltag, tag, iov, payload] <json content> "
+        print "       <object type>      : this will ask directly for fields "
+        print "       <object type> help : this will dump needed fields "
+        print "       Time format to use in timestamp types: YYYYMMddHHmmss:GMT, e.g. 20141130100000:GMT"
         print " "
         print " - MAPTAG2GLOBALTAG <tag name> <globaltag name>"
         print " "
@@ -230,6 +234,41 @@ class PhysDBDriver():
                 print "object not found..."
             print resp
 
+        elif (self.action =='UPD'):
+            try:
+                print 'Found N arguments ',len(self.args)
+                object=self.args[0]
+                data = {}
+                print 'determine action...'
+                if len(self.args) == 2:
+                    f = open(self.args[1],"r")
+
+                try:
+                    print 'Load data using ',self.args[1]
+                    data = json.loads(f.read())
+                except:
+                    print 'Error in loading json...'
+                    print 'For Global Tags use : '
+                    print GlobalTag({}).help()
+                    print 'For Tags use : '
+                    print Tag({}).help()
+                    return
+            
+                if data is None:
+                    print "Missing data for ADD method"
+                    return
+            
+            except ValueError as e:
+                print "error({0}): {1}".format(e.errno, e.strerror)
+                print "problem uploading or missing arguments: ", sys.exc_info()[0]
+                raise
+            
+            if (object == "globaltag"):
+                resp = restserver.updGlobalTag(data)
+            else:
+                print "object not found..."
+                print resp
+                    
         elif (self.action =='ADD'):
             try:
                 print 'Found N arguments ',len(self.args)

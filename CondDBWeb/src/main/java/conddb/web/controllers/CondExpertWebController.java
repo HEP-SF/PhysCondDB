@@ -62,14 +62,14 @@ public class CondExpertWebController {
 		}
 	}
 
-	@PUT
-	@Path("/globaltag/update/{id}")
+	@POST
+	@Path("/globaltag/update")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public GlobalTag updateGlobalTag(@PathParam("id") String id, GlobalTag jsonString) throws ConddbWebException {
+	public GlobalTag updateGlobalTag(GlobalTag jsonString) throws ConddbWebException {
 		try {
 			this.log.info("CondExpertWebController processing request for updateGlobalTag ...");
-			GlobalTag stored = this.globalTagController.getGlobalTag(id);
+			GlobalTag stored = this.globalTagController.getGlobalTag(jsonString.getName());
 			if (stored != null) {
 				if (jsonString.getDescription() != null) {
 					stored.setDescription(jsonString.getDescription());
@@ -83,12 +83,15 @@ public class CondExpertWebController {
 				if (jsonString.getSnapshotTime() != null) {
 					stored.setSnapshotTime(jsonString.getSnapshotTime());
 				}
+				if (jsonString.getValidity() != null) {
+					stored.setValidity(jsonString.getValidity());
+				}
 				GlobalTag gtag = this.globalTagController.insertGlobalTag(stored);
 				return gtag;
 			}
 			return null;
 		} catch (Exception e) {
-			throw new ConddbWebException(e);
+			throw new ConddbWebException(e.getMessage());
 		}
 	}
 

@@ -313,6 +313,19 @@ class PhysCurl(object):
         print jsonobj
         return self.__curl.postData(jsonobj)
 
+    def updGlobalTag(self,params,servicebase="/globaltag/update"):
+    
+        print 'Update global tag using input '
+        print params
+        url = (self.baseurl + servicebase)
+        self.__curl.setUrl(url)
+        self.__curl.setHeader(['Content-Type:application/json', 'Accept:application/json'])
+        #      globalTag = GlobalTag(params)
+        print 'Try to serialize in json '
+        jsonobj = json.dumps(params)
+        print jsonobj
+        return self.__curl.postData(jsonobj)
+
     def addTag(self,params,servicebase="/tag/add"):
 
         print 'Add tag using input '
