@@ -110,6 +110,39 @@ public class CondExpertWebController {
 	}
 
 	@POST
+	@Path("/tag/update")
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Tag updateTag(Tag jsonString) throws ConddbWebException {
+		try {
+			this.log.info("CondExpertWebController processing request for updateTag ...");
+			Tag stored = this.globalTagController.getTag(jsonString.getName());
+			if (stored != null) {
+				if (jsonString.getDescription() != null) {
+					stored.setDescription(jsonString.getDescription());
+				}
+				if (jsonString.getObjectType() != null) {
+					stored.setObjectType(jsonString.getObjectType());
+				}
+				if (jsonString.getTimeType() != null) {
+					stored.setTimeType(jsonString.getTimeType());
+				}
+				if (jsonString.getSynchronization() != null) {
+					stored.setSynchronization(jsonString.getSynchronization());
+				}
+				if (jsonString.getEndOfValidity() != null) {
+					stored.setEndOfValidity(jsonString.getEndOfValidity());
+				}
+				Tag atag = this.globalTagController.insertTag(stored);
+				return atag;
+			}
+			return null;
+		} catch (Exception e) {
+			throw new ConddbWebException(e.getMessage());
+		}
+	}
+
+	@POST
 	@Path("/map/add")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })

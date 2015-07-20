@@ -101,6 +101,17 @@ public class GlobalTagController {
 		return gtagRepository.save(entity);
 	}
 	
+	@ProfileExecution
+	public Tag getTag(String tagname)
+			throws ConddbServiceException {
+
+		Tag atag = this.tagRepository
+				.findByName(tagname);
+		this.log.debug("Found tag " + atag);
+
+		return atag;
+	}
+
 	@Transactional
 	public Tag insertTag(Tag entity) throws ConddbServiceException {
 		return tagRepository.save(entity);
