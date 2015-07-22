@@ -1,0 +1,58 @@
+<div class="container">
+	<div ng-controller="TagTraceListCtrl">
+		<p>List of tags associated to {{selectedglobaltagname}}</p>
+		<button class="btn btn-sm" popover-placement="top"
+			popover="{{selectedglobaltagname}}" type="button">
+			<i class="glyphicon glyphicon-link"></i>
+		</button>
+		<a ng-href="#/maps/{{selectedglobaltagname}}">Update Mappings</a><br> 
+		<label for="items">items
+			by page</label> <input class="input-sm form-control" name="items" id="items"
+			type="number" ng-model="itemsByPage" />
+
+		<table st-table="displayedTagsCollection"
+			st-safe-src="selectedtracetags" class="table table-striped"
+			show-filter="true" export-csv="csv">
+			<thead>
+				<tr>
+					<th st-sort="name">name</th>
+					<th st-sort="insertionTime">insertion time</th>
+					<th st-sort="modificationTime">modification time</th>
+					<th st-sort="endOfvalidity">end of validity</th>
+					<th st-sort="lastValidatedTime">last valid time</th>
+					<th st-sort="description">description</th>
+					<th st-sort="synchronization">synchronization</th>
+					<th st-sort="objectType">object type</th>
+					<th st-sort="timeType">time type</th>
+				</tr>
+				<tr>
+					<th colspan="5"><input st-search="" class="form-control"
+						placeholder="global search ..." type="text" /></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr st-select-row="atag" st-select-mode="single"
+					ng-repeat="atag in displayedTagsCollection">
+					<td data-title="'Name'">{{atag.systemTag.name}}</td>
+					<td data-title="'Insertion Time'">{{atag.systemTag.insertionTime}}</td>
+					<td data-title="'Modification Time'">{{atag.systemTag.modificationTime}}</td>
+					<td data-title="'End of Validity'">{{atag.systemTag.endOfValidity}}</td>
+					<td data-title="'Last Validated Time'">{{atag.systemTag.lastValidatedTime}}</td>
+					<td data-title="'Description'">{{atag.systemTag.description}}</td>
+					<td data-title="'Synchonization'">{{atag.systemTag.synchronization}}</td>
+					<td data-title="'Object Type'">{{atag.systemTag.objectType}}</td>
+					<td data-title="'Time Type'">{{atag.systemTag.timeType}}</td>
+				</tr>
+			</tbody>
+			<tfoot>
+				<tr>
+					<td colspan="5" class="text-center">
+						<div st-pagination="" st-items-by-page="itemsByPage"
+							st-displayed-pages="displayedPages"></div>
+					</td>
+				</tr>
+			</tfoot>
+		</table>
+	</div>
+</div>
+

@@ -1,0 +1,172 @@
+<div class="container">
+	<h2>Global Tag Management page</h2>
+	<hr>
+	<div ng-controller="GlobalTagListCtrl">
+		<label class="col-sm-2 control-label" for="items">items by
+			page</label> <input class="input-sm form-control" name="items" id="items"
+			type="number" ng-model="itemsByPage" />
+		<hr>
+		<input type="submit" ng-click="refresh()" value="Refresh" /> <input
+			type="submit" ng-click="search()" value="Search" />
+
+		<table st-table="displayedCollection" st-safe-src="globaltags"
+			class="table table-striped" show-filter="true" export-csv="csv">
+
+			<thead>
+				<tr>
+					<th>edit</th>
+					<th st-sort="name">name</th>
+					<th st-sort="insertionTime">insertion time</th>
+					<th st-sort="description">description</th>
+					<th st-sort="validity">validity</th>
+					<th st-sort="release">release</th>
+					<th st-sort="lockstatus">lock</th>
+					<th st-sort="snapshotTime">snapshot time</th>
+					<th></th>
+					<th></th>
+					<th></th>
+				</tr>
+				<tr>
+					<th colspan="5"><input st-search="" class="form-control"
+						placeholder="global search ..." type="text" /></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr st-select-row="gtag" st-select-mode="single"
+					ng-repeat="gtag in displayedCollection">
+					<td>
+						<button class="btn" ng-click="edit(gtag)">
+							<span class="glyphicon glyphicon-pencil"></span>Edit
+						</button>
+					</td>
+
+					<td data-title="'Name'">{{gtag.name}}</td>
+					<td data-title="'Insertion Time'">{{gtag.insertionTime}}</td>
+					<td data-title="'Description'">{{gtag.description}}</td>
+					<td data-title="'Validity'">{{gtag.validity}}</td>
+					<td data-title="'Release'">{{gtag.release}}</td>
+					<td data-title="'Lock'">{{gtag.lockstatus}}</td>
+					<td data-title="'SnapshotTime'">{{gtag.snapshotTime}}</td>
+					<td>
+						<button class="btn btn-sm" popover-placement="top"
+							popover="Trace tags associated to {{gtag.name}}" type="button">
+							<i class="glyphicon glyphicon-eye-open"></i>
+						</button> <a ng-href="#/tracetags/{{gtag.name}}">trace</a>
+					</td>
+					<td>
+						<button class="btn btn-sm" popover-placement="top"
+							popover="Modify {{gtag.name}} mappings" type="button">
+							<i class="glyphicon glyphicon-link"></i>
+						</button> <a ng-href="#/maps/{{gtag.name}}">map</a>
+					</td>
+					<td>
+						<button popover="Remove {{gtag.name}}" type="button"
+							ng-click="remove(gtag)" class="btn btn-sm btn-danger">
+							<i class="glyphicon glyphicon-remove-circle"></i>
+						</button>
+					</td>
+				</tr>
+			</tbody>
+			<tfoot>
+				<tr>
+					<td colspan="5">
+						<div class="text-center" st-pagination=""
+							st-items-by-page="itemsByPage"
+							st-displayed-pages="displayedPages"></div>
+					</td>
+				</tr>
+			</tfoot>
+		</table>
+	</div>
+	<hr>
+	<div ng-controller="GlobalTagFormCtrl">
+		<button class="btn btn-success" ng-click="add('new')">
+			<span class="glyphicon glyphicon-plus-sign"></span> Add GlobalTag
+		</button>
+		<hr>
+
+		<h3 ng-init="edit = true" ng-show="edit">Create New Global Tag:</h3>
+		<h3 ng-init="edit = true" ng-hide="edit">Edit Global Tag:</h3>
+
+		<form novalidate class="form-horizontal">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">GlobalTag Name:</label>
+				<div class="col-sm-10">
+					<input type="text" ng-model="globaltag.name" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">Description:</label>
+				<div class="col-sm-10">
+					<input type="text" ng-model="globaltag.description" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">Release:</label>
+				<div class="col-sm-10">
+					<input type="text" ng-model="globaltag.release" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">Validity:</label>
+				<div class="col-sm-10">
+					<input type="text" ng-model="globaltag.validity" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">SnapshotTime:</label>
+				<div class="col-sm-10">
+					<div class="dropdown">
+						<a class="dropdown-toggle my-toggle-select" id="dLabel"
+							role="button" data-toggle="dropdown" data-target="#" href="">
+							<div class="input-append">
+								<input type="text" class="input-large"
+									data-ng-model="globaltag.snapshotTime"><span class="add-on"><i
+									class="glyphicon glyphicon-calendar"></i></span>
+							</div>
+						</a>
+						<ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+							<datetimepicker data-ng-model="globaltag.snapshotTime"
+								data-datetimepicker-config="{ dropdownSelector: '.my-toggle-select' }"></datetimepicker>
+						</ul>
+					</div>
+					</div>
+					<!-- 					<input type="text" ng-model="globaltag.snapshotTime" /> -->
+					<!-- 					<datetimepicker data-ng-model="snapshottime" data-on-set-time="onTimeSet(newDate, oldDate)"></datetimepicker> -->
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label">Status:</label>
+				<div class="col-sm-10">
+					<input type="radio" ng-model="globaltag.lockstatus"
+						value="unlocked" />unlocked <input type="radio"
+						ng-model="globaltag.lockstatus" value="locked" />locked
+				</div>
+			</div>
+		</form>
+		<hr>
+
+		<!-- 		<button class="btn" ng-click="add(globaltag)"> -->
+		<!-- 			<span class="glyphicon glyphicon-plus-sign"></span>Add -->
+		<!-- 		</button> -->
+		<button class="btn" ng-click="save(globaltag)">
+			<span class="glyphicon glyphicon-saved"></span>Save
+		</button>
+		<button class="btn" ng-click="clean()">
+			<span class="glyphicon glyphicon-erase"></span>Clean Form
+		</button>
+		<button class="btn" ng-click="reset()">
+			<span class="glyphicon glyphicon-step-backward"></span>Reset
+		</button>
+		<br> Debug: <input type="checkbox" ng-model="checked"
+			aria-label="Toggle ngShow">
+		<div class="check-element animate-hide" ng-show="checked">
+			<span class="glyphicon glyphicon-thumbs-up"></span> check values of
+			scope variables.
+			<pre>form = {{globaltag | json}}</pre>
+			<pre>master = {{master | json}}</pre>
+		</div>
+	</div>
+
+
+</div>
+

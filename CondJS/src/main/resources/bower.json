@@ -1,0 +1,18 @@
+{
+  "name": "CondDBJS",
+  "version": "1.0.0",
+  "main": "app/css/app.css",
+  "ignore": [
+    ".jshintrc",
+    "**/*.txt"
+  ],
+  "dependencies": {
+    "angular-bootstrap-datetimepicker": "latest",
+    "angular-resource": "latest",
+    "angular-strap": "~2.0.0"
+  },
+  "resolutions": {
+    "bootstrap": "~3.0.3",
+    "angular": "1.4.2"
+  }
+}
