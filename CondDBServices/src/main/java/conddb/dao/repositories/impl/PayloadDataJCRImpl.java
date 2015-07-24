@@ -106,12 +106,13 @@ public class PayloadDataJCRImpl implements PayloadDataBaseCustom {
 		try {
 			Resource resource = new FileSystemResource(rootpath + "/" + id);
 			log.info("Use resource filename "+resource.getFilename()+ " in path " + resource.getURI().getPath());
-			File outputfile = resource .getFile();
+			File outputfile = resource.getFile();
 			BufferedOutputStream stream = new BufferedOutputStream(
 					new FileOutputStream(outputfile));
 			stream.write(entity.getData());
 			stream.close();
 			log.info("Writing of file is ended");
+			entity.setUri(outputfile.getAbsolutePath());
 			return entity;
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block

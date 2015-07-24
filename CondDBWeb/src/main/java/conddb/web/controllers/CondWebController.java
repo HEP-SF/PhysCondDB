@@ -140,7 +140,7 @@ public class CondWebController {
 			} else if (method.equals("backtrace")) {
 				taglist = this.conddbsvc.getTagBackTrace(tagname);
 			} else {
-				String help = " use : /like, /one, /iovs instead !";
+				String help = " use : /like, /one, /iovs, /backtrace instead !";
 				throw new ConddbWebException("Cannot find method " + method+" "+help);
 			}
 			return taglist;

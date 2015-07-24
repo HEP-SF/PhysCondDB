@@ -20,33 +20,30 @@ package conddb.data.handler;
 import java.util.HashSet;
 import java.util.Set;
 
-import conddb.data.GlobalTag;
+import conddb.data.Iov;
 
 /**
  * @author formica
  *
  */
-public class GlobalTagHandler implements CondDBObjectHandler<GlobalTag, String> {
+public class IovHandler implements CondDBObjectHandler<Iov, Long> {
 
 	@Override
-	public GlobalTag cloneObject(GlobalTag source, String newname) {
-		GlobalTag newgtag = new GlobalTag(newname);
-		newgtag.setDescription(source.getDescription() + " - Cloned from "
-				+ source.getName());
-		newgtag.setValidity(source.getValidity());
-		newgtag.setRelease(source.getRelease());
-		newgtag.setSnapshotTime(source.getSnapshotTime());
-//		newgtag.setInsertionTime(new Timestamp(new Date().getTime()));
-		newgtag.setLockstatus(source.getLockstatus());
-		return newgtag;
+	public Iov cloneObject(Iov source, Long newid) {
+		Iov newiov = new Iov();
+		newiov.setSince(source.getSince());
+		newiov.setPayload(source.getPayload());
+		newiov.setSinceString(source.getSinceString());
+		
+		return newiov;
 	}
 
 	@Override
-	public Iterable<GlobalTag> cloneObjectList(Iterable<GlobalTag> source, String newname) {
-		Set<GlobalTag> newlist = new HashSet<GlobalTag>();
-		for (GlobalTag globalTag : source) {
-			GlobalTag newgtag = cloneObject(globalTag,newname);
-			newlist.add(newgtag);
+	public Iterable<Iov> cloneObjectList(Iterable<Iov> source, Long newid) {
+		Set<Iov> newlist = new HashSet<Iov>();
+		for (Iov iov : source) {
+			Iov newiov = cloneObject(iov,null);
+			newlist.add(newiov);
 		}
 		return newlist;
 	}

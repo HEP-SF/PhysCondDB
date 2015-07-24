@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -28,6 +29,7 @@ public class PayloadData implements java.io.Serializable {
 	private static final long serialVersionUID = 6319755970273574624L;
 	private String hash;
 	private byte[]  data;
+	private String uri;
 
 	public PayloadData() {
 		this.data = "EMPTY".getBytes();
@@ -57,5 +59,15 @@ public class PayloadData implements java.io.Serializable {
 	public void setData(byte[]  data) {
 		this.data = data;
 	}
+
+	@Transient
+	public String getUri() {
+		return uri;
+	}
+
+	public void setUri(String uri) {
+		this.uri = uri;
+	}
+	
 	
 }

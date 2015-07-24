@@ -326,6 +326,33 @@ class PhysCurl(object):
         print jsonobj
         return self.__curl.postData(jsonobj)
 
+    def cloneGlobalTag(self,sourcegtag,destgtag,servicebase="/globaltag/clone"):
+    
+        print 'Clone global tag using input '
+        url = (self.adminbaseurl + servicebase)
+        self.__curl.setUrl(url)
+        params = (('sourcegtag', sourcegtag),('destgtag' , destgtag))
+        pairs = urllib.urlencode(params)
+        print 'Use arguments ',pairs
+        self.__curl.setUrl(url+'?'+pairs)
+        #        self.__curl.setUrl(url)
+        self.__curl.setHeader(['Content-Type:application/x-www-form-urlencoded'])
+        return self.__curl.postAction(pairs)
+
+    def cloneTag(self,sourcetag,desttag,since,until,timetype,servicebase="/tag/clone"):
+    
+        print 'Clone tag using input '
+        url = (self.adminbaseurl + servicebase)
+        self.__curl.setUrl(url)
+        params = (('sourcetag', sourcetag),('desttag' , desttag),('from',since),('to',until),('timetype', timetype))
+        pairs = urllib.urlencode(params)
+        print 'Use arguments ',pairs
+        self.__curl.setUrl(url+'?'+pairs)
+        #        self.__curl.setUrl(url)
+        self.__curl.setHeader(['Content-Type:application/x-www-form-urlencoded'])
+        return self.__curl.postAction(pairs)
+
+
     def addTag(self,params,servicebase="/tag/add"):
 
         print 'Add tag using input '
@@ -393,10 +420,18 @@ class PhysCurl(object):
         print 'Search ',params['type'],' using parameter ',params['id']
         url = servicebase+'/'+params['type']+'/'+params['id']+params['opt']
         urlquoted = urllib.quote_plus(url,safe=':/')
+        
         if params['type'] == 'globaltag' and params['opt'] == '/trace':
             print 'Verify url syntax ',url, ' ',urlquoted
             if url != urlquoted:
                 return "Cannot access globaltag trace information for list of global tags"
+                
+		print 'Check if type is payload and ',params['opt']
+		if params['type'] == 'payload' and params['opt'] == '/hash':
+			print 'Change url because it is payload access'
+			url = servicebase+'/'+params['type']+'/'+params['id']
+			urlquoted = urllib.quote_plus(url,safe=':/')
+		
         self.__curl.setUrl(urlquoted)
         return self.__curl.getData()
 
@@ -431,7 +466,7 @@ class PhysCurl(object):
         self.__curl.setUrl(url+'?'+pairs)
         return self.__curl.getData()
 
-    def mapTag2GlobalTag(self,tagname,gtagname,servicebase="/map/tag2gtag"):
+    def mapTag2GlobalTag(self,tagname,gtagname,servicebase="/map/addtoglobaltag"):
 
         url = (self.baseurl + servicebase)
 #        url = servicebase

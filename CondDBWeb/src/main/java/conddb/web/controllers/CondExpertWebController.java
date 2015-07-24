@@ -23,6 +23,7 @@ import org.springframework.stereotype.Controller;
 
 import conddb.dao.controllers.GlobalTagController;
 import conddb.dao.controllers.IovController;
+import conddb.dao.expert.controllers.GlobalTagExpertController;
 import conddb.dao.svc.ConddbClientService;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
@@ -44,10 +45,18 @@ public class CondExpertWebController {
 	@Autowired
 	private GlobalTagController globalTagController;
 	@Autowired
+	private GlobalTagExpertController globalTagExpertController;
+	@Autowired
 	private IovController iovController;
 	@Autowired
 	private ConddbClientService clientservice;
 
+	/**
+	 * Add a new global tag.
+	 * @param jsonString
+	 * @return
+	 * @throws ConddbWebException
+	 */
 	@POST
 	@Path("/globaltag/add")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -62,6 +71,14 @@ public class CondExpertWebController {
 		}
 	}
 
+	/**
+	 * Update global tag fields.
+	 * TODO: Remove the lock status that should be updated only by an expert. A method already
+	 * exists in GlobalTagExpertController for this purpose.
+	 * @param jsonString
+	 * @return
+	 * @throws ConddbWebException
+	 */
 	@POST
 	@Path("/globaltag/update")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -74,6 +91,8 @@ public class CondExpertWebController {
 				if (jsonString.getDescription() != null) {
 					stored.setDescription(jsonString.getDescription());
 				}
+				// FIXME: this should be removed....updating the lock status should be done
+				// via the REST service /globaltag/lock/update
 				if (jsonString.getLockstatus() != null) {
 					stored.setLockstatus(jsonString.getLockstatus());
 				}
@@ -95,6 +114,13 @@ public class CondExpertWebController {
 		}
 	}
 
+
+	/**
+	 * Add a new tag.
+	 * @param jsonString
+	 * @return The new tag.
+	 * @throws ConddbWebException
+	 */
 	@POST
 	@Path("/tag/add")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -109,6 +135,13 @@ public class CondExpertWebController {
 		}
 	}
 
+	
+	/**
+	 * The tag update url is used to update a set of fields for an existing tag.
+	 * @param jsonString
+	 * @return
+	 * @throws ConddbWebException
+	 */
 	@POST
 	@Path("/tag/update")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -172,9 +205,9 @@ public class CondExpertWebController {
 	}
 
 	@POST
-	@Path("/map/tag2gtag")
+	@Path("/map/addtoglobaltag")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public GlobalTagMap mapTagToGtag(@QueryParam(value = "globaltagname") String globaltagname,
+	public GlobalTagMap mapAddTagToGtag(@QueryParam(value = "globaltagname") String globaltagname,
 			@QueryParam(value = "tagname") String tagname) throws ConddbWebException {
 		try {
 			this.log.info(
@@ -183,11 +216,29 @@ public class CondExpertWebController {
 			List<Tag> list = clientservice.getTagOne(tagname);
 			Tag atag = list.get(0);
 			this.log.info("CondExpertWebController processing request for mapTagToGtag using " + gtag + " " + atag);
-			GlobalTagMap gtagmap = this.globalTagController.mapTagToGlobalTag(atag, gtag);
+			GlobalTagMap gtagmap = this.globalTagController.mapAddTagToGlobalTag(atag, gtag);
 			return gtagmap;
 		} catch (Exception e) {
 			throw new ConddbWebException(e);
 		}
 	}
+//	@POST
+//	@Path("/map/rmfromglobaltag")
+//	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+//	public void mapRemoveTagFromGtag(@QueryParam(value = "globaltagname") String globaltagname,
+//			@QueryParam(value = "tagname") String tagname) throws ConddbWebException {
+//		try {
+//			this.log.info(
+//					"CondExpertWebController processing request for mapRemoveTagFromGtag ..." + globaltagname + " " + tagname);
+//			GlobalTag gtag = globalTagController.getGlobalTag(globaltagname);
+//			List<Tag> list = clientservice.getTagOne(tagname);
+//			Tag atag = list.get(0);
+//			this.log.info("CondExpertWebController processing request for mapRemoveTagFromGtag using " + gtag + " " + atag);
+//			this.globalTagExpertController.
+//			return;
+//		} catch (Exception e) {
+//			throw new ConddbWebException(e);
+//		}
+//	}
 
 }

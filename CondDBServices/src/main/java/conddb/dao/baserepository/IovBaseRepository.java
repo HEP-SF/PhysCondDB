@@ -8,6 +8,8 @@ import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
@@ -31,6 +33,17 @@ public interface IovBaseRepository extends
 	 * @return List of IOVs for a given tag name.
 	 */
 	List<Iov> findByTagName(@Param("tag_name") String tagname);
+
+	/**
+	 * TODO:
+	 * Test paging for large resultset.
+	 * @param tagname
+	 * 	The name of the tag.
+	 * 
+	 * @return List of IOVs for a given tag name.
+	 */
+	@Query("select iv from Iov iv where iv.tag.name = :tagname")
+	Page<Iov> findAllByTagName(@Param("tagname") String tagname, Pageable pageable);
 	
 	
 	/**

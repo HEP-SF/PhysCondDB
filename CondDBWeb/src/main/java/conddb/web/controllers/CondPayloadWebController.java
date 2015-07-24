@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -51,10 +52,11 @@ public class CondPayloadWebController {
 	@Autowired
 	private PayloadRepository payloadRepository;
 	@Autowired
-	@Qualifier("payloaddatajcrrepo")
+	@Qualifier("payloaddatadbrepo")
 	private PayloadDataBaseCustom payloadDataBaseCustom;
 
-	private static final String SERVER_UPLOAD_LOCATION_FOLDER = "/tmp/physconddb-uploads/";
+	@Value( "${physconddb.upload.dir:/tmp}" )
+	private String SERVER_UPLOAD_LOCATION_FOLDER;
 
 	@POST
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -70,6 +72,7 @@ public class CondPayloadWebController {
 				try {
 					String outfname = name + "-uploaded";
 					String uploadedFileLocation = SERVER_UPLOAD_LOCATION_FOLDER + outfname;
+					log.debug("Uploads files location is "+SERVER_UPLOAD_LOCATION_FOLDER);
 					saveToFile(uploadedInputStream, uploadedFileLocation);
 					byte[] bytes = readFromFile(uploadedFileLocation);
 
@@ -84,13 +87,14 @@ public class CondPayloadWebController {
 
 					PayloadHandler phandler = new PayloadHandler(pylddata);
 					PayloadData storable = phandler.getPayloadWithHash();
-					payloadDataBaseCustom.save(storable);
+					PayloadData stored = payloadDataBaseCustom.save(storable);
 
 					apayload.setHash(storable.getHash());
 					log.info("Uploaded object has hash " + storable.getHash());
 					log.info("Uploaded object has data size " + apayload.getDatasize());
 
 					if (payloadRepository.findOne(apayload.getHash()) == null) {
+						apayload.setBackendInfo(stored.getUri());
 						payloadRepository.save(apayload);
 					} else {
 						return "Payload with hash " + storable.getHash() + " already exists...skip update ";

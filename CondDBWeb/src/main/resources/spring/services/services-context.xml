@@ -10,11 +10,12 @@
            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
 	<context:component-scan
-		base-package="conddb.dao.svc,conddb.dao.admin,conddb.dao.controllers,conddb.dao.repositories,conddb.utils" />
+		base-package="conddb.dao.svc,conddb.dao.admin,conddb.dao.expert,conddb.dao.controllers,conddb.dao.repositories,conddb.utils" />
 	<mvc:annotation-driven/>
 
 	<!-- Services -->
 	<bean id="globalTagAdminController" class="conddb.dao.admin.controllers.GlobalTagAdminController" />
+	<bean id="globalTagExpertController" class="conddb.dao.expert.controllers.GlobalTagExpertController" />
 	<bean id="globalTagController" class="conddb.dao.controllers.GlobalTagController" />
 	<bean id="iovController" class="conddb.dao.controllers.IovController" />
 	<bean id="conddbClientService" class="conddb.dao.svc.ConddbClientService" />
@@ -24,7 +25,7 @@
 	<bean id="payloaddatajcrrepo" class="conddb.dao.repositories.impl.PayloadDataJCRImpl">
 		<property name="rootpath" value="/tmp/physconddb" />
 	</bean>
-	<bean id="payloaddatarepo" class="conddb.dao.repositories.impl.PayloadDataDBImpl"></bean>
+	<bean id="payloaddatadbrepo" class="conddb.dao.repositories.impl.PayloadDataDBImpl"></bean>
 
 	<!-- Timestamp serializer and deserializer formatting methods -->
 	<bean id="tsformat" class="conddb.utils.json.serializers.TimestampFormat">

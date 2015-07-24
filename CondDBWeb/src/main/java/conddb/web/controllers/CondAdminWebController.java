@@ -16,6 +16,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import conddb.dao.admin.controllers.GlobalTagAdminController;
+import conddb.dao.controllers.GlobalTagController;
+import conddb.dao.expert.controllers.GlobalTagExpertController;
+import conddb.data.GlobalTag;
+import conddb.data.Tag;
 import conddb.web.exceptions.ConddbWebException;
 
 /**
@@ -31,22 +35,47 @@ public class CondAdminWebController {
 
 	@Autowired
 	private GlobalTagAdminController globalTagAdminController;
+	@Autowired
+	private GlobalTagExpertController globalTagExpertController;
+	@Autowired
+	private GlobalTagController globalTagController;
 
 	@POST
 	@Path("/globaltag/clone")
-	@Produces({ MediaType.TEXT_HTML })
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@ResponseBody
-	public String cloneGlobalTag(@QueryParam(value = "sourcegtag") String sourcegtag,
+	public GlobalTag cloneGlobalTag(@QueryParam(value = "sourcegtag") String sourcegtag,
 			@QueryParam(value = "destgtag") String destgtag) throws ConddbWebException {
 		try {
 			this.log.info("CondAdminWebController processing request for cloning " + sourcegtag + " into " + destgtag);
-			this.globalTagAdminController.cloneGlobalTag(sourcegtag, destgtag);
-			return "Success";
+			this.globalTagExpertController.cloneGlobalTag(sourcegtag, destgtag);
+			GlobalTag cloned = this.globalTagController.getGlobalTag(destgtag);
+
+			return cloned;
 		} catch (Exception e) {
 			throw new ConddbWebException(e);
 		}
 	}
 
+	@POST
+	@Path("/tag/clone")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@ResponseBody
+	public Tag cloneTag(@QueryParam(value = "sourcetag") String sourcetag,
+			@QueryParam(value = "desttag") String desttag,
+			@QueryParam(value = "from") String from,
+			@QueryParam(value = "to") String to,
+			@QueryParam(value = "timetype") String timetype
+			) throws ConddbWebException {
+		try {
+			this.log.info("CondAdminWebController processing request for cloning " + sourcetag + " into " + desttag);
+			this.globalTagExpertController.cloneTag(sourcetag, desttag,from,to,timetype);
+			Tag cloned = this.globalTagController.getTag(desttag);
+			return cloned;
+		} catch (Exception e) {
+			throw new ConddbWebException(e);
+		}
+	}
 	@POST
 	@Path("/map/update")
 	@Produces({ MediaType.TEXT_HTML })
@@ -57,7 +86,7 @@ public class CondAdminWebController {
 		try {
 			this.log.info("CondAdminWebController processing request for updating mapping " + sourcegtag + " from "
 					+ oldtag + " to " + newtag);
-			this.globalTagAdminController.updateTagMapping(sourcegtag, oldtag, newtag);
+			this.globalTagExpertController.updateTagMapping(sourcegtag, oldtag, newtag);
 			return "Success";
 		} catch (Exception e) {
 			throw new ConddbWebException(e);
@@ -89,7 +118,7 @@ public class CondAdminWebController {
 		try {
 			this.log.info("CondAdminWebController processing request for updating locking status " + sourcegtag
 					+ " using lock " + locking);
-			this.globalTagAdminController.updateGlobalTagLocking(sourcegtag, locking);
+			this.globalTagExpertController.updateGlobalTagLocking(sourcegtag, locking);
 			return "Success";
 		} catch (Exception e) {
 			throw new ConddbWebException(e);

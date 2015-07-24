@@ -29,49 +29,6 @@ public class GlobalTagAdminController {
 	@Autowired
 	private TagRepository tagRepository;
 
-	@Transactional
-	public void cloneGlobalTag(String sourcegtag, String destgtag)
-			throws ConddbServiceException {
-		GlobalTag sgtag = this.gtagRepository
-				.findByNameAndFetchTagsEagerly(sourcegtag);
-		this.log.debug("Retrieved globaltag for cloning: " + sgtag
-				+ " linked to " + sgtag.getGlobalTagMaps().size() + " tags");
-		GlobalTag newgtag = new GlobalTagHandler().cloneObject(sgtag,destgtag);
-		Set<GlobalTagMap> sgtagmap = sgtag.getGlobalTagMaps();
-		
-		this.gtagRepository.save(newgtag);
-
-		Set<GlobalTagMap> newmaps = new HashSet<GlobalTagMap>();
-		for (GlobalTagMap globalTagMap : sgtagmap) {
-			Tag atag = globalTagMap.getSystemTag();
-			GlobalTagMap amap = new GlobalTagMap(newgtag, atag);
-			newmaps.add(amap);
-		}
-		this.gtagMapRepository.save(newmaps);
-	}
-
-	@Transactional
-	public void updateTagMapping(String sourcegtag, String oldtag, String newtag)
-			throws ConddbServiceException {
-		GlobalTagMap map = this.gtagMapRepository.findByGlobalTagAndTagName(
-				sourcegtag, oldtag);
-		GlobalTag gtag = map.getGlobalTag();
-		if (gtag.islocked()) {
-			throw new ConddbServiceException("Cannot update mapping on locked global tag");
-		}
-		Tag tag = this.tagRepository.findByName(newtag);
-		map.setSystemTag(tag);
-		this.gtagMapRepository.save(map);
-	}
-	
-	@Transactional
-	public void updateGlobalTagLocking(String sourcegtag, String locking)
-			throws ConddbServiceException {
-
-		GlobalTag gtag = gtagRepository.findOne(sourcegtag);
-		gtag.setLockstatus(locking);
-		this.gtagRepository.save(gtag);
-	}
 
 	@Transactional
 	public void deleteGlobalTag(String sourcegtag)
@@ -89,7 +46,8 @@ public class GlobalTagAdminController {
 				+ " linked to " + ntags + " tags: cascade deleting ALL tags and iovs ");
 		this.gtagRepository.delete(sgtag);
 	}
-	
+
+
 	@Transactional
 	public void deleteGlobalTagMap(String globaltag, String tag)
 			throws ConddbServiceException {

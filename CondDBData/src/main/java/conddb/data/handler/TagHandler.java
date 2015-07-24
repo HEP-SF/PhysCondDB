@@ -20,33 +20,33 @@ package conddb.data.handler;
 import java.util.HashSet;
 import java.util.Set;
 
-import conddb.data.GlobalTag;
+import conddb.data.Tag;
 
 /**
  * @author formica
  *
  */
-public class GlobalTagHandler implements CondDBObjectHandler<GlobalTag, String> {
+public class TagHandler implements CondDBObjectHandler<Tag, String> {
 
 	@Override
-	public GlobalTag cloneObject(GlobalTag source, String newname) {
-		GlobalTag newgtag = new GlobalTag(newname);
-		newgtag.setDescription(source.getDescription() + " - Cloned from "
+	public Tag cloneObject(Tag source, String newname) {
+		Tag newtag = new Tag(newname);
+		newtag.setDescription(source.getDescription() + " - Cloned from "
 				+ source.getName());
-		newgtag.setValidity(source.getValidity());
-		newgtag.setRelease(source.getRelease());
-		newgtag.setSnapshotTime(source.getSnapshotTime());
-//		newgtag.setInsertionTime(new Timestamp(new Date().getTime()));
-		newgtag.setLockstatus(source.getLockstatus());
-		return newgtag;
+		newtag.setEndOfValidity(source.getEndOfValidity());
+		newtag.setLastValidatedTime(source.getLastValidatedTime());
+		newtag.setObjectType(source.getObjectType());
+		newtag.setTimeType(source.getTimeType());
+		newtag.setSynchronization(source.getSynchronization());
+		return newtag;
 	}
 
 	@Override
-	public Iterable<GlobalTag> cloneObjectList(Iterable<GlobalTag> source, String newname) {
-		Set<GlobalTag> newlist = new HashSet<GlobalTag>();
-		for (GlobalTag globalTag : source) {
-			GlobalTag newgtag = cloneObject(globalTag,newname);
-			newlist.add(newgtag);
+	public Iterable<Tag> cloneObjectList(Iterable<Tag> source, String newname) {
+		Set<Tag> newlist = new HashSet<Tag>();
+		for (Tag tag : source) {
+			Tag newtag = cloneObject(tag,newname);
+			newlist.add(newtag);
 		}
 		return newlist;
 	}

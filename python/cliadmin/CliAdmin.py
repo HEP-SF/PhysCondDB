@@ -192,6 +192,20 @@ class PhysDBDriver():
             restserver.setUserPassword(self.user,self.passwd)
             pyld = restserver.delete(params)
             
+        elif (self.action=='CLONEGTAG'):
+            sourcename = self.args[0]
+            destname   = self.args[1]
+            restserver.setUserPassword(self.user,self.passwd)
+            pyld = restserver.cloneGlobalTag(sourcename,destname)
+            print pyld
+            
+        elif (self.action=='CLONETAG'):
+            sourcename = self.args[0]
+            destname   = self.args[1]
+            restserver.setUserPassword(self.user,self.passwd)
+            pyld = restserver.cloneTag(sourcename,destname,'0','Inf','time')
+            print pyld
+
         elif (self.action=='MAPTAG2GLOBALTAG'):
             tagname = self.args[0]
             gtagname = self.args[1]

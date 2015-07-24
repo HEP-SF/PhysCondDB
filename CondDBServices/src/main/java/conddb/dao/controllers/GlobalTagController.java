@@ -118,13 +118,14 @@ public class GlobalTagController {
 	}
 
 	@Transactional
-	public GlobalTagMap mapTagToGlobalTag(Tag atag, GlobalTag gtag) throws ConddbServiceException {
+	public GlobalTagMap mapAddTagToGlobalTag(Tag atag, GlobalTag gtag) throws ConddbServiceException {
 		if (atag == null || gtag == null) {
 			throw new ConddbServiceException("Cannot associate...there are null elements");
 		}
 		GlobalTagMap entity = new GlobalTagMap(gtag, atag);
 		return gtagMapRepository.save(entity);
 	}
+	
 
 	@Transactional
 	public GlobalTagMap insertGlobalTagMap(GlobalTagMap entity) throws ConddbServiceException {

@@ -76,6 +76,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		jdbcTemplate.update(sql,
 				new Object[] { entity.getHash(), entity.getData() });
 		log.info("Insertion done...");
+		entity.setUri(sql+" ; hash="+entity.getHash());
 		return entity;
 	}
 
