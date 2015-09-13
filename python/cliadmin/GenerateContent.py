@@ -171,7 +171,7 @@ class PhysDBGenerator():
                     restserver = PhysCurl(self.urlsvc, self.useSocks)
                     for it in range(0, self.nobjs):
                         print 'generate element ',it
-                        sincetime = random.randint(self.t0, self.tMax)
+                        sincetime = random.randint(int(self.t0), int(self.tMax))
                         iov = Iov(data)
                         iov.setParameter('since', sincetime)
                         iov.setParameter('tag', { 'name' : self.tag })

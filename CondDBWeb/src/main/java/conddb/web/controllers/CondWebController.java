@@ -3,24 +3,28 @@
  */
 package conddb.web.controllers;
 
+import io.swagger.annotations.Api;
+
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
 
 import conddb.annotations.LogAction;
 import conddb.dao.controllers.GlobalTagController;
@@ -28,6 +32,7 @@ import conddb.dao.svc.ConddbClientService;
 import conddb.data.GlobalTag;
 import conddb.data.Iov;
 import conddb.data.Payload;
+import conddb.data.PayloadData;
 import conddb.data.Tag;
 import conddb.web.exceptions.ConddbWebException;
 
@@ -35,7 +40,9 @@ import conddb.web.exceptions.ConddbWebException;
  * @author formica
  *
  */
-@RestController
+@Path("/user")
+@Api(value = "/user")
+@Controller
 public class CondWebController {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
@@ -50,11 +57,13 @@ public class CondWebController {
 	@Autowired
 	private GlobalTagController globalTagController;
 
-	@RequestMapping(value = "/globaltag/{gtag}/{method}", method = RequestMethod.GET)
-	@ResponseBody
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Path("/globaltag/{gtag}/{method}")
+//	@ResponseBody
 	public List<GlobalTag> getGlobalTag(
-			@PathVariable("gtag") String globaltagname,
-			@PathVariable("method") String method) throws ConddbWebException {
+			@PathParam("gtag") String globaltagname,
+			@PathParam("method") String method) throws ConddbWebException {
 		this.log.info("CondWebController processing request for getGlobalTagLikeTrace: global tag name pattern..."
 				+ globaltagname);
 		List<GlobalTag> gtaglist = new ArrayList<GlobalTag>();
@@ -62,12 +71,10 @@ public class CondWebController {
 			if (method.equals("like")) {
 				gtaglist = this.conddbsvc.getGlobalTagLike(globaltagname);
 			} else if (method.equals("one")) {
-				GlobalTag gtag = this.conddbsvc.getGlobalTag(globaltagname);
-				gtaglist.add(gtag);
+				gtaglist = this.conddbsvc.getGlobalTagOne(globaltagname);
 			} else if (method.equals("trace")) {
-				GlobalTag gtag = this.conddbsvc
+				gtaglist = this.conddbsvc
 						.getGlobalTagTrace(globaltagname);
-				gtaglist.add(gtag);
 			} else {
 				String help = " use : /like, /one, /trace instead !";
 				throw new ConddbWebException("Cannot find method " + method+" "+help);
@@ -78,12 +85,13 @@ public class CondWebController {
 		return gtaglist;
 	}
 
-	@RequestMapping(value = "/gtagbetween", method = RequestMethod.GET)
-	@ResponseBody
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Path("/globaltag/between")
 	public List<GlobalTag> getGlobalTagBetweenTime(
-			@RequestParam(value = "sincetime", defaultValue = "20071203101530:GMT") String since,
-			@RequestParam(value = "untiltime", defaultValue = "20151203101530:GMT") String until,
-			@RequestParam(value = "format", defaultValue = "yyyyMMddHHmmss:z") String format)
+			@QueryParam(value = "sincetime") String since,
+			@QueryParam(value = "untiltime") String until,
+			@QueryParam(value = "format") String format)
 			throws ConddbWebException {
 
 		this.log.info("CondWebController processing request for getGlobalTagBetweenTime: since until..."
@@ -112,11 +120,12 @@ public class CondWebController {
 		}
 	}
 
-	@RequestMapping(value = "/tag/{tag}/{method}", method = RequestMethod.GET)
-	@ResponseBody
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Path("/tag/{tag}/{method}")
 	@LogAction(actionPerformed = "getTag")
-	public List<Tag> getTag(@PathVariable("tag") String tagname,
-			@PathVariable("method") String method) throws ConddbWebException {
+	public List<Tag> getTag(@PathParam("tag") String tagname,
+			@PathParam("method") String method) throws ConddbWebException {
 		this.log.info("CondWebController processing request for getTag: name ..."
 				+ tagname);
 		List<Tag> taglist = new ArrayList<Tag>();
@@ -125,13 +134,13 @@ public class CondWebController {
 			if (method.equals("like")) {
 				taglist = this.conddbsvc.getTagLike(tagname);
 			} else if (method.equals("one")) {
-				Tag tag = this.conddbsvc.getTag(tagname);
-				taglist.add(tag);
+				taglist = this.conddbsvc.getTagOne(tagname);
 			} else if (method.equals("iovs")) {
-				Tag tag = this.conddbsvc.getTagIovs(tagname);
-				taglist.add(tag);
+				taglist = this.conddbsvc.getTagIovs(tagname);
+			} else if (method.equals("backtrace")) {
+				taglist = this.conddbsvc.getTagBackTrace(tagname);
 			} else {
-				String help = " use : /like, /one, /iovs instead !";
+				String help = " use : /like, /one, /iovs, /backtrace instead !";
 				throw new ConddbWebException("Cannot find method " + method+" "+help);
 			}
 			return taglist;
@@ -140,10 +149,11 @@ public class CondWebController {
 		}
 	}
 
-	@RequestMapping(value = "/iovs/{tag}/{method}", method = RequestMethod.GET)
-	@ResponseBody
-	public List<Iov> getIovs(@PathVariable("tag") String tagname,
-			@PathVariable("method") String method) throws ConddbWebException {
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Path("/iovs/{tag}/{method}")
+	public List<Iov> getIovs(@PathParam("tag") String tagname,
+			@PathParam("method") String method) throws ConddbWebException {
 		this.log.info(
 				"CondWebController processing request for getIovs: tag name ...",
 				tagname);
@@ -162,14 +172,13 @@ public class CondWebController {
 			throw new ConddbWebException(e.getMessage());
 		}
 	}
-
-	@RequestMapping(value = "/payload/{hash}", method = RequestMethod.GET)
-	@ResponseBody
-	public Payload getPayload(@PathVariable("hash") String hash)
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Path("/payload/{hash}")
+	public Payload getPayload(@PathParam("hash") String hash)
 			throws ConddbWebException {
 		this.log.info(
-				"CondWebController processing request for getPayload: hash ...",
-				hash);
+				"CondWebController processing request for getPayload: hash ..."+hash);
 		try {
 			Payload pyld = this.conddbsvc.getPayload(hash);
 			return pyld;
@@ -177,10 +186,26 @@ public class CondWebController {
 			throw new ConddbWebException(e.getMessage());
 		}
 	}
+	
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Path("/payloaddata/{hash}")
+	public PayloadData getPayloadBlob(@PathParam("hash") String hash)
+			throws ConddbWebException {
+		this.log.info(
+				"CondWebController processing request for getPayloadBlob: hash ..."+hash);
+		try {
+			PayloadData pyld = this.conddbsvc.getPayloadData(hash);
+			return pyld;
+		} catch (Exception e) {
+			throw new ConddbWebException(e.getMessage());
+		}
+	}
 
-	@RequestMapping(value = "/payloadfilter/sizegt/{size}", method = RequestMethod.GET)
-	@ResponseBody
-	public List<Payload> getPayloadFiltered(@PathVariable("size") Integer size)
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Path("/payloadfilter/sizegt/{size}")
+	public List<Payload> getPayloadFiltered(@PathParam("size") Integer size)
 			throws ConddbWebException {
 		this.log.info(
 				"CondWebController processing request for getPayloadSizeGt: size ...",
@@ -193,14 +218,14 @@ public class CondWebController {
 		}
 	}
 
-	@ExceptionHandler
-	ResponseEntity<?> handleExceptions(Exception ex) {
-		ResponseEntity<?> responseEntity = null;
-		if (ex instanceof Exception) {
-			log.debug(ex.getMessage());
-			responseEntity = new ResponseEntity(
-					HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		return responseEntity;
-	}
+//	@ExceptionHandler
+//	ResponseEntity<?> handleExceptions(Exception ex) {
+//		ResponseEntity<?> responseEntity = null;
+//		if (ex instanceof Exception) {
+//			log.debug(ex.getMessage());
+//			responseEntity = new ResponseEntity(
+//					HttpStatus.INTERNAL_SERVER_ERROR);
+//		}
+//		return responseEntity;
+//	}
 }

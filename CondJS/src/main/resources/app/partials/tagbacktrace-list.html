@@ -1,0 +1,60 @@
+<div class="container">
+	<div ng-controller="TagBackTraceListCtrl">
+		<p>List of global tags associated to {{selectedtagname}}</p>
+		<label for="items">items by page</label> <input
+			class="input-sm form-control" name="items" id="items" type="number"
+			ng-model="itemsByPage" />
+
+		<table st-table="displayedCollection"
+			st-safe-src="selectedbacktracetags" class="table table-striped"
+			show-filter="true" export-csv="csv">
+			<thead>
+				<tr>
+					<th st-sort="name">name</th>
+					<th st-sort="insertionTime">insertion time</th>
+					<th st-sort="description">description</th>
+					<th st-sort="validity">validity</th>
+					<th st-sort="release">release</th>
+					<th st-sort="lockstatus">lock</th>
+					<th st-sort="snapshotTime">snapshot time</th>
+				</tr>
+				<tr>
+					<th colspan="5"><input st-search="" class="form-control"
+						placeholder="global search ..." type="text" /></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr st-select-row="gtag" st-select-mode="single"
+					ng-repeat="gtag in displayedCollection">
+					<td data-title="'Name'">{{gtag.globalTag.name}}</td>
+					<td data-title="'Insertion Time'">{{gtag.globalTag.insertionTime}}</td>
+					<td data-title="'Description'">{{gtag.globalTag.description}}</td>
+					<td data-title="'Validity'">{{gtag.globalTag.validity}}</td>
+					<td data-title="'Release'">{{gtag.globalTag.release}}</td>
+					<td data-title="'Lock'">{{gtag.globalTag.lockstatus}}</td>
+					<td data-title="'SnapshotTime'">{{gtag.globalTag.snapshotTime}}</td>
+					<td>
+						<button class="btn btn-sm" popover-placement="top"
+							popover="{{gtag.name}}" type="button">
+							<i class="glyphicon glyphicon-eye-open"></i>
+						</button> <a ng-href="#/tracetags/{{gtag.globalTag.name}}">trace</a>
+					</td>
+					<td>
+						<button type="button" ng-click="remove(gtag)" class="btn btn-sm btn-danger">
+						<i class="glyphicon glyphicon-remove-circle"></i>
+						</button>
+					</td>
+					</tr>
+			</tbody>
+			<tfoot>
+				<tr>
+					<td colspan="5" class="text-center">
+						<div st-pagination="" st-items-by-page="itemsByPage"
+							st-displayed-pages="displayedPages"></div>
+					</td>
+				</tr>
+			</tfoot>
+		</table>
+	</div>
+</div>
+

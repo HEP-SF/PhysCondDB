@@ -3,29 +3,41 @@
  */
 package conddb.web.controllers;
 
+import io.swagger.annotations.Api;
+
+import java.util.List;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
 
 import conddb.dao.controllers.GlobalTagController;
 import conddb.dao.controllers.IovController;
+import conddb.dao.expert.controllers.GlobalTagExpertController;
 import conddb.dao.svc.ConddbClientService;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.Iov;
 import conddb.data.Tag;
+import conddb.web.exceptions.ConddbWebException;
 
 /**
  * @author formica
  *
  */
-@RestController
+@Path("/expert")
+@Api(value = "/expert")
+@Controller
 public class CondExpertWebController {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
@@ -33,62 +45,200 @@ public class CondExpertWebController {
 	@Autowired
 	private GlobalTagController globalTagController;
 	@Autowired
+	private GlobalTagExpertController globalTagExpertController;
+	@Autowired
 	private IovController iovController;
 	@Autowired
 	private ConddbClientService clientservice;
 
-	@RequestMapping(value = "/gtagAdd", method = RequestMethod.POST)
-	@ResponseBody
-	public GlobalTag insertGlobalTag(
-			@RequestBody GlobalTag jsonString)
-			throws Exception {
-		this.log.info("CondExpertWebController processing request for insertGlobalTag ...");
-		GlobalTag gtag = this.globalTagController.insertGlobalTag(jsonString);
-		return gtag;
-	}
-	
-	@RequestMapping(value = "/tagAdd", method = RequestMethod.POST)
-	@ResponseBody
-	public Tag insertTag(
-			@RequestBody Tag jsonString)
-			throws Exception {
-		this.log.info("CondExpertWebController processing request for insertTag ...");
-		Tag tag = this.globalTagController.insertTag(jsonString);
-		return tag;
-	}
-
-	@RequestMapping(value = "/mapAdd", method = RequestMethod.POST)
-	@ResponseBody
-	public GlobalTagMap insertGlobalTagMap(
-			@RequestBody GlobalTagMap jsonString)
-			throws Exception {
-		this.log.info("CondExpertWebController processing request for insertGlobalTagMap ...");
-		GlobalTagMap gtagmap = this.globalTagController.insertGlobalTagMap(jsonString);
-		return gtagmap;
-	}
-	
-	@RequestMapping(value = "/iovAdd", method = RequestMethod.POST)
-	@ResponseBody
-	public Iov insertIov(
-			@RequestBody Iov jsonString)
-			throws Exception {
-		this.log.info("CondExpertWebController processing request for insertIov using tag..."+jsonString.getTag().getName());
-		Iov iov = this.iovController.insertIov(jsonString);
-		return iov;
+	/**
+	 * Add a new global tag.
+	 * @param jsonString
+	 * @return
+	 * @throws ConddbWebException
+	 */
+	@POST
+	@Path("/globaltag/add")
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public GlobalTag insertGlobalTag(GlobalTag jsonString) throws ConddbWebException {
+		try {
+			this.log.info("CondExpertWebController processing request for insertGlobalTag ...");
+			GlobalTag gtag = this.globalTagController.insertGlobalTag(jsonString);
+			return gtag;
+		} catch (Exception e) {
+			throw new ConddbWebException(e);
+		}
 	}
 
-	@RequestMapping(value = "/mapTagToGtag", method = RequestMethod.POST)
-	@ResponseBody
-	public GlobalTagMap mapTagToGtag(
-			@RequestParam(value = "globaltagname", defaultValue = "CONDBR2-01") String globaltagname,
-			@RequestParam(value = "tagname", defaultValue = "ATAG-01") String tagname)
-			throws Exception {
-		this.log.info("CondExpertWebController processing request for mapTagToGtag ..."+globaltagname+" "+tagname);
-		GlobalTag gtag = clientservice.getGlobalTag(globaltagname);
-		Tag atag = clientservice.getTag(tagname);
-		this.log.info("CondExpertWebController processing request for mapTagToGtag using "+gtag+" "+atag);
-		GlobalTagMap gtagmap = this.globalTagController.mapTagToGlobalTag(atag, gtag);
-		return gtagmap;
+	/**
+	 * Update global tag fields.
+	 * TODO: Remove the lock status that should be updated only by an expert. A method already
+	 * exists in GlobalTagExpertController for this purpose.
+	 * @param jsonString
+	 * @return
+	 * @throws ConddbWebException
+	 */
+	@POST
+	@Path("/globaltag/update")
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public GlobalTag updateGlobalTag(GlobalTag jsonString) throws ConddbWebException {
+		try {
+			this.log.info("CondExpertWebController processing request for updateGlobalTag ...");
+			GlobalTag stored = this.globalTagController.getGlobalTag(jsonString.getName());
+			if (stored != null) {
+				if (jsonString.getDescription() != null) {
+					stored.setDescription(jsonString.getDescription());
+				}
+				// FIXME: this should be removed....updating the lock status should be done
+				// via the REST service /globaltag/lock/update
+				if (jsonString.getLockstatus() != null) {
+					stored.setLockstatus(jsonString.getLockstatus());
+				}
+				if (jsonString.getRelease() != null) {
+					stored.setRelease(jsonString.getRelease());
+				}
+				if (jsonString.getSnapshotTime() != null) {
+					stored.setSnapshotTime(jsonString.getSnapshotTime());
+				}
+				if (jsonString.getValidity() != null) {
+					stored.setValidity(jsonString.getValidity());
+				}
+				GlobalTag gtag = this.globalTagController.insertGlobalTag(stored);
+				return gtag;
+			}
+			return null;
+		} catch (Exception e) {
+			throw new ConddbWebException(e.getMessage());
+		}
 	}
+
+
+	/**
+	 * Add a new tag.
+	 * @param jsonString
+	 * @return The new tag.
+	 * @throws ConddbWebException
+	 */
+	@POST
+	@Path("/tag/add")
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Tag insertTag(Tag jsonString) throws ConddbWebException {
+		try {
+			this.log.info("CondExpertWebController processing request for insertTag ...");
+			Tag tag = this.globalTagController.insertTag(jsonString);
+			return tag;
+		} catch (Exception e) {
+			throw new ConddbWebException(e);
+		}
+	}
+
+	
+	/**
+	 * The tag update url is used to update a set of fields for an existing tag.
+	 * @param jsonString
+	 * @return
+	 * @throws ConddbWebException
+	 */
+	@POST
+	@Path("/tag/update")
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Tag updateTag(Tag jsonString) throws ConddbWebException {
+		try {
+			this.log.info("CondExpertWebController processing request for updateTag ...");
+			Tag stored = this.globalTagController.getTag(jsonString.getName());
+			if (stored != null) {
+				if (jsonString.getDescription() != null) {
+					stored.setDescription(jsonString.getDescription());
+				}
+				if (jsonString.getObjectType() != null) {
+					stored.setObjectType(jsonString.getObjectType());
+				}
+				if (jsonString.getTimeType() != null) {
+					stored.setTimeType(jsonString.getTimeType());
+				}
+				if (jsonString.getSynchronization() != null) {
+					stored.setSynchronization(jsonString.getSynchronization());
+				}
+				if (jsonString.getEndOfValidity() != null) {
+					stored.setEndOfValidity(jsonString.getEndOfValidity());
+				}
+				Tag atag = this.globalTagController.insertTag(stored);
+				return atag;
+			}
+			return null;
+		} catch (Exception e) {
+			throw new ConddbWebException(e.getMessage());
+		}
+	}
+
+	@POST
+	@Path("/map/add")
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public GlobalTagMap insertGlobalTagMap(GlobalTagMap jsonString) throws ConddbWebException {
+		try {
+			this.log.info("CondExpertWebController processing request for insertGlobalTagMap ...");
+			GlobalTagMap gtagmap = this.globalTagController.insertGlobalTagMap(jsonString);
+			return gtagmap;
+		} catch (Exception e) {
+			throw new ConddbWebException(e);
+		}
+	}
+
+	@POST
+	@Path("/iov/add")
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public Iov insertIov(Iov jsonString) throws ConddbWebException {
+		try {
+			this.log.info("CondExpertWebController processing request for insertIov using tag..."
+					+ jsonString.getTag().getName());
+			Iov iov = this.iovController.insertIov(jsonString);
+			return iov;
+		} catch (Exception e) {
+			throw new ConddbWebException(e);
+		}
+	}
+
+	@POST
+	@Path("/map/addtoglobaltag")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	public GlobalTagMap mapAddTagToGtag(@QueryParam(value = "globaltagname") String globaltagname,
+			@QueryParam(value = "tagname") String tagname) throws ConddbWebException {
+		try {
+			this.log.info(
+					"CondExpertWebController processing request for mapTagToGtag ..." + globaltagname + " " + tagname);
+			GlobalTag gtag = globalTagController.getGlobalTag(globaltagname);
+			List<Tag> list = clientservice.getTagOne(tagname);
+			Tag atag = list.get(0);
+			this.log.info("CondExpertWebController processing request for mapTagToGtag using " + gtag + " " + atag);
+			GlobalTagMap gtagmap = this.globalTagController.mapAddTagToGlobalTag(atag, gtag);
+			return gtagmap;
+		} catch (Exception e) {
+			throw new ConddbWebException(e);
+		}
+	}
+//	@POST
+//	@Path("/map/rmfromglobaltag")
+//	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+//	public void mapRemoveTagFromGtag(@QueryParam(value = "globaltagname") String globaltagname,
+//			@QueryParam(value = "tagname") String tagname) throws ConddbWebException {
+//		try {
+//			this.log.info(
+//					"CondExpertWebController processing request for mapRemoveTagFromGtag ..." + globaltagname + " " + tagname);
+//			GlobalTag gtag = globalTagController.getGlobalTag(globaltagname);
+//			List<Tag> list = clientservice.getTagOne(tagname);
+//			Tag atag = list.get(0);
+//			this.log.info("CondExpertWebController processing request for mapRemoveTagFromGtag using " + gtag + " " + atag);
+//			this.globalTagExpertController.
+//			return;
+//		} catch (Exception e) {
+//			throw new ConddbWebException(e);
+//		}
+//	}
 
 }

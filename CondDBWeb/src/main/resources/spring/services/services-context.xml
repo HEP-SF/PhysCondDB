@@ -10,16 +10,27 @@
            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
 	<context:component-scan
-		base-package="conddb.dao.svc,conddb.dao.admin,conddb.dao.controllers,conddb.dao.repositories" />
+		base-package="conddb.dao.svc,conddb.dao.admin,conddb.dao.expert,conddb.dao.controllers,conddb.dao.repositories,conddb.utils" />
+	<mvc:annotation-driven/>
 
 	<!-- Services -->
 	<bean id="globalTagAdminController" class="conddb.dao.admin.controllers.GlobalTagAdminController" />
+	<bean id="globalTagExpertController" class="conddb.dao.expert.controllers.GlobalTagExpertController" />
 	<bean id="globalTagController" class="conddb.dao.controllers.GlobalTagController" />
 	<bean id="iovController" class="conddb.dao.controllers.IovController" />
 	<bean id="conddbClientService" class="conddb.dao.svc.ConddbClientService" />
 	<bean id="profilingAdvisor" class="conddb.utils.aop.ProfilingAdvisor"></bean>
 	<bean id="profilingMethodInterceptor" class="conddb.utils.aop.ProfilingMethodInterceptor"></bean>
 	<bean id="influxRepository" class="conddb.monitoring.influx.InfluxRepository"></bean>
+	<bean id="payloaddatajcrrepo" class="conddb.dao.repositories.impl.PayloadDataJCRImpl">
+		<property name="rootpath" value="/tmp/physconddb" />
+	</bean>
+	<bean id="payloaddatadbrepo" class="conddb.dao.repositories.impl.PayloadDataDBImpl"></bean>
+
+	<!-- Timestamp serializer and deserializer formatting methods -->
+	<bean id="tsformat" class="conddb.utils.json.serializers.TimestampFormat">
+		<property name="pattern" value="ISO_OFFSET_DATE_TIME"/>
+	</bean>
 
 	<!-- this is the actual advice itself -->
 	<bean id="profilingAspect" class="conddb.utils.aop.ProfilingAspect" />
@@ -40,25 +51,4 @@
 		<property name="queueCapacity" value="25" />
 	</bean>
 
-<!-- 			<bean -->
-<!-- 				class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter"> -->
-<!-- 				<property name="messageConverters"> -->
-<!-- 					<list> -->
-<!-- 						<ref bean="jsonConverter" /> -->
-<!-- 					</list> -->
-<!-- 				</property> -->
-<!-- 			</bean> -->
-
-<!-- 	<mvc:annotation-driven> -->
-<!-- 		<mvc:message-converters> -->
-
-<!-- 			<bean id="jsonConverter" -->
-<!-- 				class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter"> -->
-<!-- 				<property name="supportedMediaTypes" value="application/json" /> -->
-<!-- 				<property name="objectMapper"> -->
-<!-- 					<bean class="conddb.utils.json.HibernateAwareObjectMapper" /> -->
-<!-- 				</property> -->
-<!-- 			</bean> -->
-<!-- 		</mvc:message-converters> -->
-<!-- 	</mvc:annotation-driven> -->
 </beans>

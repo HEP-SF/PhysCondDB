@@ -11,22 +11,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.Basic;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
-import javax.persistence.NamedAttributeNode;
-import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
-import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.LazyToOne;
-import org.hibernate.annotations.LazyToOneOption;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -36,13 +28,11 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
  */
 @Entity
 @Table(name = "PHCOND_PAYLOAD")
-@NamedEntityGraph(name = "graph.detailed.payload", attributeNodes = { 
-		  @NamedAttributeNode("data")
-		  })
+//@NamedEntityGraph(name = "graph.detailed.payload", attributeNodes = { 
+//		  @NamedAttributeNode("data")
+//		  })
 
-@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="hash")
-//@JsonDeserialize(using=PayloadDeserializer.class)
-//@JsonSerialize(using = PayloadSerializer.class)
+@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="hash", scope = Payload.class)
 public class Payload implements java.io.Serializable {
 
 	/**
@@ -52,8 +42,6 @@ public class Payload implements java.io.Serializable {
 	private String hash;
 	private String version;
 	private String objectType;
-//	private byte[]  data;
-	private PayloadData data;
 	private Integer datasize; // size in bytes of the payload
 	private String streamerInfo;
 	private String backendInfo="db://PHCOND_PAYLOAD_DATA";
@@ -64,21 +52,21 @@ public class Payload implements java.io.Serializable {
 
 	}
 
-	public Payload(String hash, String objectType, PayloadData data,
+	public Payload(String hash, String objectType, String backendInfo,
 			String streamerInfo, Timestamp insertionTime, String version) {
 		this.hash = hash;
 		this.objectType = objectType;
-		this.data = data;
+		this.backendInfo = backendInfo;
 		this.streamerInfo = streamerInfo;
 		this.insertionTime = insertionTime;
 		this.version = version;
 	}
 
-	public Payload(String hash, String objectType, PayloadData data,
+	public Payload(String hash, String objectType, String backendInfo,
 			String streamerInfo, Timestamp insertionTime,  String version, Set<Iov> iovs) {
 		this.hash = hash;
 		this.objectType = objectType;
-		this.data = data;
+		this.backendInfo = backendInfo;
 		this.streamerInfo = streamerInfo;
 		this.insertionTime = insertionTime;
 		this.version = version;
@@ -112,16 +100,15 @@ public class Payload implements java.io.Serializable {
 	public void setObjectType(String objectType) {
 		this.objectType = objectType;
 	}
-
-	@PrimaryKeyJoinColumn
-	@OneToOne(optional=false, fetch=FetchType.LAZY, cascade = CascadeType.ALL)
-	@LazyToOne(LazyToOneOption.PROXY)
-	public PayloadData getData() {
-		return this.data;
+	
+	@Column(name = "BACKEND_INFO", nullable = false)
+	@Lob @Basic(fetch=FetchType.LAZY)
+	public String getBackendInfo() {
+		return backendInfo;
 	}
 
-	public void setData(PayloadData  data) {
-		this.data = data;
+	public void setBackendInfo(String backendInfo) {
+		this.backendInfo = backendInfo;
 	}
 
 	@Column(name = "STREAMER_INFO", nullable = true)

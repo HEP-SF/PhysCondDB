@@ -19,6 +19,15 @@ package conddb.utils.json.serializers;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -29,14 +38,43 @@ import com.fasterxml.jackson.databind.SerializerProvider;
  * @author formica
  *
  */
+@Component
 public class TimestampSerializer extends JsonSerializer<Timestamp> {
 
+	@Autowired
+	TimestampFormat tsformat;
+	
+	private Logger log = LoggerFactory.getLogger(this.getClass()); 
+
+	public TimestampSerializer(){
+        SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);    
+    }
+	
 	@Override
-	public void serialize(Timestamp arg0, JsonGenerator arg1,
-			SerializerProvider arg2) throws IOException,
+	public void serialize(Timestamp ts, JsonGenerator jg,
+			SerializerProvider sp) throws IOException,
 			JsonProcessingException {
-		// TODO Auto-generated method stub
-		
+		try {
+			if (tsformat == null) {
+				log.warn("Get an instance of the format here if no autowiring...but the pattern can be different!!");
+				tsformat = new TimestampFormat();
+			}
+			log.debug("Use private version of serializer...."+tsformat.getLocformatter().toString());
+			Instant fromEpochMilli = Instant.ofEpochMilli(ts.getTime());
+			ZonedDateTime zdt = fromEpochMilli.atZone(ZoneId.of("Europe/Paris"));
+			jg.writeString(zdt.format(tsformat.getLocformatter()));
+		} catch (Exception ex) {
+			log.error("Failed to serialize using format "+tsformat.getLocformatter().toString());
+			ex.printStackTrace();
+		}
+	}
+
+	public TimestampFormat getTsformat() {
+		return tsformat;
+	}
+
+	public void setTsformat(TimestampFormat tsformat) {
+		this.tsformat = tsformat;
 	}
 
 }

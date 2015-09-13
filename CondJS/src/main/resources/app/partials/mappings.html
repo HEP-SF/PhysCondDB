@@ -1,0 +1,78 @@
+<div class="container-fluid">
+	<div ng-controller="MapCtrl">
+		<p>Update tags associations to {{globaltagname}}</p>
+		<p>The number of associated tags is {{noRow}}</p>
+		<label> Filter by Name: </label> <input type="text" ng-model="tagname" /><br />
+		<br /> 
+		<button class="btn" ng-click="mapit()">
+          <span class="glyphicon glyphicon-link"></span>Update
+        </button>
+<!-- 		<input class="glyphicon glyphicon-link" type="submit" ng-click="mapit()" value="Update" />  -->
+		<br />
+		<label for="items">items by page</label> <input
+			class="input-sm form-control" name="items" id="items" type="number"
+			ng-model="itemsByPage" /> <input type="submit" ng-click="refresh()"
+			value="Refresh" /> <input type="submit" ng-click="search()"
+			value="Search" /> 
+			<br>
+			Debug: <input type="checkbox" ng-model="checked"
+			aria-label="Toggle ngShow">
+		<div class="check-element animate-hide" ng-show="checked">
+			<span class="glyphicon glyphicon-thumbs-up"></span> check values of
+			scope variables.
+			<pre>tagname = {{tagname | json}}</pre>
+			<pre>select = {{select | json}}</pre>
+			<pre>globaltagmappings = {{globaltagmappings | json}}</pre>
+			<pre>displayedTagsCollection = {{displayedTagsCollection | json}}</pre>
+			<pre>gtags = {{gtags | json}}</pre>
+			<pre>assmap = {{assmap | json}}</pre>
+		</div>
+
+		<table st-table="displayedTagsCollection" st-safe-src="tags"
+			class="table table-striped" show-filter="true" export-csv="csv">
+			<thead>
+				<tr>
+					<th st-sort="name">name</th>
+					<th st-sort="insertionTime">insertion time</th>
+					<th st-sort="modificationTime">modification time</th>
+					<th st-sort="endOfvalidity">end of validity</th>
+					<th st-sort="lastValidatedTime">last valid time</th>
+					<th st-sort="description">description</th>
+					<th st-sort="synchronization">synchronization</th>
+					<th st-sort="objectType">object type</th>
+					<th st-sort="timeType">time type</th>
+				</tr>
+				<tr>
+					<th colspan="5"><input st-search="" class="form-control"
+						placeholder="global search ..." type="text" /></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr st-select-row="atag" st-select-mode="single"
+					ng-repeat="atag in displayedTagsCollection">
+					<td data-title="'Name'">{{atag.name}}</td>
+					<td data-title="'Insertion Time'">{{atag.insertionTime}}</td>
+					<td data-title="'Modification Time'">{{atag.modificationTime}}</td>
+					<td data-title="'End of Validity'">{{atag.endOfValidity}}</td>
+					<td data-title="'Last Validated Time'">{{atag.lastValidatedTime}}</td>
+					<td data-title="'Description'">{{atag.description}}</td>
+					<td data-title="'Synchonization'">{{atag.synchronization}}</td>
+					<td data-title="'Object Type'">{{atag.objectType}}</td>
+					<td data-title="'Time Type'">{{atag.timeType}}</td>
+					<td><input type="checkbox"
+						ng-click="manageSelected(select,atag.name,atag)"
+						ng-checked="atag.select" ng-model="select" /></td>
+				</tr>
+			</tbody>
+			<tfoot>
+				<tr>
+					<td colspan="5" class="text-center">
+						<div st-pagination="" st-items-by-page="itemsByPage"
+							st-displayed-pages="displayedPages"></div>
+					</td>
+				</tr>
+			</tfoot>
+		</table>
+	</div>
+</div>
+

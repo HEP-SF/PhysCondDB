@@ -69,6 +69,14 @@ If you use in addition the `dev` spring profile (instead of `prod`) you may defi
 
 Some of the fields in this file are very important in case of deployment under *jetty*, *tomcat7* or *jboss*.
 
+## Oracle driver installation
+Since Oracle JDBC driver is not present in maven repositories, you should install it locally using
+the following procedure. Download the ojdbc6.jar file in your computer.
+Use maven to install it:
+`<a_dir_with_the_jar>$ mvn install:install-file -Dfile=./ojdbc6.jar -DgroupId=com.oracle -DartifactId=ojdbc6 -Dversion=11.2.0.3 -Dpackaging=jar`
+
+This will create an appropriate repository for oracle inside your maven local repository (~/.m2/xxxx).
+
 ## Build instructions
 Execute the following commands from project ROOT directory.
 - To compile the code: `<PhysCondDB>/$ mvn clean compile `

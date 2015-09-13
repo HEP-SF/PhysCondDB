@@ -73,6 +73,10 @@ class PhysDBDriver():
         print "       <object type>      : this will ask directly for fields "
         print "       <object type> help : this will dump needed fields "
         print "       Time format to use in timestamp types: YYYYMMddHHmmss:GMT, e.g. 20141130100000:GMT"
+        print " - UPD <object type> [globaltag, tag, iov, payload] <json content> "
+        print "       <object type>      : this will ask directly for fields "
+        print "       <object type> help : this will dump needed fields "
+        print "       Time format to use in timestamp types: YYYYMMddHHmmss:GMT, e.g. 20141130100000:GMT"
         print " "
         print " - MAPTAG2GLOBALTAG <tag name> <globaltag name>"
         print " "
@@ -188,12 +192,34 @@ class PhysDBDriver():
             restserver.setUserPassword(self.user,self.passwd)
             pyld = restserver.delete(params)
             
+        elif (self.action=='CLONEGTAG'):
+            sourcename = self.args[0]
+            destname   = self.args[1]
+            restserver.setUserPassword(self.user,self.passwd)
+            pyld = restserver.cloneGlobalTag(sourcename,destname)
+            print pyld
+            
+        elif (self.action=='CLONETAG'):
+            sourcename = self.args[0]
+            destname   = self.args[1]
+            restserver.setUserPassword(self.user,self.passwd)
+            pyld = restserver.cloneTag(sourcename,destname,'0','Inf','time')
+            print pyld
+
         elif (self.action=='MAPTAG2GLOBALTAG'):
             tagname = self.args[0]
             gtagname = self.args[1]
             mapt = restserver.mapTag2GlobalTag(tagname,gtagname)
             print mapt
-            
+
+        elif (self.action=='MAKEHASH'):
+            file = self.args[0]
+            #f = open(file,"r")
+            #data = json.loads(f.read())
+            dict = { 'file' : file }
+            result = restserver.makehash(dict)
+            print result
+
         elif (self.action=='ADDFROMFILE'):
             resp="No response"
             try:
@@ -222,6 +248,41 @@ class PhysDBDriver():
                 print "object not found..."
             print resp
 
+        elif (self.action =='UPD'):
+            try:
+                print 'Found N arguments ',len(self.args)
+                object=self.args[0]
+                data = {}
+                print 'determine action...'
+                if len(self.args) == 2:
+                    f = open(self.args[1],"r")
+
+                try:
+                    print 'Load data using ',self.args[1]
+                    data = json.loads(f.read())
+                except:
+                    print 'Error in loading json...'
+                    print 'For Global Tags use : '
+                    print GlobalTag({}).help()
+                    print 'For Tags use : '
+                    print Tag({}).help()
+                    return
+            
+                if data is None:
+                    print "Missing data for ADD method"
+                    return
+            
+            except ValueError as e:
+                print "error({0}): {1}".format(e.errno, e.strerror)
+                print "problem uploading or missing arguments: ", sys.exc_info()[0]
+                raise
+            
+            if (object == "globaltag"):
+                resp = restserver.updGlobalTag(data)
+            else:
+                print "object not found..."
+                print resp
+                    
         elif (self.action =='ADD'):
             try:
                 print 'Found N arguments ',len(self.args)

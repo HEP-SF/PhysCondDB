@@ -17,8 +17,6 @@
  **/
 package conddb.data.handler;
 
-import java.sql.Timestamp;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -38,7 +36,6 @@ public class GlobalTagHandler implements CondDBObjectHandler<GlobalTag, String> 
 		newgtag.setValidity(source.getValidity());
 		newgtag.setRelease(source.getRelease());
 		newgtag.setSnapshotTime(source.getSnapshotTime());
-//		newgtag.setInsertionTime(new Timestamp(new Date().getTime()));
 		newgtag.setLockstatus(source.getLockstatus());
 		return newgtag;
 	}

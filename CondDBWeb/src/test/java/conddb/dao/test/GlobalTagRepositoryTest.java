@@ -20,6 +20,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import conddb.dao.admin.controllers.GlobalTagAdminController;
 import conddb.dao.exceptions.ConddbServiceException;
+import conddb.dao.expert.controllers.GlobalTagExpertController;
 import conddb.dao.repositories.GlobalTagRepository;
 import conddb.data.GlobalTag;
 
@@ -36,6 +37,8 @@ public class GlobalTagRepositoryTest {
 	private GlobalTagRepository repo;
 	@Autowired
 	private GlobalTagAdminController gtagadmin;
+	@Autowired
+	private GlobalTagExpertController gtagexpert;
 
 	private String gtagtestname = "TEST_01";
 	
@@ -62,10 +65,11 @@ public class GlobalTagRepositoryTest {
 		List<GlobalTag> gtags = (List<GlobalTag>) this.repo.findByNameLike(gtagtestname);
 		assertThat(gtags.size(), is(1));
 	}
+	
 	@Test
 	public void updateGlobalTagLocking() {
 		try {
-			gtagadmin.updateGlobalTagLocking(gtagtestname, "locked");
+			gtagexpert.updateGlobalTagLocking(gtagtestname, "locked");
 			GlobalTag gtag = repo.findOne(gtagtestname);
 			assertThat(gtag.getLockstatus(), is("locked"));
 		} catch (ConddbServiceException e) {

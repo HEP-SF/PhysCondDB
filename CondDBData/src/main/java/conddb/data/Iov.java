@@ -31,7 +31,7 @@ import conddb.utils.json.serializers.TimestampDeserializer;
 @Table(name = "PHCOND_IOV", uniqueConstraints = { @UniqueConstraint(columnNames = {
 		"SINCE", "INSERTION_TIME", "TAG_ID" }) })
 //@//JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = Iov.class)
 public class Iov implements java.io.Serializable {
 
 	/**

@@ -3,6 +3,8 @@
 
 <Configure id ="datadb" class="org.eclipse.jetty.webapp.WebAppContext">
 
+    <Set name="contextPath">/physconddb</Set>
+
     <New id="h2Datasource" class="org.eclipse.jetty.plus.jndi.Resource">
         <Arg>jdbc/H2DB</Arg>
         <Arg>
