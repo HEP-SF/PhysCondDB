@@ -30,7 +30,7 @@
 		maxActive="100" maxIdle="30" maxWait="10000" username="${devuser}"
 		password="${devpassword}" driverClassName="oracle.jdbc.OracleDriver"
 		url="jdbc:oracle:thin:@(DESCRIPTION =
-        (ADDRESS= (PROTOCOL=TCP) (HOST=intr-s.cern.ch) (PORT=10121) )
+        (ADDRESS= (PROTOCOL=TCP) (HOST=db-d0002.cern.ch) (PORT=10654) )
         (ENABLE=BROKEN)
         (CONNECT_DATA=
                 (SERVICE_NAME=intr.cern.ch)
