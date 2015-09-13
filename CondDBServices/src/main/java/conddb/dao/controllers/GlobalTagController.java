@@ -41,56 +41,56 @@ public class GlobalTagController {
 	private TagRepository tagRepository;
 	@Autowired
 	private IovRepository iovRepository;
-    @Autowired 
-    private PayloadRepository payloadRepository;
-	
-    public List<GlobalTag> getGlobalTagByNameLike(String globaltagname) throws ConddbServiceException {
-    	try {
-    		return gtagRepository.findByNameLike(globaltagname);
-    	} catch (Exception e) {
-    		throw new ConddbServiceException("Cannot find global tag by name: "+e.getMessage());
-    	}
-    }
-    
+	@Autowired
+	private PayloadRepository payloadRepository;
+
+	public List<GlobalTag> getGlobalTagByNameLike(String globaltagname) throws ConddbServiceException {
+		try {
+			return gtagRepository.findByNameLike(globaltagname);
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot find global tag by name: " + e.getMessage());
+		}
+	}
+
 	@ProfileExecution
-	public GlobalTag getGlobalTagFetchTags(String globaltagname)
+	public GlobalTag getGlobalTagFetchTags(String globaltagname) throws ConddbServiceException {
+		try {
+			GlobalTag gtag = this.gtagRepository.findByNameAndFetchTagsEagerly(globaltagname);
+			this.log.debug("Found global tag " + gtag);
+			return gtag;
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot find global tag by name and fetch tags: " + e.getMessage());
+		}
+	}
+
+	@ProfileExecution
+	public GlobalTag getGlobalTag(String globaltagname) throws ConddbServiceException {
+		try {
+			GlobalTag gtag = this.gtagRepository.findOne(globaltagname);
+			this.log.debug("Found global tag " + gtag);
+			return gtag;
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot find global tag by name: " + e.getMessage());
+		}
+	}
+
+	@ProfileExecution
+	public List<GlobalTag> getGlobalTagByNameLikeFetchTags(String globaltagnamepattern) throws ConddbServiceException {
+
+		try {
+			List<GlobalTag> gtaglist = this.gtagRepository.findByNameLikeAndFetchTagsEagerly(globaltagnamepattern);
+			this.log.debug("Found global tag list of size " + gtaglist.size());
+			return gtaglist;
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot find global tag by name like "+ globaltagnamepattern +" and fetch tags: " + e.getMessage());
+		}
+	}
+
+	@ProfileExecution
+	public List<GlobalTag> getGlobalTagByInsertionTimeBetween(Timestamp since, Timestamp until)
 			throws ConddbServiceException {
 
-		GlobalTag gtag = this.gtagRepository
-				.findByNameAndFetchTagsEagerly(globaltagname);
-		this.log.debug("Found global tag " + gtag);
-
-		return gtag;
-	}
-
-	@ProfileExecution
-	public GlobalTag getGlobalTag(String globaltagname)
-			throws ConddbServiceException {
-
-		GlobalTag gtag = this.gtagRepository
-				.findOne(globaltagname);
-		this.log.debug("Found global tag " + gtag);
-
-		return gtag;
-	}
-
-	@ProfileExecution
-	public List<GlobalTag> getGlobalTagByNameLikeFetchTags(
-			String globaltagnamepattern) throws ConddbServiceException {
-
-		List<GlobalTag> gtaglist = this.gtagRepository
-				.findByNameLikeAndFetchTagsEagerly(globaltagnamepattern);
-		this.log.debug("Found global tag list of size " + gtaglist.size());
-
-		return gtaglist;
-	}
-
-	@ProfileExecution
-	public List<GlobalTag> getGlobalTagByInsertionTimeBetween(Timestamp since,
-			Timestamp until) throws ConddbServiceException {
-
-		List<GlobalTag> gtaglist = this.gtagRepository
-				.findByInsertionTimeBetween(since, until);
+		List<GlobalTag> gtaglist = this.gtagRepository.findByInsertionTimeBetween(since, until);
 		this.log.debug("Found global tag list of size " + gtaglist.size());
 
 		return gtaglist;
@@ -100,13 +100,11 @@ public class GlobalTagController {
 	public GlobalTag insertGlobalTag(GlobalTag entity) throws ConddbServiceException {
 		return gtagRepository.save(entity);
 	}
-	
-	@ProfileExecution
-	public Tag getTag(String tagname)
-			throws ConddbServiceException {
 
-		Tag atag = this.tagRepository
-				.findByName(tagname);
+	@ProfileExecution
+	public Tag getTag(String tagname) throws ConddbServiceException {
+
+		Tag atag = this.tagRepository.findByName(tagname);
 		this.log.debug("Found tag " + atag);
 
 		return atag;
@@ -125,7 +123,6 @@ public class GlobalTagController {
 		GlobalTagMap entity = new GlobalTagMap(gtag, atag);
 		return gtagMapRepository.save(entity);
 	}
-	
 
 	@Transactional
 	public GlobalTagMap insertGlobalTagMap(GlobalTagMap entity) throws ConddbServiceException {
@@ -135,6 +132,5 @@ public class GlobalTagController {
 		entity.setSystemTag(atag);
 		return gtagMapRepository.save(entity);
 	}
-
 
 }

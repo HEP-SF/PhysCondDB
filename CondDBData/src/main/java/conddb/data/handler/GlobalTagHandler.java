@@ -36,7 +36,6 @@ public class GlobalTagHandler implements CondDBObjectHandler<GlobalTag, String> 
 		newgtag.setValidity(source.getValidity());
 		newgtag.setRelease(source.getRelease());
 		newgtag.setSnapshotTime(source.getSnapshotTime());
-//		newgtag.setInsertionTime(new Timestamp(new Date().getTime()));
 		newgtag.setLockstatus(source.getLockstatus());
 		return newgtag;
 	}

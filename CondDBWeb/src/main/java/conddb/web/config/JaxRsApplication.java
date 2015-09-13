@@ -34,6 +34,7 @@ import conddb.utils.json.HibernateAwareObjectMapper;
 import conddb.web.controllers.CondAdminWebController;
 import conddb.web.controllers.CondExpertWebController;
 import conddb.web.controllers.CondPayloadWebController;
+import conddb.web.controllers.CondRestWebController;
 import conddb.web.controllers.CondWebController;
 import conddb.web.exceptions.CondDBExceptionMapper;
 import io.swagger.jaxrs.config.BeanConfig;
@@ -63,6 +64,7 @@ public class JaxRsApplication extends ResourceConfig {
 		register(CondExpertWebController.class);
 		register(CondAdminWebController.class);
 		register(CondPayloadWebController.class);
+		register(CondRestWebController.class);
 
 		// register json provider
 		log.info("Register JacksonJsonProvide using object mapper "+hibernateAwareObjectMapper);

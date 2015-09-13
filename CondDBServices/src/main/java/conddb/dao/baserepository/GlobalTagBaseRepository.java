@@ -26,7 +26,6 @@ public interface GlobalTagBaseRepository extends CondDBPageAndSortingRepository<
 	List<GlobalTag> findByDescriptionLike(
 			@Param("description") String description);
 
-	// TODO: Test using orm.xml by commenting....did not work
 	@Query("SELECT distinct p FROM GlobalTag p JOIN FETCH p.globalTagMaps maps WHERE maps.globalTag.name = (:name)")
 	public GlobalTag findByNameAndFetchTagsEagerly(@Param("name") String name);
 
