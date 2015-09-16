@@ -18,11 +18,15 @@
 package conddb.web.config;
 
 import javax.inject.Inject;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.process.Inflector;
 //import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.model.Resource;
 import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +38,11 @@ import conddb.utils.json.HibernateAwareObjectMapper;
 import conddb.web.controllers.CondAdminWebController;
 import conddb.web.controllers.CondExpertWebController;
 import conddb.web.controllers.CondPayloadWebController;
-import conddb.web.controllers.CondRestWebController;
+import conddb.web.controllers.GlobalTagRestController;
+import conddb.web.controllers.TagRestController;
 import conddb.web.controllers.CondWebController;
+import conddb.web.controllers.GlobalTagExpRestController;
+import conddb.web.controllers.GlobalTagMapRestController;
 import conddb.web.exceptions.CondDBExceptionMapper;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.models.Info;
@@ -64,7 +71,10 @@ public class JaxRsApplication extends ResourceConfig {
 		register(CondExpertWebController.class);
 		register(CondAdminWebController.class);
 		register(CondPayloadWebController.class);
-		register(CondRestWebController.class);
+		register(GlobalTagRestController.class);
+		register(GlobalTagExpRestController.class);
+		register(GlobalTagMapRestController.class);
+		register(TagRestController.class);
 
 		// register json provider
 		log.info("Register JacksonJsonProvide using object mapper "+hibernateAwareObjectMapper);
@@ -80,8 +90,24 @@ public class JaxRsApplication extends ResourceConfig {
 		register(JacksonFeature.class);
 		register(MultiPartFeature.class);
 		
+		// Test programmatic resources
+		buildResources();
+		
+		// Test swagger
 		initSwagger();
-
+	}
+	
+	protected void buildResources() {
+		final Resource.Builder resourceBuilder = Resource.builder(GlobalTagRestController.class);
+		resourceBuilder.addMethod("OPTIONS")
+		    .handledBy(new Inflector<ContainerRequestContext, Response>() {
+		        @Override
+		        public Response apply(ContainerRequestContext containerRequestContext) {
+		            return Response.ok("This is a response to an OPTIONS method.").build();
+		        }
+		    });
+		final Resource resource = resourceBuilder.build();
+//		registerResources(resource);
 	}
 
 	public ObjectMapper getHibernateAwareObjectMapper() {

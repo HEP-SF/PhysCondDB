@@ -3,6 +3,8 @@
  */
 package conddb.data;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -18,7 +20,7 @@ import javax.persistence.UniqueConstraint;
 @Entity
 @Table(name = "PHCOND_SYSTEM_NODE", uniqueConstraints = { @UniqueConstraint(columnNames = {
 		"NODE_FULLPATH"}) })
-public class SystemDescription {
+public class SystemDescription extends conddb.data.Entity implements Serializable {
 
 	private Long id;
 	private String nodeFullpath;

@@ -23,9 +23,8 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 @Entity
 @Table(name = "PHCOND_GLOBAL_TAG_MAP",
 	uniqueConstraints=@UniqueConstraint(columnNames={"TAG_ID", "GLOBAL_TAG_NAME"}))
-//)
 @JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id", scope = GlobalTagMap.class)
-public class GlobalTagMap implements java.io.Serializable {
+public class GlobalTagMap extends conddb.data.Entity implements java.io.Serializable {
 
 	/**
 	 * 

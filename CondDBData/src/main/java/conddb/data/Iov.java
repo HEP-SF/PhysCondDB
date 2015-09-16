@@ -32,13 +32,14 @@ import conddb.utils.json.serializers.TimestampDeserializer;
 		"SINCE", "INSERTION_TIME", "TAG_ID" }) })
 //@//JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = Iov.class)
-public class Iov implements java.io.Serializable {
+public class Iov extends conddb.data.Entity implements java.io.Serializable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 7499748521778474013L;
-
+	public static final long MAX_TIME = 999999999999999L;
+	
 	private Long id;
 	private BigDecimal since;
 	private String sinceString;

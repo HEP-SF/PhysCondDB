@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import conddb.annotations.ProfileExecution;
 import conddb.dao.baserepository.PayloadDataBaseCustom;
@@ -58,12 +60,8 @@ public class ConddbClientService {
 
 	// Iovs related methods
 	public List<Iov> getIovsForTag(String tagname) throws Exception {
-		List<Iov> iovlist = iovRepository.findByTagName(tagname);
-		for (Iov iov : iovlist) {
-			log.info("Loaded iov " + iov.getSince() + " with payload "
-					+ iov.getPayload().toString());
-		}
-		return iovlist;
+		Page<Iov> iovlist = iovRepository.findByTagName(tagname, new PageRequest(0,10000));
+		return iovlist.getContent();
 	}
 
 	public List<Iov> getIovsForTagFetchPayload(String tagname) throws Exception {

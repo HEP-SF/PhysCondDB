@@ -27,7 +27,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import conddb.annotations.LogAction;
-import conddb.dao.controllers.GlobalTagController;
+import conddb.dao.controllers.GlobalTagService;
 import conddb.dao.svc.ConddbClientService;
 import conddb.data.GlobalTag;
 import conddb.data.Iov;
@@ -55,7 +55,7 @@ public class CondWebController {
 	@Autowired
 	private ConddbClientService conddbsvc;
 	@Autowired
-	private GlobalTagController globalTagController;
+	private GlobalTagService globalTagController;
 
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })

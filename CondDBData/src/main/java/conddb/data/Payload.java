@@ -33,7 +33,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 //		  })
 
 @JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="hash", scope = Payload.class)
-public class Payload implements java.io.Serializable {
+public class Payload extends conddb.data.Entity implements java.io.Serializable {
 
 	/**
 	 * 

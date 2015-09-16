@@ -15,6 +15,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
 import conddb.data.Iov;
+import conddb.data.Tag;
 
 /**
  * @author formica
@@ -32,7 +33,17 @@ public interface IovBaseRepository extends
 	 * 
 	 * @return List of IOVs for a given tag name.
 	 */
-	List<Iov> findByTagName(@Param("tag_name") String tagname);
+	Page<Iov> findByTagName(@Param("tag_name") String tagname, Pageable pageable);
+
+	/**
+	 * TODO:
+	 * May be hide this method to clients.
+	 * @param tagname
+	 * 	The name of the tag.
+	 * 
+	 * @return List of IOVs for a given tag name.
+	 */
+	Page<Iov> findByTag(@Param("tag") Tag tag, Pageable pageable);
 
 	/**
 	 * TODO:

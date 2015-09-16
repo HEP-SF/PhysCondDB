@@ -19,6 +19,8 @@ package conddb.utils.json.serializers;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 import org.slf4j.Logger;
@@ -41,7 +43,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 public class TimestampDeserializer extends JsonDeserializer<Timestamp> {
 
 	@Autowired
-	TimestampFormat tsformat;
+	TimestampFormat timestampFormat;
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -54,14 +56,14 @@ public class TimestampDeserializer extends JsonDeserializer<Timestamp> {
 			throws IOException, JsonProcessingException {
 		Timestamp tstamp = null;
 		try {
-			if (tsformat == null) {
+			if (timestampFormat == null) {
 				log.warn("Get an instance of the format here if no autowiring...but the pattern can be different!!");
-				tsformat = new TimestampFormat();
+				timestampFormat = new TimestampFormat();
 			}
 			log.debug("Use private version of deserializer...."
-					+ tsformat.getLocformatter().toString());
+					+ timestampFormat.getLocformatter().toString());
 			ZonedDateTime zdt = ZonedDateTime.parse(jp.getText(),
-					tsformat.getLocformatter());
+					timestampFormat.getLocformatter());
 			tstamp = new Timestamp(zdt.toInstant().toEpochMilli());
 		} catch (Exception ex) {
 			// If an exception is catch on parsing, try as if it was
@@ -69,12 +71,12 @@ public class TimestampDeserializer extends JsonDeserializer<Timestamp> {
 			log.error(ex.getMessage());
 			log.warn("Failed parsing date, try with milliseconds: "
 					+ jp.getText());
-			log.error("Failed to deserialize using format "+tsformat.getLocformatter().toString());
+			log.error("Failed to deserialize using format "+timestampFormat.getLocformatter().toString());
 			try {
 				String millisec = jp.getText();
 				tstamp = new Timestamp(new Long(millisec));
 			} catch (Exception e) {
-				log.error("Failed to deserialize using format "+tsformat.getLocformatter().toString());
+				log.error("Failed to deserialize using format "+timestampFormat.getLocformatter().toString());
 				throw new JsonParseException(e.getMessage(),
 						jp.getCurrentLocation());
 			}
@@ -82,12 +84,12 @@ public class TimestampDeserializer extends JsonDeserializer<Timestamp> {
 		return tstamp;
 	}
 
-	public TimestampFormat getTsformat() {
-		return tsformat;
+	public TimestampFormat getTimestampFormat() {
+		return timestampFormat;
 	}
 
-	public void setTsformat(TimestampFormat tsformat) {
-		this.tsformat = tsformat;
+	public void setTimestampFormat(TimestampFormat timestampFormat) {
+		this.timestampFormat = timestampFormat;
 	}
 
 }

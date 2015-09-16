@@ -24,8 +24,11 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
+import conddb.dao.exceptions.ConddbServiceException;
 import conddb.dao.repositories.IovRepository;
 import conddb.dao.repositories.PayloadRepository;
 import conddb.dao.repositories.TagRepository;
@@ -37,7 +40,7 @@ import conddb.data.Tag;
  * @author formica
  *
  */
-public class IovController {
+public class IovService {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -48,6 +51,46 @@ public class IovController {
     @Autowired 
     private PayloadRepository payloadRepository;
 
+    /**
+     * @param tag
+     * @param preq
+     * @return
+     * @throws ConddbServiceException
+     */
+    public Iov getIov(Long id) throws ConddbServiceException {
+    	try {
+    		return iovRepository.findOne(id);
+    	} catch (Exception e) {
+    		throw new ConddbServiceException("Cannot find iov "+id+": "+e.getMessage());
+    	}
+    }
+  
+    /**
+     * @param tag
+     * @param preq
+     * @return
+     * @throws ConddbServiceException
+     */
+    public List<Iov> getIovsByTag(Tag tag, PageRequest preq) throws ConddbServiceException {
+    	try {
+    		return iovRepository.findByTag(tag, preq).getContent();
+    	} catch (Exception e) {
+    		throw new ConddbServiceException("Cannot look for iovs in tag "+tag.getName()+": "+e.getMessage());
+    	}
+    }
+    /**
+     * @param preq
+     * @return
+     * @throws ConddbServiceException
+     */
+    public Page<Iov> findAll(PageRequest preq) throws ConddbServiceException {
+    	try {
+    		return iovRepository.findAll(preq);
+    	} catch (Exception e) {
+    		throw new ConddbServiceException("Cannot find iovs : "+e.getMessage());
+    	}
+    }
+    
 	@Transactional
 	public Iov insertIov(Iov entity) {
 		log.info("Controller searching for tag by name "+entity.getTag().getName());

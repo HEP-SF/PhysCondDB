@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 @Entity
 @Table(name = "PHCOND_PAYLOAD_DATA")
 @JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="hash")
-public class PayloadData implements java.io.Serializable {
+public class PayloadData extends conddb.data.Entity implements java.io.Serializable {
 
 	/**
 	 * 

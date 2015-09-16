@@ -56,5 +56,23 @@
             </New>
         </Arg>
     </New>
+   
+    <New id="oraintrdatasource" class="org.eclipse.jetty.plus.jndi.Resource">
+        <Arg>jdbc/OraIntr</Arg>
+        <Arg>
+            <New class="org.apache.commons.dbcp.BasicDataSource">
+                <Set name="driverClassName">oracle.jdbc.OracleDriver</Set>
+                <Set name="url">jdbc:oracle:thin:@(DESCRIPTION = 
+        (ADDRESS= (PROTOCOL=TCP) (HOST=db-d0002.cern.ch) (PORT=10654) )
+        (ENABLE=BROKEN)
+        (CONNECT_DATA=
+                (SERVICE_NAME=intr.cern.ch)
+        )
+)</Set>
+                <Set name="username">${devuser}</Set>
+                <Set name="password">${devpassword}</Set>
+            </New>
+        </Arg>
+    </New>
     
 </Configure>

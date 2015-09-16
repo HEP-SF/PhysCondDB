@@ -16,7 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import conddb.dao.admin.controllers.GlobalTagAdminController;
-import conddb.dao.controllers.GlobalTagController;
+import conddb.dao.controllers.GlobalTagService;
 import conddb.dao.expert.controllers.GlobalTagExpertController;
 import conddb.data.GlobalTag;
 import conddb.data.Tag;
@@ -38,7 +38,7 @@ public class CondAdminWebController {
 	@Autowired
 	private GlobalTagExpertController globalTagExpertController;
 	@Autowired
-	private GlobalTagController globalTagController;
+	private GlobalTagService globalTagController;
 
 	@POST
 	@Path("/globaltag/clone")

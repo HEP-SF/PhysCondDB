@@ -10,14 +10,14 @@
            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
 	<context:component-scan
-		base-package="conddb.dao.svc,conddb.dao.admin,conddb.dao.expert,conddb.dao.controllers,conddb.dao.repositories,conddb.utils" />
+		base-package="conddb.dao.svc,conddb.dao.admin,conddb.dao.expert,conddb.dao.controllers,conddb.dao.repositories,conddb.utils,conddb.web" />
 	<mvc:annotation-driven/>
 
 	<!-- Services -->
 	<bean id="globalTagAdminController" class="conddb.dao.admin.controllers.GlobalTagAdminController" />
 	<bean id="globalTagExpertController" class="conddb.dao.expert.controllers.GlobalTagExpertController" />
-	<bean id="globalTagController" class="conddb.dao.controllers.GlobalTagController" />
-	<bean id="iovController" class="conddb.dao.controllers.IovController" />
+	<bean id="globalTagService" class="conddb.dao.controllers.GlobalTagService" />
+	<bean id="iovService" class="conddb.dao.controllers.IovService" />
 	<bean id="conddbClientService" class="conddb.dao.svc.ConddbClientService" />
 	<bean id="profilingAdvisor" class="conddb.utils.aop.ProfilingAdvisor"></bean>
 	<bean id="profilingMethodInterceptor" class="conddb.utils.aop.ProfilingMethodInterceptor"></bean>
@@ -28,9 +28,11 @@
 	<bean id="payloaddatadbrepo" class="conddb.dao.repositories.impl.PayloadDataDBImpl"></bean>
 
 	<!-- Timestamp serializer and deserializer formatting methods -->
-	<bean id="tsformat" class="conddb.utils.json.serializers.TimestampFormat">
+	<bean id="timestampFormat" class="conddb.utils.json.serializers.TimestampFormat">
 		<property name="pattern" value="ISO_OFFSET_DATE_TIME"/>
 	</bean>
+
+<!-- 	<bean id="resourceFactory" class="conddb.web.resources.SpringResourceFactory"></bean> -->
 
 	<!-- this is the actual advice itself -->
 	<bean id="profilingAspect" class="conddb.utils.aop.ProfilingAspect" />

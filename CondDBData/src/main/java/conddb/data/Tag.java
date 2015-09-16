@@ -33,7 +33,7 @@ import conddb.utils.json.serializers.TimestampSerializer;
 @Entity
 @Table(name = "PHCOND_TAG")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = Tag.class)
-public class Tag implements java.io.Serializable {
+public class Tag extends conddb.data.Entity implements java.io.Serializable {
 
 	/**
 	 * 

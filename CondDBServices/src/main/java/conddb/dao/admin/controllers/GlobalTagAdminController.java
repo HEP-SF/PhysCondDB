@@ -31,7 +31,7 @@ public class GlobalTagAdminController {
 
 
 	@Transactional
-	public void deleteGlobalTag(String sourcegtag)
+	public GlobalTag deleteGlobalTag(String sourcegtag)
 			throws ConddbServiceException {
 		GlobalTag sgtag = this.gtagRepository
 				.findOne(sourcegtag);
@@ -45,6 +45,7 @@ public class GlobalTagAdminController {
 		this.log.debug("Retrieved globaltag for removal operation: " + sgtag
 				+ " linked to " + ntags + " tags: cascade deleting ALL tags and iovs ");
 		this.gtagRepository.delete(sgtag);
+		return sgtag;
 	}
 
 

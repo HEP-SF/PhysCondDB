@@ -3,15 +3,11 @@
  */
 package conddb.web.controllers;
 
-import io.swagger.annotations.Api;
-
 import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -21,15 +17,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import conddb.dao.controllers.GlobalTagController;
-import conddb.dao.controllers.IovController;
-import conddb.dao.expert.controllers.GlobalTagExpertController;
+import conddb.dao.controllers.GlobalTagService;
+import conddb.dao.controllers.IovService;
 import conddb.dao.svc.ConddbClientService;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.Iov;
 import conddb.data.Tag;
 import conddb.web.exceptions.ConddbWebException;
+import io.swagger.annotations.Api;
 
 /**
  * @author formica
@@ -43,11 +39,9 @@ public class CondExpertWebController {
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
-	private GlobalTagController globalTagController;
+	private GlobalTagService globalTagService;
 	@Autowired
-	private GlobalTagExpertController globalTagExpertController;
-	@Autowired
-	private IovController iovController;
+	private IovService iovService;
 	@Autowired
 	private ConddbClientService clientservice;
 
@@ -64,7 +58,7 @@ public class CondExpertWebController {
 	public GlobalTag insertGlobalTag(GlobalTag jsonString) throws ConddbWebException {
 		try {
 			this.log.info("CondExpertWebController processing request for insertGlobalTag ...");
-			GlobalTag gtag = this.globalTagController.insertGlobalTag(jsonString);
+			GlobalTag gtag = this.globalTagService.insertGlobalTag(jsonString);
 			return gtag;
 		} catch (Exception e) {
 			throw new ConddbWebException(e);
@@ -86,7 +80,7 @@ public class CondExpertWebController {
 	public GlobalTag updateGlobalTag(GlobalTag jsonString) throws ConddbWebException {
 		try {
 			this.log.info("CondExpertWebController processing request for updateGlobalTag ...");
-			GlobalTag stored = this.globalTagController.getGlobalTag(jsonString.getName());
+			GlobalTag stored = this.globalTagService.getGlobalTag(jsonString.getName());
 			if (stored != null) {
 				if (jsonString.getDescription() != null) {
 					stored.setDescription(jsonString.getDescription());
@@ -105,7 +99,7 @@ public class CondExpertWebController {
 				if (jsonString.getValidity() != null) {
 					stored.setValidity(jsonString.getValidity());
 				}
-				GlobalTag gtag = this.globalTagController.insertGlobalTag(stored);
+				GlobalTag gtag = this.globalTagService.insertGlobalTag(stored);
 				return gtag;
 			}
 			return null;
@@ -128,7 +122,7 @@ public class CondExpertWebController {
 	public Tag insertTag(Tag jsonString) throws ConddbWebException {
 		try {
 			this.log.info("CondExpertWebController processing request for insertTag ...");
-			Tag tag = this.globalTagController.insertTag(jsonString);
+			Tag tag = this.globalTagService.insertTag(jsonString);
 			return tag;
 		} catch (Exception e) {
 			throw new ConddbWebException(e);
@@ -149,7 +143,7 @@ public class CondExpertWebController {
 	public Tag updateTag(Tag jsonString) throws ConddbWebException {
 		try {
 			this.log.info("CondExpertWebController processing request for updateTag ...");
-			Tag stored = this.globalTagController.getTag(jsonString.getName());
+			Tag stored = this.globalTagService.getTag(jsonString.getName());
 			if (stored != null) {
 				if (jsonString.getDescription() != null) {
 					stored.setDescription(jsonString.getDescription());
@@ -166,7 +160,7 @@ public class CondExpertWebController {
 				if (jsonString.getEndOfValidity() != null) {
 					stored.setEndOfValidity(jsonString.getEndOfValidity());
 				}
-				Tag atag = this.globalTagController.insertTag(stored);
+				Tag atag = this.globalTagService.insertTag(stored);
 				return atag;
 			}
 			return null;
@@ -182,7 +176,7 @@ public class CondExpertWebController {
 	public GlobalTagMap insertGlobalTagMap(GlobalTagMap jsonString) throws ConddbWebException {
 		try {
 			this.log.info("CondExpertWebController processing request for insertGlobalTagMap ...");
-			GlobalTagMap gtagmap = this.globalTagController.insertGlobalTagMap(jsonString);
+			GlobalTagMap gtagmap = this.globalTagService.insertGlobalTagMap(jsonString);
 			return gtagmap;
 		} catch (Exception e) {
 			throw new ConddbWebException(e);
@@ -197,7 +191,7 @@ public class CondExpertWebController {
 		try {
 			this.log.info("CondExpertWebController processing request for insertIov using tag..."
 					+ jsonString.getTag().getName());
-			Iov iov = this.iovController.insertIov(jsonString);
+			Iov iov = this.iovService.insertIov(jsonString);
 			return iov;
 		} catch (Exception e) {
 			throw new ConddbWebException(e);
@@ -212,11 +206,11 @@ public class CondExpertWebController {
 		try {
 			this.log.info(
 					"CondExpertWebController processing request for mapTagToGtag ..." + globaltagname + " " + tagname);
-			GlobalTag gtag = globalTagController.getGlobalTag(globaltagname);
+			GlobalTag gtag = globalTagService.getGlobalTag(globaltagname);
 			List<Tag> list = clientservice.getTagOne(tagname);
 			Tag atag = list.get(0);
 			this.log.info("CondExpertWebController processing request for mapTagToGtag using " + gtag + " " + atag);
-			GlobalTagMap gtagmap = this.globalTagController.mapAddTagToGlobalTag(atag, gtag);
+			GlobalTagMap gtagmap = this.globalTagService.mapAddTagToGlobalTag(atag, gtag);
 			return gtagmap;
 		} catch (Exception e) {
 			throw new ConddbWebException(e);

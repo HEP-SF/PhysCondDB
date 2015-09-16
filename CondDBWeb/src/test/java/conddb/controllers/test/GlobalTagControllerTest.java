@@ -20,7 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import conddb.builders.GlobalTagBuilder;
-import conddb.dao.controllers.GlobalTagController;
+import conddb.dao.controllers.GlobalTagService;
 import conddb.data.GlobalTag;
 
 /////@ActiveProfiles({ "dev", "h2" })
@@ -36,7 +36,7 @@ public class GlobalTagControllerTest {
     public static final MediaType APPLICATION_JSON_UTF8 = new MediaType(MediaType.APPLICATION_JSON.getType(), MediaType.APPLICATION_JSON.getSubtype(), Charset.forName("utf8"));
     
     @Autowired
-    private GlobalTagController gtagMock;
+    private GlobalTagService gtagMock;
     
 //    @//Test
     public void findAll_GlobalTags() throws Exception {

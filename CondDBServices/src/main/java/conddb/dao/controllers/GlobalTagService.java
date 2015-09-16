@@ -4,32 +4,28 @@
 package conddb.dao.controllers;
 
 import java.sql.Timestamp;
-import java.time.Instant;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import conddb.annotations.ProfileExecution;
 import conddb.dao.exceptions.ConddbServiceException;
 import conddb.dao.repositories.GlobalTagMapRepository;
 import conddb.dao.repositories.GlobalTagRepository;
-import conddb.dao.repositories.IovRepository;
-import conddb.dao.repositories.PayloadRepository;
 import conddb.dao.repositories.TagRepository;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
-import conddb.data.Iov;
-import conddb.data.Payload;
 import conddb.data.Tag;
 
 /**
  * @author formica
  *
  */
-public class GlobalTagController {
+public class GlobalTagService {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -39,11 +35,60 @@ public class GlobalTagController {
 	private GlobalTagMapRepository gtagMapRepository;
 	@Autowired
 	private TagRepository tagRepository;
-	@Autowired
-	private IovRepository iovRepository;
-	@Autowired
-	private PayloadRepository payloadRepository;
-
+	
+	/**
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public Iterable<GlobalTag> findAllGlobalTags() throws ConddbServiceException {
+		try {
+			return gtagRepository.findAll();
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot find global tag list " + e.getMessage());
+		}
+	}
+	/**
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public Iterable<GlobalTagMap> findAllGlobalTagMaps(PageRequest preq) throws ConddbServiceException {
+		try {
+			if (preq == null)
+				throw new ConddbServiceException("Cannot query full table without pagination");
+			return gtagMapRepository.findAll(preq);
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot find global tag map list " + e.getMessage());
+		}
+	}
+	/**
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public GlobalTagMap getGlobalTagMap(Long id) throws ConddbServiceException {
+		try {
+			return gtagMapRepository.findOne(id);
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot find global tag map element " + e.getMessage());
+		}
+	}
+	/**
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public Iterable<Tag> findAllTags(PageRequest preq) throws ConddbServiceException {
+		try {
+			if (preq == null)
+				throw new ConddbServiceException("Cannot query full table without pagination");
+			return tagRepository.findAll(preq);
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot find tag list " + e.getMessage());
+		}
+	}	
+	/**
+	 * @param globaltagname
+	 * @return
+	 * @throws ConddbServiceException
+	 */
 	public List<GlobalTag> getGlobalTagByNameLike(String globaltagname) throws ConddbServiceException {
 		try {
 			return gtagRepository.findByNameLike(globaltagname);
@@ -95,26 +140,92 @@ public class GlobalTagController {
 
 		return gtaglist;
 	}
-
-	@Transactional
-	public GlobalTag insertGlobalTag(GlobalTag entity) throws ConddbServiceException {
-		return gtagRepository.save(entity);
+	
+	/**
+	 * @param globaltagname
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public List<GlobalTagMap> getGlobalTagMapByGlobalTagName(String globaltagname) throws ConddbServiceException {
+		return gtagMapRepository.findByGlobalTagName(globaltagname);
 	}
-
-	@ProfileExecution
+	/**
+	 * @param tagname
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public List<GlobalTagMap> getGlobalTagMapByTagName(String tagname) throws ConddbServiceException {
+		return gtagMapRepository.findByTagName(tagname);
+	}	
+	
+	/**
+	 * @param tagname
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public List<Tag> getTagByNameLike(String tagname) throws ConddbServiceException {
+		try {
+			return tagRepository.findByNameLike(tagname);
+		} catch (Exception e) {
+			throw new ConddbServiceException(e.getMessage());
+		}
+	}
+	
+	/**
+	 * @param tagname
+	 * @return
+	 * @throws ConddbServiceException
+	 */
 	public Tag getTag(String tagname) throws ConddbServiceException {
-
-		Tag atag = this.tagRepository.findByName(tagname);
-		this.log.debug("Found tag " + atag);
-
-		return atag;
+		try {
+			return tagRepository.findByName(tagname);
+		} catch (Exception e) {
+			throw new ConddbServiceException(e.getMessage());
+		}
 	}
 
+	/**
+	 * @param tagname
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public Tag getTag(Long id) throws ConddbServiceException {
+		try {
+			return tagRepository.findOne(id);
+		} catch (Exception e) {
+			throw new ConddbServiceException(e.getMessage());
+		}
+	}
+
+	/**
+	 * @param tagname
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public Tag getTagFetchGlobalTags(String tagname) throws ConddbServiceException {
+		try {
+			return tagRepository.findByNameAndFetchGlobalTagsEagerly(tagname);
+		} catch (Exception e) {
+			throw new ConddbServiceException(e.getMessage());
+		}
+	}
+
+	/**
+	 * @param entity
+	 * @return
+	 * @throws ConddbServiceException
+	 */
 	@Transactional
 	public Tag insertTag(Tag entity) throws ConddbServiceException {
 		return tagRepository.save(entity);
 	}
 
+	/**
+	 * @param atag
+	 * @param gtag
+	 * @return
+	 * @throws ConddbServiceException
+	 */
 	@Transactional
 	public GlobalTagMap mapAddTagToGlobalTag(Tag atag, GlobalTag gtag) throws ConddbServiceException {
 		if (atag == null || gtag == null) {
@@ -124,6 +235,11 @@ public class GlobalTagController {
 		return gtagMapRepository.save(entity);
 	}
 
+	/**
+	 * @param entity
+	 * @return
+	 * @throws ConddbServiceException
+	 */
 	@Transactional
 	public GlobalTagMap insertGlobalTagMap(GlobalTagMap entity) throws ConddbServiceException {
 		GlobalTag gtag = gtagRepository.findOne(entity.getGlobalTagName());
@@ -131,6 +247,16 @@ public class GlobalTagController {
 		entity.setGlobalTag(gtag);
 		entity.setSystemTag(atag);
 		return gtagMapRepository.save(entity);
+	}
+
+	/**
+	 * @param entity
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	@Transactional
+	public GlobalTag insertGlobalTag(GlobalTag entity) throws ConddbServiceException {
+		return gtagRepository.save(entity);
 	}
 
 }
