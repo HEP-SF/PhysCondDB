@@ -4,8 +4,8 @@ alldirs=`find . -name "pom.xml" -print | egrep -v "target" | awk -F'/' '{print $
 wdir=$PWD
 
 # Change this variables to point to your local installation
-
-for adir in $alldirs; do
+for adir in $(echo $alldirs | tr ";" "\n"); do
+##for adir in $alldirs; do
 echo "present directory is $wdir: examine $adir"
 echo "linking properties..." 
 cd $adir
