@@ -60,7 +60,7 @@ public class GlobalTagRestController {
 		Response resp = null;
 		try {
 			CacheControl control = new CacheControl();
-			control.setMaxAge(60);
+			control.setMaxAge(600);
 			
 			if (globaltagname.contains("%")) {
 				if (trace.equals("on")) {

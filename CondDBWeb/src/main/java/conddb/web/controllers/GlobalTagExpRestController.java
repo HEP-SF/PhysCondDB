@@ -62,15 +62,14 @@ public class GlobalTagExpRestController extends BaseController {
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path(Link.GLOBALTAGS)
 	public Response create(@Context UriInfo info, GlobalTag globaltag) throws ConddbWebException {
-		Response resp = null;
 		try {
 			GlobalTag saved = globalTagService.insertGlobalTag(globaltag);
+			saved.setResId(saved.getName());
 			GlobalTagResource resource = (GlobalTagResource) springResourceFactory.getResource("globaltag", info,
 					saved);
 			return created(resource);
 		} catch (Exception e) {
-			resp = Response.status(Response.Status.EXPECTATION_FAILED).build();
-			throw new ConddbWebException("Cannot create entity " + globaltag + " : " + e.getMessage());
+			throw new ConddbWebException("Cannot create entity " + globaltag.getName() + " : " + e.getMessage());
 		}
 	}
 
