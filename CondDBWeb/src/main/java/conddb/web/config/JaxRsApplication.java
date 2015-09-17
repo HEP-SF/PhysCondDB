@@ -39,9 +39,11 @@ import conddb.web.controllers.CondAdminWebController;
 import conddb.web.controllers.CondExpertWebController;
 import conddb.web.controllers.CondPayloadWebController;
 import conddb.web.controllers.GlobalTagRestController;
+import conddb.web.controllers.TagExpRestController;
 import conddb.web.controllers.TagRestController;
 import conddb.web.controllers.CondWebController;
 import conddb.web.controllers.GlobalTagExpRestController;
+import conddb.web.controllers.GlobalTagMapExpRestController;
 import conddb.web.controllers.GlobalTagMapRestController;
 import conddb.web.exceptions.CondDBExceptionMapper;
 import io.swagger.jaxrs.config.BeanConfig;
@@ -72,9 +74,11 @@ public class JaxRsApplication extends ResourceConfig {
 		register(CondAdminWebController.class);
 		register(CondPayloadWebController.class);
 		register(GlobalTagRestController.class);
-		register(GlobalTagExpRestController.class);
 		register(GlobalTagMapRestController.class);
 		register(TagRestController.class);
+		register(GlobalTagExpRestController.class);
+		register(GlobalTagMapExpRestController.class);
+		register(TagExpRestController.class);
 
 		// register json provider
 		log.info("Register JacksonJsonProvide using object mapper "+hibernateAwareObjectMapper);

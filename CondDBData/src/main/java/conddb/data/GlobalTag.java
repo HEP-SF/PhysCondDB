@@ -134,7 +134,7 @@ public class GlobalTag extends conddb.data.Entity implements java.io.Serializabl
 
 	@Transient
 	public boolean islocked() {
-		if (this.lockstatus.equals("unlocked")) {
+		if (this.lockstatus.equals(GlobalTagStatus.LOCKED.name())) {
 			return false; 
 		} else {
 			return true;
@@ -142,8 +142,11 @@ public class GlobalTag extends conddb.data.Entity implements java.io.Serializabl
 	}
 	
 	@Transient
-	public void lock() {
-		this.lockstatus = "locked";
+	public void lock(boolean lockit) {
+		if (lockit)
+			this.lockstatus = GlobalTagStatus.LOCKED.name();
+		else
+			this.lockstatus = GlobalTagStatus.UNLOCKED.name();
 	}
 	
   	@JsonSerialize(using = TimestampSerializer.class)

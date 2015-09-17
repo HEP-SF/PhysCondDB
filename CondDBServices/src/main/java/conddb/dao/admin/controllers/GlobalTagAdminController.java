@@ -64,6 +64,21 @@ public class GlobalTagAdminController {
 	}
 	
 	@Transactional
+	public GlobalTagMap deleteGlobalTagMap(Long id)
+			throws ConddbServiceException {
+		GlobalTagMap map = this.gtagMapRepository
+				.findOne(id);
+		if (map != null) {
+			this.log.debug("Retrieved map for removal operation: " + map.toString());
+			this.gtagMapRepository.delete(map);
+		} else {
+			log.info("Cannot find mapping corresponding to "+id);
+			throw new ConddbServiceException("Null mapping element retrieved");
+		}
+		return map;
+	}
+	
+	@Transactional
 	public void deleteTagLike(String tag)
 			throws ConddbServiceException {
 		List<Tag> stags = this.tagRepository
@@ -84,5 +99,19 @@ public class GlobalTagAdminController {
 		}
 		log.info("Remove "+counter+" tags");
 	}
-
+	
+	@Transactional
+	public Tag deleteTag(String tag)
+			throws ConddbServiceException {
+		Tag entity = this.tagRepository
+				.findByName(tag);
+		if (entity != null) {
+			log.debug("Removing entity"+entity.getName());
+			this.tagRepository.delete(entity);
+		} else {
+			log.info("Cannot find "+tag);
+			throw new ConddbServiceException("Null tag retrieved");
+		}
+		return entity;
+	}
 }

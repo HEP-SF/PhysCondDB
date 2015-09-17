@@ -4,7 +4,6 @@
 package conddb.web.controllers;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Map;
 
@@ -26,15 +25,13 @@ import org.springframework.stereotype.Controller;
 import conddb.dao.admin.controllers.GlobalTagAdminController;
 import conddb.dao.controllers.GlobalTagService;
 import conddb.dao.exceptions.ConddbServiceException;
-import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
-import conddb.data.GlobalTagStatus;
-import conddb.data.exceptions.ConversionException;
+import conddb.data.Tag;
 import conddb.utils.json.serializers.TimestampDeserializer;
 import conddb.web.exceptions.ConddbWebException;
-import conddb.web.resources.GlobalTagResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
+import conddb.web.resources.TagResource;
 
 /**
  * @author aformic
@@ -42,7 +39,7 @@ import conddb.web.resources.SpringResourceFactory;
  */
 @Path(Link.EXPERT)
 @Controller
-public class GlobalTagExpRestController extends BaseController {
+public class TagExpRestController extends BaseController {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -57,34 +54,34 @@ public class GlobalTagExpRestController extends BaseController {
 
 	@POST
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Path(Link.GLOBALTAGS)
-	public Response create(@Context UriInfo info, GlobalTag globaltag) throws ConddbWebException {
+	@Path(Link.TAGS)
+	public Response create(@Context UriInfo info, Tag tag) throws ConddbWebException {
 		try {
-			GlobalTag saved = globalTagService.insertGlobalTag(globaltag);
+			Tag saved = globalTagService.insertTag(tag);
 			saved.setResId(saved.getName());
-			GlobalTagResource resource = (GlobalTagResource) springResourceFactory.getResource("globaltag", info,
+			TagResource resource = (TagResource) springResourceFactory.getResource("tag", info,
 					saved);
 			return created(resource);
 		} catch (Exception e) {
-			throw new ConddbWebException("Cannot create entity " + globaltag.getName() + " : " + e.getMessage());
+			throw new ConddbWebException("Cannot create entity " + tag.getName() + " : " + e.getMessage());
 		}
 	}
 
-	@Path(Link.GLOBALTAGS+"/{globaltagname}")
+	@Path(Link.TAGS+"/{tagname}")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response updateGlobalTag(@Context UriInfo info, @PathParam("globaltagname") String id, Map map)
+	public Response updateGlobalTag(@Context UriInfo info, @PathParam("tagname") String id, Map map)
 			throws ConddbWebException {
 		Response resp;
 		try {
-			log.info("Request for updating global tag "+id+" using "+map.size());
-			GlobalTag existing = globalTagService.getGlobalTag(id);
+			log.info("Request for updating tag "+id+" using "+map.size());
+			Tag existing = globalTagService.getTag(id);
 			if (existing == null) {
 				throw new ConddbWebException("Resource not found");
 			}
 			if (map.containsKey("name")) {
-				List<GlobalTagMap> maplist = globalTagService.getGlobalTagMapByGlobalTagName(id);
-				if (maplist != null && maplist.size()>0 || existing.islocked()) {
+				List<GlobalTagMap> maplist = globalTagService.getGlobalTagMapByTagName(id);
+				if (maplist != null && maplist.size()>0) {
 					resp = Response.status(Response.Status.FORBIDDEN).build(); 
 					return resp;
 				}
@@ -93,43 +90,38 @@ public class GlobalTagExpRestController extends BaseController {
 			if (map.containsKey("description")) {
 				existing.setDescription(String.valueOf(map.get("description")));
 			}
-			if (map.containsKey("lockstatus")) {
-				String lockstatus = String.valueOf(map.get("lockstatus"));
-				if (lockstatus.equalsIgnoreCase(GlobalTagStatus.LOCKED.name())) {
-					existing.lock(true);
-				} else {
-					existing.lock(false);
-				}
+			if (map.containsKey("synchronization")) {
+				existing.setSynchronization(String.valueOf(map.get("synchronization")));
 			}
-			if (map.containsKey("release")) {
-				existing.setRelease(String.valueOf(map.get("release")));
-			}			
-			if (map.containsKey("validity")) {
-				BigDecimal validity = new BigDecimal(String.valueOf(map.get("validity")));
-				existing.setValidity(validity);
+			if (map.containsKey("objectType")) {
+				existing.setObjectType(String.valueOf(map.get("objectType")));
 			}
-			if (map.containsKey("snapshotTime")) {
-				Timestamp snapshottime = timestampDeserializer.timestampFromString(String.valueOf(map.get("snapshotTime")));
-				existing.setSnapshotTime(snapshottime);
+			if (map.containsKey("timeType")) {
+				existing.setTimeType(String.valueOf(map.get("timeType")));
 			}
-			existing = globalTagService.insertGlobalTag(existing);
-			resp = Response.ok(new GlobalTagResource(info, existing), MediaType.APPLICATION_JSON).build();
+			if (map.containsKey("lastValidatedTime")) {
+				BigDecimal value = new BigDecimal(String.valueOf(map.get("lastValidatedTime")));
+				existing.setLastValidatedTime(value);
+			}
+			if (map.containsKey("endOfValidity")) {
+				BigDecimal value = new BigDecimal(String.valueOf(map.get("endOfValidity")));
+				existing.setEndOfValidity(value);
+			}
+			existing = globalTagService.insertTag(existing);
+			resp = Response.ok(new TagResource(info, existing), MediaType.APPLICATION_JSON).build();
 		} catch (ConddbServiceException e) {
 			resp = Response.status(Response.Status.EXPECTATION_FAILED).build();
-			e.printStackTrace();
-		} catch (ConversionException e) {
-			resp = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 			e.printStackTrace();
 		}
 		return resp;
 	}
 
-	@Path(Link.GLOBALTAGS+"/{globaltagname}")
+	@Path(Link.TAGS+"/{tagname}")
 	@DELETE
-	public void deleteGlobalTag(@PathParam("globaltagname") String id) throws ConddbWebException {
-		GlobalTag existing;
+	public void deleteTag(@PathParam("tagname") String id) throws ConddbWebException {
+		Tag existing;
 		try {
-			existing = globalTagAdminController.deleteGlobalTag(id);
+			existing = globalTagAdminController.deleteTag(id);
 			if (existing == null) {
 				throw new ConddbWebException("Cannot remove id " + id);
 			}

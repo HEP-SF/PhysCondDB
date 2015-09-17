@@ -170,5 +170,9 @@ public class GlobalTagMap extends conddb.data.Entity implements java.io.Serializ
 		return this.globalTag.getName();
 	}
 
-
+	@Override
+	public String toString() {
+		return "GlobalTagMap [id=" + id + ", record=" + record + ", label=" + label + ", getTagName()=" + getTagName()
+				+ ", getGlobalTagName()=" + getGlobalTagName() + "]";
+	}
 }
