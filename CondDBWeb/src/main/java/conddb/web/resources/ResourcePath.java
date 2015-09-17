@@ -26,7 +26,7 @@ public enum ResourcePath {
     globaltags(Link.GLOBALTAGS, GlobalTag.class),
     maps(Link.GLOBALTAGMAPS, GlobalTagMap.class),
     tags(Link.TAGS, Tag.class),
-    iovs(Link.IOVS, Iov.class),
+    iovs(Link.IOVS, Iov.class)
     ;
 
     final String path;
