@@ -72,11 +72,17 @@ public class IovRestController {
 		try {
 			CacheControl control = new CacheControl();
 			control.setMaxAge(60);
-			Long id = new Long(tag);
-			BigDecimal sincetime = new BigDecimal(since);
-			BigDecimal untiltime = new BigDecimal(until);
+			BigDecimal sincetime = null;
+			BigDecimal untiltime = null;
+			if (until.equalsIgnoreCase("INF")) {
+				 sincetime = new BigDecimal(since);
+				 untiltime = new BigDecimal(Iov.MAX_TIME);
+			} else {
+				 sincetime = new BigDecimal(since);
+				 untiltime = new BigDecimal(until);
+			}
 			PageRequest preq = new PageRequest(ipage,size);
-			Tag atag = globalTagService.getTag(id);
+			Tag atag = globalTagService.getTag(tag);
 			
 			List<Iov> entitylist = this.iovService.getIovsByTag(atag,preq);	
 			resp = Response.ok(entitylist).cacheControl(control).build();
