@@ -39,6 +39,7 @@ import conddb.web.controllers.CondAdminWebController;
 import conddb.web.controllers.CondExpertWebController;
 import conddb.web.controllers.CondPayloadWebController;
 import conddb.web.controllers.GlobalTagRestController;
+import conddb.web.controllers.IovRestController;
 import conddb.web.controllers.TagExpRestController;
 import conddb.web.controllers.TagRestController;
 import conddb.web.controllers.CondWebController;
@@ -76,6 +77,7 @@ public class JaxRsApplication extends ResourceConfig {
 		register(GlobalTagRestController.class);
 		register(GlobalTagMapRestController.class);
 		register(TagRestController.class);
+		register(IovRestController.class);
 		register(GlobalTagExpRestController.class);
 		register(GlobalTagMapExpRestController.class);
 		register(TagExpRestController.class);
