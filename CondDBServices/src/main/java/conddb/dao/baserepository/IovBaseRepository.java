@@ -184,7 +184,8 @@ public interface IovBaseRepository extends
 			+ "SELECT max(p2.insertionTime) FROM Iov p2 WHERE "
 			+ "p2.insertionTime < (:instime))")
 	List<Iov> findGroupsByTag(
-			@Param("tag") String tagname);
+			@Param("tag") String tagname,
+			@Param("instime") Timestamp instime);
 
 	
 }

@@ -1,5 +1,7 @@
 package conddb.data;
 
+import java.util.Arrays;
+
 // Generated Aug 25, 2014 4:52:00 PM by Hibernate Tools 3.4.0.CR1
 
 //import conddb.data.deserialiser.*;
@@ -67,6 +69,11 @@ public class PayloadData extends conddb.data.Entity implements java.io.Serializa
 
 	public void setUri(String uri) {
 		this.uri = uri;
+	}
+
+	@Override
+	public String toString() {
+		return "PayloadData [hash=" + hash + ", data=" + Arrays.toString(data) + "]";
 	}
 	
 	

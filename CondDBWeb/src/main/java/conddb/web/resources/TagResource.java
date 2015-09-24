@@ -29,22 +29,26 @@ public class TagResource extends Link {
 		put("lockstatus", tag.getEndOfValidity());
 		put("lastvalidatedtime", tag.getLastValidatedTime());
 		put("modificationtime", tag.getModificationTime());
-		
-		CollectionResource mapsresource = new CollectionResource(info,Link.GLOBALTAGMAPS+"/trace?type=tag&id="+tag.getName(), Collections.emptyList());
-		put("maps",mapsresource);
-		CollectionResource iovsresource = new CollectionResource(info,Link.IOVS+"/"+tag.getId(), Collections.emptyList());
-		put("iovs",iovsresource);
+
+		CollectionResource mapsresource = new CollectionResource(info,
+				Link.GLOBALTAGMAPS + "/trace?type=tag&id=" + tag.getName(), Collections.emptyList());
+		put("maps", mapsresource);
+		CollectionResource iovsresource = new CollectionResource(info, Link.IOVS + "/" + tag.getId(),
+				Collections.emptyList());
+		put("iovs", iovsresource);
 	}
 
 	public void serializeTimestamps(TimestampFormat tsformat) {
 		this.tsformat = tsformat;
 		Timestamp ts = (Timestamp) get("insertiontime");
-		String tsstr = format(ts);
-		if (tsstr != null)
-			put("insertiontime", format(ts));
+		if (ts != null) {
+			String tsstr = format(ts);
+			put("insertiontime", tsstr);
+		}
 		ts = (Timestamp) get("modificationtime");
-		tsstr = format(ts);
-		if (tsstr != null)
-			put("modificationtime", format(ts));
+		if (ts != null) {
+			String tsstr = format(ts);
+			put("modificationtime", tsstr);
+		}
 	}
 }

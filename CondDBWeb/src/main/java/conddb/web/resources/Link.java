@@ -39,7 +39,9 @@ public class Link extends LinkedHashMap {
     public static final String GLOBALTAGMAPS = PATH_SEPARATOR + "maps";
     public static final String TAGS = PATH_SEPARATOR + "tags";
     public static final String IOVS = PATH_SEPARATOR + "iovs";
+    public static final String PAYLOAD = PATH_SEPARATOR + "payload";
     public static final String EXPERT = PATH_SEPARATOR + "expert";
+    public static final String CALIB = PATH_SEPARATOR + "calibration";
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 	TimestampFormat tsformat = null;

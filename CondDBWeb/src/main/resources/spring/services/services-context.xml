@@ -10,7 +10,7 @@
            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
 	<context:component-scan
-		base-package="conddb.dao.svc,conddb.dao.admin,conddb.dao.expert,conddb.dao.controllers,conddb.dao.repositories,conddb.utils,conddb.web" />
+		base-package="conddb.dao.svc,conddb.dao.admin,conddb.dao.expert,conddb.dao.controllers,conddb.dao.repositories,conddb.utils,conddb.calibration,conddb.web" />
 	<mvc:annotation-driven/>
 
 	<!-- Services -->

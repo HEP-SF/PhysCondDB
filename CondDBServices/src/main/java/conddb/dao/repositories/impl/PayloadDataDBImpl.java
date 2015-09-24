@@ -80,4 +80,15 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		return entity;
 	}
 
+	@Override
+	public void delete(String id) {
+		String sql = "DELETE FROM PHCOND_PAYLOAD_DATA "
+				+ " WHERE HASH=(?)";
+		log.info("Remove payload with hash "+id+" using JDBCTEMPLATE");
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+		jdbcTemplate.update(sql,
+				new Object[] { id });
+		log.info("Entity removal done...");
+	}
+
 }

@@ -34,12 +34,14 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
+import conddb.calibration.web.controllers.CalibrationRestController;
 import conddb.utils.json.HibernateAwareObjectMapper;
 import conddb.web.controllers.CondAdminWebController;
 import conddb.web.controllers.CondExpertWebController;
 import conddb.web.controllers.CondPayloadWebController;
 import conddb.web.controllers.GlobalTagRestController;
 import conddb.web.controllers.IovRestController;
+import conddb.web.controllers.PayloadRestController;
 import conddb.web.controllers.TagExpRestController;
 import conddb.web.controllers.TagRestController;
 import conddb.web.controllers.CondWebController;
@@ -78,9 +80,11 @@ public class JaxRsApplication extends ResourceConfig {
 		register(GlobalTagMapRestController.class);
 		register(TagRestController.class);
 		register(IovRestController.class);
+		register(PayloadRestController.class);
 		register(GlobalTagExpRestController.class);
 		register(GlobalTagMapExpRestController.class);
 		register(TagExpRestController.class);
+		register(CalibrationRestController.class);
 
 		// register json provider
 		log.info("Register JacksonJsonProvide using object mapper "+hibernateAwareObjectMapper);

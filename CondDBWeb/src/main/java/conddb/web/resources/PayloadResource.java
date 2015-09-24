@@ -14,36 +14,34 @@ import org.slf4j.LoggerFactory;
 
 import conddb.data.GlobalTag;
 import conddb.data.Iov;
+import conddb.data.Payload;
 import conddb.data.Tag;
 import conddb.utils.json.serializers.TimestampFormat;
 
 @SuppressWarnings("unchecked")
-public class IovResource extends Link {
+public class PayloadResource extends Link {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public IovResource(UriInfo info, Iov iov) {
-		super(info, iov);
-		put("id", iov.getId());
-		put("since", iov.getSince());
-		put("sincestr", iov.getSinceString());
-		put("insertiontime", iov.getInsertionTime());
-		
-		put("payload",new Link(getFullyQualifiedContextPath(info), iov.getPayload()));
-		put("tag",new Link(getFullyQualifiedContextPath(info), iov.getTag()));
+	public PayloadResource(UriInfo info, Payload payload) {
+		super(info, payload);
+		put("hash", payload.getHash());
+		put("backendInfo", payload.getBackendInfo());
+		put("objectType", payload.getObjectType());
+		put("streamerInfo", payload.getStreamerInfo());
+		put("version", payload.getVersion());
+		put("datasize", payload.getDatasize());
+		put("insertiontime", payload.getInsertionTime());
+		if (payload.getData() != null) {
+			put("data", payload.getData().getData());
+		}
 	}
 
 	public void serializeTimestamps(TimestampFormat tsformat) {
 		this.tsformat = tsformat;
 		Timestamp ts = (Timestamp) get("insertiontime");
-		if (ts != null) {
-			String tsstr = format(ts);
-			put("insertiontime", tsstr);
-		}
-		ts = (Timestamp) get("modificationtime");
-		if (ts != null) {
-			String tsstr = format(ts);
-			put("modificationtime", tsstr);
-		}
+		String tsstr = format(ts);
+		if (tsstr != null)
+			put("insertiontime", format(ts));
 	}
 }

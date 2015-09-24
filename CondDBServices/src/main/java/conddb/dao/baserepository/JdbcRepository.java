@@ -31,18 +31,22 @@ public class JdbcRepository {
 	}
 
 	//FIXME: method not yet implemented
-	public List<IovGroups> selectGroups(String tagname, Timestamp insertionTime) throws Exception {
+	public List<IovGroups> selectGroups(String tagname) throws Exception {
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(localDs);
 		try {
+			String tagrootname=tagname.split("-")[0];
 			String sqlquery = "select   "
-					+ " max(tag.tag_name) as tagname, "
-					+ " FLOOR(since/node.iovgroup_size) * node.iovgroup_size as since, "
-					+ " count(*) as niovs, "
-					+ " iov.insertionTime as insertionTime "
-					+ "from IOV iov, TAG tag, SYSTEM_NODE node where "
-					+ "tag.tag_name=(:tagname) group by FLOOR(since/node.iovgroup_size) * node.iovgroup_size ";
+					+ " (FLOOR(iov.since/node.iovgroup_size) * node.iovgroup_size) as since, "
+					+ " count(iov.since) as niovs, "
+					+ " min(iov.sinceString) as sinceString "
+					+ " from IOV iov, TAG tag, SYSTEM_NODE node where "
+					+ " tag.name=(:tagname) and "
+					+ " iov.tag_id=tag.tag_id and "
+					+ " node.tag_name_root=:tagrootname and "
+					+ " iov.insertion_time >= ALL(select p.insertion_time from PHCOND_IOV p where p.since=iov.since and p.tag_id=tag.tag_id) "
+					+ " group by (FLOOR(since/node.iovgroup_size) * node.iovgroup_size) ";
 			return jdbcTemplate.query(sqlquery, 
-					new Object[] { tagname, insertionTime }, 
+					new Object[] { tagname, tagrootname }, 
 					new IovGroupsMapper());
 		} catch (EmptyResultDataAccessException emptyResultDataAccessException) {
 			throw emptyResultDataAccessException;

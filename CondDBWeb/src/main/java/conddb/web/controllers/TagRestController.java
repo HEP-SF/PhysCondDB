@@ -70,7 +70,7 @@ public class TagRestController {
 					throw new ConddbWebException("Cannot activate trace on generic tag pattern");
 				}
 				List<Tag> entitylist = this.globalTagService.getTagByNameLike(tagname);
-				resp = Response.ok(entitylist).cacheControl(control).build();
+				resp = Response.ok(entitylist).header("size", entitylist.size()).cacheControl(control).build();
 			} else {
 				if (trace.equals("off")) {
 					Tag entity = this.globalTagService.getTag(tagname);

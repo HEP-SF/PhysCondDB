@@ -163,7 +163,7 @@ public class Tag extends conddb.data.Entity implements java.io.Serializable {
 	 * @return
 	 * 	The tag name.
 	 */
-	@Column(name = "NAME", unique = true, nullable = false, updatable=false, length = 255)
+	@Column(name = "NAME", unique = true, nullable = false, updatable=false, length = 2000)
 	public String getName() {
 		return this.name;
 	}

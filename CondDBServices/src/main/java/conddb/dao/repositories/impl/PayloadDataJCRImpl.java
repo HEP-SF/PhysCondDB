@@ -124,6 +124,21 @@ public class PayloadDataJCRImpl implements PayloadDataBaseCustom {
 		return null;
 	}
 
+	@Override
+	public void delete(String id) {
+		try {
+			Resource resource = new FileSystemResource(rootpath + "/" + id);
+			log.info("Search resource filename "+resource.getFilename()+ " in path " + resource.getURI().getPath()+" for REMOVAL ");
+			resource.getFile().delete();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	public String getRootpath() {
 		return rootpath;
 	}

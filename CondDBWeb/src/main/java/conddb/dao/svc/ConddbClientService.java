@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 
 import conddb.annotations.ProfileExecution;
 import conddb.dao.baserepository.PayloadDataBaseCustom;
+import conddb.dao.exceptions.ConddbServiceException;
 import conddb.dao.repositories.GlobalTagRepository;
 import conddb.dao.repositories.IovRepository;
 import conddb.dao.repositories.PayloadRepository;
@@ -70,11 +71,27 @@ public class ConddbClientService {
 
 	// Payload related methods
 	public Payload getPayload(String hash) throws Exception {
-		return payloadRepository.findByHash(hash);
+		try {
+			Payload pyld = payloadRepository.findByHash(hash);
+			if (pyld == null) {
+				throw new ConddbServiceException("Cannot find payload for hash "+hash);
+			}
+			return pyld;
+		} catch (Exception e) {
+			throw e;
+		}
 	}
 
 	public PayloadData getPayloadData(String hash) throws Exception {
-		return payloaddataRepository.find(hash);
+		try {
+			PayloadData pyld = payloaddataRepository.find(hash);
+			if (pyld == null) {
+				throw new ConddbServiceException("Cannot find payload data for hash "+hash);
+			}
+			return pyld;
+		} catch (Exception e) {
+			throw e;
+		}
 	}
 
 	public List<Payload> getPayloadSizeGt(Integer size) throws Exception {

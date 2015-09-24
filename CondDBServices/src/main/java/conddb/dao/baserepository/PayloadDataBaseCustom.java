@@ -26,4 +26,5 @@ import conddb.data.PayloadData;
 public interface PayloadDataBaseCustom {
 	PayloadData find(String id);
 	PayloadData save(PayloadData entity);
+	void delete(String id);
 }

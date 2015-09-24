@@ -29,7 +29,6 @@ public class IovGroups implements java.io.Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -8700232195277325799L;
-	private String tagname;
 	private BigDecimal since;
 	private String sinceString;
 	private Integer niovs;
@@ -54,21 +53,6 @@ public class IovGroups implements java.io.Serializable {
 		this.since = since;
 		this.sinceString = sinceString;
 		this.niovs = niovs;
-	}
-
-	/**
-	 * @return The tag name
-	 */
-	public String getTagname() {
-		return tagname;
-	}
-
-	/**
-	 * @param tagname
-	 * 	The tag name to set.
-	 */
-	public void setTagname(String tagname) {
-		this.tagname = tagname;
 	}
 
 	/**

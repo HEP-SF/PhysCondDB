@@ -4,6 +4,7 @@
 package conddb.data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,7 +31,7 @@ public class SystemDescription extends conddb.data.Entity implements Serializabl
 	 */
 	private String tagNameRoot;
 	private String nodeDescription;
-	private Integer groupSize=1000;
+	private BigDecimal groupSize=new BigDecimal(1000000000L);
 	/**
 	 * 
 	 */
@@ -140,8 +141,8 @@ public class SystemDescription extends conddb.data.Entity implements Serializabl
 	 * @return
 	 * 	The iov group size.
 	 */
-	@Column(name = "IOVGROUP_SIZE", nullable = false)
-	public Integer getGroupSize() {
+	@Column(name = "IOVGROUP_SIZE", nullable = false, precision = 22, scale = 0)
+	public BigDecimal getGroupSize() {
 		return groupSize;
 	}
 	
@@ -149,7 +150,7 @@ public class SystemDescription extends conddb.data.Entity implements Serializabl
 	 * @param groupSize
 	 * 	The group size to set.
 	 */
-	public void setGroupSize(Integer groupSize) {
+	public void setGroupSize(BigDecimal groupSize) {
 		this.groupSize = groupSize;
 	}
 

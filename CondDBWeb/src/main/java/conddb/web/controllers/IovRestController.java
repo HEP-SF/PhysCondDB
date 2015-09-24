@@ -59,7 +59,9 @@ public class IovRestController {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/find")
-	public Response getIovs(
+	public CollectionResource getIovsInTag(
+			@Context UriInfo info,
+            @DefaultValue("false") @QueryParam("expand") boolean expand,
 			@DefaultValue("none") @QueryParam("tag") final String tag,
 			@DefaultValue("0") @QueryParam("since") final String since,
 			@DefaultValue("Inf") @QueryParam("until") final String until,
@@ -68,30 +70,46 @@ public class IovRestController {
 			) throws ConddbWebException {
 		this.log.info("IovRestController processing request for iovs in tag "
 				+ tag);
-		Response resp = null;
+		Collection<Iov> entitylist;		
 		try {
-			CacheControl control = new CacheControl();
-			control.setMaxAge(60);
 			BigDecimal sincetime = null;
 			BigDecimal untiltime = null;
+			PageRequest preq = new PageRequest(ipage,size);
+			Tag atag = globalTagService.getTag(tag);
+			List<Iov> iovlist = null;
 			if (until.equalsIgnoreCase("INF")) {
 				 sincetime = new BigDecimal(since);
 				 untiltime = new BigDecimal(Iov.MAX_TIME);
+				 if (since.equals("0")) {
+					 iovlist = this.iovService.getIovsByTag(atag,preq);
+				 }
 			} else {
 				 sincetime = new BigDecimal(since);
 				 untiltime = new BigDecimal(until);
 			}
-			PageRequest preq = new PageRequest(ipage,size);
-			Tag atag = globalTagService.getTag(tag);
-			
-			List<Iov> entitylist = this.iovService.getIovsByTag(atag,preq);	
-			resp = Response.ok(entitylist).cacheControl(control).build();
-			
-		} catch (Exception e) {
-			resp = Response.status(Response.Status.NOT_FOUND).build();
+			if (iovlist == null) {
+				iovlist = this.iovService.getIovsByTagBetween(tag, sincetime, untiltime, preq);
+			}
+			entitylist = CollectionUtils.iterableToCollection(iovlist);
+
+		} catch (ConddbServiceException e) {
 			throw new ConddbWebException(e.getMessage());
 		}
-		return resp;
+		if (entitylist == null || entitylist.size() == 0) {
+            return (CollectionResource)springResourceFactory.getCollectionResource(info, Link.IOVS, Collections.emptyList());
+        }
+        Collection items = new ArrayList(entitylist.size());
+        for( Iov iov : entitylist) {
+        	iov.setResId(iov.getId().toString());
+        	iov.getPayload().setResId(iov.getPayload().getHash());
+        	iov.getTag().setResId(iov.getTag().getName());
+            if (expand) {
+                items.add(springResourceFactory.getResource("iov", info, iov));
+            } else {
+                items.add(springResourceFactory.getResource("link",info,iov));
+            }
+        }
+        return (CollectionResource)springResourceFactory.getCollectionResource(info, Link.IOVS, items);
 	}
 
 	@GET

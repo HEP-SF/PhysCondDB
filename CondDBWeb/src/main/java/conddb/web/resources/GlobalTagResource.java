@@ -37,12 +37,14 @@ public class GlobalTagResource extends Link {
 	public void serializeTimestamps(TimestampFormat tsformat) {
 		this.tsformat = tsformat;
 		Timestamp ts = (Timestamp) get("insertiontime");
-		String tsstr = format(ts);
-		if (tsstr != null)
-			put("insertiontime", format(ts));
+		if (ts != null) {
+			String tsstr = format(ts);
+			put("insertiontime", tsstr);
+		}
 		ts = (Timestamp) get("snapshottime");
-		tsstr = format(ts);
-		if (tsstr != null)
-			put("snapshottime", format(ts));
+		if (ts != null) {
+			String tsstr = format(ts);
+			put("snapshottime", tsstr);
+		}		
 	}
 }
