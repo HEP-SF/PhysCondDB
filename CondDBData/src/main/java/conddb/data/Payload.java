@@ -56,12 +56,11 @@ public class Payload extends conddb.data.Entity implements java.io.Serializable 
 	}
 
 	public Payload(String hash, String objectType, String backendInfo,
-			String streamerInfo, Timestamp insertionTime, String version) {
+			String streamerInfo, String version) {
 		this.hash = hash;
 		this.objectType = objectType;
 		this.backendInfo = backendInfo;
 		this.streamerInfo = streamerInfo;
-		this.insertionTime = insertionTime;
 		this.version = version;
 	}
 

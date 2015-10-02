@@ -1,6 +1,5 @@
 package conddb.dao.baserepository;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 import javax.sql.DataSource;

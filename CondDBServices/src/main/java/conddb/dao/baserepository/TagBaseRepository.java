@@ -39,4 +39,8 @@ public interface TagBaseRepository extends CondDBPageAndSortingRepository<Tag, L
 	
 	@Query("SELECT distinct p FROM Tag p JOIN FETCH p.globalTagMaps maps WHERE p.name = (:name)")
 	public Tag findByNameAndFetchGlobalTagsEagerly(@Param("name") String name);
+
+	@Query("SELECT distinct p FROM Tag p JOIN FETCH p.globalTagMaps maps WHERE p.name = (:name) "+
+	" AND maps.globalTag.lockstatus=(:lock)")
+	public Tag findByNameAndFetchGlobalTagsWithLock(@Param("name") String name, @Param("name") String status);
 }

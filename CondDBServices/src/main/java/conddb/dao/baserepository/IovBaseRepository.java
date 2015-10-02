@@ -22,170 +22,214 @@ import conddb.data.Tag;
  *
  */
 @RepositoryRestResource
-public interface IovBaseRepository extends
-		CondDBPageAndSortingRepository<Iov, Long> {
+public interface IovBaseRepository extends CondDBPageAndSortingRepository<Iov, Long> {
 
 	/**
-	 * TODO:
-	 * May be hide this method to clients.
+	 * TODO: May be hide this method to clients.
+	 * 
 	 * @param tagname
-	 * 	The name of the tag.
+	 *            The name of the tag.
 	 * 
 	 * @return List of IOVs for a given tag name.
 	 */
 	Page<Iov> findByTagName(@Param("tag_name") String tagname, Pageable pageable);
 
 	/**
-	 * TODO:
-	 * May be hide this method to clients.
+	 * TODO: May be hide this method to clients.
+	 * 
 	 * @param tagname
-	 * 	The name of the tag.
+	 *            The name of the tag.
 	 * 
 	 * @return List of IOVs for a given tag name.
 	 */
 	Page<Iov> findByTag(@Param("tag") Tag tag, Pageable pageable);
 
 	/**
-	 * TODO:
-	 * Test paging for large resultset.
+	 * TODO: Test paging for large resultset.
+	 * 
 	 * @param tagname
-	 * 	The name of the tag.
+	 *            The name of the tag.
 	 * 
 	 * @return List of IOVs for a given tag name.
 	 */
 	@Query("select iv from Iov iv where iv.tag.name = :tagname")
 	Page<Iov> findAllByTagName(@Param("tagname") String tagname, Pageable pageable);
-	
-	
+
 	/**
 	 * @param payloadhash
-	 * 	The payload Hash.
+	 *            The payload Hash.
 	 * @return List of IOVs containing the payload_hash as reference.
 	 */
 	List<Iov> findByPayloadHashOrderByIdAsc(@Param("payload_hash") String payloadhash);
 
 	/**
 	 * @param tagname
-	 * 	The name of the tag.
+	 *            The name of the tag.
 	 * @param since
-	 * 	The since time of the interval.
+	 *            The since time of the interval.
 	 * @param inserttime
-	 * 	The insertion time.
+	 *            The insertion time.
 	 * 
 	 * @return A single IOV.
 	 */
 	@Query("SELECT distinct p FROM Iov p WHERE "
 			+ "p.tag.name = (:name) AND p.since = (:since) AND p.insertionTime=(:instime)")
-	Iov fetchBySinceAndInsertionTimeAndTagName(
-			@Param("name") String tagname,
-			@Param("since") BigDecimal since, 
+	Iov fetchBySinceAndInsertionTimeAndTagName(@Param("name") String tagname, @Param("since") BigDecimal since,
 			@Param("instime") Date inserttime);
 
 	/**
-	 * TODO:
-	 * This is a test only method.
-	 * Should be then hidden to clients.
+	 * TODO: This is a test only method. Should be then hidden to clients.
+	 * 
 	 * @param tagname
-	 * 	The name of the tag.
+	 *            The name of the tag.
 	 * @return All IOVs for given tag including payloads.
 	 */
-	@Query("SELECT distinct p FROM Iov p JOIN FETCH p.payload pylds WHERE "
-			+ "p.tag.name = (:name)")
-	List<Iov> findByTagNameAndFetchPayloadEagerly(
-			@Param("name") String tagname);
+	@Query("SELECT distinct p FROM Iov p JOIN FETCH p.payload pylds WHERE " + "p.tag.name = (:name)")
+	List<Iov> findByTagNameAndFetchPayloadEagerly(@Param("name") String tagname);
+
+	/**
+	 * TODO: This is a test only method. Should be then hidden to clients.
+	 * 
+	 * @param tagname
+	 *            The name of the tag.
+	 * @return All IOVs for given tag including payloads.
+	 */
+	@Query("SELECT distinct p FROM Iov p JOIN FETCH p.payload pylds WHERE " + "p.id = (:id)")
+	Iov findByIdAndFetchPayloadEagerly(@Param("id") Long id);
 
 	/**
 	 * @param tagname
-	 * 	The name of the tag.
+	 *            The name of the tag.
+	 * @return list of IOVs.
+	 */
+	@Query("SELECT distinct p FROM Iov p WHERE " + "p.tag.id = (:tag) " + "AND p.insertionTime >= ALL("
+			+ "SELECT p2.insertionTime FROM Iov p2 WHERE " + "p2.tag.id = p.tag.id AND (p2.since = p.since))")
+	List<Iov> findByTagAndInsertionTimeMax(@Param("tag") Long id);
+
+	/**
+	 * @param tagname
+	 *            The name of the tag.
 	 * @param since
-	 * 	The since time of the interval.
+	 *            The since time of the interval.
 	 * @param until
-	 * 	The until time of the selected interva.
+	 *            The until time of the selected interva.
+	 * @return list of IOVs.
+	 */
+	@Query("SELECT distinct p FROM Iov p WHERE " + "p.tag.id = (:tag) " + "AND p.insertionTime = ANY("
+			+ "SELECT max(p2.insertionTime) FROM Iov p2 WHERE "
+			+ "p2.tag.id = p.tag.id AND (p2.since = p.since) AND p2.insertionTime <= (:snapshot) "
+			+ " group by p2.since)")
+	List<Iov> findByTagAndInsertionTimeSnapshot(@Param("tag") Long id, @Param("snapshot") Timestamp snapshot);
+
+	/**
+	 * @param tagname
+	 *            The name of the tag.
+	 * @param since
+	 *            The since time of the interval.
+	 * @param until
+	 *            The until time of the selected interva.
+	 * @return list of IOVs.
+	 */
+	// @Query("SELECT distinct p FROM Iov p WHERE "
+	// + "p.tag.name = (:tag) AND (p.since >= (:since) AND p.since < (:until))")
+	// List<Iov> findByRangeAndTagName(
+	// @Param("tag") String tagname,
+	// @Param("since") BigDecimal since,
+	// @Param("until") BigDecimal until);
+
+	/**
+	 * @param tagname
+	 *            The name of the tag.
+	 * @param since
+	 *            The since time of the interval.
+	 * @param until
+	 *            The until time of the selected interva.
+	 * @return list of IOVs.
+	 */
+	@Query("SELECT distinct p FROM Iov p WHERE " + "p.tag.id = (:tag) AND (p.since >= (:since) AND p.since < (:until))")
+	List<Iov> findByRangeAndTag(@Param("tag") Long id, @Param("since") BigDecimal since,
+			@Param("until") BigDecimal until);
+
+	/**
+	 * @param tagname
+	 *            The name of the tag.
+	 * @param since
+	 *            The since time of the interval.
+	 * @param until
+	 *            The until time of the selected interva.
 	 * @return list of IOVs.
 	 */
 	@Query("SELECT distinct p FROM Iov p WHERE "
-			+ "p.tag.name = (:tag) AND (p.since >= (:since) AND p.since < (:until))")
-	List<Iov> findByRangeAndTag(
-			@Param("tag") String tagname,
-			@Param("since") BigDecimal since, 
+			+ "(p.tag.id = (:tag) AND (p.since >= (:since) AND p.since < (:until))) " 
+			+ "AND p.insertionTime >= ALL("
+			+ "SELECT p2.insertionTime FROM Iov p2 WHERE " 
+			+ "p2.tag.id = p.tag.id AND (p2.since = p.since))")
+	List<Iov> findByRangeAndTagAndInsertionTimeMax(@Param("tag") Long id, @Param("since") BigDecimal since,
 			@Param("until") BigDecimal until);
-
 
 	/**
 	 * @param tagname
-	 * 	The name of the tag.
+	 *            The name of the tag.
 	 * @param since
-	 * 	The since time of the interval.
+	 *            The since time of the interval.
 	 * @param instime
-	 * 	The insertion time.
-	 * 	Use yyyy-MM-dd hh:mm:ss in local time as format.
+	 *            The insertion time. Use yyyy-MM-dd hh:mm:ss in local time as
+	 *            format.
 	 * @return list of IOVs.
 	 */
 	@Query("SELECT distinct p FROM Iov p WHERE "
 			+ "p.tag.name = (:tag) AND (p.since = (:since) AND p.insertionTime < (:instime)) "
 			+ "ORDER BY p.insertionTime desc")
-	List<Iov> findBySinceAndTagAndInsertionTimeLessThanOrderByInsertionTimeDesc(
-			@Param("tag") String tagname, 
-			@Param("since") BigDecimal since, 
-			@Param("instime") Timestamp instime);
+	List<Iov> findBySinceAndTagAndInsertionTimeLessThanOrderByInsertionTimeDesc(@Param("tag") String tagname,
+			@Param("since") BigDecimal since, @Param("instime") Timestamp instime);
 
 	/**
 	 * @param tagname
-	 * 	The name of the tag.
+	 *            The name of the tag.
 	 * @param since
-	 * 	The since time of the interval.
+	 *            The since time of the interval.
 	 * @param until
-	 * 	The until time of the selected interva.
+	 *            The until time of the selected interva.
 	 * @return list of IOVs.
 	 */
 	@Query("SELECT distinct p FROM Iov p WHERE "
-			+ "p.tag.name = (:tag) AND (p.since >= (:since) AND p.since < (:until)) "
-			+ "AND p.insertionTime >= ALL("
-			+ "SELECT p2.insertionTime FROM Iov p2 WHERE "
-			+ "p2.tag.name = (:tag) AND (p2.since = p.since))")
-	
-	List<Iov> findByRangeAndTagAndInsertionTimeMax(
-			@Param("tag") String tagname, 
-			@Param("since") BigDecimal since, 
+			+ "p.tag.name = (:tag) AND (p.since >= (:since) AND p.since < (:until)) " + "AND p.insertionTime >= ALL("
+			+ "SELECT p2.insertionTime FROM Iov p2 WHERE " + "p2.tag.name = (:tag) AND (p2.since = p.since))")
+
+	List<Iov> findByRangeAndTagAndInsertionTimeMax(@Param("tag") String tagname, @Param("since") BigDecimal since,
 			@Param("until") BigDecimal until);
 
 	/**
 	 * @param tagname
-	 * 	The name of the tag.
+	 *            The name of the tag.
 	 * @param since
-	 * 	The since time of the interval.
+	 *            The since time of the interval.
 	 * @param until
-	 * 	The until time of the selected interval.
+	 *            The until time of the selected interval.
 	 * @param instime.
-	 * 	The insertion time.
-	 * 		Use yyyy-MM-dd hh:mm:ss in local time as format.
+	 *            The insertion time. Use yyyy-MM-dd hh:mm:ss in local time as
+	 *            format.
 	 * @return list of IOVs.
 	 */
 	@Query("SELECT distinct p FROM Iov p WHERE "
-			+ "p.tag.name = (:tag) AND (p.since >= (:since) AND p.since < (:until)) "
+			+ "(p.tag.id = (:tag) AND (p.since >= (:since) AND p.since < (:until))) " 
 			+ "AND p.insertionTime = ANY("
-			+ "SELECT max(p2.insertionTime) FROM Iov p2 WHERE "
-			+ "p2.insertionTime < (:instime))")
-	List<Iov> findByRangeAndTagAndInsertionTimeLessThan(
-			@Param("tag") String tagname, 
-			@Param("since") BigDecimal since, 
-			@Param("until") BigDecimal until, 
-			@Param("instime") Timestamp instime);
+			+ "SELECT max(p2.insertionTime) FROM Iov p2 WHERE " 
+			+ "(p2.tag.id = p.tag.id AND (p2.since = p.since)) "
+			+ "AND p2.insertionTime < (:instime)"
+			+ " group by p2.since)")
+	List<Iov> findByRangeAndTagAndInsertionTimeLessThan(@Param("tag") Long tagid, @Param("since") BigDecimal since,
+			@Param("until") BigDecimal until, @Param("instime") Timestamp instime);
 
 	/**
 	 * @param tagname
-	 * 	The name of the tag.
+	 *            The name of the tag.
 	 * 
 	 * @return list of IOVs.
 	 */
 	@Query("SELECT distinct p FROM Iov p WHERE "
-			+ "p.tag.name = (:tag) AND (p.since >= (:since) AND p.since < (:until)) "
-			+ "AND p.insertionTime = ANY("
-			+ "SELECT max(p2.insertionTime) FROM Iov p2 WHERE "
-			+ "p2.insertionTime < (:instime))")
-	List<Iov> findGroupsByTag(
-			@Param("tag") String tagname,
-			@Param("instime") Timestamp instime);
+			+ "p.tag.name = (:tag) AND (p.since >= (:since) AND p.since < (:until)) " + "AND p.insertionTime = ANY("
+			+ "SELECT max(p2.insertionTime) FROM Iov p2 WHERE " + "p2.insertionTime < (:instime))")
+	List<Iov> findGroupsByTag(@Param("tag") String tagname, @Param("instime") Timestamp instime);
 
-	
 }

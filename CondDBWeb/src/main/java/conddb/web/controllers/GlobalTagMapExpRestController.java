@@ -3,9 +3,6 @@
  */
 package conddb.web.controllers;
 
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.Consumes;
@@ -29,11 +26,8 @@ import conddb.dao.exceptions.ConddbServiceException;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.Tag;
-import conddb.data.exceptions.ConversionException;
-import conddb.utils.json.serializers.TimestampDeserializer;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.GlobalTagMapResource;
-import conddb.web.resources.GlobalTagResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
 
@@ -53,9 +47,7 @@ public class GlobalTagMapExpRestController extends BaseController {
 	private GlobalTagAdminController globalTagAdminController;
 	@Autowired
 	private SpringResourceFactory springResourceFactory;
-	@Autowired 
-	private TimestampDeserializer timestampDeserializer;
-
+	
 	@POST
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path(Link.GLOBALTAGMAPS)

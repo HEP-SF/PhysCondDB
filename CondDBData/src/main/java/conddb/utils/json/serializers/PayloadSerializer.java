@@ -37,7 +37,8 @@ public class PayloadSerializer extends JsonSerializer<Payload> {
 			size = pyld.getDatasize();
 			version = pyld.getVersion();
 			PayloadData pd = pyld.getData();
-			data = new String(pd.getData());
+//			data = new String(pd.getData());
+			data = new String("payload blob stored in "+pd.getUri());
 		} 
 		jgen.writeStartObject();
 		jgen.writeStringField("hash", hashpayload);

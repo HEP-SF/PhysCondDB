@@ -28,7 +28,6 @@ import org.springframework.stereotype.Controller;
 
 import conddb.dao.controllers.GlobalTagService;
 import conddb.dao.exceptions.ConddbServiceException;
-import conddb.data.GlobalTag;
 import conddb.data.Tag;
 import conddb.utils.collections.CollectionUtils;
 import conddb.web.exceptions.ConddbWebException;

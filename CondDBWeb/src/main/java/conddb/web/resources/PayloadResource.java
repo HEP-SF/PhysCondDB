@@ -2,20 +2,13 @@
 package conddb.web.resources;
 
 import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Collections;
 
 import javax.ws.rs.core.UriInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import conddb.data.GlobalTag;
-import conddb.data.Iov;
 import conddb.data.Payload;
-import conddb.data.Tag;
 import conddb.utils.json.serializers.TimestampFormat;
 
 @SuppressWarnings("unchecked")
@@ -33,15 +26,16 @@ public class PayloadResource extends Link {
 		put("datasize", payload.getDatasize());
 		put("insertiontime", payload.getInsertionTime());
 		if (payload.getData() != null) {
-			put("data", payload.getData().getData());
+			put("data",new Link(getFullyQualifiedContextPath(info), payload.getData()));
 		}
 	}
 
 	public void serializeTimestamps(TimestampFormat tsformat) {
 		this.tsformat = tsformat;
 		Timestamp ts = (Timestamp) get("insertiontime");
-		String tsstr = format(ts);
-		if (tsstr != null)
-			put("insertiontime", format(ts));
+		if (ts != null) {
+			String tsstr = format(ts);
+			put("insertiontime", tsstr);
+		}
 	}
 }

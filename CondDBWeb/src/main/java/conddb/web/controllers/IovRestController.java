@@ -4,6 +4,7 @@
 package conddb.web.controllers;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -15,7 +16,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -62,33 +62,41 @@ public class IovRestController {
 	public CollectionResource getIovsInTag(
 			@Context UriInfo info,
             @DefaultValue("false") @QueryParam("expand") boolean expand,
-			@DefaultValue("none") @QueryParam("tag") final String tag,
+			@QueryParam("tag") final String id,
+			@DefaultValue("none") @QueryParam("globaltag") final String globaltagid,
 			@DefaultValue("0") @QueryParam("since") final String since,
 			@DefaultValue("Inf") @QueryParam("until") final String until,
 			@DefaultValue("0") @QueryParam("page") Integer ipage, 
             @DefaultValue("1000") @QueryParam("size") Integer size
 			) throws ConddbWebException {
 		this.log.info("IovRestController processing request for iovs in tag "
-				+ tag);
+				+ id);
 		Collection<Iov> entitylist;		
 		try {
 			BigDecimal sincetime = null;
 			BigDecimal untiltime = null;
 			PageRequest preq = new PageRequest(ipage,size);
-			Tag atag = globalTagService.getTag(tag);
+			Tag atag = globalTagService.getTag(id);
 			List<Iov> iovlist = null;
+			Timestamp snapshotTime = null;
+			if (!globaltagid.equals("none")) {
+				GlobalTag gtag = globalTagService.getGlobalTag(globaltagid);
+				snapshotTime = gtag.getSnapshotTime();
+				log.debug("Setting snapshot time to "+snapshotTime);
+			}
 			if (until.equalsIgnoreCase("INF")) {
 				 sincetime = new BigDecimal(since);
 				 untiltime = new BigDecimal(Iov.MAX_TIME);
+			
 				 if (since.equals("0")) {
-					 iovlist = this.iovService.getIovsByTag(atag,preq);
+					 iovlist = this.iovService.getIovsByTag(atag,preq,snapshotTime);
 				 }
 			} else {
 				 sincetime = new BigDecimal(since);
 				 untiltime = new BigDecimal(until);
 			}
 			if (iovlist == null) {
-				iovlist = this.iovService.getIovsByTagBetween(tag, sincetime, untiltime, preq);
+				iovlist = this.iovService.getIovsByTagBetween(atag.getId(), sincetime, untiltime, preq, snapshotTime);
 			}
 			entitylist = CollectionUtils.iterableToCollection(iovlist);
 

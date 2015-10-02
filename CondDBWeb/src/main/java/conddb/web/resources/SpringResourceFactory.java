@@ -19,6 +19,8 @@ import conddb.data.GlobalTagMap;
 import conddb.data.Tag;
 import conddb.data.Iov;
 import conddb.data.Payload;
+import conddb.data.PayloadData;
+import conddb.data.SystemDescription;
 import conddb.utils.json.serializers.TimestampFormat;
 
 /**
@@ -61,6 +63,16 @@ public class SpringResourceFactory {
 		} else if (resourceName.equals("payload")) {
 			PayloadResource resource = new PayloadResource(info,(Payload)entity);
 			log.info("Create payload resource");
+			resource.serializeTimestamps(timestampFormat);
+			return resource;			
+		} else if (resourceName.equals("payloaddata")) {
+			PayloadDataResource resource = new PayloadDataResource(info,(PayloadData)entity);
+			log.info("Create payload data resource");
+			resource.serializeTimestamps(timestampFormat);
+			return resource;			
+		} else if (resourceName.equals("system")) {
+			SystemDescriptionResource resource = new SystemDescriptionResource(info,(SystemDescription)entity);
+			log.info("Create system resource");
 			resource.serializeTimestamps(timestampFormat);
 			return resource;			
 		} else {

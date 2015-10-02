@@ -182,7 +182,7 @@ public class TestLoadDB {
 			Timestamp now = new Timestamp(new Date().getTime());
 			String name = "TEST_" + i;
 			GlobalTag gtag = new GlobalTag(name, new BigDecimal(100),
-					"Test global tag", "0.0.1", now, now);
+					"Test global tag", "0.0.1", now);
 			gtaglist.add(gtag);
 		}
 		return gtaglist;
@@ -238,7 +238,7 @@ public class TestLoadDB {
 		Tag atag = new Tag("tagtest_5");
 		for (int i = 0; i < size; i++) {
 			Timestamp now = new Timestamp(new Date().getTime());
-			Iov iov = new Iov(new BigDecimal(i*1000L),"this should be a time",now,pyld,atag);
+			Iov iov = new Iov(new BigDecimal(i*1000L),"this should be a time",pyld,atag);
 			iovlist.add(iov);
 		}
 		return iovlist;	

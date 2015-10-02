@@ -27,7 +27,6 @@ import conddb.dao.controllers.GlobalTagService;
 import conddb.dao.exceptions.ConddbServiceException;
 import conddb.data.GlobalTagMap;
 import conddb.data.Tag;
-import conddb.utils.json.serializers.TimestampDeserializer;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
@@ -49,9 +48,8 @@ public class TagExpRestController extends BaseController {
 	private GlobalTagAdminController globalTagAdminController;
 	@Autowired
 	private SpringResourceFactory springResourceFactory;
-	@Autowired 
-	private TimestampDeserializer timestampDeserializer;
-
+	
+	
 	@POST
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path(Link.TAGS)
@@ -67,10 +65,10 @@ public class TagExpRestController extends BaseController {
 		}
 	}
 
-	@Path(Link.TAGS+"/{tagname}")
+	@Path(Link.TAGS+"/{id}")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response updateGlobalTag(@Context UriInfo info, @PathParam("tagname") String id, Map map)
+	public Response updateTag(@Context UriInfo info, @PathParam("id") String id, Map map)
 			throws ConddbWebException {
 		Response resp;
 		try {
@@ -116,9 +114,9 @@ public class TagExpRestController extends BaseController {
 		return resp;
 	}
 
-	@Path(Link.TAGS+"/{tagname}")
+	@Path(Link.TAGS+"/{id}")
 	@DELETE
-	public void deleteTag(@PathParam("tagname") String id) throws ConddbWebException {
+	public void deleteTag(@PathParam("id") String id) throws ConddbWebException {
 		Tag existing;
 		try {
 			existing = globalTagAdminController.deleteTag(id);

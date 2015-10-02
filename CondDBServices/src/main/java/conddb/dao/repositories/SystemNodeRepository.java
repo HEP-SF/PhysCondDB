@@ -14,7 +14,7 @@ import conddb.data.SystemDescription;
  *
  */
 @RestResource(exported = false)
-public interface SystemNodeRepository extends CrudRepository<SystemDescription, Long>,SystemNodeBaseRepository {
+public interface SystemNodeRepository extends CrudRepository<SystemDescription, Long>, SystemNodeBaseRepository {
 
     @Override
     @RestResource(exported = false)

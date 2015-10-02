@@ -210,7 +210,7 @@ public class CondExpertWebController {
 			List<Tag> list = clientservice.getTagOne(tagname);
 			Tag atag = list.get(0);
 			this.log.info("CondExpertWebController processing request for mapTagToGtag using " + gtag + " " + atag);
-			GlobalTagMap gtagmap = this.globalTagService.mapAddTagToGlobalTag(atag, gtag);
+			GlobalTagMap gtagmap = this.globalTagService.mapAddTagToGlobalTag(atag, gtag, null, null);
 			return gtagmap;
 		} catch (Exception e) {
 			throw new ConddbWebException(e);

@@ -41,6 +41,7 @@ public class Iov extends conddb.data.Entity implements java.io.Serializable {
 	 */
 	private static final long serialVersionUID = 7499748521778474013L;
 	public static final long MAX_TIME = 999999999999999L;
+	public static final long TO_NANOSECONDS = 1000000L;
 	
 	private Long id;
 	private BigDecimal since;
@@ -53,11 +54,10 @@ public class Iov extends conddb.data.Entity implements java.io.Serializable {
 	public Iov() {
 	}
 
-	public Iov(BigDecimal since, String sincestr, Timestamp insertiontime,
+	public Iov(BigDecimal since, String sincestr,
 			Payload payload, Tag tag) {
 		this.since = since;
 		this.sinceString = sincestr;
-		this.insertionTime = insertiontime;
 		this.payload = payload;
 		this.tag = tag;
 	}

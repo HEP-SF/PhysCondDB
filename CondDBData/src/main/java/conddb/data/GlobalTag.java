@@ -63,24 +63,32 @@ public class GlobalTag extends conddb.data.Entity implements java.io.Serializabl
 	}
 
 	public GlobalTag(String name, BigDecimal validity, String description,
-			String release, Timestamp insertionTime, Timestamp snapshotTime) {
+			String release) {
 		this.name = name;
 		this.validity = validity;
 		this.description = description;
 		this.release = release;
-		this.insertionTime = insertionTime;
+		this.lockstatus="unlocked";
+		this.snapshotTime=null;
+	}
+	
+	public GlobalTag(String name, BigDecimal validity, String description,
+			String release, Timestamp snapshotTime) {
+		this.name = name;
+		this.validity = validity;
+		this.description = description;
+		this.release = release;
 		this.snapshotTime = snapshotTime;
 		this.lockstatus="unlocked";
 	}
 
 	public GlobalTag(String name, BigDecimal validity, String description,
-			String release, Timestamp insertionTime, Timestamp snapshotTime,
+			String release, Timestamp snapshotTime,
 			Set<GlobalTagMap> globalTagMaps) {
 		this.name = name;
 		this.validity = validity;
 		this.description = description;
 		this.release = release;
-		this.insertionTime = insertionTime;
 		this.snapshotTime = snapshotTime;
 		this.globalTagMaps = globalTagMaps;
 		this.lockstatus="unlocked";
@@ -134,10 +142,10 @@ public class GlobalTag extends conddb.data.Entity implements java.io.Serializabl
 
 	@Transient
 	public boolean islocked() {
-		if (this.lockstatus.equals(GlobalTagStatus.LOCKED.name())) {
-			return false; 
+		if (this.lockstatus.equalsIgnoreCase(GlobalTagStatus.LOCKED.name())) {
+			return true; 
 		} else {
-			return true;
+			return false;
 		}
 	}
 	

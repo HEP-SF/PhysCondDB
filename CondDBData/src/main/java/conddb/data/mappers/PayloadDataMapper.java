@@ -34,7 +34,8 @@ public class PayloadDataMapper implements RowMapper<PayloadData> {
 	public PayloadData mapRow(ResultSet rs, int rownum) throws SQLException {
 		PayloadData pyd = new PayloadData();
 		pyd.setHash(rs.getString("HASH"));
-		pyd.setData(rs.getBytes("DATA"));
+//		pyd.setData(rs.getBytes("DATA"));
+		pyd.setData(rs.getBlob("DATA"));
 		return pyd;
 	}
 

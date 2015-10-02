@@ -48,6 +48,10 @@ public class DirectoryMapperService {
 		this.localrootdir = localrootdir;
 	}
 	
+	public void dumpBlobOnDisk(byte[] data, String path, String outputfile) {
+		return;
+	}
+	
 	public void dumpGlobalTagOnDisk(GlobalTag globaltag) {
 		try {
 			GlobalTag entity = globalTagService.getGlobalTagFetchTags(globaltag.getName());

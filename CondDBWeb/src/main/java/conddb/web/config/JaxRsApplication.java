@@ -40,8 +40,12 @@ import conddb.web.controllers.CondAdminWebController;
 import conddb.web.controllers.CondExpertWebController;
 import conddb.web.controllers.CondPayloadWebController;
 import conddb.web.controllers.GlobalTagRestController;
+import conddb.web.controllers.IovExpRestController;
 import conddb.web.controllers.IovRestController;
+import conddb.web.controllers.PayloadExpRestController;
 import conddb.web.controllers.PayloadRestController;
+import conddb.web.controllers.SystemDescriptionExpRestController;
+import conddb.web.controllers.SystemDescriptionRestController;
 import conddb.web.controllers.TagExpRestController;
 import conddb.web.controllers.TagRestController;
 import conddb.web.controllers.CondWebController;
@@ -80,11 +84,15 @@ public class JaxRsApplication extends ResourceConfig {
 		register(GlobalTagMapRestController.class);
 		register(TagRestController.class);
 		register(IovRestController.class);
+		register(IovExpRestController.class);
 		register(PayloadRestController.class);
+		register(PayloadExpRestController.class);
 		register(GlobalTagExpRestController.class);
 		register(GlobalTagMapExpRestController.class);
 		register(TagExpRestController.class);
 		register(CalibrationRestController.class);
+		register(SystemDescriptionRestController.class);
+		register(SystemDescriptionExpRestController.class);
 
 		// register json provider
 		log.info("Register JacksonJsonProvide using object mapper "+hibernateAwareObjectMapper);

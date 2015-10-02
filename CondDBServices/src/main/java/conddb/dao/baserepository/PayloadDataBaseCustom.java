@@ -17,7 +17,11 @@
  **/
 package conddb.dao.baserepository;
 
+import java.io.IOException;
+
+import conddb.dao.exceptions.ConddbServiceException;
 import conddb.data.PayloadData;
+import conddb.data.exceptions.PayloadEncodingException;
 
 /**
  * @author formica
@@ -25,6 +29,7 @@ import conddb.data.PayloadData;
  */
 public interface PayloadDataBaseCustom {
 	PayloadData find(String id);
-	PayloadData save(PayloadData entity);
+	PayloadData save(PayloadData entity) throws ConddbServiceException;
+	PayloadData saveNull() throws IOException, PayloadEncodingException;
 	void delete(String id);
 }

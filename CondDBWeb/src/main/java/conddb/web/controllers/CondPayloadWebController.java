@@ -83,7 +83,8 @@ public class CondPayloadWebController {
 					apayload.setDatasize(bytes.length);
 
 					PayloadData pylddata = new PayloadData();
-					pylddata.setData(bytes);
+//					pylddata.setData(bytes);
+					pylddata.setUri(uploadedFileLocation);
 
 					PayloadHandler phandler = new PayloadHandler(pylddata);
 					PayloadData storable = phandler.getPayloadWithHash();
@@ -143,10 +144,12 @@ public class CondPayloadWebController {
 					String outfname = name + "-uploaded";
 					String uploadedFileLocation = SERVER_UPLOAD_LOCATION_FOLDER + outfname;
 					saveToFile(uploadedInputStream, uploadedFileLocation);
-					byte[] bytes = readFromFile(uploadedFileLocation);
+					//byte[] bytes = readFromFile(uploadedFileLocation);
 
 					PayloadData pylddata = new PayloadData();
-					pylddata.setData(bytes);
+//					pylddata.setData(bytes);
+					pylddata.setUri(uploadedFileLocation);
+
 					PayloadHandler phandler = new PayloadHandler(pylddata);
 					PayloadData storable = phandler.getPayloadWithHash();
 

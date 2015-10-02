@@ -1,5 +1,7 @@
 package conddb.utils.hash;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -124,5 +126,28 @@ public class HashGenerator {
 		return DigestUtils.md5DigestAsHex(text);
 	}
 	
+	public static String hash(BufferedInputStream in) throws IOException, NoSuchAlgorithmException {
+
+		String digest_hash;
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		byte [] buffer = new byte[1024];
+	    int sizeRead = -1;
+	    while ((sizeRead = in.read(buffer)) != -1) {
+	        digest.update(buffer, 0, sizeRead);
+	    }
+	    in.close();
+
+	    byte [] hash = null;
+	    hash = new byte[digest.getDigestLength()];
+	    hash = digest.digest();
+	 // converting byte array to Hexadecimal String
+	 	StringBuilder sb = new StringBuilder(2 * hash.length);
+	 	for (byte b : hash) {
+	 		sb.append(String.format("%02x", b & 0xff));
+	 	}
+	 	digest_hash = sb.toString();
+	    return digest_hash;
+	}
+
 }
 

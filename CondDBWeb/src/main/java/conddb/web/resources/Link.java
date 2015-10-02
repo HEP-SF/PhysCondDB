@@ -42,6 +42,8 @@ public class Link extends LinkedHashMap {
     public static final String PAYLOAD = PATH_SEPARATOR + "payload";
     public static final String EXPERT = PATH_SEPARATOR + "expert";
     public static final String CALIB = PATH_SEPARATOR + "calibration";
+    public static final String SYSTEMS = PATH_SEPARATOR + "systems";
+    public static final String PAYLOADDATA = PAYLOAD + "/data";
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 	TimestampFormat tsformat = null;

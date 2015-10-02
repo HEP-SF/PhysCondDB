@@ -298,8 +298,17 @@ public class Tag extends conddb.data.Entity implements java.io.Serializable {
 
 	@PreUpdate
     public void preUpdate() {
+		System.out.println("TAG entity: Calling pre update method...");
         Timestamp now = new Timestamp(new Date().getTime());
         this.modificationTime = now;
     }
+
+	@Override
+	public String toString() {
+		return "Tag [id=" + id + ", name=" + name + ", timeType=" + timeType + ", objectType=" + objectType
+				+ ", synchronization=" + synchronization + ", description=" + description + ", lastValidatedTime="
+				+ lastValidatedTime + ", endOfValidity=" + endOfValidity + ", insertionTime=" + insertionTime
+				+ ", modificationTime=" + modificationTime + "]";
+	}
 
 }

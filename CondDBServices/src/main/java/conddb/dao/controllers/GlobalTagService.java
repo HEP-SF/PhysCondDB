@@ -19,7 +19,9 @@ import conddb.dao.repositories.GlobalTagRepository;
 import conddb.dao.repositories.TagRepository;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
+import conddb.data.GlobalTagStatus;
 import conddb.data.Tag;
+import conddb.data.converters.GlobalTagStatusConverter;
 
 /**
  * @author formica
@@ -209,6 +211,19 @@ public class GlobalTagService {
 			throw new ConddbServiceException(e.getMessage());
 		}
 	}
+	
+	/**
+	 * @param tagname
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public Tag getTagFetchGlobalTagsWithLock(String tagname) throws ConddbServiceException {
+		try {
+			return tagRepository.findByNameAndFetchGlobalTagsWithLock(tagname, GlobalTagStatus.LOCKED.name());
+		} catch (Exception e) {
+			throw new ConddbServiceException(e.getMessage());
+		}
+	}
 
 	/**
 	 * @param entity
@@ -219,6 +234,22 @@ public class GlobalTagService {
 	public Tag insertTag(Tag entity) throws ConddbServiceException {
 		return tagRepository.save(entity);
 	}
+	
+	/**
+	 * @param entity
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	@Transactional
+	public Tag deleteTag(Tag entity) throws ConddbServiceException {
+		Tag removable = tagRepository.findByNameAndFetchGlobalTagsWithLock(entity.getName(), GlobalTagStatus.LOCKED.name());
+		if (removable.getGlobalTagMaps() != null && removable.getGlobalTagMaps().size()>0) {
+			log.debug("Cannot remove a tag which depends on a locked global tag...");
+			throw new ConddbServiceException("Cannot remova tag "+entity.getName()+" : a parent global tag is locked ");
+		}
+		tagRepository.delete(removable);
+		return removable;
+	}
 
 	/**
 	 * @param atag
@@ -227,11 +258,16 @@ public class GlobalTagService {
 	 * @throws ConddbServiceException
 	 */
 	@Transactional
-	public GlobalTagMap mapAddTagToGlobalTag(Tag atag, GlobalTag gtag) throws ConddbServiceException {
+	public GlobalTagMap mapAddTagToGlobalTag(Tag atag, GlobalTag gtag, String record, String label) throws ConddbServiceException {
 		if (atag == null || gtag == null) {
 			throw new ConddbServiceException("Cannot associate...there are null elements");
 		}
-		GlobalTagMap entity = new GlobalTagMap(gtag, atag);
+		GlobalTagMap entity = new GlobalTagMap(gtag, atag, record, label);
+		if (gtag.islocked()) {
+			log.debug("Global tag lock string is "+gtag.getLockstatus()+";");
+			log.debug("   compared with "+GlobalTagStatus.LOCKED.name()+";");
+			throw new ConddbServiceException("Cannot add tags to a locked global tag..");
+		}
 		return gtagMapRepository.save(entity);
 	}
 
@@ -246,7 +282,24 @@ public class GlobalTagService {
 		Tag atag = tagRepository.findByName(entity.getTagName());
 		entity.setGlobalTag(gtag);
 		entity.setSystemTag(atag);
+		if (gtag.islocked()) {
+			log.debug("Global tag lock string is "+gtag.getLockstatus()+";");
+			log.debug("   compared with "+GlobalTagStatus.LOCKED.name()+";");
+			throw new ConddbServiceException("Cannot link tags to a locked global tag..");
+		}
 		return gtagMapRepository.save(entity);
+	}
+	
+	/**
+	 * @param entity
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	@Transactional
+	public GlobalTagMap removeGlobalTagMap(GlobalTagMap entity) throws ConddbServiceException {
+		GlobalTagMap removable = gtagMapRepository.findOne(entity.getId());
+		gtagMapRepository.delete(removable);
+		return removable;
 	}
 
 	/**

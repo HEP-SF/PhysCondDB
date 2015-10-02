@@ -17,6 +17,7 @@
  **/
 package conddb.dao.controllers;
 
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -26,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,10 +37,13 @@ import conddb.dao.exceptions.ConddbServiceException;
 import conddb.dao.repositories.IovRepository;
 import conddb.dao.repositories.PayloadRepository;
 import conddb.dao.repositories.TagRepository;
+import conddb.data.GlobalTagStatus;
 import conddb.data.Iov;
 import conddb.data.Payload;
 import conddb.data.PayloadData;
 import conddb.data.Tag;
+import conddb.data.handler.PayloadHandler;
+import conddb.utils.bytes.PayloadBytesHandler;
 
 /**
  * @author formica
@@ -52,108 +57,189 @@ public class IovService {
 	private TagRepository tagRepository;
 	@Autowired
 	private IovRepository iovRepository;
-    @Autowired 
-    private PayloadRepository payloadRepository;
+	@Autowired
+	private PayloadRepository payloadRepository;
 	@Autowired
 	@Qualifier("payloaddatadbrepo")
 	private PayloadDataBaseCustom payloaddataRepository;
+	@Autowired
+	private PayloadBytesHandler payloadBytesHandler;
 
-    /**
-     * @param tag
-     * @param preq
-     * @return
-     * @throws ConddbServiceException
-     */
-    public Iov getIov(Long id) throws ConddbServiceException {
-    	try {
-    		return iovRepository.findOne(id);
-    	} catch (Exception e) {
-    		throw new ConddbServiceException("Cannot find iov "+id+": "+e.getMessage());
-    	}
-    }
-  
-    /**
-     * @param tag
-     * @param preq
-     * @return
-     * @throws ConddbServiceException
-     */
-    public List<Iov> getIovsByTag(Tag tag, PageRequest preq) throws ConddbServiceException {
-    	try {
-    		return iovRepository.findByTag(tag, preq).getContent();
-    	} catch (Exception e) {
-    		throw new ConddbServiceException("Cannot look for iovs in tag "+tag.getName()+": "+e.getMessage());
-    	}
-    }
-    
-    /**
-     * @param tag
-     * @param since
-     * @param until
-     * @param preq
-     * @return
-     * @throws ConddbServiceException
-     */
-    public List<Iov> getIovsByTagBetween(String tag, BigDecimal since, BigDecimal until, PageRequest preq) throws ConddbServiceException {
-    	try {
-    		return iovRepository.findByRangeAndTag(tag, since, until);
-    	} catch (Exception e) {
-    		throw new ConddbServiceException("Cannot look for iovs in tag "+tag+" in range "+since+" "+until+": "+e.getMessage());
-    	}
-    }
-    
-    /**
-     * @param preq
-     * @return
-     * @throws ConddbServiceException
-     */
-    public Page<Iov> findAll(PageRequest preq) throws ConddbServiceException {
-    	try {
-    		return iovRepository.findAll(preq);
-    	} catch (Exception e) {
-    		throw new ConddbServiceException("Cannot find iovs : "+e.getMessage());
-    	}
-    }
-    
+	@Value( "${physconddb.upload.dir:/tmp}" )
+	private String SERVER_UPLOAD_LOCATION_FOLDER;
+
+	/**
+	 * @param tag
+	 * @param preq
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public Iov getIov(Long id) throws ConddbServiceException {
+		try {
+			return iovRepository.findOne(id);
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot find iov " + id + ": " + e.getMessage());
+		}
+	}
+
+	/**
+	 * @param tag
+	 * @param preq
+	 * @param snapshot
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public List<Iov> getIovsByTag(Tag tag, PageRequest preq, Timestamp snapshot) throws ConddbServiceException {
+		try {
+			// FIXME: we are not using page request for the moment....
+			Long tagid = tag.getId();
+			if (snapshot == null) {
+				// Retrieve only the last inserted iov for every since
+				return iovRepository.findByTagAndInsertionTimeMax(tag.getId());
+			} else {
+				log.debug("Call by range is using "+tagid+" snapshot "+snapshot);
+				return iovRepository.findByTagAndInsertionTimeSnapshot(tagid, snapshot);
+			}
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot look for iovs in tag " + tag.getName() + ": " + e.getMessage());
+		}
+	}
+
+	/**
+	 * @param tag
+	 * @param since
+	 * @param until
+	 * @param preq
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public List<Iov> getIovsByTagBetween(Long tagid, BigDecimal since, BigDecimal until, PageRequest preq, Timestamp snapshot)
+			throws ConddbServiceException {
+		try {
+			if (snapshot == null) {
+				// Retrieve only the last inserted iov for every since
+				return iovRepository.findByRangeAndTagAndInsertionTimeMax(tagid,since,until);
+			} else {
+				log.debug("Call by range is using "+tagid+" from "+since+" to "+until+" snapshot "+snapshot);
+				return iovRepository.findByRangeAndTagAndInsertionTimeLessThan(tagid, since, until,snapshot);
+			}
+		} catch (Exception e) {
+			throw new ConddbServiceException(
+					"Cannot look for iovs in tag " + tagid + " in range " + since + " " + until + ": " + e.getMessage());
+		}
+	}
+
+	/**
+	 * @param tag
+	 * @param since
+	 * @param until
+	 * @param preq
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public List<Iov> getIovsByTagNameBetween(String tag, BigDecimal since, BigDecimal until, PageRequest preq, Timestamp snapshot)
+			throws ConddbServiceException {
+		try {
+			Tag atag = tagRepository.findByName(tag);
+			if (snapshot == null) {
+				// Retrieve only the last inserted iov for every since
+				return iovRepository.findByRangeAndTagAndInsertionTimeMax(atag.getId(),since,until);
+			} else
+				return iovRepository.findByRangeAndTag(atag.getId(), since, until);
+		} catch (Exception e) {
+			throw new ConddbServiceException(
+					"Cannot look for iovs in tag " + tag + " in range " + since + " " + until + ": " + e.getMessage());
+		}
+	}
+
+	/**
+	 * @param preq
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public Page<Iov> findAll(PageRequest preq) throws ConddbServiceException {
+		try {
+			return iovRepository.findAll(preq);
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot find iovs : " + e.getMessage());
+		}
+	}
+	
+	public Payload createStorablePayload(String filename, InputStream uploadedInputStream, Payload apayload) throws ConddbServiceException {
+		try {
+			String outfname = filename + "-uploaded";
+			String uploadedFileLocation = SERVER_UPLOAD_LOCATION_FOLDER+ "/" + outfname;
+			log.debug("Upload file location is "+SERVER_UPLOAD_LOCATION_FOLDER);
+			payloadBytesHandler.saveToFile(uploadedInputStream, uploadedFileLocation);
+//			byte[] bytes = payloadBytesHandler.readFromFile(uploadedFileLocation);
+			long fsize = payloadBytesHandler.lengthOfFile(uploadedFileLocation);
+			apayload.setDatasize((int)fsize);
+
+			PayloadData pylddata = new PayloadData();
+//			pylddata.setData(bytes);
+			pylddata.setUri(uploadedFileLocation);
+
+			PayloadHandler phandler = new PayloadHandler(pylddata);
+			PayloadData storable = phandler.getPayloadWithHash();
+			apayload.setHash(storable.getHash());
+			apayload.setData(storable);
+			
+			log.info("Uploaded object has hash " + storable.getHash());
+			log.info("Uploaded object has data size " + apayload.getDatasize());
+
+			return apayload;
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot create storable payload "+e.getMessage());
+		}		
+	}
+
 	@Transactional
-	public Iov insertIov(Iov entity) {
-		log.info("Controller searching for tag by name "+entity.getTag().getName());
-		Tag atag = tagRepository.findByName(entity.getTag().getName());
-		log.info("Controller has found tag name "+atag.getName());
-		entity.setTag(atag);
-		log.info("Controller searching for payload by hash "+entity.getPayload().getHash());
-		Payload pyld = payloadRepository.findOne(entity.getPayload().getHash());
-		if (pyld == null) {
-			log.info("Payload not found...store it");
-			pyld = payloadRepository.save(entity.getPayload());
+	public Iov insertIov(Iov entity) throws ConddbServiceException {
+		try {
+			log.info("Controller searching for tag by name " + entity.getTag().getName());
+			Tag atag = tagRepository.findByName(entity.getTag().getName());
+			log.info("Controller has found tag name " + atag.getName());
+
+			log.info("Controller searching for payload by hash " + entity.getPayload().getHash());
+			Payload pyld = payloadRepository.findOne(entity.getPayload().getHash());
+			if (pyld == null) {
+				log.error("Payload not found...store it before");
+				//pyld = payloadRepository.save(entity.getPayload());
+				throw new ConddbServiceException("Cannot store iov if the payload is not found..");
+			}
+			entity.setPayload(pyld);
+			/*
+			 * Verify that IOV ID does not exists : this method is for
+			 * insertions ONLY and the ID is internally generated
+			 */
+			entity.setId(null);
+			/* Now search for existing since */
+			List<Iov> oldiov = iovRepository.findBySinceAndTagAndInsertionTimeLessThanOrderByInsertionTimeDesc(
+					atag.getName(), entity.getSince(), Timestamp.from(Instant.now()));
+			if (oldiov != null && oldiov.size() > 0) {
+				log.info("Found a list of existing iovs..." + oldiov.get(0).getSince() + " - "
+						+ oldiov.get(0).getInsertionTime());
+			}
+			return iovRepository.save(entity);
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot insert entity: " + e.getMessage());
 		}
-		entity.setPayload(pyld);
-		/* Verify that IOV ID does not exists : this method is for insertions ONLY */
-		entity.setId(null);
-		/* Now search for existing since */
-		List<Iov> oldiov = iovRepository.findBySinceAndTagAndInsertionTimeLessThanOrderByInsertionTimeDesc(
-				atag.getName(), entity.getSince(), Timestamp.from(Instant.now()));
-		if (oldiov != null && oldiov.size()>0) {
-			log.info("Found a list of existing iovs..."+oldiov.get(0).getSince()
-					+" - "+oldiov.get(0).getInsertionTime());
-		}
-		return iovRepository.save(entity);
 	}
 
 	// Payload related methods
-	public Payload getPayload(String hash) throws Exception {
+	public Payload getPayload(String hash) throws ConddbServiceException {
 		try {
 			Payload pyld = payloadRepository.findByHash(hash);
 			if (pyld == null) {
-				throw new ConddbServiceException("Cannot find payload for hash "+hash);
+				throw new ConddbServiceException("Cannot find payload for hash " + hash);
 			}
 			return pyld;
 		} catch (Exception e) {
-			throw e;
+			throw new ConddbServiceException(e.getMessage());
 		}
 	}
 
-	public List<Payload> getPayloadList(String param, String condition, String value) throws Exception {
+	public List<Payload> getPayloadList(String param, String condition, String value) throws ConddbServiceException {
 		try {
 			List<Payload> pyldlist = null;
 			if (param.equals("datasize")) {
@@ -171,20 +257,75 @@ public class IovService {
 			}
 			return pyldlist;
 		} catch (Exception e) {
-			throw e;
+			throw new ConddbServiceException(e.getMessage());
 		}
 	}
 
-
-	public PayloadData getPayloadData(String hash) throws Exception {
+	public PayloadData getPayloadData(String hash) throws ConddbServiceException {
 		try {
 			PayloadData pyld = payloaddataRepository.find(hash);
 			if (pyld == null) {
-				throw new ConddbServiceException("Cannot find payload data for hash "+hash);
+				throw new ConddbServiceException("Cannot find payload data for hash " + hash);
 			}
 			return pyld;
 		} catch (Exception e) {
-			throw e;
+			throw new ConddbServiceException(e.getMessage());
+		}
+	}
+	
+//	@Transactional
+//	public Payload insertPayload(Payload entity, byte[] data) throws ConddbServiceException {
+//		try {
+//			PayloadData payloaddata = new PayloadHandler(data).getPayloadWithHash();
+//			entity.setHash(payloaddata.getHash());
+//			Payload stored = payloadRepository.findOne(payloaddata.getHash());
+//			if (stored == null) {
+//				payloaddataRepository.save(payloaddata);
+//				stored = payloadRepository.save(entity);
+//			} else {
+//				log.debug("Payload with hash "+payloaddata.getHash()+" is already stored...");
+//			}
+//			return stored;
+//		} catch (Exception e) {
+//			throw new ConddbServiceException("Cannot insert payload..."+e.getMessage());
+//		}
+//	}
+	
+	@Transactional
+	public Payload insertPayload(Payload entity, PayloadData pylddata) throws ConddbServiceException {
+		try {
+//			PayloadData payloaddata = new PayloadHandler(pylddata).getPayloadWithHash();
+//			entity.setHash(payloaddata.getHash());
+			// Assume that hash key is already filled
+			log.debug("Search for hash "+entity.getHash()+" "+pylddata.getHash());
+			Payload stored = payloadRepository.findOne(pylddata.getHash());
+			if (stored == null) {
+				log.debug("Hash not found in DB....store the payload");
+				payloaddataRepository.save(pylddata);
+				log.debug("Store the payload metadata : "+entity.toString());
+				stored = payloadRepository.save(entity);
+			} else {
+				log.debug("Payload with hash "+pylddata.getHash()+" is already stored...");
+			}
+			return stored;
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot insert payload..."+e.getMessage());
+		}
+	}
+	
+	@Transactional
+	public Iov deleteIov(Long id) throws ConddbServiceException {
+		try {
+			Iov removable = iovRepository.findOne(id);
+			Tag tag = removable.getTag();
+			Tag tagwithmap = tagRepository.findByNameAndFetchGlobalTagsWithLock(tag.getName(), GlobalTagStatus.LOCKED.name());
+			if (tagwithmap.getGlobalTagMaps().size()>0) {
+				throw new ConddbServiceException("Cannot remove IOV from a tag associated to a locked global tag");
+			}
+			iovRepository.delete(id);
+			return removable;
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot remove IOV :"+id+" - "+e.getMessage());
 		}
 	}
 

@@ -3,25 +3,18 @@
  */
 package conddb.dao.controllers;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.transaction.annotation.Transactional;
 
-import conddb.annotations.ProfileExecution;
 import conddb.dao.exceptions.ConddbServiceException;
-import conddb.dao.repositories.GlobalTagMapRepository;
-import conddb.dao.repositories.GlobalTagRepository;
 import conddb.dao.repositories.SystemNodeRepository;
 import conddb.dao.repositories.TagRepository;
-import conddb.data.GlobalTag;
-import conddb.data.GlobalTagMap;
 import conddb.data.SystemDescription;
-import conddb.data.Tag;
 
 /**
  * @author formica
@@ -36,6 +29,13 @@ public class SystemNodeService {
 	@Autowired
 	private TagRepository tagRepository;
 	
+	public SystemDescription getSystemDescription(Long id) throws ConddbServiceException {
+		try {
+			return systemNodeRepository.findOne(id);
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot find system description list " + e.getMessage());
+		}
+	}
 	/**
 	 * @return
 	 * @throws ConddbServiceException
@@ -61,4 +61,113 @@ public class SystemNodeService {
 		}
 	}
 	
+	/**
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public Page<SystemDescription> findSystemNodesByTagnameLike(String systemtag, PageRequest preq) throws ConddbServiceException {
+		try {
+			if (preq == null) {
+				preq = new PageRequest(0, 10000);
+			}
+			return systemNodeRepository.findByTagNameRootLike(systemtag,preq);
+		} catch (Exception e) {
+			throw new ConddbServiceException("Error in finding system description list " + e.getMessage());
+		}
+	}
+	
+	/**
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public SystemDescription getSystemNodesByTagname(String systemtag) throws ConddbServiceException {
+		try {
+			return systemNodeRepository.findByTagNameRoot(systemtag);
+		} catch (Exception e) {
+			throw new ConddbServiceException("Error in finding system description list " + e.getMessage());
+		}
+	}
+
+	/**
+	 * @param systemtag
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public List<SystemDescription> findSystemNodesByTagNameRootLike(String systemtag) throws ConddbServiceException {
+		try {
+			return systemNodeRepository.findByTagNameRootLike(systemtag);
+		} catch (Exception e) {
+			throw new ConddbServiceException("Error in finding system description list " + e.getMessage());
+		}
+	}
+	
+	/**
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public Page<SystemDescription> findSystemNodesByNodeFullpathLike(String nodefullpath, PageRequest preq) throws ConddbServiceException {
+		try {
+			return systemNodeRepository.findByNodeFullpathLike(nodefullpath,preq);
+		} catch (Exception e) {
+			throw new ConddbServiceException("Error in finding system description list " + e.getMessage());
+		}
+	}
+	
+	/**
+	 * @param schemaName
+	 * @param preq
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public Page<SystemDescription> findSystemNodesBySchemaNameLike(String schemaName, PageRequest preq) throws ConddbServiceException {
+		try {
+			return systemNodeRepository.findBySchemaNameLike(schemaName, preq);
+		} catch (Exception e) {
+			throw new ConddbServiceException("Error in finding system description list " + e.getMessage());
+		}
+	}
+
+	/**
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public SystemDescription getSystemNodesByNodeFullpath(String nodefullpath) throws ConddbServiceException {
+		try {
+			return systemNodeRepository.findByNodeFullpath(nodefullpath);
+		} catch (Exception e) {
+			throw new ConddbServiceException("Error in finding system description list " + e.getMessage());
+		}
+	}
+
+
+	
+	public SystemDescription insertSystemDescription(SystemDescription entity)  throws ConddbServiceException {
+		try {
+			log.info("Controller is inserting new system " + entity.getTagNameRoot());
+			return systemNodeRepository.save(entity);
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot insert entity: " + e.getMessage());
+		}
+	}
+
+	public SystemDescription updateSystemDescription(SystemDescription entity)  throws ConddbServiceException {
+		try {
+			log.info("Controller is updating existing system " + entity.getTagNameRoot());
+			SystemDescription stored = systemNodeRepository.findByTagNameRoot(entity.getTagNameRoot());
+			if (entity.getGroupSize() != null) {
+				stored.setGroupSize(entity.getGroupSize());
+			} 
+			if (entity.getNodeDescription() != null) {
+				stored.setNodeDescription(entity.getNodeDescription());
+			} 
+			if (entity.getSchemaName() != null) {
+				stored.setSchemaName(entity.getSchemaName());
+			}
+			return systemNodeRepository.save(stored);
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot update entity: " + e.getMessage());
+		}
+	}
+	
+
 }

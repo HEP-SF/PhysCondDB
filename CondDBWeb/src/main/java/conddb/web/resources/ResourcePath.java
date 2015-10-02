@@ -20,6 +20,8 @@ import conddb.data.GlobalTagMap;
 import conddb.data.Tag;
 import conddb.data.Iov;
 import conddb.data.Payload;
+import conddb.data.PayloadData;
+import conddb.data.SystemDescription;
 import conddb.data.Entity;
 
 public enum ResourcePath {
@@ -28,7 +30,9 @@ public enum ResourcePath {
     maps(Link.GLOBALTAGMAPS, GlobalTagMap.class),
     tags(Link.TAGS, Tag.class),
     iovs(Link.IOVS, Iov.class),
-    payload(Link.PAYLOAD, Payload.class)
+    payload(Link.PAYLOAD, Payload.class),
+    payloaddata(Link.PAYLOADDATA, PayloadData.class),
+    systems(Link.SYSTEMS, SystemDescription.class)
     ;
 
     final String path;

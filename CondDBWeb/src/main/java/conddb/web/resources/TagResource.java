@@ -33,7 +33,7 @@ public class TagResource extends Link {
 		CollectionResource mapsresource = new CollectionResource(info,
 				Link.GLOBALTAGMAPS + "/trace?type=tag&id=" + tag.getName(), Collections.emptyList());
 		put("maps", mapsresource);
-		CollectionResource iovsresource = new CollectionResource(info, Link.IOVS + "/" + tag.getId(),
+		CollectionResource iovsresource = new CollectionResource(info, Link.IOVS + "/find?tag=" + tag.getId(),
 				Collections.emptyList());
 		put("iovs", iovsresource);
 	}

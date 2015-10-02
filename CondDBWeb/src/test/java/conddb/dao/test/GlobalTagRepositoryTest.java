@@ -50,7 +50,7 @@ public class GlobalTagRepositoryTest {
 
 	protected void initGlobalTag() {
 		GlobalTag gtag = new GlobalTag(gtagtestname, new BigDecimal(0),
-				"test global tag", "test", new Timestamp(new Date().getTime()),
+				"test global tag", "test", 
 				new Timestamp(new Date().getTime()));
 		this.repo.save(gtag);
 	}

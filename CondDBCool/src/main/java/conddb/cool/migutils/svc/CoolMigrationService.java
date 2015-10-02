@@ -97,7 +97,7 @@ public class CoolMigrationService {
 
 			// create global tag
 			GlobalTag conddbgtag = new GlobalTag(cooltag.getGtagName(),
-					new BigDecimal(0), description, "1.0", new java.sql.Timestamp(instimestr.getTime()),
+					new BigDecimal(0), description, "1.0", 
 					new java.sql.Timestamp(new Date().getTime()));
 			
 			// set tagdescription
@@ -181,7 +181,7 @@ public class CoolMigrationService {
 					payloadDataBaseCustom.save(defaultpylddata);
 					pyld = pyldRepository.findOne(defaultpyld.getHash());
 				}
-				Iov conddbiov = new Iov(ciov.getIovSince(), sincestring, now,
+				Iov conddbiov = new Iov(ciov.getIovSince(), sincestring,
 						pyld, atag);
 				Iov storediov = iovRepository
 						.fetchBySinceAndInsertionTimeAndTagName(atag.getName(),
