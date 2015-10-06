@@ -57,6 +57,34 @@ class PhysRestConnection:
             self.__url = self.__baseurl + url
         self.__curl.setopt(pycurl.URL, self.__url)
         
+    def downloadData(self, filename):
+        if self.__debug:
+            print "Get data using url ", self.__url
+        fp = open(filename, "wb")
+        # buf is a ByteIO object...check documentation
+        #        self.__curl.setopt(self.__curl.WRITEDATA, buf)
+        try:
+            self.setDefaultOptions()
+            self.__curl.setopt(self.__curl.HTTPGET, 1)
+            self.__curl.setopt(self.__curl.FAILONERROR, True)
+            self.__curl.setopt(self.__curl.WRITEDATA, fp)
+            self.__curl.perform()
+            # HTTP response code, e.g. 200.
+            if self.__debug:
+                print('Status: %d' % self.__curl.getinfo(self.__curl.RESPONSE_CODE))
+            # Elapsed time for the transfer.
+            if self.__debug:
+                print('Status: %f' % self.__curl.getinfo(self.__curl.TOTAL_TIME))
+
+            return fp
+        except pycurl.error, error:
+            response = self.__curl.getinfo(self.__curl.RESPONSE_CODE)
+            if response is not 200:
+                print colored.red('Problem in executing GET : status returned is %d' % response)
+            errno, errstr = error
+            print colored.red('An error occurred in GET method: %s ' % errstr)
+            return None
+
     def getData(self):
         if self.__debug:
             print "Get data using url ", self.__url
@@ -478,6 +506,20 @@ class PhysCurl(object):
             self.__curl.setUrl(urlquoted)
         
         return self.__curl.getData()
+
+    def getfile(self,params,servicebase="/globaltags"):
+        if self.__debug:
+            print 'Search object using parameter '
+            print params
+        id = params['name']
+        url = (self.userbaseurl + servicebase )
+        if id is not None:
+            url = (self.userbaseurl + servicebase + '/' + id)
+        urlquoted = urllib.quote_plus(url,safe=':/')
+        self.__curl.setUrl(urlquoted)
+
+        return self.__curl.downloadData(id+'-temp.tar')
+
 
     def getiovs(self,params,servicebase="/iovs/find"):
         if self.__debug:

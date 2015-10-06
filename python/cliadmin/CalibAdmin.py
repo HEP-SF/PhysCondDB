@@ -372,6 +372,17 @@ class PhysDBDriver():
         msg = ('    + Tree structure for GlobalTag %s was dump on file system') % (globaltagname)
         print colored.green(msg)
 
+# collect a global tag
+    def gettar(self, params):
+        globaltagname=params[0]
+        data={}
+        data['name']=globaltagname
+        # Search globaltagname in global tags
+        msg = ('>>> Collect all files in GlobalTag %s and download tar file ') % (globaltagname)
+        print colored.cyan(msg)
+        self.restserver.getfile(data,'/calibration/tar')
+    
+
 # List files under global tag
     def listcalib(self, params):
         globaltagname=params[0]
@@ -522,6 +533,17 @@ class PhysDBDriver():
                 msg = '>>> Call method %s using arguments %s ' % (self.action,calibargs)
                 print colored.cyan(msg)
                 self.collect(calibargs)
+            
+            except Exception, e:
+                sys.exit("failed: %s" % (str(e)))
+                raise
+
+        elif (self.action=='TAR'):
+            try:
+                calibargs=self.args
+                msg = '>>> Call method %s using arguments %s ' % (self.action,calibargs)
+                print colored.cyan(msg)
+                self.gettar(calibargs)
             
             except Exception, e:
                 sys.exit("failed: %s" % (str(e)))
