@@ -33,10 +33,15 @@ class PhysRestConnection:
     __username = ''
     __password = ''
     
+    def setdebug(self,value):
+        self.__debug = value
+    
     def getBaseUrl(self):
         return self.__baseurl
+    
     def setBaseUrl(self,baseurl):
         self.__baseurl=baseurl
+    
     def setUserPassword(self,user,password):
         self.__username = user
         self.__password = password
@@ -556,6 +561,10 @@ class PhysCurl(object):
     
     def close(self):
         self.__curl.close()
+
+    def setdebug(self,value):
+        self.__debug = value
+        self.__curl.setdebug(value)
 
     def __init__(self, servicepath, usesocks=False):
         '''

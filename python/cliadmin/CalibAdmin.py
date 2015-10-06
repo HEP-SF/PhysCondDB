@@ -37,6 +37,7 @@ class PhysDBDriver():
             self._command = sys.argv[0]
             self.useSocks = False
             self.t0 = 0
+            self.debug = False
             self.t0desc = 't0'
             self.tMax = 'INF'
             self.trace = 'off'
@@ -49,7 +50,7 @@ class PhysDBDriver():
             self.passwd='none'
             self.outfilename=''
             self.urlsvc='localhost:8080/physconddb'
-            longopts=['help','socks','out=','jsondump','url=','t0desc=','t0=','tMax=','snapshot=','trace=','expand=','iovspan=','user=','pass=']
+            longopts=['help','socks','out=','jsondump','debug','url=','t0desc=','t0=','tMax=','snapshot=','trace=','expand=','iovspan=','user=','pass=']
             opts,args=getopt.getopt(sys.argv[1:],'',longopts)
         #print opts, args
         except getopt.GetoptError,e:
@@ -91,6 +92,7 @@ class PhysDBDriver():
         print "Options: "
         print "  --socks activate socks proxy on localhost 3129 "
         print "  --out={filename} activate dump on filename "
+        print "  --debug activate debugging output "
         print "  --jsondump activate a dump of output lines in json format "
         print "  --trace [on|off]: trace associations (ex: globaltag ->* tags or tag ->* iovs "
         print "  --url [localhost:8080/physconddb]: use a specific server "
@@ -131,6 +133,8 @@ class PhysDBDriver():
             if (o=='--out'):
                 self.dump=True
                 self.outfilename=a
+            if (o=='--debug'):
+                self.debug=True
             if (o=='--jsondump'):
                 self.jsondump=True
             if (o=='--url'):
@@ -473,6 +477,8 @@ class PhysDBDriver():
         print colored.blue(('Execute the command for action %s and arguments : %s ' ) % (self.action, str(self.args)))
         start = datetime.now()
         self.restserver = PhysCurl(self.urlsvc, self.useSocks)
+        if self.debug:
+            self.restserver.setdebug(True)
         
         if self.dump:
             outfile = open(self.outfilename,"w")
@@ -508,6 +514,9 @@ class PhysDBDriver():
                 calibargs=self.args
                 msg = '>>> Call method %s using arguments %s ' % (self.action,calibargs)
                 print colored.cyan(msg)
+                if len(calibargs) < 2:
+                    print 'Set default option for lockstatus to LOCKED (type -h for help)'
+                    calibargs.append('LOCKED')
                 self.lockit(calibargs)
                     
             except Exception, e:
@@ -519,7 +528,7 @@ class PhysDBDriver():
                 msg = '>>> Call method %s using arguments %s ' % (self.action,calibargs)
                 print colored.cyan(msg)
                 if len(calibargs) < 2:
-                    print 'Set default option for filename pattern'
+                    print 'Set default option for filename pattern (type -h for help)'
                     calibargs.append('*')
                 self.listcalib(calibargs)
             
