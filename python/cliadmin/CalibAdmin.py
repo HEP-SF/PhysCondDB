@@ -194,6 +194,12 @@ class PhysDBDriver():
         fnamenoext = fnamewithext.split('.')[0]
         msg = ('Commit is using file %s') % (fnamenoext)
         print colored.cyan(msg)
+        # Change destination path using the filename without the extension
+        if destpath.endswith('/'):
+            destpath += fnamenoext
+        else:
+            destpath += ('/' + fnamenoext)
+
         data['by']='node'
         data['name']=destpath
         msg = ' ==> Search for system by node full path %s ' % destpath
@@ -270,6 +276,7 @@ class PhysDBDriver():
         msg = ('    + Payload file uploaded to the DB: %s ') % (storediov['href'])
         print colored.green(msg)
  
+ # Tag a full package using a global tag name (it should start with the package name ???)
     def tagit(self, params):
         systemname=params[0]
         systemsglobaltag=params[1]
@@ -301,6 +308,13 @@ class PhysDBDriver():
             gtag = self.restserver.addJsonEntity(objparams,'/globaltags')
             msg = ('    + New GlobalTag has been stored : %s') % (gtag['name'])
             print colored.green(msg)
+        else:
+            gtagstatus = gtag['lockstatus']
+            if gtagstatus == 'LOCKED':
+                msg = 'ERROR: cannot use a locked global tag to add files: %s is locked...' % systemsglobaltag
+                print colored.red(msg)
+                return -1
+        
 
         if systemlist is None or len(systemlist)<=0:
             msg = 'ERROR: cannot find any file corresponding to package %s ' % systemname

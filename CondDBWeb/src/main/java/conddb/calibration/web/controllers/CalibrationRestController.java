@@ -4,6 +4,8 @@
 package conddb.calibration.web.controllers;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,8 +25,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
@@ -191,6 +195,48 @@ public class CalibrationRestController {
 		} catch (Exception e) {
 			resp = Response.status(Response.Status.BAD_REQUEST).build();
 			throw new ConddbWebException(e.getMessage());
+		}
+		return resp;
+	}
+
+	@GET
+	@Produces({ MediaType.APPLICATION_OCTET_STREAM })
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Path("/tar/{id}")
+	public Response getTarFromGlobalTag(
+			@PathParam("id") final String globaltagname) throws ConddbWebException {
+		Response resp = null;
+		ConddbWebException ex = new ConddbWebException();
+		try {
+			GlobalTag globaltag = globalTagService.getGlobalTag(globaltagname);
+			File f = directoryMapperService.createTar(globaltag);
+			final InputStream in = new FileInputStream(f);
+	        StreamingOutput stream = new StreamingOutput() {
+	            public void write(OutputStream out) throws IOException, WebApplicationException {
+	                try {
+	                    int read = 0;
+	                        byte[] bytes = new byte[1024];
+
+	                        while ((read = in.read(bytes)) != -1) {
+	                            out.write(bytes, 0, read);
+	                        }
+	                } catch (Exception e) {
+	                    throw new WebApplicationException(e);
+	                }
+	            }
+	        };
+			
+			resp = Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM_TYPE).header("Content-Disposition", "attachment; filename=\"" + f.getName() + "\"" ).build();
+		} catch (ConddbServiceException e) {
+			ErrorMessage error = new ErrorMessage("Error dumping tree structure for global tag "+globaltagname);
+			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+			error.setInternalMessage("Cannot dump tree structure :"+e.getMessage());
+			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
+			ex.setErrMessage(error);
+			throw ex;
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 		return resp;
 	}

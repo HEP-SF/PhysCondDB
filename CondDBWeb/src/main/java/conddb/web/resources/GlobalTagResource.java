@@ -24,10 +24,10 @@ public class GlobalTagResource extends Link {
 		super(info, globaltag);
 		put("name", globaltag.getName());
 		put("description", globaltag.getDescription());
-		put("insertiontime", globaltag.getInsertionTime());
+		put("insertionTime", globaltag.getInsertionTime());
 		put("lockstatus", globaltag.getLockstatus());
 		put("release", globaltag.getRelease());
-		put("snapshottime", globaltag.getSnapshotTime());
+		put("snapshotTime", globaltag.getSnapshotTime());
 		put("validity", globaltag.getValidity());
 		
 		CollectionResource mapsresource = new CollectionResource(info,Link.GLOBALTAGMAPS+"/trace?type=globaltag&id="+globaltag.getName(), Collections.emptyList());
@@ -36,15 +36,15 @@ public class GlobalTagResource extends Link {
 
 	public void serializeTimestamps(TimestampFormat tsformat) {
 		this.tsformat = tsformat;
-		Timestamp ts = (Timestamp) get("insertiontime");
+		Timestamp ts = (Timestamp) get("insertionTime");
 		if (ts != null) {
 			String tsstr = format(ts);
-			put("insertiontime", tsstr);
+			put("insertionTime", tsstr);
 		}
-		ts = (Timestamp) get("snapshottime");
+		ts = (Timestamp) get("snapshotTime");
 		if (ts != null) {
 			String tsstr = format(ts);
-			put("snapshottime", tsstr);
+			put("snapshotTime", tsstr);
 		}		
 	}
 }

@@ -147,7 +147,10 @@ public class GlobalTagExpRestController extends BaseController {
 				existing.setSnapshotTime(snapshottime);
 			}
 			existing = globalTagService.insertGlobalTag(existing);
-			resp = Response.ok(new GlobalTagResource(info, existing), MediaType.APPLICATION_JSON).build();
+			existing.setResId(existing.getName());
+			GlobalTagResource resource = (GlobalTagResource) springResourceFactory.getResource("globaltag", info,
+					existing);
+			resp = Response.ok(resource, MediaType.APPLICATION_JSON).build();
 			return resp;
 		} catch (ConddbServiceException e) {
 			log.debug("Generate exception using an ConddbService exception..."+e.getMessage());
