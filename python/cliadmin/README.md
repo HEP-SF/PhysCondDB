@@ -34,9 +34,11 @@ python CalibAdmin.py  COMMIT  <packagename> <localfilenameandpath> <destpath>
 Example:
 ```   
 python CalibAdmin.py --url=aiatlas137.cern.ch:8080/physconddb COMMIT JavaDocPkg primefaces_users_guide_3_4.pdf   /JavaDocPkg/Computing/Generics
-
+```
+```
 python CalibAdmin.py --url=aiatlas137.cern.ch:8080/physconddb COMMIT JavaDocPkg jquery-getting-started.pdf   /JavaDocPkg/Computing/Generics
 ```
+
 * TAG a package : associate the last versions of the files to a (new) global tag
 ``` 
  python CalibAdmin.py TAG <package-name> <globaltagname>
