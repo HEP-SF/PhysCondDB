@@ -167,4 +167,11 @@ public class SystemDescription extends conddb.data.Entity implements Serializabl
 		this.tags = tags;
 	}
 	
+	@Override
+	public String toString() {
+		return "SystemDescription [id=" + id + ", nodeFullpath=" + nodeFullpath + ", schemaName=" + schemaName
+				+ ", tagNameRoot=" + tagNameRoot + ", nodeDescription=" + nodeDescription + ", groupSize=" + groupSize
+				+ "]";
+	}
+	
 }

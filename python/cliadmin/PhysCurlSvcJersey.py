@@ -27,7 +27,7 @@ except ImportError:
 class PhysRestConnection:
     
     __baseurl = 'localhost:8080/'
-    __debug = True
+    __debug = False
     __header = None
     __timeout = 100
     __username = ''
@@ -58,41 +58,49 @@ class PhysRestConnection:
         self.__curl.setopt(pycurl.URL, self.__url)
         
     def getData(self):
-        print "Get data using url ", self.__url
+        if self.__debug:
+            print "Get data using url ", self.__url
         buf = cStringIO.StringIO()
 #        self.__curl.setopt(self.__curl.WRITEFUNCTION, buf.write)
 # in python 3 this is the correct way
 # buf is a ByteIO object...check documentation
 #        self.__curl.setopt(self.__curl.WRITEDATA, buf)
-        self.setDefaultOptions()
-        self.__curl.setopt(self.__curl.HTTPGET, 1)
-        self.__curl.setopt(self.__curl.WRITEFUNCTION, buf.write)
-        self.__curl.perform()
-        # HTTP response code, e.g. 200.
-        print('Status: %d' % self.__curl.getinfo(self.__curl.RESPONSE_CODE))
-        # Elapsed time for the transfer.
-        print('Status: %f' % self.__curl.getinfo(self.__curl.TOTAL_TIME))
-        data = None
-        data = buf.getvalue()
-        print 'Retrieved data :' , data
-        if data is '':
-            return None
         try:
+            self.setDefaultOptions()
+            self.__curl.setopt(self.__curl.HTTPGET, 1)
+            self.__curl.setopt(self.__curl.FAILONERROR, True)
+            self.__curl.setopt(self.__curl.WRITEFUNCTION, buf.write)
+            self.__curl.perform()
+        # HTTP response code, e.g. 200.
+            if self.__debug:
+                print('Status: %d' % self.__curl.getinfo(self.__curl.RESPONSE_CODE))
+        # Elapsed time for the transfer.
+            if self.__debug:
+                print('Status: %f' % self.__curl.getinfo(self.__curl.TOTAL_TIME))
+                  
+            data = None
+            data = buf.getvalue()
+            buf.close()
+            if self.__debug:
+                print 'Retrieved data :' , data
+            if data is '':
+                return None
             jsondata = json.loads(data)
             return jsondata
-        except json, e:
-            print 'Catch exception from json loads....'
-            print e
-            return {}
+        except pycurl.error, error:
+            response = self.__curl.getinfo(self.__curl.RESPONSE_CODE)
+            if response is not 200:
+                print colored.red('Problem in executing GET : status returned is %d' % response)
+            errno, errstr = error
+            print colored.red('An error occurred in GET method: %s ' % errstr)
+            return None
         
     def deleteData(self):
         print "Delete data using url ", self.__url
         self.setDefaultOptions()
-
         self.__curl.setopt(self.__curl.CUSTOMREQUEST,'DELETE')
         self.__curl.setopt(self.__curl.USERNAME, self.__username)
         self.__curl.setopt(self.__curl.PASSWORD, self.__password)
-        self.__curl.setopt(self.__curl.VERBOSE, True)
         try:
             self.__curl.perform()
             response = self.__curl.getinfo(self.__curl.RESPONSE_CODE)
@@ -103,7 +111,7 @@ class PhysRestConnection:
             return { 'response' : response }
         except pycurl.error, error:
              errno, errstr = error
-             print 'An error occurred: ', errstr
+             print colored.red('An error occurred: %s ' % errstr)
 
         
     def setTimeout(self,to):
@@ -116,38 +124,48 @@ class PhysRestConnection:
 
 # This function should set appropriate values for POST type
     def postData(self, jsonobj):
-        print "Set data using url ", self.__url
+        if self.__debug:
+            print "post data using url ", self.__url
         post_data = jsonobj
 # Sets request method to POST,
 # Content-Type header to application/x-www-form-urlencoded
 # and data to send in request body.
-        print post_data
         self.setDefaultOptions()
+        buf = cStringIO.StringIO()
+        self.__curl.setopt(self.__curl.HTTPGET, 0)
         self.__curl.setopt(self.__curl.POST,1)
         self.__curl.setopt(self.__curl.POSTFIELDS,post_data)
-        self.__curl.setopt(self.__curl.VERBOSE, True)
+        self.__curl.setopt(self.__curl.FAILONERROR, True)
+        self.__curl.setopt(self.__curl.WRITEFUNCTION, buf.write)
         try:
             self.__curl.perform()
             response = self.__curl.getinfo(self.__curl.RESPONSE_CODE)
         # HTTP response code, e.g. 200.
-            print('Status: %d' % response)
+            if self.__debug:
+                print('Status: %d' % response)
         # Elapsed time for the transfer.
-            print('Status: %f' % self.__curl.getinfo(self.__curl.TOTAL_TIME))
-            return { 'response' : response }
+                print('Status: %f' % self.__curl.getinfo(self.__curl.TOTAL_TIME))
+            #            data = None
+            data = buf.getvalue()
+            if data is '':
+                return None
+            jsondata = json.loads(data)
+            buf.close()
+            return jsondata
         except pycurl.error, error:
              errno, errstr = error
-             print 'An error occurred: ', errstr
+             print colored.red('An error occurred in POST: %s ' % errstr)
 
 # This function should set appropriate values for POST type
     def postAction(self, actionparams):
-        print "Set data using url ", self.__url
+        if self.__debug:
+            print "post data action using url ", self.__url
 # Sets request method to POST,
 # Content-Type header to application/x-www-form-urlencoded
 # and data to send in request body.
 #        self.__curl.setopt(self.__curl.POST,1)
-        print actionparams
+            print actionparams
         self.__curl.setopt(self.__curl.POSTFIELDS,actionparams)
-        self.__curl.setopt(self.__curl.VERBOSE, True)
         self.__curl.setopt(self.__curl.TIMEOUT, 30)
         try:
             self.__curl.perform()
@@ -164,7 +182,8 @@ class PhysRestConnection:
 
 # This function should set appropriate values for POST type
     def postPayload(self, params):
-        print "Post file using url ", self.__url
+        if self.__debug:
+            print "Post payload file using url ", self.__url
         post_data = [("file", (self.__curl.FORM_FILE, params['file'])),
                      ("objectType", params['objectType']),
                      ("streamerInfo", params['streamerInfo']),
@@ -177,21 +196,24 @@ class PhysRestConnection:
 # Sets request method to POST,
 # Content-Type header to application/x-www-form-urlencoded
 # and data to send in request body.
-        print post_data
+        if self.__debug:
+            print post_data
         self.setDefaultOptions()
         self.__curl.setopt(self.__curl.POST,1)
         self.__curl.setopt(self.__curl.HTTPPOST,post_data)
-        self.__curl.setopt(self.__curl.VERBOSE, True)
         self.__curl.setopt(self.__curl.WRITEFUNCTION, self.write_out) # now passing own method
-        print 'Perform post action...'
         try:
             self.__curl.perform()
             response = self.__curl.getinfo(self.__curl.RESPONSE_CODE)
         # HTTP response code, e.g. 200.
-            print('Status: %d' % response)
+            if self.__debug:
+                print('Status: %d' % response)
         # Elapsed time for the transfer.
-            print('Status: %f' % self.__curl.getinfo(self.__curl.TOTAL_TIME))
-            return { 'response' : response, 'data' : self.dataresponse }
+                print('Status: %f' % self.__curl.getinfo(self.__curl.TOTAL_TIME))
+#            data = { 'response' : response, 'data' : self.dataresponse }
+            data = self.dataresponse
+            jsondata = json.loads(data)
+            return jsondata
         except pycurl.error, error:
              errno, errstr = error
              print 'An error occurred: ', errstr
@@ -204,22 +226,24 @@ class PhysRestConnection:
         # Sets request method to POST,
         # Content-Type header to application/x-www-form-urlencoded
         # and data to send in request body.
-        print post_data
+        if self.__debug:
+            print post_data
         self.__curl.setopt(self.__curl.POST,1)
         self.__curl.setopt(self.__curl.HTTPPOST,post_data)
-        self.__curl.setopt(self.__curl.VERBOSE, True)
         # Set size of file to be uploaded.
         filesize = os.path.getsize(filename)
         #self.__curl.setopt(self.__curl.INFILESIZE, filesize)
-        print 'File has size ',filesize
+        if self.__debug:
+            print 'File has size ',filesize
         try:
             self.__curl.perform()
             print 'URL action performed'
             response = self.__curl.getinfo(self.__curl.RESPONSE_CODE)
             # HTTP response code, e.g. 200.
-            print('Status: %d' % response)
+            if self.__debug:
+                print('Status: %d' % response)
             # Elapsed time for the transfer.
-            print('Status: %f' % self.__curl.getinfo(self.__curl.TOTAL_TIME))
+                print('Status: %f' % self.__curl.getinfo(self.__curl.TOTAL_TIME))
             return { 'response' : response }
         except pycurl.error, error:
             errno, errstr = error
@@ -227,20 +251,28 @@ class PhysRestConnection:
 
     
     def write_out(self,data):
-        print 'Data len', len(data)
-        print 'Data content : ', data
+        if self.__debug:
+            print 'Data len', len(data)
+            print 'Data content : ', data
         self.dataresponse = data
         return len(data)
     
     def setDefaultOptions(self):
-        print 'Set default options'
+        if self.__debug:
+            print 'Set default options'
+        self.__curl.setopt(self.__curl.VERBOSE, False)
+
         #self.__curl.unsetopt(self.__curl.POST)
         #self.__curl.unsetopt(self.__curl.VERBOSE)
+
+    def close(self):
+        self.__curl.close()
 
     def __init__(self):
         self.__curl = pycurl.Curl()
         self.__curl.setopt(self.__curl.TIMEOUT, self.__timeout)
         self.__curl.setopt(self.__curl.FAILONERROR, True)
+        self.__curl.setopt(self.__curl.VERBOSE, True)
         self.__curl.setopt(self.__curl.CONNECTTIMEOUT, 5)
         self.dataresponse = "none"
 
@@ -250,9 +282,11 @@ class PhysCond(object):
     _dictkeys = []
     _dictval = {}
     _dicttypes = []
-    _example = ''' 
+    _example = '''
     Generic object...
     '''
+    __debug = False
+
     def __init__(self,jsonobj):
         self._dictval = jsonobj
     def getKeys(self):
@@ -348,49 +382,51 @@ class PhysCurl(object):
     baseurl='/conddbweb/rest/expert'
     userbaseurl='/conddbweb/rest'
     adminbaseurl='/conddbweb/rest/admin'
+    __debug = False
 
 
     ### TO BE DONE AT SERVER LEVEL
     def addPayload(self,params,servicebase="/payload"):
-
-        print 'Add payload using input '
-        print params
+        if self.__debug:
+            print 'Add payload using input '
+            print params
         url = (self.baseurl + servicebase)
         self.__curl.setUrl(url)
         self.__curl.setHeader(['Content-Type:multipart/form-data'])
         return self.__curl.postPayload(params)
 
     def addWithPairs(self,data,params,servicebase="/globaltags"):
-    
-        print 'Add object using parameter '
-        print params
+        if self.__debug:
+            print 'Add object using parameter '
+            print params
         url = (self.baseurl + servicebase )
         self.__curl.setUrl(url)
         self.__curl.setHeader(['Content-Type:application/json', 'Accept:application/json'])
         urlquoted = urllib.quote_plus(url,safe=':/')
         pairs = urllib.urlencode(params)
         self.__curl.setUrl(urlquoted+'?'+pairs)
-        print 'Try to serialize in json '
+        if self.__debug:
+            print 'Try to serialize in json '
         jsonobj = json.dumps(data)
         return self.__curl.postData(jsonobj)
 
 
     def addJsonEntity(self,params,servicebase="/globaltags"):
-    
-        print 'Add object using parameter '
-        print params
+        if self.__debug:
+            print 'Add object using parameter '
+            print params
         url = (self.baseurl + servicebase )
         self.__curl.setUrl(url)
         self.__curl.setHeader(['Content-Type:application/json', 'Accept:application/json'])
-        print 'Try to serialize in json '
+        if self.__debug:
+            print 'Try to serialize in json '
         jsonobj = json.dumps(params)
-        print jsonobj
         return self.__curl.postData(jsonobj)
 
     def deleteEntity(self,id,servicebase="/globaltags"):
-    
-        print 'Update object using parameter '
-        print id
+        if self.__debug:
+            print 'Update object using parameter '
+            print id
         url = (self.baseurl + servicebase + "/" + id)
         self.__curl.setUrl(url)
         self.__curl.setHeader(['Content-Type:application/json', 'Accept:application/json'])
@@ -406,25 +442,25 @@ class PhysCurl(object):
 ###    - /tags :       { 'description', 'synchronization','objectType','timeType','lastValidatedTime','endOfValidity' }
 
     def update(self,params,id,servicebase="/globaltags"):
-        
-        print 'Update object using parameter '
-        print params
-        print id
+        if self.__debug:
+            print 'Update object using parameter '
+            print params
+            print id
         url = (self.baseurl + servicebase + "/" + id)
         self.__curl.setUrl(url)
         self.__curl.setHeader(['Content-Type:application/json', 'Accept:application/json'])
-        print 'Try to serialize in json '
+        if self.__debug:
+            print 'Try to serialize in json '
         jsonobj = json.dumps(params)
-        print jsonobj
         return self.__curl.postData(jsonobj)
 
 ### Get an object from the conditions DB, depending on the servicebase path
 ###   - /globaltags : <name> [optional: trace=on/off]
 ###   - /tags       : <name> [optional: trace=on/off]
     def get(self,params,servicebase="/globaltags"):
-
-        print 'Search object using parameter '
-        print params
+        if self.__debug:
+            print 'Search object using parameter '
+            print params
         id = params['name']
         url = (self.userbaseurl + servicebase )
         if id is not None:
@@ -444,51 +480,50 @@ class PhysCurl(object):
         return self.__curl.getData()
 
     def getiovs(self,params,servicebase="/iovs/find"):
-    
-        print 'Search object using parameter '
-        print params
+        if self.__debug:
+            print 'Search object using parameter '
+            print params
         id = params['tag']
-        print 'Search iovs in tag ',id
         url = (self.userbaseurl + servicebase )
         urlquoted = urllib.quote_plus(url,safe=':/')
         pairs = urllib.urlencode(params)
         self.__curl.setUrl(urlquoted+'?'+pairs)
-        
         return self.__curl.getData()
 
     def getsystems(self,params,servicebase="/systems/find"):
-        
-        print 'Search systems using parameters ',params
-
+        if self.__debug:
+            print 'Search systems using parameters ',params
         url = (self.userbaseurl + servicebase )
         urlquoted = urllib.quote_plus(url,safe=':/')
         pairs = urllib.urlencode(params)
         self.__curl.setUrl(urlquoted+'?'+pairs)
-        
         return self.__curl.getData()
 
     def getlink(self,params,servicebase=None):
-    
-        print 'follow href link ',params['href']
-        print params
+        if self.__debug:
+            print 'follow href link ',params['href']
+            print params
         url = (params['href'])
         urlquoted = urllib.quote_plus(url,safe=':/')
         self.__curl.setUrl(urlquoted)
-        
         return self.__curl.getData()
 
 
     def setUserPassword(self,user,passwd):
         self.__curl.setUserPassword(user, passwd)
+    
+    def close(self):
+        self.__curl.close()
 
     def __init__(self, servicepath, usesocks=False):
         '''
         Constructor
         '''
-        print 'Access to PhysCondDB via REST services'
+        if self.__debug:
+            print 'Access to PhysCondDB via REST services'
         self.__servicepath = servicepath
         self.__curl = PhysRestConnection()
         self.__curl.setBaseUrl(self.__servicepath)
         if usesocks == True:
             self.__curl.setSocks('localhost', 3129)
-        print 'Init Business Delegate with servicepath ', self.__servicepath
+#print 'Init Business Delegate with servicepath ', self.__servicepath

@@ -242,13 +242,14 @@ public class GlobalTagService {
 	 */
 	@Transactional
 	public Tag deleteTag(Tag entity) throws ConddbServiceException {
+		Tag existing = tagRepository.findByName(entity.getName());
 		Tag removable = tagRepository.findByNameAndFetchGlobalTagsWithLock(entity.getName(), GlobalTagStatus.LOCKED.name());
-		if (removable.getGlobalTagMaps() != null && removable.getGlobalTagMaps().size()>0) {
+		if (removable != null && removable.getGlobalTagMaps() != null && removable.getGlobalTagMaps().size()>0) {
 			log.debug("Cannot remove a tag which depends on a locked global tag...");
 			throw new ConddbServiceException("Cannot remova tag "+entity.getName()+" : a parent global tag is locked ");
 		}
-		tagRepository.delete(removable);
-		return removable;
+		tagRepository.delete(existing);
+		return existing;
 	}
 
 	/**

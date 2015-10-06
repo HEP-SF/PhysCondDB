@@ -17,10 +17,21 @@
  **/
 package conddb.data.mappers;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.sql.Blob;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.hibernate.engine.jdbc.StreamUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.lob.DefaultLobHandler;
+import org.springframework.jdbc.support.lob.LobHandler;
 
 import conddb.data.PayloadData;
 
@@ -30,12 +41,28 @@ import conddb.data.PayloadData;
  */
 public class PayloadDataMapper implements RowMapper<PayloadData> {
 
+	private Logger log = LoggerFactory.getLogger(this.getClass());
+
 	@Override
 	public PayloadData mapRow(ResultSet rs, int rownum) throws SQLException {
 		PayloadData pyd = new PayloadData();
 		pyd.setHash(rs.getString("HASH"));
-//		pyd.setData(rs.getBytes("DATA"));
-		pyd.setData(rs.getBlob("DATA"));
+		try {
+			LobHandler lobhandler = new DefaultLobHandler();
+			String uri = "/tmp/"+pyd.getHash()+".blob";
+//			Blob blob = rs.getBlob("DATA");
+//			InputStream istream = blob.getBinaryStream();
+			InputStream istream = lobhandler.getBlobAsBinaryStream(rs, "DATA");
+			log.debug("retrieved blob stream from handler : "+istream.available()+" !");
+			log.debug("copy stream into uri  : "+uri+" !");
+			OutputStream out = new FileOutputStream(new File(uri));
+			StreamUtils.copy(istream, out);
+			out.close();
+			pyd.setData(rs.getBlob("DATA"));
+			pyd.setUri(uri);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}		
 		return pyd;
 	}
 

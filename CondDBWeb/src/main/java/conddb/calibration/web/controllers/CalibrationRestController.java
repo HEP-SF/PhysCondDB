@@ -14,7 +14,6 @@ import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
-import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
@@ -42,15 +41,14 @@ import conddb.dao.baserepository.PayloadDataBaseCustom;
 import conddb.dao.controllers.GlobalTagService;
 import conddb.dao.controllers.IovService;
 import conddb.dao.controllers.SystemNodeService;
+import conddb.dao.exceptions.ConddbServiceException;
+import conddb.data.ErrorMessage;
 import conddb.data.GlobalTag;
-import conddb.data.GlobalTagMap;
 import conddb.data.GlobalTagStatus;
 import conddb.data.Iov;
 import conddb.data.Payload;
-import conddb.data.PayloadData;
 import conddb.data.SystemDescription;
 import conddb.data.Tag;
-import conddb.data.handler.PayloadHandler;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.Link;
 
@@ -204,21 +202,18 @@ public class CalibrationRestController {
 	public Response dumpContent(
 			@PathParam("id") final String globaltagname) throws ConddbWebException {
 		Response resp = null;
+		ConddbWebException ex = new ConddbWebException();
 		try {
-			GlobalTag entity = globalTagService.getGlobalTagFetchTags(globaltagname);
-			Set<GlobalTagMap> maplist = entity.getGlobalTagMaps();
-			for (GlobalTagMap globalTagMap : maplist) {
-				Tag atag = globalTagMap.getSystemTag();
-				List<Iov> iovlist = iovService.getIovsByTag(atag, null, entity.getSnapshotTime());
-				for (Iov iov : iovlist) {
-					log.info("Found iov "+iov.toString()+" and payload "+iov.getPayload().toString());
-					PayloadData data = payloadDataBaseCustom.find(iov.getPayload().getHash());
-				}
-			}
+			GlobalTag globaltag = globalTagService.getGlobalTag(globaltagname);
+			directoryMapperService.dumpGlobalTagOnDisk(globaltag);
 			resp = Response.ok().build();
-		} catch (Exception e) {
-			resp = Response.status(Response.Status.BAD_REQUEST).build();
-			throw new ConddbWebException(e.getMessage());
+		} catch (ConddbServiceException e) {
+			ErrorMessage error = new ErrorMessage("Error dumping tree structure for global tag "+globaltagname);
+			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+			error.setInternalMessage("Cannot dump tree structure :"+e.getMessage());
+			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
+			ex.setErrMessage(error);
+			throw ex;
 		}
 		return resp;
 	}

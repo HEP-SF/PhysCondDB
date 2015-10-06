@@ -31,6 +31,7 @@ import org.springframework.stereotype.Controller;
 import conddb.dao.admin.controllers.GlobalTagAdminController;
 import conddb.dao.controllers.GlobalTagService;
 import conddb.dao.exceptions.ConddbServiceException;
+import conddb.data.ErrorMessage;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.GlobalTagStatus;
@@ -71,8 +72,14 @@ public class GlobalTagExpRestController extends BaseController {
 			GlobalTagResource resource = (GlobalTagResource) springResourceFactory.getResource("globaltag", info,
 					saved);
 			return created(resource);
-		} catch (Exception e) {
-			throw new ConddbWebException("Cannot create entity " + globaltag.getName() + " : " + e.getMessage());
+		} catch (ConddbServiceException e) {
+			ConddbWebException ex = new ConddbWebException();
+			ErrorMessage error = new ErrorMessage("Error creating new GlobalTag resource "+globaltag.getName());
+			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+			error.setInternalMessage("Cannot create new global tag :"+e.getMessage());
+			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
+			ex.setErrMessage(error);
+			throw ex;
 		}
 	}
 
@@ -83,21 +90,35 @@ public class GlobalTagExpRestController extends BaseController {
 			throws ConddbWebException {
 		Response resp;
 		try {
+			ConddbWebException ex = new ConddbWebException();
 			log.info("Request for updating global tag "+id+" using "+map.size());
 			GlobalTag existing = globalTagService.getGlobalTag(id);
 			if (existing == null) {
-				throw new ConddbWebException("Resource not found");
+				ErrorMessage error = new ErrorMessage("Error updating not existing GlobalTag resource "+id);
+				error.setCode(Response.Status.NOT_FOUND.getStatusCode());
+				error.setInternalMessage("Cannot update global tag because is not found in DB");
+				ex.setStatus(Response.Status.NOT_FOUND);
+				ex.setErrMessage(error);
+				throw ex;
 			}
 			//TODO: This should be activated in the final code
 			if (existing.islocked()) {
-//				throw new ConddbWebException("Cannot update a locked global tag");
+				ErrorMessage error = new ErrorMessage("Error updating locked GlobalTag resource "+id);
+				error.setCode(Response.Status.NOT_MODIFIED.getStatusCode());
+				error.setInternalMessage("Cannot update global tag because it is locked");
+				ex.setStatus(Response.Status.NOT_MODIFIED);
+				ex.setErrMessage(error);
 				log.info("In principle no update is possible for a locked global tag");
 			}
 			if (map.containsKey("name")) {
 				List<GlobalTagMap> maplist = globalTagService.getGlobalTagMapByGlobalTagName(id);
 				if (maplist != null && maplist.size()>0 || existing.islocked()) {
-					resp = Response.status(Response.Status.FORBIDDEN).build(); 
-					return resp;
+					ErrorMessage error = new ErrorMessage("Cannot update GlobalTag resource <name> field when associations are active..."+id);
+					error.setCode(Response.Status.NOT_MODIFIED.getStatusCode());
+					error.setInternalMessage("Cannot update global tag because <name> field cannot be modified");
+					ex.setStatus(Response.Status.NOT_MODIFIED);
+					ex.setErrMessage(error);
+					throw ex;
 				}
 				existing.setName(String.valueOf(map.get("name")));
 			}
@@ -127,14 +148,18 @@ public class GlobalTagExpRestController extends BaseController {
 			}
 			existing = globalTagService.insertGlobalTag(existing);
 			resp = Response.ok(new GlobalTagResource(info, existing), MediaType.APPLICATION_JSON).build();
+			return resp;
 		} catch (ConddbServiceException e) {
-			resp = Response.status(Response.Status.EXPECTATION_FAILED).build();
-			e.printStackTrace();
+			log.debug("Generate exception using an ConddbService exception..."+e.getMessage());
+			ConddbWebException ex = new ConddbWebException(e.getMessage());
+			ex.setStatus(Response.Status.BAD_REQUEST);
+			throw ex;
 		} catch (ConversionException e) {
-			resp = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-			e.printStackTrace();
+			log.debug("Generate exception using an ConversionException exception..."+e.getMessage());
+			ConddbWebException ex = new ConddbWebException(e.getMessage());
+			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
+			throw ex;
 		}
-		return resp;
 	}
 
 	@Path(Link.GLOBALTAGS+"/maps/{id}")
@@ -147,6 +172,7 @@ public class GlobalTagExpRestController extends BaseController {
 			Map map)
 			throws ConddbWebException {
 		Response resp;
+		ConddbWebException ex = new ConddbWebException();
 		try {
 			String record = (map.containsKey("record")) ? (String) map.get("record") : "none" ;
 			String label = (map.containsKey("label")) ? (String) map.get("label") : "none" ;
@@ -154,16 +180,31 @@ public class GlobalTagExpRestController extends BaseController {
 			if (map.containsKey("name")) {
 				pattern = (String)map.get("name");
 			} else {
-				throw new ConddbWebException("Cannot apply any mapping if name pattern is null");
+				ErrorMessage error = new ErrorMessage("Cannot create mappings when <name> field is null..."+id);
+				error.setCode(Response.Status.NOT_MODIFIED.getStatusCode());
+				error.setInternalMessage("Cannot create mapping because <name> field for tag pattern is null");
+				ex.setStatus(Response.Status.NOT_MODIFIED);
+				ex.setErrMessage(error);
+				throw ex;			
 			}
 			log.info("Request to associate tags to a global tag "+id+" using a pattern "+pattern);
 			log.info("   - using common values for record and label :"+record+" "+label);
 			GlobalTag existing = globalTagService.getGlobalTag(id);
 			if (existing == null) {
-				throw new ConddbWebException("Resource not found");
+				ErrorMessage error = new ErrorMessage("Cannot create mappings because global tag resource was not found for id="+id);
+				error.setCode(Response.Status.NOT_FOUND.getStatusCode());
+				error.setInternalMessage("Cannot create mapping because global tag resource was not found in the DB");
+				ex.setStatus(Response.Status.NOT_FOUND);
+				ex.setErrMessage(error);
+				throw ex;			
 			}
 			if (existing.islocked()) {
-				throw new ConddbWebException("Cannot add tags to locked global tag");
+				ErrorMessage error = new ErrorMessage("Cannot create mappings because global tag "+id+" is locked");
+				error.setCode(Response.Status.NOT_ACCEPTABLE.getStatusCode());
+				error.setInternalMessage("Cannot create mapping because global tag resource is locked in the DB");
+				ex.setStatus(Response.Status.NOT_ACCEPTABLE);
+				ex.setErrMessage(error);
+				throw ex;			
 			}
 			if (action.equals("addtags")) {
 				log.info("action=addtags: add to "+id+" using tag pattern "+pattern);
@@ -184,27 +225,42 @@ public class GlobalTagExpRestController extends BaseController {
 				}
 			}
 			resp = Response.ok().build();
+			return resp;
+
 		} catch (ConddbServiceException e) {
-			resp = Response.status(Response.Status.EXPECTATION_FAILED).build();
-			e.printStackTrace();
+			ErrorMessage error = new ErrorMessage("Cannot create mappings because internal service received exception for global tag "+id);
+			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+			error.setInternalMessage("Cannot create mapping because of an internal server error : "+e.getMessage());
+			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
+			ex.setErrMessage(error);
+			throw ex;			
 		}
-		return resp;
 	}
 
 	@Path(Link.GLOBALTAGS+"/{id}")
 	@DELETE
 	public Response deleteGlobalTag(@PathParam("id") String id) throws ConddbWebException {
 		Response resp;
+		ConddbWebException ex = new ConddbWebException();
 		try {
 			GlobalTag existing = globalTagService.getGlobalTag(id);
 			if (existing.islocked()) {
-				throw new ConddbWebException("Cannot delete a locked global tag");
+				ErrorMessage error = new ErrorMessage("Cannot remove global tag "+id+" because it is locked");
+				error.setCode(Response.Status.NOT_MODIFIED.getStatusCode());
+				error.setInternalMessage("Cannot remove a locked global tag");
+				ex.setStatus(Response.Status.NOT_MODIFIED);
+				ex.setErrMessage(error);
 			}
 			existing = globalTagAdminController.deleteGlobalTag(id);
 			resp = Response.ok(existing).build();
 
 		} catch (ConddbServiceException e) {
-			throw new ConddbWebException("Cannot remove id " + id + " : " + e.getMessage());
+			ErrorMessage error = new ErrorMessage("Cannot remove global tag because internal service received exception for global tag "+id);
+			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+			error.setInternalMessage("Cannot remove global tag because of an internal server error : "+e.getMessage());
+			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
+			ex.setErrMessage(error);
+			throw ex;			
 		}
 		return resp;
 	}

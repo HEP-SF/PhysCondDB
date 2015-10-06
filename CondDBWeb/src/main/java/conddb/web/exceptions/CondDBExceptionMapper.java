@@ -12,8 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import conddb.data.ErrorMessage;
-
 /**
  * @author formica
  *
@@ -29,7 +27,7 @@ public class CondDBExceptionMapper implements ExceptionMapper<ConddbWebException
 		
 		log.debug("Calling Exception mapper on exception "+ex.getMessage());
 		return Response.status(ex.getStatus())
-				.entity(new ErrorMessage(ex.getMessage()))
+				.entity(ex.getErrMessage())
 				.type(MediaType.APPLICATION_JSON).
 				build();
 	}

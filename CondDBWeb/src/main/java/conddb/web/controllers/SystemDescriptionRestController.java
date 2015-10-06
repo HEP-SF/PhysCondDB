@@ -30,6 +30,7 @@ import org.springframework.stereotype.Controller;
 import conddb.dao.controllers.GlobalTagService;
 import conddb.dao.controllers.SystemNodeService;
 import conddb.dao.exceptions.ConddbServiceException;
+import conddb.data.ErrorMessage;
 import conddb.data.GlobalTag;
 import conddb.data.SystemDescription;
 import conddb.data.Tag;
@@ -87,17 +88,22 @@ public class SystemDescriptionRestController {
 			@DefaultValue("off") @QueryParam("trace") String trace, @DefaultValue("tag") @QueryParam("by") String type,
 			@DefaultValue("0") @QueryParam("page") Integer ipage,
 			@DefaultValue("1000") @QueryParam("size") Integer size) throws ConddbWebException {
+
 		this.log.info("SystemDescriptionRestController processing request to get systems using name " + system
 				+ " as type " + type);
+		
 		Response resp = null;
+		ConddbWebException ex = new ConddbWebException();
 		try {
 			CacheControl control = new CacheControl();
 			control.setMaxAge(600);
-
 			if (system.equals("none")) {
-				String help = "{ 'options' : [ { 'by': 'tag,node,schema' }, { 'name' : 'a string representing the search you want to perform' } ]}";
-				resp = Response.status(Response.Status.BAD_REQUEST).entity(help).build();
-				return resp;
+				ErrorMessage error = new ErrorMessage("Wrong options; 'by' field is mandatory [tag|node|schema] ");
+				error.setCode(Response.Status.BAD_REQUEST.getStatusCode());
+				error.setInternalMessage("Cannot perform search using option by=none");
+				ex.setStatus(Response.Status.BAD_REQUEST);
+				ex.setErrMessage(error);
+				throw ex;
 			}
 
 			PageRequest preq = new PageRequest(ipage, size);
@@ -111,43 +117,52 @@ public class SystemDescriptionRestController {
 				} else if (type.equals("schema")) {
 					pagelist = this.systemNodeService.findSystemNodesBySchemaNameLike(system, preq);
 				}
-				log.debug("Retrieved list of systems " + pagelist.getNumberOfElements());
+				if (pagelist == null) {
+					log.debug("Controller could not retrieve any entity list....");
+					ErrorMessage error = new ErrorMessage("Cannot find system using option by = "+system);
+					error.setCode(Response.Status.NOT_FOUND.getStatusCode());
+					error.setInternalMessage("Element not found");
+					ex.setStatus(Response.Status.NOT_FOUND);
+					ex.setErrMessage(error);
+					throw ex;					
+				}
+				log.debug("Retrieved list of systems " + pagelist.getNumberOfElements());				
 				sdlist = pagelist.getContent();
 				resp = Response.ok(sdlist).cacheControl(control).build();
 			} else {
-				if (trace.equals("off")) {
-					SystemDescription entity = null;
-					if (type.equals("tag")) {
-						SystemDescription sd = this.systemNodeService.getSystemNodesByTagname(system);
-						entity = sd;
-					} else if (type.equals("node")) {
-						SystemDescription sd = this.systemNodeService.getSystemNodesByNodeFullpath(system);
-						entity = sd;
-					}
-					SystemDescriptionResource resource = (SystemDescriptionResource) springResourceFactory
-							.getResource("system", info, entity);
-					resp = Response.ok(resource).cacheControl(control).build();
-				} else {
-					SystemDescription entity = null;
-					if (type.equals("tag")) {
-						SystemDescription sd = this.systemNodeService.getSystemNodesByTagname(system);
-						List<Tag> tags = this.globalTagService.getTagByNameLike(sd.getTagNameRoot() + "%");
-						sd.setTags(tags);
-						entity = sd;
-					} else if (type.equals("node")) {
-						SystemDescription sd = this.systemNodeService.getSystemNodesByNodeFullpath(system);
-						List<Tag> tags = this.globalTagService.getTagByNameLike(sd.getTagNameRoot() + "%");
-						sd.setTags(tags);
-						entity = sd;
-					}
-					SystemDescriptionResource resource = (SystemDescriptionResource) springResourceFactory
-							.getResource("system", info, entity);
-					resp = Response.ok(resource).cacheControl(control).build();
+				SystemDescription entity = null;
+				if (type.equals("tag")) {
+					SystemDescription sd = this.systemNodeService.getSystemNodesByTagname(system);
+					entity = sd;
+				} else if (type.equals("node")) {
+					SystemDescription sd = this.systemNodeService.getSystemNodesByNodeFullpath(system);
+					entity = sd;
 				}
+				if (entity == null) {
+					log.debug("Controller could not retrieve any entity....");
+					ErrorMessage error = new ErrorMessage("Cannot find system using option by = "+system);
+					error.setCode(Response.Status.NOT_FOUND.getStatusCode());
+					error.setInternalMessage("Element not found");
+					ex.setStatus(Response.Status.NOT_FOUND);
+					ex.setErrMessage(error);
+					throw ex;					
+				}
+				if (trace.equals("on")) {
+					List<Tag> tags = this.globalTagService.getTagByNameLike(entity.getTagNameRoot() + "%");
+					entity.setTags(tags);
+				}
+				log.debug("Controller creating resource from entity...."+entity);
+				SystemDescriptionResource resource = (SystemDescriptionResource) springResourceFactory
+						.getResource("system", info, entity);
+				resp = Response.ok(resource).cacheControl(control).build();
 			}
-		} catch (Exception e) {
-			resp = Response.status(Response.Status.NOT_FOUND).build();
-			throw new ConddbWebException(e.getMessage());
+		} catch (ConddbServiceException e) {
+			ErrorMessage error = new ErrorMessage("Error finding systemdescription resource ");
+			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+			error.setInternalMessage("Cannot find a systemdescription resource :"+e.getMessage());
+			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
+			ex.setErrMessage(error);
+			throw ex;
 		}
 		return resp;
 	}

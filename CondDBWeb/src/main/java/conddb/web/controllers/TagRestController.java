@@ -105,7 +105,7 @@ public class TagRestController {
 			throw new ConddbWebException(e.getMessage());
 		}
 		if (tags == null || tags.size() == 0) {
-            return (CollectionResource)springResourceFactory.getCollectionResource(info, Link.GLOBALTAGS, Collections.emptyList());
+            return (CollectionResource)springResourceFactory.getCollectionResource(info, Link.TAGS, Collections.emptyList());
         }
         Collection items = new ArrayList(tags.size());
         for( Tag tag : tags) {
@@ -116,7 +116,7 @@ public class TagRestController {
                 items.add(springResourceFactory.getResource("link",info,tag));
             }
         }
-        return (CollectionResource)springResourceFactory.getCollectionResource(info, Link.GLOBALTAGS, items);
+        return (CollectionResource)springResourceFactory.getCollectionResource(info, Link.TAGS, items);
 	}
 
 }

@@ -5,6 +5,8 @@ package conddb.dao.controllers;
 
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,7 +142,7 @@ public class SystemNodeService {
 	}
 
 
-	
+	@Transactional
 	public SystemDescription insertSystemDescription(SystemDescription entity)  throws ConddbServiceException {
 		try {
 			log.info("Controller is inserting new system " + entity.getTagNameRoot());
@@ -150,6 +152,7 @@ public class SystemNodeService {
 		}
 	}
 
+	@Transactional
 	public SystemDescription updateSystemDescription(SystemDescription entity)  throws ConddbServiceException {
 		try {
 			log.info("Controller is updating existing system " + entity.getTagNameRoot());
@@ -169,5 +172,14 @@ public class SystemNodeService {
 		}
 	}
 	
-
+	@Transactional
+	public SystemDescription delete(Long id) throws ConddbServiceException {
+		try {
+			SystemDescription existing = systemNodeRepository.findOne(id);
+			systemNodeRepository.delete(id);
+			return existing;
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot delete system with id "+id);
+		}
+	}
 }

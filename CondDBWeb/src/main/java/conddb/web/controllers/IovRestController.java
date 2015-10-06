@@ -131,6 +131,7 @@ public class IovRestController {
 		Response resp = null;
 		try {
 			Iov entity = this.iovService.getIov(id);	
+			entity.getPayload().setResId(entity.getPayload().getHash());
 			resp = Response.ok(entity).build();
 			
 		} catch (Exception e) {

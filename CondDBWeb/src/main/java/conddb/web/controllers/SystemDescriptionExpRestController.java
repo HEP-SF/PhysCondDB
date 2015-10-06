@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -23,6 +24,8 @@ import org.springframework.stereotype.Controller;
 import conddb.dao.controllers.GlobalTagService;
 import conddb.dao.controllers.SystemNodeService;
 import conddb.dao.exceptions.ConddbServiceException;
+import conddb.data.ErrorMessage;
+import conddb.data.GlobalTagMap;
 import conddb.data.SystemDescription;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.Link;
@@ -51,13 +54,22 @@ public class SystemDescriptionExpRestController extends BaseController {
 	@Path(Link.SYSTEMS)
 	public Response create(@Context UriInfo info, SystemDescription systemdescription) throws ConddbWebException {
 		try {
+			log.debug("Controller will create system "+systemdescription);
 			SystemDescription saved = systemNodeService.insertSystemDescription(systemdescription);
 			saved.setResId(saved.getId().toString());
+			log.debug("Controller creating resource for inserted entity "+saved);
 			SystemDescriptionResource resource = (SystemDescriptionResource) springResourceFactory.getResource("system", info,
 					saved);
 			return created(resource);
 		} catch (Exception e) {
-			throw new ConddbWebException("Cannot create entity " + systemdescription.getTagNameRoot() + " : " + e.getMessage());
+			log.debug("Controller could not insert entity....");
+			ConddbWebException ex = new ConddbWebException();
+			ErrorMessage error = new ErrorMessage("Cannot insert system "+systemdescription);
+			error.setCode(Response.Status.NOT_MODIFIED.getStatusCode());
+			error.setInternalMessage(e.getMessage());
+			ex.setStatus(Response.Status.NOT_MODIFIED);
+			ex.setErrMessage(error);
+			throw ex;	
 		}
 	}
 
@@ -83,11 +95,32 @@ public class SystemDescriptionExpRestController extends BaseController {
 			
 			existing = systemNodeService.insertSystemDescription(existing);
 			resp = Response.ok(new SystemDescriptionResource(info, existing), MediaType.APPLICATION_JSON).build();
+			return resp;
 		} catch (ConddbServiceException e) {
-			resp = Response.status(Response.Status.EXPECTATION_FAILED).build();
-			e.printStackTrace();
+			log.debug("Controller could not update entity....");
+			ConddbWebException ex = new ConddbWebException();
+			ErrorMessage error = new ErrorMessage("Cannot update system "+id);
+			error.setCode(Response.Status.NOT_MODIFIED.getStatusCode());
+			error.setInternalMessage(e.getMessage());
+			ex.setStatus(Response.Status.NOT_MODIFIED);
+			ex.setErrMessage(error);
+			throw ex;	
 		}
-		return resp;
+	}
+
+	@Path(Link.SYSTEMS+"/{id}")
+	@DELETE
+	public void deleteSystemDescription(@PathParam("id") Long id) throws ConddbWebException {
+		SystemDescription existing;
+		try {
+			existing = systemNodeService.delete(id);
+			if (existing == null) {
+				throw new ConddbWebException("Cannot remove id " + id);
+			}
+		} catch (ConddbServiceException e) {
+			throw new ConddbWebException("Cannot remove id " + id + " : " + e.getMessage());
+		}
+
 	}
 
 }

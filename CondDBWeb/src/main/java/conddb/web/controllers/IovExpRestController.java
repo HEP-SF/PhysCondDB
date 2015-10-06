@@ -108,6 +108,7 @@ public class IovExpRestController extends BaseController {
 			// Store the payload: this will then not be rolledback if something goes wrong later on
 			// We do not care too much since in that case the payload is simply already there
 			Payload stored = iovService.insertPayload(storable, storable.getData());
+			stored.setResId(stored.getHash());
 			log.info("Stored payload "+stored.getHash());
 			
 			// Create the iov and store it
@@ -117,6 +118,7 @@ public class IovExpRestController extends BaseController {
 
 			// This update will change the modification time 
 			entity = globalTagService.insertTag(entity);
+			entity.setResId(entity.getName());
 			
 			// Create the IovResource for the Response
 			saved.setResId(saved.getId().toString());

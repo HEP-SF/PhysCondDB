@@ -23,6 +23,7 @@ import org.springframework.stereotype.Controller;
 import conddb.dao.admin.controllers.GlobalTagAdminController;
 import conddb.dao.controllers.GlobalTagService;
 import conddb.dao.exceptions.ConddbServiceException;
+import conddb.data.ErrorMessage;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.Tag;
@@ -52,6 +53,8 @@ public class GlobalTagMapExpRestController extends BaseController {
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path(Link.GLOBALTAGMAPS)
 	public Response create(@Context UriInfo info, Map map) throws ConddbWebException {
+
+		ConddbWebException ex = new ConddbWebException();
 		try {
 			GlobalTagMap globaltagmap = createGlobalTagMap(map);
 			GlobalTagMap saved = globalTagService.insertGlobalTagMap(globaltagmap);
@@ -60,8 +63,13 @@ public class GlobalTagMapExpRestController extends BaseController {
 			GlobalTagMapResource resource = (GlobalTagMapResource) springResourceFactory.getResource("globaltagmap", info,
 					saved);
 			return created(resource);
-		} catch (Exception e) {
-			throw new ConddbWebException("Cannot create entity from map: " + e.getMessage());
+		} catch (ConddbServiceException e) {
+			ErrorMessage error = new ErrorMessage("Error creating association resource ");
+			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+			error.setInternalMessage("Cannot creating an association resource :"+e.getMessage());
+			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
+			ex.setErrMessage(error);
+			throw ex;
 		}
 	}
 
@@ -71,11 +79,17 @@ public class GlobalTagMapExpRestController extends BaseController {
 	public Response updateGlobalTagMap(@Context UriInfo info, @PathParam("id") Long id, Map map)
 			throws ConddbWebException {
 		Response resp;
+		ConddbWebException ex = new ConddbWebException();
 		try {
 			log.info("Request for updating global tag "+id+" using "+map.size());
 			GlobalTagMap existing = globalTagService.getGlobalTagMap(id);
 			if (existing == null) {
-				throw new ConddbWebException("Resource not found");
+				ErrorMessage error = new ErrorMessage("Error updating association resource "+id);
+				error.setCode(Response.Status.NOT_FOUND.getStatusCode());
+				error.setInternalMessage("Cannot updating an association resource because it was not found in the DB");
+				ex.setStatus(Response.Status.NOT_FOUND);
+				ex.setErrMessage(error);
+				throw ex;
 			}
 			if (map.containsKey("label")) {
 				existing.setLabel(String.valueOf(map.get("label")));
@@ -86,8 +100,12 @@ public class GlobalTagMapExpRestController extends BaseController {
 			existing = globalTagService.insertGlobalTagMap(existing);
 			resp = Response.ok(new GlobalTagMapResource(info, existing), MediaType.APPLICATION_JSON).build();
 		} catch (ConddbServiceException e) {
-			resp = Response.status(Response.Status.EXPECTATION_FAILED).build();
-			e.printStackTrace();
+			ErrorMessage error = new ErrorMessage("Error updating association resource "+id);
+			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+			error.setInternalMessage("Cannot updating an association resource :"+e.getMessage());
+			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
+			ex.setErrMessage(error);
+			throw ex;
 		}
 		return resp;
 	}
@@ -99,10 +117,22 @@ public class GlobalTagMapExpRestController extends BaseController {
 		try {
 			existing = globalTagAdminController.deleteGlobalTagMap(id);
 			if (existing == null) {
-				throw new ConddbWebException("Cannot remove id " + id);
+				ConddbWebException ex = new ConddbWebException();
+				ErrorMessage error = new ErrorMessage("Error removing association resource "+id);
+				error.setCode(Response.Status.NOT_FOUND.getStatusCode());
+				error.setInternalMessage("Cannot remove an association resource because id was not found");
+				ex.setStatus(Response.Status.NOT_FOUND);
+				ex.setErrMessage(error);
+				throw ex;
 			}
 		} catch (ConddbServiceException e) {
-			throw new ConddbWebException("Cannot remove id " + id + " : " + e.getMessage());
+			ConddbWebException ex = new ConddbWebException();
+			ErrorMessage error = new ErrorMessage("Error removing association resource "+id);
+			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+			error.setInternalMessage("Cannot remove an association resource :"+e.getMessage());
+			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
+			ex.setErrMessage(error);
+			throw ex;
 		}
 
 	}

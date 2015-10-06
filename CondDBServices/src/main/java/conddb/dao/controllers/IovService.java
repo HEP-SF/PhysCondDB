@@ -272,30 +272,10 @@ public class IovService {
 			throw new ConddbServiceException(e.getMessage());
 		}
 	}
-	
-//	@Transactional
-//	public Payload insertPayload(Payload entity, byte[] data) throws ConddbServiceException {
-//		try {
-//			PayloadData payloaddata = new PayloadHandler(data).getPayloadWithHash();
-//			entity.setHash(payloaddata.getHash());
-//			Payload stored = payloadRepository.findOne(payloaddata.getHash());
-//			if (stored == null) {
-//				payloaddataRepository.save(payloaddata);
-//				stored = payloadRepository.save(entity);
-//			} else {
-//				log.debug("Payload with hash "+payloaddata.getHash()+" is already stored...");
-//			}
-//			return stored;
-//		} catch (Exception e) {
-//			throw new ConddbServiceException("Cannot insert payload..."+e.getMessage());
-//		}
-//	}
-	
+
 	@Transactional
 	public Payload insertPayload(Payload entity, PayloadData pylddata) throws ConddbServiceException {
 		try {
-//			PayloadData payloaddata = new PayloadHandler(pylddata).getPayloadWithHash();
-//			entity.setHash(payloaddata.getHash());
 			// Assume that hash key is already filled
 			log.debug("Search for hash "+entity.getHash()+" "+pylddata.getHash());
 			Payload stored = payloadRepository.findOne(pylddata.getHash());

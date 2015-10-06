@@ -17,8 +17,15 @@
  **/
 package conddb.dao.repositories.impl;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Blob;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
@@ -26,14 +33,17 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
+import org.hibernate.engine.jdbc.StreamUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback;
 import org.springframework.jdbc.core.support.SqlLobValue;
 import org.springframework.jdbc.support.lob.DefaultLobHandler;
+import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,6 +88,16 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 				new Object[] { id }, new PayloadDataMapper());
 	}
 
+//	@Transactional
+//	public PayloadData findBlob(String id) {
+//		log.info("Find blob " + id + " using JDBCTEMPLATE");
+//		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+////		jdbcTemplate.q
+//		LobHandler lobHandler = new DefaultLobHandler();
+//		lobHandler.
+//
+//	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -87,7 +107,13 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 	@Override
 	@Transactional
 	public PayloadData save(PayloadData entity) {
-		PayloadData savedentity = this.saveBlob(entity);
+//		PayloadData savedentity = this.saveBlob(entity);
+		PayloadData savedentity = null;
+		try {
+			savedentity = this.saveBlobWithLobCreator(entity);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		return savedentity;
 	}
 
@@ -126,16 +152,24 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 	}
 
 	protected Blob getBlobFromFile(String filename) {
-		return payloadBytesHandler.createBlobFromFile(filename);
+//		return payloadBytesHandler.createBlobFromFile(filename);
+		return this.createBlobFromFile(filename);
 	}
 	
 	@Transactional
 	protected PayloadData saveBlob(PayloadData entity) {
+		// FIXME: This does not WORK !!!! Attention !!!!
 		String sql = "INSERT INTO PHCOND_PAYLOAD_DATA " + "(HASH, DATA) VALUES (?, ?)";
 		log.info("Insert payload " + entity.getHash() + " using JDBCTEMPLATE");
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
 		LobHandler lobHandler = new DefaultLobHandler();
-		Blob blob = (entity.getData() != null ? entity.getData() : getBlobFromFile(entity.getUri()));
+//		Blob blob = (entity.getData() != null ? entity.getData() : getBlobFromFile(entity.getUri()));
+		Blob blob = null;
+		if (entity.getData() != null) {
+			log.debug("Payload data is not null....check why");
+		} else {
+			blob = getBlobFromFile(entity.getUri());
+		}
 		try {
 			jdbcTemplate.update(sql, new Object[] { entity.getHash(),
 					new SqlLobValue(blob.getBinaryStream(), (int) blob.length(), lobHandler) },
@@ -146,6 +180,26 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return entity;
+	}
+	
+	protected PayloadData saveBlobWithLobCreator(PayloadData entity) throws IOException {
+		final File blobIn = new File(entity.getUri());
+		final InputStream blobIs = new FileInputStream(blobIn);
+		LobHandler lobHandler = new DefaultLobHandler();
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
+		String sql = "INSERT INTO PHCOND_PAYLOAD_DATA " + "(HASH, DATA) VALUES (?, ?)";
+		jdbcTemplate.execute(
+		  sql,
+		  new AbstractLobCreatingPreparedStatementCallback(lobHandler) {                         
+		      protected void setValues(PreparedStatement ps, LobCreator lobCreator) 
+		          throws SQLException {
+		        ps.setString(1, entity.getHash());
+		        lobCreator.setBlobAsBinaryStream(ps, 2, blobIs, (int)blobIn.length());           
+		      }
+		  }
+		);
+		blobIs.close();
 		return entity;
 	}
 
@@ -168,12 +222,28 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		Map<String,Object> genmap = PayloadGenerator.createDefaultPayload();
 		Payload pyld = (Payload) genmap.get("payload");
 		PayloadData pyldata = (PayloadData) genmap.get("payloaddata");
-		Blob nullblob = payloadBytesHandler.createBlobFromFile(pyldata.getUri());
-		pyldata.setData(nullblob);
+//		Blob nullblob = payloadBytesHandler.createBlobFromFile(pyldata.getUri());
+//		pyldata.setData(nullblob);
 		payloadRepository.save(pyld);
-		this.saveBlob(pyldata);
+		this.saveBlobWithLobCreator(pyldata);
 		return pyldata;
 	}
 
-	
+	//FIXME: This does not work .... but for the moment it is not needed....
+	protected Blob createBlobFromFile(String filelocation) {
+		Blob blob=null;
+		try {
+			log.debug("Fill blob using file in "+filelocation);
+			File f = new File(filelocation);
+			BufferedInputStream fstream = new BufferedInputStream(new FileInputStream(f));
+			blob = ds.getConnection().createBlob();
+			return blob;
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return blob;
+	}
+
 }
