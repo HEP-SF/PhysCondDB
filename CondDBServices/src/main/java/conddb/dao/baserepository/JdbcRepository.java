@@ -18,7 +18,7 @@ import conddb.data.view.IovGroups;
 public class JdbcRepository {
 
 	@Autowired
-	@Qualifier("localDataSource")
+	@Qualifier("daoDataSource")
 	private DataSource localDs;
 
 	public DataSource getLocalDs() {

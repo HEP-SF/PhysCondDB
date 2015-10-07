@@ -10,8 +10,30 @@
            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
 	<context:component-scan
-		base-package="conddb.dao.svc,conddb.dao.admin,conddb.dao.expert,conddb.dao.controllers,conddb.dao.repositories,conddb.utils,conddb.calibration,conddb.web" />
-	<mvc:annotation-driven/>
+		base-package="conddb.dao,conddb.utils,conddb.calibration,conddb.web" />
+
+	<mvc:annotation-driven>
+
+		<mvc:message-converters>
+			<bean id="jsonConverter"
+				class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+				<property name="supportedMediaTypes" value="application/json" />
+				<property name="objectMapper">
+					<ref bean="hibernateAwareObjectMapper" />
+				</property>
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**" />
+			<bean class="conddb.web.interceptors.RequestProcessingFrontierInterceptor" />
+		</mvc:interceptor>
+		<!-- This is a INFLUXDB based interceptor for monitoring time spent in 
+			different queries <mvc:interceptor> <mvc:mapping path="/**" /> <bean class="conddb.monitoring.interceptors.RequestProcessingProfilerInterceptor" 
+			/> </mvc:interceptor> -->
+	</mvc:interceptors>
 
 	<!-- Services -->
 	<bean id="calibrationService" class="conddb.calibration.tools.CalibrationService" />
@@ -36,6 +58,9 @@
 
 <!-- 	<bean id="resourceFactory" class="conddb.web.resources.SpringResourceFactory"></bean> -->
 
+	<!-- Hibernate Mapper -->
+	<bean id="hibernateAwareObjectMapper" class="conddb.utils.json.HibernateAwareObjectMapper"></bean>
+
 	<!-- this is the actual advice itself -->
 	<bean id="profilingAspect" class="conddb.utils.aop.ProfilingAspect" />
 
@@ -53,6 +78,23 @@
 		<property name="corePoolSize" value="5" />
 		<property name="maxPoolSize" value="10" />
 		<property name="queueCapacity" value="25" />
+	</bean>
+
+
+	<!-- Use multipart for payload uploads -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="268435456" /> <!-- 256 megs -->
+	</bean>
+	<!-- Set the properties -->
+	<bean
+		class="org.springframework.context.support.PropertySourcesPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:spring/web/webapp.properties</value>
+			</list>
+		</property>
+		<property name="ignoreUnresolvablePlaceholders" value="true" />
 	</bean>
 
 </beans>

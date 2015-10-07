@@ -17,7 +17,6 @@
  **/
 package conddb.web.config;
 
-import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Response;
 
@@ -30,15 +29,16 @@ import org.glassfish.jersey.server.model.Resource;
 import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
 import conddb.calibration.web.controllers.CalibrationRestController;
 import conddb.utils.json.HibernateAwareObjectMapper;
-import conddb.web.controllers.CondAdminWebController;
-import conddb.web.controllers.CondExpertWebController;
-import conddb.web.controllers.CondPayloadWebController;
+import conddb.web.controllers.GlobalTagExpRestController;
+import conddb.web.controllers.GlobalTagMapExpRestController;
+import conddb.web.controllers.GlobalTagMapRestController;
 import conddb.web.controllers.GlobalTagRestController;
 import conddb.web.controllers.IovExpRestController;
 import conddb.web.controllers.IovRestController;
@@ -48,27 +48,26 @@ import conddb.web.controllers.SystemDescriptionExpRestController;
 import conddb.web.controllers.SystemDescriptionRestController;
 import conddb.web.controllers.TagExpRestController;
 import conddb.web.controllers.TagRestController;
-import conddb.web.controllers.CondWebController;
-import conddb.web.controllers.GlobalTagExpRestController;
-import conddb.web.controllers.GlobalTagMapExpRestController;
-import conddb.web.controllers.GlobalTagMapRestController;
 import conddb.web.exceptions.CondDBExceptionMapper;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.models.Info;
 
 
 /**
+ * Configuration for Jersey.
+ * In order to integrate Jersey and Spring we have been using the jersey-spring3 module.
+ * Nevertheless, autowiring of Spring managed beans is not trivial.
+ * In this example, in order for the autowiring to work, we need to declare the
+ * HibernateAwareObjectMapper directly in xml configuration.
+ * 
  * @author formica
  *
  */
-////@ApplicationPath("/")
-//@Configuration
-//@Component
 public class JaxRsApplication extends ResourceConfig {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
-	@Inject
+	@Autowired
 	private HibernateAwareObjectMapper hibernateAwareObjectMapper;
 	
 	// Swagger initialization
@@ -76,10 +75,6 @@ public class JaxRsApplication extends ResourceConfig {
 		
 		// Probably not needed since it should pick up from annotations
 		// NOT TRUE: this is really needed !!!!
-		register(CondWebController.class);
-		register(CondExpertWebController.class);
-		register(CondAdminWebController.class);
-		register(CondPayloadWebController.class);
 		register(GlobalTagRestController.class);
 		register(GlobalTagMapRestController.class);
 		register(TagRestController.class);
