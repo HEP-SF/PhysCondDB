@@ -139,10 +139,10 @@ public class JaxRsApplication extends ResourceConfig {
 
 	protected void initSwagger() {
 		BeanConfig beanConfig = new BeanConfig();
-		beanConfig.setVersion("1.0.2");
+		beanConfig.setVersion("2.0");
 		beanConfig.setSchemes(new String[] { "http" });
 		beanConfig.setHost("localhost:8080");
-		beanConfig.setBasePath("/conddbweb/rest");
+		beanConfig.setBasePath("/physconddb/conddbweb/rest");
 		beanConfig.setResourcePackage("conddb.web.controllers");
 		beanConfig.setTitle("PhysCondDB REST API");
 		Info info = new Info();
