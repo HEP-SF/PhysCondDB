@@ -1,4 +1,4 @@
-package conddb.web.controllers;
+package conddb.admin.web.controllers;
 
 import io.swagger.annotations.Api;
 

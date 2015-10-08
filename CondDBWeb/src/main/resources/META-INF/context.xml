@@ -40,9 +40,9 @@
 		maxActive="100" maxIdle="30" maxWait="10000" username="SA" password=""
 		driverClassName="org.hsqldb.jdbcDriver" url="jdbc:hsqldb:mem:spring-playground" />
 
-	<!-- <Resource name="java/H2DB" auth="Container" type="javax.sql.DataSource" 
-		maxActive="100" maxIdle="30" maxWait="10000" username="root" password="" 
-		driverClassName="org.h2.Driver" url="jdbc:h2:mem:condspring-testdb" /> -->
+	<Resource name="java/H2DB" auth="Container" type="javax.sql.DataSource" 
+		maxActive="100" maxIdle="30" maxWait="10000" username="sa" password="" 
+ 		driverClassName="org.h2.Driver" url="jdbc:h2:${h2.file.name}" /> 
 
 	<!-- Tomcat in memory database should be defined inside conf/server.xml??? 
 		This is true IF we want to share the connection at server level. The variable 

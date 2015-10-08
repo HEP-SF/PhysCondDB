@@ -34,6 +34,7 @@ import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
+import io.swagger.annotations.Api;
 
 /**
  * @author aformic
@@ -41,6 +42,7 @@ import conddb.web.resources.SpringResourceFactory;
  */
 @Path(Link.TAGS)
 @Controller
+@Api(value = Link.TAGS)
 public class TagRestController {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());

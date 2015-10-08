@@ -38,7 +38,6 @@ public class HibernateAwareObjectMapper extends ObjectMapper {
 	@Override
 	@Autowired
 	public Object setHandlerInstantiator(HandlerInstantiator hi) {
-		// TODO Auto-generated method stub
 		System.out.println("Setting handler in objectmapper "+hi.getClass().getName());
 		return super.setHandlerInstantiator(hi);
 	}	

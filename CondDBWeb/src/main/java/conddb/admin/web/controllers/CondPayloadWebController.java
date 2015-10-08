@@ -1,7 +1,7 @@
 /**
  * 
  */
-package conddb.web.controllers;
+package conddb.admin.web.controllers;
 
 import java.io.File;
 import java.io.FileOutputStream;

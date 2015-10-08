@@ -28,11 +28,14 @@ import org.springframework.stereotype.Controller;
 
 import conddb.dao.controllers.GlobalTagService;
 import conddb.dao.exceptions.ConddbServiceException;
+import conddb.data.ErrorMessage;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.utils.collections.CollectionUtils;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
+import conddb.web.resources.GlobalTagMapResource;
+import conddb.web.resources.GlobalTagResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
 
@@ -42,7 +45,7 @@ import conddb.web.resources.SpringResourceFactory;
  */
 @Path(Link.GLOBALTAGMAPS)
 @Controller
-public class GlobalTagMapRestController {
+public class GlobalTagMapRestController  extends BaseController {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -55,43 +58,66 @@ public class GlobalTagMapRestController {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/trace")
 	public Response getGlobalTag(
+			@Context UriInfo info,
 			@DefaultValue("globaltag") @QueryParam("type") final String type,
 			@DefaultValue("none") @QueryParam("id") final String name
 			) throws ConddbWebException {
 		this.log.info("GlobalTagMapRestController processing request for type "
 				+ type + " and name "+name);
-		Response resp = null;
+		ConddbWebException ex = new ConddbWebException();
 		try {
+			List<GlobalTagMap> list  = null;
 			if (type.equals("globaltag")) {
-				List<GlobalTagMap> list = this.globalTagService.getGlobalTagMapByGlobalTagName(name);
-				resp = Response.ok(list).build();
+				list = this.globalTagService.getGlobalTagMapByGlobalTagName(name);
+				log.debug("Controller has executed query for globaltag search...");
 			} else if (type.equals("tag")) {
-				List<GlobalTagMap> list = this.globalTagService.getGlobalTagMapByTagName(name);
-				resp = Response.ok(list).build();	
+				list = this.globalTagService.getGlobalTagMapByTagName(name);
+				log.debug("Controller has executed query for tag search...");
 			} else {
-				resp = Response.status(Response.Status.BAD_REQUEST).build();
+				ErrorMessage error = new ErrorMessage("Error in input arguments: [type] should be [globaltag|tag]! ");
+				error.setCode(Response.Status.BAD_REQUEST.getStatusCode());
+				error.setInternalMessage("Cannot use type "+ type + " for searching associations ");
+				ex.setStatus(Response.Status.BAD_REQUEST);
+				ex.setErrMessage(error);
+				throw ex;
 			}
-		} catch (Exception e) {
-			resp = Response.status(Response.Status.NOT_FOUND).build();
-			throw new ConddbWebException(e.getMessage());
+			if (list == null || list.isEmpty()) {
+				return Response.ok((CollectionResource)springResourceFactory.getCollectionResource(info, Link.GLOBALTAGMAPS, Collections.emptyList())).build();	
+			}
+			log.debug("Controller has retrieved a list of size "+list.size());
+			Collection<GlobalTagMap> globaltagmaps = CollectionUtils.iterableToCollection(list);
+			CollectionResource collres = listToCollection(globaltagmaps, false, info,null,null);
+			return created(collres);
+			
+		} catch (ConddbServiceException e) {
+			ErrorMessage error = new ErrorMessage("Error retrieving association resource ");
+			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+			error.setInternalMessage("Cannot creating an association resource :"+e.getMessage());
+			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
+			ex.setErrMessage(error);
+			throw ex;
 		}
-		return resp;
 	}
 	
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/{id}")
 	public Response getGlobalTag(
+			@Context UriInfo info,
 			@PathParam("id") Long id) throws ConddbWebException {
 		this.log.info("GlobalTagMapRestController processing request for "+ id);
 		Response resp = null;
 		try {
+			GlobalTagMap entity = null;
 			if (id != null) {
-				GlobalTagMap entity = this.globalTagService.getGlobalTagMap(id);
-				resp = Response.ok(entity).build();	
+				entity = this.globalTagService.getGlobalTagMap(id);
 			} else {
 				resp = Response.status(Response.Status.BAD_REQUEST).build();
+				return resp;
 			}
+			entity.setResId(entity.getId().toString());
+			GlobalTagMapResource gtagres = (GlobalTagMapResource) springResourceFactory.getResource("globaltagmap", info, entity);
+			resp = Response.ok(gtagres).build();
 		} catch (Exception e) {
 			resp = Response.status(Response.Status.NOT_FOUND).build();
 			throw new ConddbWebException(e.getMessage());
@@ -120,6 +146,10 @@ public class GlobalTagMapRestController {
 		if (globaltagmaps == null || globaltagmaps.size() == 0) {
             return (CollectionResource)springResourceFactory.getCollectionResource(info, Link.GLOBALTAGMAPS, Collections.emptyList());
         }
+		return listToCollection(globaltagmaps, expand, info, ipage, size);
+	}
+
+	protected CollectionResource listToCollection(Collection<GlobalTagMap> globaltagmaps, boolean expand, UriInfo info, Integer ipage, Integer size) {
         Collection items = new ArrayList(globaltagmaps.size());
         for( GlobalTagMap globaltagmap : globaltagmaps) {
         	globaltagmap.setResId(globaltagmap.getId().toString());
@@ -131,6 +161,10 @@ public class GlobalTagMapRestController {
                 items.add(springResourceFactory.getResource("link",info,globaltagmap));
             }
         }
+        if (ipage == null || size ==null) {
+            return (CollectionResource)springResourceFactory.getCollectionResource(info, Link.GLOBALTAGMAPS, items);
+        }
+        	
         return (CollectionResource)springResourceFactory.getCollectionResource(info, Link.GLOBALTAGMAPS, items, ipage, size);
 	}
 

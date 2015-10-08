@@ -32,28 +32,17 @@ http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 			<param-name>javax.ws.rs.Application</param-name>
 			<param-value>conddb.web.config.JaxRsApplication</param-value>			
 		</init-param>
-		<load-on-startup>4</load-on-startup>
+		<load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>jersey-servlet</servlet-name>
 		<url-pattern>/conddbweb/rest/*</url-pattern>
 	</servlet-mapping>	
 	
-	<!-- Springfox
-	<servlet>
-		<servlet-name>springfox</servlet-name>
-		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-		<init-param>
-			<param-name>contextConfigLocation</param-name>
-			<param-value>classpath:spring/springfox-config.xml</param-value>
-		</init-param>
-		<load-on-startup>4</load-on-startup>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>springfox</servlet-name>
-		<url-pattern>/springfox/*</url-pattern>
-	</servlet-mapping>
-	 -->
-	
-
+<!-- 	<servlet> -->
+<!--         <servlet-name>SwaggerBootstrap</servlet-name> -->
+<!--         <servlet-class>conddb.web.config.SwaggerBootstrap</servlet-class> -->
+<!--         <load-on-startup>2</load-on-startup> -->
+<!--     </servlet> -->
+        	
 </web-app>

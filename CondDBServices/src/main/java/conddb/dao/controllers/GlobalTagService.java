@@ -37,7 +37,7 @@ public class GlobalTagService {
 	private GlobalTagMapRepository gtagMapRepository;
 	@Autowired
 	private TagRepository tagRepository;
-	
+
 	/**
 	 * @return
 	 * @throws ConddbServiceException
@@ -49,6 +49,7 @@ public class GlobalTagService {
 			throw new ConddbServiceException("Cannot find global tag list " + e.getMessage());
 		}
 	}
+
 	/**
 	 * @return
 	 * @throws ConddbServiceException
@@ -62,6 +63,7 @@ public class GlobalTagService {
 			throw new ConddbServiceException("Cannot find global tag map list " + e.getMessage());
 		}
 	}
+
 	/**
 	 * @return
 	 * @throws ConddbServiceException
@@ -73,6 +75,7 @@ public class GlobalTagService {
 			throw new ConddbServiceException("Cannot find global tag map element " + e.getMessage());
 		}
 	}
+
 	/**
 	 * @return
 	 * @throws ConddbServiceException
@@ -85,7 +88,8 @@ public class GlobalTagService {
 		} catch (Exception e) {
 			throw new ConddbServiceException("Cannot find tag list " + e.getMessage());
 		}
-	}	
+	}
+
 	/**
 	 * @param globaltagname
 	 * @return
@@ -129,7 +133,8 @@ public class GlobalTagService {
 			this.log.debug("Found global tag list of size " + gtaglist.size());
 			return gtaglist;
 		} catch (Exception e) {
-			throw new ConddbServiceException("Cannot find global tag by name like "+ globaltagnamepattern +" and fetch tags: " + e.getMessage());
+			throw new ConddbServiceException("Cannot find global tag by name like " + globaltagnamepattern
+					+ " and fetch tags: " + e.getMessage());
 		}
 	}
 
@@ -142,24 +147,35 @@ public class GlobalTagService {
 
 		return gtaglist;
 	}
-	
+
 	/**
 	 * @param globaltagname
 	 * @return
 	 * @throws ConddbServiceException
 	 */
 	public List<GlobalTagMap> getGlobalTagMapByGlobalTagName(String globaltagname) throws ConddbServiceException {
-		return gtagMapRepository.findByGlobalTagName(globaltagname);
+		try {
+			return gtagMapRepository.findByGlobalTagName(globaltagname);
+		} catch (Exception e) {
+			throw new ConddbServiceException(
+					"Exception in retrieving maps using global tag name " + globaltagname + " : " + e.getMessage());
+		}
 	}
+
 	/**
 	 * @param tagname
 	 * @return
 	 * @throws ConddbServiceException
 	 */
 	public List<GlobalTagMap> getGlobalTagMapByTagName(String tagname) throws ConddbServiceException {
-		return gtagMapRepository.findByTagName(tagname);
-	}	
-	
+		try {
+			return gtagMapRepository.findByTagName(tagname);
+		} catch (Exception e) {
+			throw new ConddbServiceException(
+					"Exception in retrieving maps using tag name " + tagname + " : " + e.getMessage());
+		}
+	}
+
 	/**
 	 * @param tagname
 	 * @return
@@ -172,7 +188,7 @@ public class GlobalTagService {
 			throw new ConddbServiceException(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * @param tagname
 	 * @return
@@ -211,7 +227,7 @@ public class GlobalTagService {
 			throw new ConddbServiceException(e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * @param tagname
 	 * @return
@@ -234,7 +250,7 @@ public class GlobalTagService {
 	public Tag insertTag(Tag entity) throws ConddbServiceException {
 		return tagRepository.save(entity);
 	}
-	
+
 	/**
 	 * @param entity
 	 * @return
@@ -243,10 +259,12 @@ public class GlobalTagService {
 	@Transactional
 	public Tag deleteTag(Tag entity) throws ConddbServiceException {
 		Tag existing = tagRepository.findByName(entity.getName());
-		Tag removable = tagRepository.findByNameAndFetchGlobalTagsWithLock(entity.getName(), GlobalTagStatus.LOCKED.name());
-		if (removable != null && removable.getGlobalTagMaps() != null && removable.getGlobalTagMaps().size()>0) {
+		Tag removable = tagRepository.findByNameAndFetchGlobalTagsWithLock(entity.getName(),
+				GlobalTagStatus.LOCKED.name());
+		if (removable != null && removable.getGlobalTagMaps() != null && removable.getGlobalTagMaps().size() > 0) {
 			log.debug("Cannot remove a tag which depends on a locked global tag...");
-			throw new ConddbServiceException("Cannot remova tag "+entity.getName()+" : a parent global tag is locked ");
+			throw new ConddbServiceException(
+					"Cannot remova tag " + entity.getName() + " : a parent global tag is locked ");
 		}
 		tagRepository.delete(existing);
 		return existing;
@@ -259,14 +277,15 @@ public class GlobalTagService {
 	 * @throws ConddbServiceException
 	 */
 	@Transactional
-	public GlobalTagMap mapAddTagToGlobalTag(Tag atag, GlobalTag gtag, String record, String label) throws ConddbServiceException {
+	public GlobalTagMap mapAddTagToGlobalTag(Tag atag, GlobalTag gtag, String record, String label)
+			throws ConddbServiceException {
 		if (atag == null || gtag == null) {
 			throw new ConddbServiceException("Cannot associate...there are null elements");
 		}
 		GlobalTagMap entity = new GlobalTagMap(gtag, atag, record, label);
 		if (gtag.islocked()) {
-			log.debug("Global tag lock string is "+gtag.getLockstatus()+";");
-			log.debug("   compared with "+GlobalTagStatus.LOCKED.name()+";");
+			log.debug("Global tag lock string is " + gtag.getLockstatus() + ";");
+			log.debug("   compared with " + GlobalTagStatus.LOCKED.name() + ";");
 			throw new ConddbServiceException("Cannot add tags to a locked global tag..");
 		}
 		return gtagMapRepository.save(entity);
@@ -284,13 +303,13 @@ public class GlobalTagService {
 		entity.setGlobalTag(gtag);
 		entity.setSystemTag(atag);
 		if (gtag.islocked()) {
-			log.debug("Global tag lock string is "+gtag.getLockstatus()+";");
-			log.debug("   compared with "+GlobalTagStatus.LOCKED.name()+";");
+			log.debug("Global tag lock string is " + gtag.getLockstatus() + ";");
+			log.debug("   compared with " + GlobalTagStatus.LOCKED.name() + ";");
 			throw new ConddbServiceException("Cannot link tags to a locked global tag..");
 		}
 		return gtagMapRepository.save(entity);
 	}
-	
+
 	/**
 	 * @param entity
 	 * @return

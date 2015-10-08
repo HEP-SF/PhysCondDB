@@ -23,7 +23,6 @@ import javax.ws.rs.core.Response;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.process.Inflector;
-//import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.model.Resource;
 import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
@@ -90,12 +89,13 @@ public class JaxRsApplication extends ResourceConfig {
 		register(SystemDescriptionExpRestController.class);
 
 		// register json provider
-		log.info("Register JacksonJsonProvide using object mapper "+hibernateAwareObjectMapper);
+//		log.info("Register JacksonJsonProvide using object mapper "+hibernateAwareObjectMapper);
+        register(ObjectMapperContextResolver.class);
+//		register(JacksonJsonProvider.class);
 		register(new JacksonJsonProvider(hibernateAwareObjectMapper));
 
 		// register filters
 		register(RequestContextFilter.class);
-        register(ObjectMapperContextResolver.class);
 
 		// register exception mappers
         register(CondDBExceptionMapper.class);
@@ -124,11 +124,13 @@ public class JaxRsApplication extends ResourceConfig {
 	}
 
 	public ObjectMapper getHibernateAwareObjectMapper() {
+		log.info("Get hibernate object mapper");
 		return hibernateAwareObjectMapper;
 	}
 
 	public void setHibernateAwareObjectMapper(
 			HibernateAwareObjectMapper hibernateAwareObjectMapper) {
+		log.info("Set hibernate object mapper");
 		this.hibernateAwareObjectMapper = hibernateAwareObjectMapper;
 	}
 
@@ -137,7 +139,7 @@ public class JaxRsApplication extends ResourceConfig {
 		beanConfig.setVersion("2.0");
 		beanConfig.setSchemes(new String[] { "http" });
 		beanConfig.setHost("localhost:8080");
-		beanConfig.setBasePath("/physconddb/conddbweb/rest");
+		beanConfig.setBasePath("/physconddb");
 		beanConfig.setResourcePackage("conddb.web.controllers");
 		beanConfig.setTitle("PhysCondDB REST API");
 		Info info = new Info();
