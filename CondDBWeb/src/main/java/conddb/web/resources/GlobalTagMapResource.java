@@ -18,12 +18,12 @@ public class GlobalTagMapResource extends Link {
 
 	public GlobalTagMapResource(UriInfo info, GlobalTagMap globaltagmap) {
 		super(info, globaltagmap);
-		put("globaltagname", globaltagmap.getGlobalTagName());
-		put("tagname", globaltagmap.getTagName());
+		put("globalTagName", globaltagmap.getGlobalTagName());
+		put("tagName", globaltagmap.getTagName());
 		put("label", globaltagmap.getLabel());
 		put("record", globaltagmap.getRecord());
 		
-		put("globaltag",new Link(getFullyQualifiedContextPath(info), globaltagmap.getGlobalTag()));
-		put("tag",new Link(getFullyQualifiedContextPath(info), globaltagmap.getSystemTag()));
+		put("globalTag",new Link(getFullyQualifiedContextPath(info), globaltagmap.getGlobalTag()));
+		put("systemTag",new Link(getFullyQualifiedContextPath(info), globaltagmap.getSystemTag()));
 	}
 }

@@ -15,6 +15,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.hibernate4.Hibernate4Module;
+import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 
 import conddb.utils.json.HibernateAwareObjectMapper;
 
@@ -29,17 +32,34 @@ public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
-    private HibernateAwareObjectMapper objectMapper;
+    private HibernateAwareObjectMapper hibernateAwareObjectMapper;
 
     public ObjectMapperContextResolver() {
         super();
-        log.info("Creating objectMapperContextResolver using HibernateAwareObjectMapper "+objectMapper);
+        log.info("Creating objectMapperContextResolver using HibernateAwareObjectMapper "+hibernateAwareObjectMapper);
+//        if (hibernateAwareObjectMapper == null) {
+//        	hibernateAwareObjectMapper = (HibernateAwareObjectMapper) createDefaultMapper();
+//        }
     }
+    
+    private static ObjectMapper createDefaultMapper() {
+        final HibernateAwareObjectMapper result = new HibernateAwareObjectMapper();
+        return result;
+    }
+    
+    public HibernateAwareObjectMapper getHibernateAwareObjectMapper() {
+		return hibernateAwareObjectMapper;
+	}
 
-    @Override
+	public void setHibernateAwareObjectMapper(HibernateAwareObjectMapper hibernateAwareObjectMapper) {
+		log.info("Setting hibernateAwareObjectMapper in contextresolver");
+		this.hibernateAwareObjectMapper = hibernateAwareObjectMapper;
+	}
+
+	@Override
     public ObjectMapper getContext(Class<?> type) {
-    	log.info("Return context objectMapper "+objectMapper);
-        return objectMapper;
+    	log.info("Return context objectMapper "+hibernateAwareObjectMapper);
+        return hibernateAwareObjectMapper;
     }
 
 }

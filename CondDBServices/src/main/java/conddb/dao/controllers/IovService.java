@@ -92,10 +92,11 @@ public class IovService {
 	public List<Iov> getIovsByTag(Tag tag, PageRequest preq, Timestamp snapshot) throws ConddbServiceException {
 		try {
 			// FIXME: we are not using page request for the moment....
+			log.debug("Get iovs for tag "+tag.getName());
 			Long tagid = tag.getId();
 			if (snapshot == null) {
 				// Retrieve only the last inserted iov for every since
-				return iovRepository.findByTagAndInsertionTimeMax(tag.getId());
+				return iovRepository.findByTagAndInsertionTimeMax(tagid);
 			} else {
 				log.debug("Call by range is using "+tagid+" snapshot "+snapshot);
 				return iovRepository.findByTagAndInsertionTimeSnapshot(tagid, snapshot);

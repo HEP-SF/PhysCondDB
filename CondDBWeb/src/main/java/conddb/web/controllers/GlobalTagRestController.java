@@ -27,6 +27,7 @@ import org.springframework.stereotype.Controller;
 
 import conddb.dao.controllers.GlobalTagService;
 import conddb.dao.exceptions.ConddbServiceException;
+import conddb.data.ErrorMessage;
 import conddb.data.GlobalTag;
 import conddb.utils.collections.CollectionUtils;
 import conddb.web.exceptions.ConddbWebException;
@@ -43,7 +44,7 @@ import io.swagger.annotations.Api;
 @Path(Link.GLOBALTAGS)
 @Controller
 @Api(value = Link.GLOBALTAGS)
-public class GlobalTagRestController {
+public class GlobalTagRestController extends BaseController {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -62,17 +63,22 @@ public class GlobalTagRestController {
 		this.log.info("GlobalTagRestController processing request for get global tag name"
 				+ globaltagname);
 		Response resp = null;
+		ConddbWebException ex = new ConddbWebException();
 		try {
 			CacheControl control = new CacheControl();
 			control.setMaxAge(600);
 			if (globaltagname.contains("%")) {
 				if (trace.equals("on")) {
-					// Do not want to trace the full tag list
-					throw new ConddbWebException("Cannot activate trace on generic global tag pattern");
+					ErrorMessage error = new ErrorMessage("Error in input arguments: [globaltag name] should be unique for tracing ! ");
+					error.setCode(Response.Status.BAD_REQUEST.getStatusCode());
+					error.setInternalMessage("Cannot use global tag name "+ globaltagname + " for tracing ");
+					ex.setStatus(Response.Status.BAD_REQUEST);
+					ex.setErrMessage(error);
+					throw ex;
 				}
 				Collection<GlobalTag> gtaglist = CollectionUtils.iterableToCollection(this.globalTagService.getGlobalTagByNameLike(globaltagname));
 				CollectionResource collres = listToCollection(gtaglist, false, info);
-				resp = Response.ok(collres).cacheControl(control).build();
+				return created(collres);
 			} else {
 				GlobalTag gtag = null;
 				if (trace.equals("off")) {
@@ -82,13 +88,16 @@ public class GlobalTagRestController {
 				}
 				gtag.setResId(gtag.getName());
 				GlobalTagResource gtagres = (GlobalTagResource) springResourceFactory.getResource("globaltag", info, gtag);
-				resp = Response.ok(gtagres).cacheControl(control).build();
+				return created(gtagres);
 			}
-		} catch (Exception e) {
-			resp = Response.status(Response.Status.NOT_FOUND).build();
-			throw new ConddbWebException(e.getMessage());
+		} catch (ConddbServiceException e) {
+			ErrorMessage error = new ErrorMessage("Error retrieving globaltag resource ");
+			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+			error.setInternalMessage("Cannot creating an globaltag resource :"+e.getMessage());
+			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
+			ex.setErrMessage(error);
+			throw ex;
 		}
-		return resp;
 	}
 
 	@SuppressWarnings("unchecked")

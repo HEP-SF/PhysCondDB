@@ -75,6 +75,7 @@ public class Link extends LinkedHashMap {
     }
 
     protected String createHref(String fqBasePath, Entity entity) {
+    	log.debug("Create href link from "+fqBasePath+" for entity "+entity);
         StringBuilder sb = new StringBuilder(fqBasePath);
         ResourcePath path = ResourcePath.forClass(entity.getClass());
         sb.append(path.getPath()).append(PATH_SEPARATOR).append(entity.getResId());

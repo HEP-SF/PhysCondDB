@@ -86,7 +86,7 @@ public class GlobalTagMapRestController  extends BaseController {
 			}
 			log.debug("Controller has retrieved a list of size "+list.size());
 			Collection<GlobalTagMap> globaltagmaps = CollectionUtils.iterableToCollection(list);
-			CollectionResource collres = listToCollection(globaltagmaps, false, info,null,null);
+			CollectionResource collres = listToCollection(globaltagmaps, true, info,null,null);
 			return created(collres);
 			
 		} catch (ConddbServiceException e) {

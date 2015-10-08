@@ -29,12 +29,27 @@ public class TagResource extends Link {
 		put("lockstatus", tag.getEndOfValidity());
 		put("lastvalidatedtime", tag.getLastValidatedTime());
 		put("modificationtime", tag.getModificationTime());
-
-		CollectionResource mapsresource = new CollectionResource(info,
-				Link.GLOBALTAGMAPS + "/trace?type=tag&id=" + tag.getName(), Collections.emptyList());
-		put("maps", mapsresource);
-		CollectionResource iovsresource = new CollectionResource(info, Link.IOVS + "/find?tag=" + tag.getId(),
-				Collections.emptyList());
+		CollectionResource mapsresource = null;
+		CollectionResource iovsresource = null;
+		try {
+			log.debug("Loading iovs....");
+			if (tag.getIovs() != null) {
+				iovsresource = new CollectionResource(info, Link.IOVS, tag.getIovs());
+			}
+		} catch (org.hibernate.LazyInitializationException e) {
+			iovsresource = new CollectionResource(info, Link.IOVS + "/find?tag=" + tag.getName(),
+					Collections.emptyList());
+		}
+		try {
+			log.debug("Loading maps....");
+			if (tag.getGlobalTagMaps() != null) {
+				mapsresource = new CollectionResource(info, Link.GLOBALTAGMAPS, tag.getGlobalTagMaps());
+			}
+		} catch (org.hibernate.LazyInitializationException e) {
+			mapsresource = new CollectionResource(info, Link.GLOBALTAGMAPS + "/trace?type=tag&id=" + tag.getName(),
+					Collections.emptyList());
+		}
+		put("globalTagMaps", mapsresource);
 		put("iovs", iovsresource);
 	}
 

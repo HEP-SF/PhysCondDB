@@ -17,6 +17,7 @@
  **/
 package conddb.web.config;
 
+import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Response;
 
@@ -31,6 +32,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.hibernate4.Hibernate4Module;
+import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
 import conddb.calibration.web.controllers.CalibrationRestController;
@@ -66,8 +69,8 @@ public class JaxRsApplication extends ResourceConfig {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
-	@Autowired
-	private HibernateAwareObjectMapper hibernateAwareObjectMapper;
+//	@Inject
+//	private HibernateAwareObjectMapper hibernateAwareObjectMapper;
 	
 	// Swagger initialization
 	public JaxRsApplication() {
@@ -89,13 +92,14 @@ public class JaxRsApplication extends ResourceConfig {
 		register(SystemDescriptionExpRestController.class);
 
 		// register json provider
-//		log.info("Register JacksonJsonProvide using object mapper "+hibernateAwareObjectMapper);
-        register(ObjectMapperContextResolver.class);
-//		register(JacksonJsonProvider.class);
-		register(new JacksonJsonProvider(hibernateAwareObjectMapper));
+//		ObjectMapper om = getHibernateAwareObjectMapper();
+//		log.info("Register JacksonJsonProvide using object mapper "+om);
+		register(JacksonJsonProvider.class);
+//		register(new JacksonJsonProvider(om));
 
 		// register filters
 		register(RequestContextFilter.class);
+        register(ObjectMapperContextResolver.class);
 
 		// register exception mappers
         register(CondDBExceptionMapper.class);
@@ -123,16 +127,18 @@ public class JaxRsApplication extends ResourceConfig {
 //		registerResources(resource);
 	}
 
-	public ObjectMapper getHibernateAwareObjectMapper() {
-		log.info("Get hibernate object mapper");
-		return hibernateAwareObjectMapper;
+	public static ObjectMapper getHibernateAwareObjectMapper() {
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.registerModule(new Hibernate4Module());
+		objectMapper.registerModule(new JSR310Module());
+		return objectMapper;
 	}
 
-	public void setHibernateAwareObjectMapper(
-			HibernateAwareObjectMapper hibernateAwareObjectMapper) {
-		log.info("Set hibernate object mapper");
-		this.hibernateAwareObjectMapper = hibernateAwareObjectMapper;
-	}
+//	public void setHibernateAwareObjectMapper(
+//			HibernateAwareObjectMapper hibernateAwareObjectMapper) {
+//		log.info("Set hibernate object mapper");
+//		this.hibernateAwareObjectMapper = hibernateAwareObjectMapper;
+//	}
 
 	protected void initSwagger() {
 		BeanConfig beanConfig = new BeanConfig();
