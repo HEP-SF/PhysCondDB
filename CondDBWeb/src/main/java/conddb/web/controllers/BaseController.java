@@ -17,11 +17,12 @@ package conddb.web.controllers;
 
 import javax.ws.rs.core.Response;
 
+import conddb.data.ErrorMessage;
+import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.Link;
 
 import java.net.URI;
 
-@SuppressWarnings("MismatchedQueryAndUpdateOfCollection")
 public abstract class BaseController {
 
     protected Response created(Link resource) {
@@ -30,4 +31,13 @@ public abstract class BaseController {
         return Response.created(uri).entity(resource).build();
     }
 
+    protected ConddbWebException buildException(String msg, String internalmsg, Response.Status status) {
+    	ConddbWebException ex = new ConddbWebException(msg);
+		ErrorMessage error = new ErrorMessage(msg);
+		error.setCode(status.getStatusCode());
+		error.setInternalMessage(internalmsg);
+		ex.setStatus(status);
+		ex.setErrMessage(error);
+		return ex;    	
+    }
 }

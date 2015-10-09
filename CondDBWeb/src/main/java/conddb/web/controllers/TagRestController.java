@@ -58,28 +58,23 @@ public class TagRestController extends BaseController {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/{tagname}")
 	public Response getTag(@Context UriInfo info, @PathParam("tagname") final String tagname,
-			@DefaultValue("off") @QueryParam("trace") final String trace) throws ConddbWebException {
+			@DefaultValue("off") @QueryParam("trace") final String trace,
+			@DefaultValue("true") @QueryParam("expand") final boolean expand) throws ConddbWebException {
 
 		this.log.info("TagRestController processing request for getting tag name" + tagname);
 
-		ConddbWebException ex = new ConddbWebException();
 		try {
 			CacheControl control = new CacheControl();
 			control.setMaxAge(60);
 
 			if (tagname.contains("%")) {
 				if (trace.equals("on")) {
-					ErrorMessage error = new ErrorMessage(
-							"Error in input arguments: [tag name] should be unique for tracing ! ");
-					error.setCode(Response.Status.BAD_REQUEST.getStatusCode());
-					error.setInternalMessage("Cannot use tag name " + tagname + " for tracing ");
-					ex.setStatus(Response.Status.BAD_REQUEST);
-					ex.setErrMessage(error);
-					throw ex;
+					String msg = "Error in input arguments: [tag name] should be unique for tracing ! ";
+					throw buildException(msg, msg, Response.Status.BAD_REQUEST);
 				}
 				List<Tag> entitylist = this.globalTagService.getTagByNameLike(tagname);
 				Collection<Tag> taglist = CollectionUtils.iterableToCollection(entitylist);
-				CollectionResource collres = listToCollection(taglist, false, info);
+				CollectionResource collres = listToCollection(taglist, expand, info);
 				return created(collres);
 			} else {
 				Tag entity = null;
@@ -88,35 +83,35 @@ public class TagRestController extends BaseController {
 				} else {
 					entity = this.globalTagService.getTagFetchGlobalTags(tagname);
 				}
+				if (entity == null) {
+					String msg = "Tag not found for id "+tagname;
+					throw buildException(msg, msg, Response.Status.NOT_FOUND);
+				}				
 				log.debug("Creating resource....");
 				entity.setResId(entity.getName());
 				TagResource tagres = (TagResource) springResourceFactory.getResource("tag", info, entity);
 				return created(tagres);
 			}
 		} catch (ConddbServiceException e) {
-			ErrorMessage error = new ErrorMessage("Error retrieving tag resource ");
-			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			error.setInternalMessage("Cannot creating an tag resource :" + e.getMessage());
-			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
-			ex.setErrMessage(error);
-			throw ex;
+			String msg = "Error retrieving tag resource ";
+			throw buildException(msg+" "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public CollectionResource list(@Context UriInfo info, @DefaultValue("false") @QueryParam("expand") boolean expand,
 			@DefaultValue("0") @QueryParam("page") Integer ipage, @DefaultValue("25") @QueryParam("size") Integer size)
 					throws ConddbWebException {
 		this.log.info("TagRestController processing request for tag list (expansion = " + expand + ")");
-		Collection<Tag> tags;
+		Collection<Tag> tags = null;
 		try {
 			// Here we could implement pagination
 			PageRequest preq = new PageRequest(ipage, size);
 			tags = CollectionUtils.iterableToCollection(globalTagService.findAllTags(preq));
 		} catch (ConddbServiceException e) {
-			throw new ConddbWebException(e.getMessage());
+			String msg = "Error in creation of tags collection";
+			throw buildException(msg+" "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 		if (tags == null || tags.size() == 0) {
 			return (CollectionResource) springResourceFactory.getCollectionResource(info, Link.TAGS,

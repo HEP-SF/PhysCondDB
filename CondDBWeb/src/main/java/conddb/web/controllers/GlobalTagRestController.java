@@ -6,7 +6,6 @@ package conddb.web.controllers;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -27,7 +26,6 @@ import org.springframework.stereotype.Controller;
 
 import conddb.dao.controllers.GlobalTagService;
 import conddb.dao.exceptions.ConddbServiceException;
-import conddb.data.ErrorMessage;
 import conddb.data.GlobalTag;
 import conddb.utils.collections.CollectionUtils;
 import conddb.web.exceptions.ConddbWebException;
@@ -59,44 +57,44 @@ public class GlobalTagRestController extends BaseController {
 	public Response getGlobalTag(
 			@Context UriInfo info,
 			@PathParam("gtagname") final String globaltagname,
-			@DefaultValue("off") @QueryParam("trace") final String trace) throws ConddbWebException {
-		this.log.info("GlobalTagRestController processing request for get global tag name"
+			@DefaultValue("off") @QueryParam("trace") final String trace,
+			@DefaultValue("true") @QueryParam("expand") final boolean expand) throws ConddbWebException {
+		this.log.info("GlobalTagRestController processing request for get global tag name "
 				+ globaltagname);
-		Response resp = null;
-		ConddbWebException ex = new ConddbWebException();
+
 		try {
 			CacheControl control = new CacheControl();
 			control.setMaxAge(600);
 			if (globaltagname.contains("%")) {
 				if (trace.equals("on")) {
-					ErrorMessage error = new ErrorMessage("Error in input arguments: [globaltag name] should be unique for tracing ! ");
-					error.setCode(Response.Status.BAD_REQUEST.getStatusCode());
-					error.setInternalMessage("Cannot use global tag name "+ globaltagname + " for tracing ");
-					ex.setStatus(Response.Status.BAD_REQUEST);
-					ex.setErrMessage(error);
-					throw ex;
+					String msg = "Error in input arguments: [globaltag name] should be unique for tracing ! ";
+					throw buildException(msg, msg, Response.Status.BAD_REQUEST);
 				}
 				Collection<GlobalTag> gtaglist = CollectionUtils.iterableToCollection(this.globalTagService.getGlobalTagByNameLike(globaltagname));
-				CollectionResource collres = listToCollection(gtaglist, false, info);
+				CollectionResource collres = listToCollection(gtaglist, expand, info);
 				return created(collres);
 			} else {
-				GlobalTag gtag = null;
+				GlobalTag entity = null;
 				if (trace.equals("off")) {
-					gtag = this.globalTagService.getGlobalTag(globaltagname);
+					log.debug("Search for a globaltag "+globaltagname);
+					entity = this.globalTagService.getGlobalTag(globaltagname);
 				} else {
-					gtag = this.globalTagService.getGlobalTagFetchTags(globaltagname);
+					log.debug("Search for a globaltag "+globaltagname+" and associated tags...");
+					entity = this.globalTagService.getGlobalTagFetchTags(globaltagname);
+					log.debug("Retrieved globaltag entity : ");
+					log.debug("                   content : "+entity);
 				}
-				gtag.setResId(gtag.getName());
-				GlobalTagResource gtagres = (GlobalTagResource) springResourceFactory.getResource("globaltag", info, gtag);
+				if (entity == null) {
+					String msg = "GlobalTag not found for id "+globaltagname;
+					throw buildException(msg, msg, Response.Status.NOT_FOUND);
+				}				
+				entity.setResId(entity.getName());
+				GlobalTagResource gtagres = (GlobalTagResource) springResourceFactory.getResource("globaltag", info, entity);
 				return created(gtagres);
 			}
 		} catch (ConddbServiceException e) {
-			ErrorMessage error = new ErrorMessage("Error retrieving globaltag resource ");
-			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			error.setInternalMessage("Cannot creating an globaltag resource :"+e.getMessage());
-			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
-			ex.setErrMessage(error);
-			throw ex;
+			String msg = "Error retrieving globaltag resource ";
+			throw buildException(msg+" "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -108,12 +106,13 @@ public class GlobalTagRestController extends BaseController {
             @DefaultValue("false") @QueryParam("expand") boolean expand) throws ConddbWebException {
 		this.log.info("GlobalTagRestController processing request for global tag list (expansion = "
 				+ expand+")");
-		Collection<GlobalTag> globaltags;
+		Collection<GlobalTag> globaltags = null;
 		try {
 			// Here we could implement pagination
 			globaltags = CollectionUtils.iterableToCollection(globalTagService.findAllGlobalTags());
 		} catch (ConddbServiceException e) {
-			throw new ConddbWebException(e.getMessage());
+			String msg = "Error in creation of globaltags collection";
+			throw buildException(msg+" "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 		if (globaltags == null || globaltags.size() == 0) {
             return (CollectionResource)springResourceFactory.getCollectionResource(info, Link.GLOBALTAGS, Collections.emptyList());

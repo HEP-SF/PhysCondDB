@@ -329,6 +329,10 @@ class PhysCond(object):
     def getTypes(self):
         return self._dicttypes
     def getParameter(self,field):
+        #print 'Search for field ',field
+        if field not in self._dictval:
+            #print 'Not found...'
+            return None
         return self._dictval[field]
     def setParameter(self,field,value):
         self._dictval[field] = value
@@ -551,7 +555,7 @@ class PhysCurl(object):
             print 'follow href link ',params['href']
             print params
         url = (params['href'])
-        urlquoted = urllib.quote_plus(url,safe=':/')
+        urlquoted = urllib.quote_plus(url,safe='=&?:/')
         self.__curl.setUrl(urlquoted)
         return self.__curl.getData()
 

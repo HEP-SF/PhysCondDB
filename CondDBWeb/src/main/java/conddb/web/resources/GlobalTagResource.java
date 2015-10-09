@@ -51,6 +51,7 @@ public class GlobalTagResource extends Link {
 
 			}
 		} catch (org.hibernate.LazyInitializationException e) {
+			log.debug("LazyInitialization Exception from hibernate: maps collection is empty ");
 			mapsresource = new CollectionResource(info,Link.GLOBALTAGMAPS+"/trace?type=globaltag&id="+globaltag.getName(), Collections.emptyList());
 		}
 		put("globalTagMaps",mapsresource);

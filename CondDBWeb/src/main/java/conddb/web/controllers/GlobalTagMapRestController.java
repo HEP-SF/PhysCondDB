@@ -102,30 +102,45 @@ public class GlobalTagMapRestController  extends BaseController {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/{id}")
-	public Response getGlobalTag(
+	public Response getGlobalTagMap(
 			@Context UriInfo info,
 			@PathParam("id") Long id) throws ConddbWebException {
 		this.log.info("GlobalTagMapRestController processing request for "+ id);
-		Response resp = null;
+
+		ConddbWebException ex = new ConddbWebException();
 		try {
 			GlobalTagMap entity = null;
 			if (id != null) {
 				entity = this.globalTagService.getGlobalTagMap(id);
 			} else {
-				resp = Response.status(Response.Status.BAD_REQUEST).build();
-				return resp;
+				ErrorMessage error = new ErrorMessage("Error in input arguments: [id] should be provided as a number! ");
+				error.setCode(Response.Status.BAD_REQUEST.getStatusCode());
+				error.setInternalMessage("Cannot use type "+ id + " for searching associations ");
+				ex.setStatus(Response.Status.BAD_REQUEST);
+				ex.setErrMessage(error);
+				throw ex;
+			}
+			if (entity == null) {
+				ErrorMessage error = new ErrorMessage("GlobalTagMap not found for id "+id);
+				error.setCode(Response.Status.NOT_FOUND.getStatusCode());
+				error.setInternalMessage("Cannot find association for id "+ id);
+				ex.setStatus(Response.Status.NOT_FOUND);
+				ex.setErrMessage(error);
+				throw ex;
 			}
 			entity.setResId(entity.getId().toString());
 			GlobalTagMapResource gtagres = (GlobalTagMapResource) springResourceFactory.getResource("globaltagmap", info, entity);
-			resp = Response.ok(gtagres).build();
-		} catch (Exception e) {
-			resp = Response.status(Response.Status.NOT_FOUND).build();
-			throw new ConddbWebException(e.getMessage());
+			return created(gtagres);
+		} catch (ConddbServiceException e) {
+			ErrorMessage error = new ErrorMessage("Error retrieving association resource ");
+			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+			error.setInternalMessage("Cannot creating an association resource :"+e.getMessage());
+			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
+			ex.setErrMessage(error);
+			throw ex;
 		}
-		return resp;
 	}
 
-	@SuppressWarnings("unchecked")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	public CollectionResource list(

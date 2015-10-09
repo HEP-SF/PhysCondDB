@@ -35,8 +35,13 @@ public class TagResource extends Link {
 			log.debug("Loading iovs....");
 			if (tag.getIovs() != null) {
 				iovsresource = new CollectionResource(info, Link.IOVS, tag.getIovs());
+			} else {
+				iovsresource = new CollectionResource(info, Link.IOVS + "/find?tag=" + tag.getName(),
+						Collections.emptyList());
 			}
 		} catch (org.hibernate.LazyInitializationException e) {
+			//e.printStackTrace();
+			log.debug("LazyInitialization Exception from hibernate: iov list is empty");
 			iovsresource = new CollectionResource(info, Link.IOVS + "/find?tag=" + tag.getName(),
 					Collections.emptyList());
 		}
@@ -46,6 +51,8 @@ public class TagResource extends Link {
 				mapsresource = new CollectionResource(info, Link.GLOBALTAGMAPS, tag.getGlobalTagMaps());
 			}
 		} catch (org.hibernate.LazyInitializationException e) {
+			//e.printStackTrace();
+			log.debug("LazyInitialization Exception from hibernate: maps collection is empty");
 			mapsresource = new CollectionResource(info, Link.GLOBALTAGMAPS + "/trace?type=tag&id=" + tag.getName(),
 					Collections.emptyList());
 		}

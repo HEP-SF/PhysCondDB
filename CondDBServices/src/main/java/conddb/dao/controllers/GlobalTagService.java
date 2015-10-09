@@ -21,7 +21,6 @@ import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.GlobalTagStatus;
 import conddb.data.Tag;
-import conddb.data.converters.GlobalTagStatusConverter;
 
 /**
  * @author formica
@@ -107,7 +106,6 @@ public class GlobalTagService {
 	public GlobalTag getGlobalTagFetchTags(String globaltagname) throws ConddbServiceException {
 		try {
 			GlobalTag gtag = this.gtagRepository.findByNameAndFetchTagsEagerly(globaltagname);
-			this.log.debug("Found global tag " + gtag);
 			return gtag;
 		} catch (Exception e) {
 			throw new ConddbServiceException("Cannot find global tag by name and fetch tags: " + e.getMessage());
@@ -118,7 +116,6 @@ public class GlobalTagService {
 	public GlobalTag getGlobalTag(String globaltagname) throws ConddbServiceException {
 		try {
 			GlobalTag gtag = this.gtagRepository.findOne(globaltagname);
-			this.log.debug("Found global tag " + gtag);
 			return gtag;
 		} catch (Exception e) {
 			throw new ConddbServiceException("Cannot find global tag by name: " + e.getMessage());
@@ -127,10 +124,8 @@ public class GlobalTagService {
 
 	@ProfileExecution
 	public List<GlobalTag> getGlobalTagByNameLikeFetchTags(String globaltagnamepattern) throws ConddbServiceException {
-
 		try {
 			List<GlobalTag> gtaglist = this.gtagRepository.findByNameLikeAndFetchTagsEagerly(globaltagnamepattern);
-			this.log.debug("Found global tag list of size " + gtaglist.size());
 			return gtaglist;
 		} catch (Exception e) {
 			throw new ConddbServiceException("Cannot find global tag by name like " + globaltagnamepattern
@@ -141,11 +136,13 @@ public class GlobalTagService {
 	@ProfileExecution
 	public List<GlobalTag> getGlobalTagByInsertionTimeBetween(Timestamp since, Timestamp until)
 			throws ConddbServiceException {
-
-		List<GlobalTag> gtaglist = this.gtagRepository.findByInsertionTimeBetween(since, until);
-		this.log.debug("Found global tag list of size " + gtaglist.size());
-
-		return gtaglist;
+		try {
+			List<GlobalTag> gtaglist = this.gtagRepository.findByInsertionTimeBetween(since, until);
+			return gtaglist;
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot find global tags by insertion time between " + since + " and "
+					+ until + " : " + e.getMessage());
+		}
 	}
 
 	/**

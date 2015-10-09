@@ -103,6 +103,7 @@ public class JaxRsApplication extends ResourceConfig {
 
 		// register exception mappers
         register(CondDBExceptionMapper.class);
+        
 		// register features
 		register(JacksonFeature.class);
 		register(MultiPartFeature.class);

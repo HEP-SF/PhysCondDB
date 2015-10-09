@@ -3,6 +3,7 @@
  */
 package conddb.web.exceptions;
 
+import javax.inject.Singleton;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
@@ -17,7 +18,8 @@ import org.springframework.stereotype.Component;
  *
  */
 @Provider
-@Component
+//@Component
+@Singleton
 public class CondDBExceptionMapper implements ExceptionMapper<ConddbWebException> {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());

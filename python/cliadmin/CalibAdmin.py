@@ -173,7 +173,8 @@ class PhysDBDriver():
             href = data['href']
             url = {}
             url['href'] = href
-            #print 'Use url link ',url
+            if self.debug:
+                print 'Use url link ',url
             obj = self.restserver.getlink(url)
             return obj
         # Assume that data is a list of items
@@ -182,7 +183,8 @@ class PhysDBDriver():
             href = anobj['href']
             url = {}
             url['href'] = href
-            #print 'Use url link ',url
+            if self.debug:
+                print 'Use url link from object ',anobj,' -> ',url
             obj = self.restserver.getlink(url)
             return obj
 
@@ -336,6 +338,10 @@ class PhysDBDriver():
             tagparams['trace']='off'
             tagparams['expand']='true'
             taglist = self.restserver.get(tagparams,'/tags')
+            if 'items' in taglist:
+                taglist = taglist['items']
+            if self.debug:
+                print 'Retrieved tag list ',taglist
             for atag in taglist:
             # link it to the global tag
                 msg = '>>> Associate tag %s to GlobalTag %s ' % (atag['name'],gtag['name'])
@@ -396,9 +402,17 @@ class PhysDBDriver():
         msg = ('>>> Search files in GlobalTag %s using pattern %s') % (globaltagname,filenamepattern)
         print colored.cyan(msg)
         data = {}
-        data['trace']='on'
+        data['expand']='true'
+        data['trace']='off'
         data['name']=globaltagname
         maplist = self.getgtagtags(data)
+        if self.debug:
+            print 'Dump the retrieved map list'
+            print maplist
+        if len(maplist) == 0:
+            msg = (' ===> GlobalTag %s has empty list of associated tags....') % (globaltagname)
+            print colored.cyan(msg)
+        
         for amap in maplist:
             atag = Tag(amap['systemTag'])
             atagname = atag.getParameter('name')
@@ -459,19 +473,50 @@ class PhysDBDriver():
         return objList
     #print json_string
 
+    def parseMapItems(self,mapitems):
+        #Retrieve systemTags from map list of items
+        outputlist=[]
+        for amap in mapitems:
+    #print 'Analyse content of ',amap
+            atag = amap['systemTag']
+            gtag = amap['globalTag']
+            if 'name' not in atag:
+                href = atag['href']
+                #print 'Load linked item using ',href
+                tagdata = self.loadItems(atag)
+                amap['systemTag']=tagdata
+                #print 'Modified map to use ',amap['systemTag']
+                outputlist.append(amap)
+        return outputlist
+
     def getgtagtags(self, data):
         obj = {}
         #print 'Select mappings using arguments ',data
         obj = self.restserver.get(data,'/globaltags')
         mpobj = self.createObj('globaltags',obj)
         maplist=[]
-        if mpobj.getValues()['globalTagMaps'] is not None:
+        # Now load associations
+        globaltagmapsobj = obj['globalTagMaps']
+        href = globaltagmapsobj['href']
+        #print 'Retrieve a list of associated tags using url ',href
+        maplist = self.loadItems(globaltagmapsobj)
+        #print 'Retrieved list of associated tags: ',maplist
+        outputlist=[]
+        if mpobj.getValues()['globalTagMaps'] is not None and len(maplist)==0:
+            if self.debug:
+                print 'global tag object contains globalTagMaps in ',mpobj
             maplist = mpobj.getValues()['globalTagMaps']
-            for amap in maplist:
-                atag = Tag(amap['systemTag'])
-                gtag = GlobalTag(amap['globalTag'])
+            if 'items' in maplist:
+                maplist = maplist['items']
+            outputlist = self.parseMapItems(maplist)
         #print atag.toJson()
-        return maplist
+        elif 'items' in maplist:
+            if self.debug:
+                print 'items key has been found in ',maplist
+            outputlist = self.parseMapItems(maplist['items'])
+        #print 'getgtagtags has retrieved ',outputlist
+
+        return outputlist
 
     def execute(self):
         print colored.blue(('Execute the command for action %s and arguments : %s ' ) % (self.action, str(self.args)))
