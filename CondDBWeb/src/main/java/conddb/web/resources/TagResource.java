@@ -5,7 +5,10 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Set;
 
 import javax.ws.rs.core.UriInfo;
 
@@ -13,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import conddb.data.GlobalTag;
+import conddb.data.GlobalTagMap;
 import conddb.data.Tag;
 import conddb.utils.json.serializers.TimestampFormat;
 
@@ -48,7 +52,15 @@ public class TagResource extends Link {
 		try {
 			log.debug("Loading maps....");
 			if (tag.getGlobalTagMaps() != null) {
-				mapsresource = new CollectionResource(info, Link.GLOBALTAGMAPS, tag.getGlobalTagMaps());
+				Set<GlobalTagMap> maps = tag.getGlobalTagMaps();
+		        Collection items = new ArrayList(maps.size());
+		        for( GlobalTagMap globaltagmap : maps) {
+		        	globaltagmap.setResId(globaltagmap.getId().toString());
+		        	globaltagmap.getGlobalTag().setResId(globaltagmap.getGlobalTagName());
+		        	globaltagmap.getSystemTag().setResId(globaltagmap.getTagName());
+		            items.add(new GlobalTagMapResource(info, globaltagmap));
+		        }
+				mapsresource = new CollectionResource(info, Link.GLOBALTAGMAPS, items);
 			}
 		} catch (org.hibernate.LazyInitializationException e) {
 			//e.printStackTrace();

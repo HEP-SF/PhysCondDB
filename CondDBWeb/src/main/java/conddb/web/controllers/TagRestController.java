@@ -31,12 +31,16 @@ import conddb.dao.exceptions.ConddbServiceException;
 import conddb.data.ErrorMessage;
 import conddb.data.Tag;
 import conddb.utils.collections.CollectionUtils;
+import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
+import conddb.web.resources.GlobalTagResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
 import conddb.web.resources.TagResource;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * @author aformic
@@ -57,8 +61,16 @@ public class TagRestController extends BaseController {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/{tagname}")
-	public Response getTag(@Context UriInfo info, @PathParam("tagname") final String tagname,
+	@ApiOperation(value = "Finds Tags by name",
+    notes = "Usage of % allows to select based on patterns",
+    response = TagResource.class,
+    responseContainer = "List")
+	public Response getTag(@Context UriInfo info, 
+			@ApiParam(value = "name pattern for the search", required = true)
+			@PathParam("tagname") final String tagname,
+			@ApiParam(value = "trace {off|on} allows to retrieve associated global tags", required = false)
 			@DefaultValue("off") @QueryParam("trace") final String trace,
+			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false)
 			@DefaultValue("true") @QueryParam("expand") final boolean expand) throws ConddbWebException {
 
 		this.log.info("TagRestController processing request for getting tag name" + tagname);
@@ -100,8 +112,17 @@ public class TagRestController extends BaseController {
 
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public CollectionResource list(@Context UriInfo info, @DefaultValue("false") @QueryParam("expand") boolean expand,
-			@DefaultValue("0") @QueryParam("page") Integer ipage, @DefaultValue("25") @QueryParam("size") Integer size)
+	@ApiOperation(value = "Finds all Tags",
+    notes = "Retrieval is implemented via pagination",
+    response = CollectionResource.class,
+    responseContainer = "List")
+	public CollectionResource list(@Context UriInfo info, 
+			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false)
+			@DefaultValue("false") @QueryParam("expand") boolean expand,
+			@ApiParam(value = "page: page number for the query, defaults to 0", required = false)
+			@DefaultValue("0") @QueryParam("page") Integer ipage, 
+			@ApiParam(value = "size: size of the page, defaults to 25", required = false)
+			@DefaultValue("25") @QueryParam("size") Integer size)
 					throws ConddbWebException {
 		this.log.info("TagRestController processing request for tag list (expansion = " + expand + ")");
 		Collection<Tag> tags = null;

@@ -28,12 +28,15 @@ import conddb.dao.controllers.GlobalTagService;
 import conddb.dao.exceptions.ConddbServiceException;
 import conddb.data.GlobalTag;
 import conddb.utils.collections.CollectionUtils;
+import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.GlobalTagResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * @author aformic
@@ -54,10 +57,17 @@ public class GlobalTagRestController extends BaseController {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/{gtagname}")
+	@ApiOperation(value = "Finds GlobalTags by name",
+    notes = "Usage of % allows to select based on patterns",
+    response = GlobalTagResource.class,
+    responseContainer = "List")
 	public Response getGlobalTag(
 			@Context UriInfo info,
+			@ApiParam(value = "name pattern for the search", required = true)
 			@PathParam("gtagname") final String globaltagname,
+			@ApiParam(value = "trace {off|on} allows to retrieve associated global tags", required = false)
 			@DefaultValue("off") @QueryParam("trace") final String trace,
+			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false)
 			@DefaultValue("true") @QueryParam("expand") final boolean expand) throws ConddbWebException {
 		this.log.info("GlobalTagRestController processing request for get global tag name "
 				+ globaltagname);
@@ -101,8 +111,13 @@ public class GlobalTagRestController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@ApiOperation(value = "Finds all GlobalTags",
+    notes = "Usage of url argument expand={true|false} in order to see full resource content or href links only",
+    response = CollectionResource.class,
+    responseContainer = "List")
 	public CollectionResource list(
 			@Context UriInfo info,
+			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false)
             @DefaultValue("false") @QueryParam("expand") boolean expand) throws ConddbWebException {
 		this.log.info("GlobalTagRestController processing request for global tag list (expansion = "
 				+ expand+")");

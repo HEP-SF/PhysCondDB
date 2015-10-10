@@ -38,6 +38,7 @@ import conddb.data.GlobalTagStatus;
 import conddb.data.Tag;
 import conddb.data.exceptions.ConversionException;
 import conddb.utils.json.serializers.TimestampDeserializer;
+import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.GlobalTagResource;
 import conddb.web.resources.Link;

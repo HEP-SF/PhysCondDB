@@ -27,6 +27,7 @@ import conddb.dao.exceptions.ConddbServiceException;
 import conddb.data.ErrorMessage;
 import conddb.data.GlobalTagMap;
 import conddb.data.SystemDescription;
+import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;

@@ -17,7 +17,6 @@
  **/
 package conddb.web.config;
 
-import javax.inject.Inject;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Response;
 
@@ -29,15 +28,10 @@ import org.glassfish.jersey.server.model.Resource;
 import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.hibernate4.Hibernate4Module;
-import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
 import conddb.calibration.web.controllers.CalibrationRestController;
-import conddb.utils.json.HibernateAwareObjectMapper;
 import conddb.web.controllers.GlobalTagExpRestController;
 import conddb.web.controllers.GlobalTagMapExpRestController;
 import conddb.web.controllers.GlobalTagMapRestController;
@@ -69,6 +63,7 @@ public class JaxRsApplication extends ResourceConfig {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
+	// This is in case we need to initialize the JacksonJsonProvider with an object mapper...
 //	@Inject
 //	private HibernateAwareObjectMapper hibernateAwareObjectMapper;
 	
@@ -92,9 +87,8 @@ public class JaxRsApplication extends ResourceConfig {
 		register(SystemDescriptionExpRestController.class);
 
 		// register json provider
-//		ObjectMapper om = getHibernateAwareObjectMapper();
-//		log.info("Register JacksonJsonProvide using object mapper "+om);
 		register(JacksonJsonProvider.class);
+		// Not yet sure if this or the previous one are working now....
 //		register(new JacksonJsonProvider(om));
 
 		// register filters
@@ -128,29 +122,16 @@ public class JaxRsApplication extends ResourceConfig {
 //		registerResources(resource);
 	}
 
-	public static ObjectMapper getHibernateAwareObjectMapper() {
-		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.registerModule(new Hibernate4Module());
-		objectMapper.registerModule(new JSR310Module());
-		return objectMapper;
-	}
-
-//	public void setHibernateAwareObjectMapper(
-//			HibernateAwareObjectMapper hibernateAwareObjectMapper) {
-//		log.info("Set hibernate object mapper");
-//		this.hibernateAwareObjectMapper = hibernateAwareObjectMapper;
-//	}
-
 	protected void initSwagger() {
 		BeanConfig beanConfig = new BeanConfig();
 		beanConfig.setVersion("2.0");
 		beanConfig.setSchemes(new String[] { "http" });
 		beanConfig.setHost("localhost:8080");
-		beanConfig.setBasePath("/physconddb");
+		beanConfig.setBasePath("/physconddb/conddbweb/rest");
 		beanConfig.setResourcePackage("conddb.web.controllers");
-		beanConfig.setTitle("PhysCondDB REST API");
+		beanConfig.setTitle("PhysCondDB REST API setting in JAX-RS");
 		Info info = new Info();
-		info.setDescription("REST services for PhysCondDB access.");
+		info.setDescription("REST services for PhysCondDB access, initialized by JAX-RS.");
 		beanConfig.setInfo(info);
 		beanConfig.setScan(true);
 		

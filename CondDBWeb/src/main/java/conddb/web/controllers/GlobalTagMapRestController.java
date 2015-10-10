@@ -32,12 +32,17 @@ import conddb.data.ErrorMessage;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.utils.collections.CollectionUtils;
+import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.GlobalTagMapResource;
 import conddb.web.resources.GlobalTagResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
+import conddb.web.resources.TagResource;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * @author aformic
@@ -45,6 +50,7 @@ import conddb.web.resources.SpringResourceFactory;
  */
 @Path(Link.GLOBALTAGMAPS)
 @Controller
+@Api(value = Link.GLOBALTAGMAPS)
 public class GlobalTagMapRestController  extends BaseController {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
@@ -57,14 +63,19 @@ public class GlobalTagMapRestController  extends BaseController {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/trace")
-	public Response getGlobalTag(
+	@ApiOperation(value = "Finds Tags to GlobalTag's mappings by name either of the tag or of the global tag",
+    notes = "Usage of % allows to select based on patterns",
+    response = CollectionResource.class,
+    responseContainer = "List")
+	public Response getGlobalTagMap(
 			@Context UriInfo info,
+			@ApiParam(value = "type: {globaltag|tag}", required = true)
 			@DefaultValue("globaltag") @QueryParam("type") final String type,
+			@ApiParam(value = "id: the name either of the tag or the global tag, patterns not allowed", required = true)
 			@DefaultValue("none") @QueryParam("id") final String name
 			) throws ConddbWebException {
 		this.log.info("GlobalTagMapRestController processing request for type "
 				+ type + " and name "+name);
-		ConddbWebException ex = new ConddbWebException();
 		try {
 			List<GlobalTagMap> list  = null;
 			if (type.equals("globaltag")) {
@@ -74,15 +85,12 @@ public class GlobalTagMapRestController  extends BaseController {
 				list = this.globalTagService.getGlobalTagMapByTagName(name);
 				log.debug("Controller has executed query for tag search...");
 			} else {
-				ErrorMessage error = new ErrorMessage("Error in input arguments: [type] should be [globaltag|tag]! ");
-				error.setCode(Response.Status.BAD_REQUEST.getStatusCode());
-				error.setInternalMessage("Cannot use type "+ type + " for searching associations ");
-				ex.setStatus(Response.Status.BAD_REQUEST);
-				ex.setErrMessage(error);
-				throw ex;
+				String msg = "Error in input arguments: [type] should be either globaltag or tag ! ";
+				throw buildException(msg, msg, Response.Status.BAD_REQUEST);
 			}
 			if (list == null || list.isEmpty()) {
-				return Response.ok((CollectionResource)springResourceFactory.getCollectionResource(info, Link.GLOBALTAGMAPS, Collections.emptyList())).build();	
+				String msg = "Associations not found for "+type+" and id "+name;
+				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
 			log.debug("Controller has retrieved a list of size "+list.size());
 			Collection<GlobalTagMap> globaltagmaps = CollectionUtils.iterableToCollection(list);
@@ -90,63 +98,54 @@ public class GlobalTagMapRestController  extends BaseController {
 			return created(collres);
 			
 		} catch (ConddbServiceException e) {
-			ErrorMessage error = new ErrorMessage("Error retrieving association resource ");
-			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			error.setInternalMessage("Cannot creating an association resource :"+e.getMessage());
-			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
-			ex.setErrMessage(error);
-			throw ex;
+			String msg = "Error retrieving association resource ";
+			throw buildException(msg+" "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 	
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/{id}")
+	@ApiOperation(value = "Finds Tags to GlobalTag's mappings by id (integer)",
+    notes = "This is ment essentially for internal usage when finding dependencies",
+    response = CollectionResource.class,
+    responseContainer = "List")
 	public Response getGlobalTagMap(
 			@Context UriInfo info,
+			@ApiParam(value = "id: id of the association", required = true)
 			@PathParam("id") Long id) throws ConddbWebException {
 		this.log.info("GlobalTagMapRestController processing request for "+ id);
 
 		ConddbWebException ex = new ConddbWebException();
 		try {
 			GlobalTagMap entity = null;
-			if (id != null) {
-				entity = this.globalTagService.getGlobalTagMap(id);
-			} else {
-				ErrorMessage error = new ErrorMessage("Error in input arguments: [id] should be provided as a number! ");
-				error.setCode(Response.Status.BAD_REQUEST.getStatusCode());
-				error.setInternalMessage("Cannot use type "+ id + " for searching associations ");
-				ex.setStatus(Response.Status.BAD_REQUEST);
-				ex.setErrMessage(error);
-				throw ex;
-			}
+			entity = this.globalTagService.getGlobalTagMap(id);
 			if (entity == null) {
-				ErrorMessage error = new ErrorMessage("GlobalTagMap not found for id "+id);
-				error.setCode(Response.Status.NOT_FOUND.getStatusCode());
-				error.setInternalMessage("Cannot find association for id "+ id);
-				ex.setStatus(Response.Status.NOT_FOUND);
-				ex.setErrMessage(error);
-				throw ex;
+				String msg = "Associations not found for id "+id;
+				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
 			entity.setResId(entity.getId().toString());
 			GlobalTagMapResource gtagres = (GlobalTagMapResource) springResourceFactory.getResource("globaltagmap", info, entity);
 			return created(gtagres);
 		} catch (ConddbServiceException e) {
-			ErrorMessage error = new ErrorMessage("Error retrieving association resource ");
-			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			error.setInternalMessage("Cannot creating an association resource :"+e.getMessage());
-			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
-			ex.setErrMessage(error);
-			throw ex;
+			String msg = "Error retrieving association resource for id "+id;
+			throw buildException(msg+" "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@ApiOperation(value = "Finds all Tags to GlobalTag's mappings",
+    notes = "Usage of pagination and parameter expand to get full output of the association or link only",
+    response = CollectionResource.class,
+    responseContainer = "List")
 	public CollectionResource list(
 			@Context UriInfo info,
+			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false)
             @DefaultValue("false") @QueryParam("expand") boolean expand,
+			@ApiParam(value = "page: page number for the query, defaults to 0", required = false)
             @DefaultValue("0") @QueryParam("page") Integer ipage, 
+			@ApiParam(value = "size: size of the page, defaults to 25", required = false)
             @DefaultValue("25") @QueryParam("size") Integer size) throws ConddbWebException {
 		this.log.info("GlobalTagRestController processing request for global tag list (expansion = "
 				+ expand+")");
@@ -159,7 +158,8 @@ public class GlobalTagMapRestController  extends BaseController {
 			throw new ConddbWebException(e.getMessage());
 		}
 		if (globaltagmaps == null || globaltagmaps.size() == 0) {
-            return (CollectionResource)springResourceFactory.getCollectionResource(info, Link.GLOBALTAGMAPS, Collections.emptyList());
+			String msg = "Associations not found";
+			throw buildException(msg, msg, Response.Status.NOT_FOUND);
         }
 		return listToCollection(globaltagmaps, expand, info, ipage, size);
 	}

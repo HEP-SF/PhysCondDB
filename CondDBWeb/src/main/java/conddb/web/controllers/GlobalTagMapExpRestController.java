@@ -27,6 +27,7 @@ import conddb.data.ErrorMessage;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.Tag;
+import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.GlobalTagMapResource;
 import conddb.web.resources.Link;
