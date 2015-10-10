@@ -5,6 +5,7 @@ package conddb.web.controllers;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -37,16 +38,24 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
 import conddb.dao.controllers.IovService;
+import conddb.dao.exceptions.ConddbServiceException;
 import conddb.data.Payload;
 import conddb.data.PayloadData;
+import conddb.data.exceptions.PayloadEncodingException;
 import conddb.data.handler.PayloadHandler;
 import conddb.utils.bytes.PayloadBytesHandler;
 import conddb.utils.collections.CollectionUtils;
+import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
+import conddb.web.resources.GenericMessageResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.PayloadResource;
 import conddb.web.resources.SpringResourceFactory;
+import conddb.web.resources.TagResource;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * @author formica
@@ -54,7 +63,8 @@ import conddb.web.resources.SpringResourceFactory;
  */
 @Path(Link.PAYLOAD)
 @Controller
-public class PayloadRestController {
+@Api(value = Link.PAYLOAD)
+public class PayloadRestController extends BaseController {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -65,98 +75,114 @@ public class PayloadRestController {
 	@Autowired
 	private PayloadBytesHandler payloadBytesHandler;
 
-	@Value( "${physconddb.upload.dir:/tmp}" )
+	@Value("${physconddb.upload.dir:/tmp}")
 	private String SERVER_UPLOAD_LOCATION_FOLDER;
 
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/{hash}")
-	public Response getPayload(
-			@Context UriInfo info,
-			@PathParam("hash") final String hash,
-			@DefaultValue("false") @QueryParam("expand") final boolean expand) throws ConddbWebException {
-		this.log.info("PayloadRestController processing request for payload "
-				+ hash);
+	@ApiOperation(value = "Finds payload by hash; the payload object contains only metadata on the payload itself.", notes = "Select one payload at the time, no regexp searches allowed here", response = PayloadResource.class)
+	public Response getPayload(@Context UriInfo info,
+			@ApiParam(value = "hash of the payload", required = true) @PathParam("hash") final String hash,
+			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false) @DefaultValue("false") @QueryParam("expand") final boolean expand)
+					throws ConddbWebException {
+		this.log.info("PayloadRestController processing request for payload " + hash);
 		Response resp = null;
 		try {
-			
-			try {
-				Payload entity = iovService.getPayload(hash);
-				entity.setResId(hash);
-				if (expand) {
-					PayloadData entitydata = iovService.getPayloadData(hash);
-					entitydata.setResId(hash);
-					entity.setData(entitydata);
-					log.debug("Payload contains "+entity.toString());
-					log.debug("  - data :"+entitydata);
-				}
-				PayloadResource resource = (PayloadResource)springResourceFactory.getResource("payload",info, entity);
-				resp = Response.ok(resource).build();
 
-			} catch (Exception e) {
-				throw new ConddbWebException(e.getMessage());
+			Payload entity = iovService.getPayload(hash);
+			if (entity == null) {
+				String msg = "Cannot find payload corresponding to hash " + hash;
+				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
-		} catch (Exception e) {
-			resp = Response.status(Response.Status.NOT_FOUND).build();
+			entity.setResId(hash);
+			if (expand) {
+				PayloadData entitydata = iovService.getPayloadData(hash);
+				if (entitydata == null) {
+					String msg = "Cannot find payload data corresponding to hash " + hash;
+					throw buildException(msg, msg, Response.Status.NOT_FOUND);
+				}
+				entitydata.setResId(hash);
+				entity.setData(entitydata);
+				log.debug("Payload contains " + entity.toString());
+				log.debug("  - data :" + entitydata);
+			}
+			PayloadResource resource = (PayloadResource) springResourceFactory.getResource("payload", info, entity);
+			resp = Response.ok(resource).build();
+			return resp;
+		} catch (ConddbServiceException e) {
+			resp = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 			throw new ConddbWebException(e.getMessage());
 		}
-		return resp;
 	}
 
 	@GET
 	@Produces({ MediaType.APPLICATION_OCTET_STREAM })
 	@Path("/data/{hash}")
-	public Response getBlob(
-			@Context UriInfo info,
-			@PathParam("hash") final String hash) throws ConddbWebException {
-		this.log.info("PayloadRestController processing request to download payload "
-				+ hash);
+	@ApiOperation(value = "Finds payload data by hash; the payload object contains the real BLOB.", notes = "Select one payload at the time, no regexp searches allowed here", response = StreamingOutput.class)
+	public Response getBlob(@Context UriInfo info,
+			@ApiParam(value = "hash of the payload", required = true) @PathParam("hash") final String hash)
+					throws ConddbWebException {
+		this.log.info("PayloadRestController processing request to download payload " + hash);
 		Response resp = null;
 		try {
-			
-			try {
-				PayloadData entitydata = iovService.getPayloadData(hash);
-				String filename = "/tmp/"+entitydata.getHash()+".blob";
-				payloadBytesHandler.dumpBlobIntoFile(entitydata.getData(),filename);
-				File f = new File(filename);
-				final InputStream in = new FileInputStream(f);
-		        StreamingOutput stream = new StreamingOutput() {
-		            public void write(OutputStream out) throws IOException, WebApplicationException {
-		                try {
-		                    int read = 0;
-		                        byte[] bytes = new byte[1024];
-
-		                        while ((read = in.read(bytes)) != -1) {
-		                            out.write(bytes, 0, read);
-		                        }
-		                } catch (Exception e) {
-		                    throw new WebApplicationException(e);
-		                }
-		            }
-		        };
-				
-				resp = Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM_TYPE).header("Content-Disposition", "attachment; filename=\"" + f.getName() + "\"" ).build();
-			} catch (Exception e) {
-				throw new ConddbWebException(e.getMessage());
+			StreamingOutput stream = null;
+			// Initialization of an empty file name
+			String filename = "/tmp/none.blob";
+			File f = null;
+			PayloadData entitydata = iovService.getPayloadData(hash);
+			if (entitydata == null) {
+				String msg = "Cannot find payload data corresponding to hash " + hash;
+				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
-		} catch (Exception e) {
-			resp = Response.status(Response.Status.NOT_FOUND).build();
+			filename = "/tmp/" + entitydata.getHash() + ".blob";
+			payloadBytesHandler.dumpBlobIntoFile(entitydata.getData(), filename);
+			// Open a file and an inputstream to read it
+			f = new File(filename);
+			final InputStream in = new FileInputStream(f);
+			// Set the output stream for the response
+			stream = new StreamingOutput() {
+				public void write(OutputStream out) throws IOException, WebApplicationException {
+					try {
+						int read = 0;
+						byte[] bytes = new byte[1024];
+
+						while ((read = in.read(bytes)) != -1) {
+							out.write(bytes, 0, read);
+						}
+					} catch (Exception e) {
+						throw new WebApplicationException(e);
+					}
+				}
+			};
+
+			resp = Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM_TYPE)
+					.header("Content-Disposition", "attachment; filename=\"" + f.getName() + "\"").build();
+			return resp;
+
+		} catch (ConddbServiceException e) {
+			resp = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 			throw new ConddbWebException(e.getMessage());
+		} catch (FileNotFoundException e1) {
+			resp = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+			throw new ConddbWebException(e1.getMessage());
 		}
-		return resp;
 	}
 
-
 	@POST
-	@Produces({ MediaType.TEXT_PLAIN })
+	@Produces({ MediaType.APPLICATION_JSON })
 	@Consumes({ MediaType.MULTIPART_FORM_DATA })
 	@Path("/hash")
-	public String getBlobHash(@FormDataParam("file") InputStream uploadedInputStream,
+	@ApiOperation(value = "Take an input file and get its hash generated by the server.", 
+	notes = "Used for checking hash generation", response = GenericMessageResource.class)
+	public Response getBlobHash(
+			@Context UriInfo info,
+			@FormDataParam("file") InputStream uploadedInputStream,
 			@FormDataParam("file") FormDataContentDisposition fileDetail) throws ConddbWebException {
+		Response resp = null;
 		try {
 			if (fileDetail != null) {
 				String name = fileDetail.getFileName();
-				try {
 					log.info("Uploaded object has name " + name);
 
 					String outfname = name + "-uploaded";
@@ -167,50 +193,60 @@ public class PayloadRestController {
 					pylddata.setUri(uploadedFileLocation);
 					PayloadHandler phandler = new PayloadHandler(pylddata);
 					PayloadData storable = phandler.getPayloadWithHash();
-
+					String thehash = storable.getHash();
 					log.info("Uploaded object has hash " + storable.getHash());
 					log.warn("This method does not perform insertions");
-
-					return storable.getHash();
-				} catch (Exception e) {
-					return "You failed to upload " + name + " => " + e.getMessage();
-				}
-			} else {
-				return "You failed to upload because the filedetail was null.";
+					GenericMessageResource responsemessage = new GenericMessageResource("hash", thehash);
+					resp = Response.ok(responsemessage).build();
+					return resp;
 			}
-		} catch (Exception e) {
+			String msg = "Cannot find payload file ";
+			throw buildException(msg, msg, Response.Status.NOT_FOUND);
+		} catch (IOException e) {
+			resp = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+			throw new ConddbWebException(e.getMessage());
+		} catch (PayloadEncodingException e) {
+			resp = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 			throw new ConddbWebException(e.getMessage());
 		}
 	}
-
+	
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/filter")
-	public CollectionResource getPayloadFilteredList(
-			@Context UriInfo info,
+	@ApiOperation(value = "Select a payload filtering on metadata...Not well implemented.", 
+	notes = "Select one payload at the time, no regexp searches allowed here. "
+	+" This method is for the moment not well implemented.", response = PayloadResource.class)
+	public CollectionResource getPayloadFilteredList(@Context UriInfo info,
+			@ApiParam(value = "Parameter name: {datasize|objectType|version}", required = true) 
 			@DefaultValue("none") @QueryParam("param") final String param,
+			@ApiParam(value = "condition: {eq|gt|..}", required = true) 
 			@DefaultValue("eq") @QueryParam("if") final String condition,
+			@ApiParam(value = "Parameter value: the value of the selected parameter", required = true) 
 			@DefaultValue("0") @QueryParam("value") final String value,
-			@DefaultValue("0") @QueryParam("page") Integer ipage, 
-            @DefaultValue("1000") @QueryParam("size") Integer size) throws ConddbWebException {
-		this.log.info("PayloadRestController processing request for payload filtered list "
-				+ param + " " +condition+" "+value);
-		Collection<Payload> entitylist;		
-		try {			
-			List<Payload> payloadList = iovService.getPayloadList(param, condition, value); 
+			@ApiParam(value = "page: page number for the query, defaults to 0", required = false)
+			@DefaultValue("0") @QueryParam("page") Integer ipage,
+			@ApiParam(value = "size: page size, defaults to 25", required = false)
+			@DefaultValue("25") @QueryParam("size") Integer size) throws ConddbWebException {
+		this.log.info("PayloadRestController processing request for payload filtered list " + param + " " + condition
+				+ " " + value);
+		Collection<Payload> entitylist;
+		try {
+			List<Payload> payloadList = iovService.getPayloadList(param, condition, value);
 			entitylist = CollectionUtils.iterableToCollection(payloadList);
 		} catch (Exception e) {
 			throw new ConddbWebException(e.getMessage());
 		}
 		if (entitylist == null || entitylist.size() == 0) {
-            return (CollectionResource)springResourceFactory.getCollectionResource(info, Link.PAYLOAD, Collections.emptyList());
-        }
+			return (CollectionResource) springResourceFactory.getCollectionResource(info, Link.PAYLOAD,
+					Collections.emptyList());
+		}
 		Collection items = new ArrayList(entitylist.size());
-        for( Payload pyld : entitylist) {
-        	pyld.setResId(pyld.getHash());
-            items.add(springResourceFactory.getResource("payload", info, pyld));
-        }
-        return (CollectionResource)springResourceFactory.getCollectionResource(info, Link.PAYLOAD, items);
+		for (Payload pyld : entitylist) {
+			pyld.setResId(pyld.getHash());
+			items.add(springResourceFactory.getResource("payload", info, pyld));
+		}
+		return (CollectionResource) springResourceFactory.getCollectionResource(info, Link.PAYLOAD, items);
 	}
 
 }
