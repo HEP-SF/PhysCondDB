@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import conddb.utils.json.serializers.TimestampDeserializer;
 import conddb.utils.json.serializers.TimestampSerializer;
+import io.swagger.annotations.ApiModel;
 
 
 /**

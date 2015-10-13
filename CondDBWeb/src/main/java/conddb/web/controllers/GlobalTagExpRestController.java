@@ -72,7 +72,7 @@ public class GlobalTagExpRestController extends BaseController {
 	@Path(Link.GLOBALTAGS)
 	@ApiOperation(value = "Create a GlobalTag.",
     notes = "Input data are in json, and should match all needed fields for a new global tag.",
-    response=GlobalTagResource.class)
+    response=GlobalTag.class)
 	public Response createGlobalTag(@Context UriInfo info,
 			GlobalTag globaltag) throws ConddbWebException {
 		try {
@@ -92,7 +92,8 @@ public class GlobalTagExpRestController extends BaseController {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@ApiOperation(value = "Update a GlobalTag.",
-		    notes = "Input data are in json, and should match all  fields to be updated.")
+		    notes = "Input data are in json, and should match all  fields to be updated.",
+		    response=GlobalTag.class)
 	public Response updateGlobalTag(@Context UriInfo info, 
 			@ApiParam(value = "id: id of the globaltag to be updated", required = true) 
 			@PathParam("id") String id, 
@@ -164,7 +165,7 @@ public class GlobalTagExpRestController extends BaseController {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@ApiOperation(value = "Map a tag to a globaltag.",
-    notes = "Can be used for one or many tags.")
+    notes = "Can be used for one or many tags.",response=GlobalTag.class)
 	public Response mapTagsToGlobalTag(
 			@Context UriInfo info, 
 			@ApiParam(value = "id: id of the globaltag to be updated", required = true) 
@@ -225,7 +226,8 @@ public class GlobalTagExpRestController extends BaseController {
 	@Path(Link.GLOBALTAGS+"/{id}")
 	@DELETE
 	@ApiOperation(value = "Delete a globaltag.",
-    notes = "It should be used one global tag at the time. This method is meant for administration purposes.")
+    notes = "It should be used one global tag at the time. This method is meant for administration purposes.",
+    response=GlobalTag.class)
 	public Response deleteGlobalTag(
 			@ApiParam(value = "id: id of the globaltag to be deleted", required = true) 
 			@PathParam("id") String id) throws ConddbWebException {

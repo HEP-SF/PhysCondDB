@@ -63,7 +63,7 @@ public class TagRestController extends BaseController {
 	@Path("/{tagname}")
 	@ApiOperation(value = "Finds Tags by name",
     notes = "Usage of % allows to select based on patterns",
-    response = TagResource.class,
+    response = Tag.class,
     responseContainer = "List")
 	public Response getTag(@Context UriInfo info, 
 			@ApiParam(value = "name pattern for the search", required = true)
@@ -114,7 +114,7 @@ public class TagRestController extends BaseController {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@ApiOperation(value = "Finds all Tags",
     notes = "Retrieval is implemented via pagination",
-    response = CollectionResource.class,
+    response = Tag.class,
     responseContainer = "List")
 	public CollectionResource listTags(@Context UriInfo info, 
 			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false)

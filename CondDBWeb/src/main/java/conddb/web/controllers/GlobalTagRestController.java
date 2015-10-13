@@ -59,7 +59,7 @@ public class GlobalTagRestController extends BaseController {
 	@Path("/{gtagname}")
 	@ApiOperation(value = "Finds GlobalTags by name",
     notes = "Usage of % allows to select based on patterns",
-    response = GlobalTagResource.class,
+    response = GlobalTag.class,
     responseContainer = "List")
 	public Response getGlobalTag(
 			@Context UriInfo info,
@@ -113,7 +113,7 @@ public class GlobalTagRestController extends BaseController {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@ApiOperation(value = "Finds all GlobalTags",
     notes = "Usage of url argument expand={true|false} in order to see full resource content or href links only",
-    response = CollectionResource.class,
+    response = GlobalTag.class,
     responseContainer = "List")
 	public CollectionResource listGlobalTags(
 			@Context UriInfo info,
