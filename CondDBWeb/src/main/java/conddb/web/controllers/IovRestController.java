@@ -132,7 +132,7 @@ public class IovRestController extends BaseController {
 	@Path("/{id}")
 	@ApiOperation(value = "Finds Iovs by id",
     notes = "Usage of this method is essentially for href links.")
-	public Response getIov(@ApiParam(value = "id: the iovid", required = true) @DefaultValue("1000")@PathParam("id") Long id) throws ConddbWebException {
+	public Response getIovById(@ApiParam(value = "id: the iovid", required = true) @DefaultValue("1000")@PathParam("id") Long id) throws ConddbWebException {
 		this.log.info("IovRestController processing request for iov id " + id);
 		Response resp = null;
 		try {
@@ -154,7 +154,7 @@ public class IovRestController extends BaseController {
     notes = "Usage of this method is essentially for test purposes.",
     response = CollectionResource.class,
     responseContainer = "List")
-	public CollectionResource list(@Context UriInfo info, 
+	public CollectionResource listIovs(@Context UriInfo info, 
 			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false)
 			@DefaultValue("false") @QueryParam("expand") boolean expand,
 			@ApiParam(value = "page: the page number", required = false)

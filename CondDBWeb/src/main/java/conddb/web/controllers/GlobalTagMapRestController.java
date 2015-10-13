@@ -110,7 +110,7 @@ public class GlobalTagMapRestController  extends BaseController {
     notes = "This is ment essentially for internal usage when finding dependencies",
     response = CollectionResource.class,
     responseContainer = "List")
-	public Response getGlobalTagMap(
+	public Response getGlobalTagMapById(
 			@Context UriInfo info,
 			@ApiParam(value = "id: id of the association", required = true)
 			@PathParam("id") Long id) throws ConddbWebException {
@@ -139,7 +139,7 @@ public class GlobalTagMapRestController  extends BaseController {
     notes = "Usage of pagination and parameter expand to get full output of the association or link only",
     response = CollectionResource.class,
     responseContainer = "List")
-	public CollectionResource list(
+	public CollectionResource listGlobalTagMaps(
 			@Context UriInfo info,
 			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false)
             @DefaultValue("false") @QueryParam("expand") boolean expand,

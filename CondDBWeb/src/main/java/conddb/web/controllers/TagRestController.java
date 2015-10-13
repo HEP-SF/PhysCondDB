@@ -116,7 +116,7 @@ public class TagRestController extends BaseController {
     notes = "Retrieval is implemented via pagination",
     response = CollectionResource.class,
     responseContainer = "List")
-	public CollectionResource list(@Context UriInfo info, 
+	public CollectionResource listTags(@Context UriInfo info, 
 			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false)
 			@DefaultValue("false") @QueryParam("expand") boolean expand,
 			@ApiParam(value = "page: page number for the query, defaults to 0", required = false)

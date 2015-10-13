@@ -115,7 +115,7 @@ public class GlobalTagRestController extends BaseController {
     notes = "Usage of url argument expand={true|false} in order to see full resource content or href links only",
     response = CollectionResource.class,
     responseContainer = "List")
-	public CollectionResource list(
+	public CollectionResource listGlobalTags(
 			@Context UriInfo info,
 			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false)
             @DefaultValue("false") @QueryParam("expand") boolean expand) throws ConddbWebException {
