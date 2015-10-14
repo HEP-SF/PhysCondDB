@@ -5,4 +5,4 @@
  * @author formica
  *
  */
-package conddb.dao.exceptions;
+package conddb.svc.dao.exceptions;

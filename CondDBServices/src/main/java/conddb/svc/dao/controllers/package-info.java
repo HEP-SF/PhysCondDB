@@ -5,4 +5,4 @@
  * @author formica
  *
  */
-package conddb.dao.controllers;
+package conddb.svc.dao.controllers;

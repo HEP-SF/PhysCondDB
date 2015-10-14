@@ -31,7 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
-import conddb.calibration.web.controllers.CalibrationRestController;
+import conddb.web.calib.controllers.CalibrationRestController;
 import conddb.web.controllers.GlobalTagExpRestController;
 import conddb.web.controllers.GlobalTagMapExpRestController;
 import conddb.web.controllers.GlobalTagMapRestController;

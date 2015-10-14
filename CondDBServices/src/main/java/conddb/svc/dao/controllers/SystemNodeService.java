@@ -1,7 +1,7 @@
 /**
  *
  */
-package conddb.dao.controllers;
+package conddb.svc.dao.controllers;
 
 import java.util.List;
 
@@ -13,10 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
-import conddb.dao.exceptions.ConddbServiceException;
-import conddb.dao.repositories.SystemNodeRepository;
-import conddb.dao.repositories.TagRepository;
 import conddb.data.SystemDescription;
+import conddb.svc.dao.exceptions.ConddbServiceException;
+import conddb.svc.dao.repositories.SystemNodeRepository;
 
 /**
  * @author formica
@@ -28,9 +27,7 @@ public class SystemNodeService {
 
 	@Autowired
 	private SystemNodeRepository systemNodeRepository;
-	@Autowired
-	private TagRepository tagRepository;
-	
+
 	public SystemDescription getSystemDescription(Long id) throws ConddbServiceException {
 		try {
 			return systemNodeRepository.findOne(id);

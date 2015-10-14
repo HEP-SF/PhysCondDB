@@ -27,12 +27,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 
-import conddb.dao.controllers.GlobalTagService;
-import conddb.dao.controllers.IovService;
-import conddb.dao.exceptions.ConddbServiceException;
 import conddb.data.GlobalTag;
 import conddb.data.Iov;
 import conddb.data.Tag;
+import conddb.svc.dao.controllers.GlobalTagService;
+import conddb.svc.dao.controllers.IovService;
+import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.utils.collections.CollectionUtils;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;

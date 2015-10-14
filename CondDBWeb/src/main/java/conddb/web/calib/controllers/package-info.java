@@ -5,4 +5,4 @@
  * @author aformic
  *
  */
-package conddb.calibration.web.controllers;
+package conddb.web.calib.controllers;

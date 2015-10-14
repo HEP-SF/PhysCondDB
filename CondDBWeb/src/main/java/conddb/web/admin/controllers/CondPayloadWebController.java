@@ -1,7 +1,7 @@
 /**
  * 
  */
-package conddb.admin.web.controllers;
+package conddb.web.admin.controllers;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -30,11 +30,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import conddb.dao.baserepository.PayloadDataBaseCustom;
-import conddb.dao.repositories.PayloadRepository;
 import conddb.data.Payload;
 import conddb.data.PayloadData;
 import conddb.data.handler.PayloadHandler;
+import conddb.svc.dao.baserepository.PayloadDataBaseCustom;
+import conddb.svc.dao.repositories.PayloadRepository;
 import conddb.web.exceptions.ConddbWebException;
 import io.swagger.annotations.Api;
 

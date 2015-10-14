@@ -26,7 +26,7 @@
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
-			<groupId>conddb.dao</groupId>
+			<groupId>conddb.svc</groupId>
 			<artifactId>CondDBServices</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>

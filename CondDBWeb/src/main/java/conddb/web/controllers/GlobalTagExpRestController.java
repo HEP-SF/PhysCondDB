@@ -28,14 +28,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import conddb.dao.admin.controllers.GlobalTagAdminController;
-import conddb.dao.controllers.GlobalTagService;
-import conddb.dao.exceptions.ConddbServiceException;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.GlobalTagStatus;
 import conddb.data.Tag;
 import conddb.data.exceptions.ConversionException;
+import conddb.svc.dao.controllers.GlobalTagAdminService;
+import conddb.svc.dao.controllers.GlobalTagService;
+import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.utils.json.serializers.TimestampDeserializer;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
@@ -60,7 +60,7 @@ public class GlobalTagExpRestController extends BaseController {
 	@Autowired
 	private GlobalTagService globalTagService;
 	@Autowired
-	private GlobalTagAdminController globalTagAdminController;
+	private GlobalTagAdminService globalTagAdminService;
 	@Autowired
 	private SpringResourceFactory springResourceFactory;
 	@Autowired 
@@ -83,7 +83,7 @@ public class GlobalTagExpRestController extends BaseController {
 					saved);
 			return created(resource);
 		} catch (ConddbServiceException e) {
-			String msg = "Error crerating globaltag resource using "+globaltag.toString();
+			String msg = "Error creating globaltag resource using "+globaltag.toString();
 			throw buildException(msg+" "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -238,7 +238,7 @@ public class GlobalTagExpRestController extends BaseController {
 				String msg = "Error in removing a locked globaltag resource: "+existing.toString();
 				throw buildException(msg, msg, Response.Status.NOT_MODIFIED);
 			}
-			existing = globalTagAdminController.deleteGlobalTag(id);
+			existing = globalTagAdminService.deleteGlobalTag(id);
 			resp = Response.ok(existing).build();
 			return resp;
 		} catch (ConddbServiceException e) {

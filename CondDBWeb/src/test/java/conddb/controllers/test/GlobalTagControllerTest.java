@@ -20,8 +20,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import conddb.builders.GlobalTagBuilder;
-import conddb.dao.controllers.GlobalTagService;
 import conddb.data.GlobalTag;
+import conddb.svc.dao.controllers.GlobalTagService;
 
 /////@ActiveProfiles({ "dev", "h2" })
 /////@RunWith(SpringJUnit4ClassRunner.class)

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package conddb.calibration.web.controllers;
+package conddb.web.calib.controllers;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,13 +39,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
-import conddb.calibration.tools.CalibrationService;
-import conddb.calibration.tools.DirectoryMapperService;
-import conddb.dao.baserepository.PayloadDataBaseCustom;
-import conddb.dao.controllers.GlobalTagService;
-import conddb.dao.controllers.IovService;
-import conddb.dao.controllers.SystemNodeService;
-import conddb.dao.exceptions.ConddbServiceException;
 import conddb.data.ErrorMessage;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagStatus;
@@ -53,6 +46,13 @@ import conddb.data.Iov;
 import conddb.data.Payload;
 import conddb.data.SystemDescription;
 import conddb.data.Tag;
+import conddb.svc.calibration.tools.CalibrationService;
+import conddb.svc.calibration.tools.DirectoryMapperService;
+import conddb.svc.dao.baserepository.PayloadDataBaseCustom;
+import conddb.svc.dao.controllers.GlobalTagService;
+import conddb.svc.dao.controllers.IovService;
+import conddb.svc.dao.controllers.SystemNodeService;
+import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.Link;
 

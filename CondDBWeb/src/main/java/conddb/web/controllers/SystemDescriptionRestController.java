@@ -27,19 +27,21 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 
-import conddb.dao.controllers.GlobalTagService;
-import conddb.dao.controllers.SystemNodeService;
-import conddb.dao.exceptions.ConddbServiceException;
-import conddb.data.ErrorMessage;
-import conddb.data.GlobalTag;
 import conddb.data.SystemDescription;
 import conddb.data.Tag;
+import conddb.svc.dao.controllers.GlobalTagService;
+import conddb.svc.dao.controllers.SystemNodeService;
+import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.utils.collections.CollectionUtils;
+import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
 import conddb.web.resources.SystemDescriptionResource;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * @author aformic
@@ -47,7 +49,8 @@ import conddb.web.resources.SystemDescriptionResource;
  */
 @Path(Link.SYSTEMS)
 @Controller
-public class SystemDescriptionRestController {
+@Api(value=Link.SYSTEMS)
+public class SystemDescriptionRestController extends BaseController {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -61,19 +64,25 @@ public class SystemDescriptionRestController {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/{tagname}")
-	public Response getSystemDescription(@PathParam("tagname") final String id,
+	@ApiOperation(value = "Get a system description entry.",
+    notes = "Use the input tagNameRoot string to search for information about a given system.",
+    response=SystemDescription.class)
+	public Response getSystemDescription(
+			@ApiParam(value = "tagname: root name of the tag associated to the system. Regexp % can be used.", required = true) 
+			@PathParam("tagname") final String id,
+			@ApiParam(value = "trace {off|on} allows to retrieve associated tags [not implemented]", required = false)
 			@DefaultValue("off") @QueryParam("trace") final String trace) throws ConddbWebException {
 		this.log.info("SystemDescriptionRestController processing request to get system using id " + id);
 		Response resp = null;
 		try {
 			if (id.contains("%")) {
-				List<SystemDescription> gtaglist = this.systemNodeService.findSystemNodesByTagNameRootLike(id);
-				resp = Response.ok(gtaglist).build();
+				List<SystemDescription> entitylist = this.systemNodeService.findSystemNodesByTagNameRootLike(id);
+				resp = Response.ok(entitylist).build();
 			} else {
 				SystemDescription node = this.systemNodeService.getSystemNodesByTagname(id);
 				resp = Response.ok(node).build();
 			}
-		} catch (Exception e) {
+		} catch (ConddbServiceException e) {
 			resp = Response.status(Response.Status.NOT_FOUND).build();
 			throw new ConddbWebException(e.getMessage());
 		}
@@ -83,27 +92,31 @@ public class SystemDescriptionRestController {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/find")
+	@ApiOperation(value = "Find a system description entry using search on tag, node or schema name.",
+    notes = "Use the input string to search for information about a given system.",
+    response=SystemDescription.class)
 	public Response findSystemDescription(@Context UriInfo info,
+			@ApiParam(value = "name pattern for the search", required = true)
 			@DefaultValue("none") @QueryParam("name") final String system,
-			@DefaultValue("off") @QueryParam("trace") String trace, @DefaultValue("tag") @QueryParam("by") String type,
+			@ApiParam(value = "trace {off|on} allows to retrieve systems.", required = false)
+			@DefaultValue("off") @QueryParam("trace") String trace, 
+			@ApiParam(value = "Select the search field : tag, node or schema.", required = true)
+			@DefaultValue("tag") @QueryParam("by") String type,
+			@ApiParam(value = "page: the page number {0}", required = false)
 			@DefaultValue("0") @QueryParam("page") Integer ipage,
+			@ApiParam(value = "size: the page size {1000}", required = false)
 			@DefaultValue("1000") @QueryParam("size") Integer size) throws ConddbWebException {
 
 		this.log.info("SystemDescriptionRestController processing request to get systems using name " + system
 				+ " as type " + type);
 		
 		Response resp = null;
-		ConddbWebException ex = new ConddbWebException();
 		try {
 			CacheControl control = new CacheControl();
 			control.setMaxAge(600);
 			if (system.equals("none")) {
-				ErrorMessage error = new ErrorMessage("Wrong options; 'by' field is mandatory [tag|node|schema] ");
-				error.setCode(Response.Status.BAD_REQUEST.getStatusCode());
-				error.setInternalMessage("Cannot perform search using option by=none");
-				ex.setStatus(Response.Status.BAD_REQUEST);
-				ex.setErrMessage(error);
-				throw ex;
+				String msg = "Wrong options; 'by' field is mandatory [tag|node|schema] ";
+				throw buildException(msg, msg, Response.Status.BAD_REQUEST);
 			}
 
 			PageRequest preq = new PageRequest(ipage, size);
@@ -116,19 +129,19 @@ public class SystemDescriptionRestController {
 					pagelist = this.systemNodeService.findSystemNodesByNodeFullpathLike(system, preq);
 				} else if (type.equals("schema")) {
 					pagelist = this.systemNodeService.findSystemNodesBySchemaNameLike(system, preq);
+				} else {
+					String msg = "Wrong options; 'by' field should be one of [tag|node|schema] ";
+					throw buildException(msg, msg, Response.Status.BAD_REQUEST);
 				}
 				if (pagelist == null) {
 					log.debug("Controller could not retrieve any entity list....");
-					ErrorMessage error = new ErrorMessage("Cannot find system using option by = "+system);
-					error.setCode(Response.Status.NOT_FOUND.getStatusCode());
-					error.setInternalMessage("Element not found");
-					ex.setStatus(Response.Status.NOT_FOUND);
-					ex.setErrMessage(error);
-					throw ex;					
+					String msg = "Cannot find system using by="+system;
+					throw buildException(msg, msg, Response.Status.NOT_FOUND);				
 				}
 				log.debug("Retrieved list of systems " + pagelist.getNumberOfElements());				
 				sdlist = pagelist.getContent();
 				resp = Response.ok(sdlist).cacheControl(control).build();
+				return resp;
 			} else {
 				SystemDescription entity = null;
 				if (type.equals("tag")) {
@@ -140,12 +153,8 @@ public class SystemDescriptionRestController {
 				}
 				if (entity == null) {
 					log.debug("Controller could not retrieve any entity....");
-					ErrorMessage error = new ErrorMessage("Cannot find system using option by = "+system);
-					error.setCode(Response.Status.NOT_FOUND.getStatusCode());
-					error.setInternalMessage("Element not found");
-					ex.setStatus(Response.Status.NOT_FOUND);
-					ex.setErrMessage(error);
-					throw ex;					
+					String msg = "Cannot find system using by="+system;
+					throw buildException(msg, msg, Response.Status.NOT_FOUND);				
 				}
 				if (trace.equals("on")) {
 					List<Tag> tags = this.globalTagService.getTagByNameLike(entity.getTagNameRoot() + "%");
@@ -155,22 +164,24 @@ public class SystemDescriptionRestController {
 				SystemDescriptionResource resource = (SystemDescriptionResource) springResourceFactory
 						.getResource("system", info, entity);
 				resp = Response.ok(resource).cacheControl(control).build();
+				return resp;
 			}
 		} catch (ConddbServiceException e) {
-			ErrorMessage error = new ErrorMessage("Error finding systemdescription resource ");
-			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			error.setInternalMessage("Cannot find a systemdescription resource :"+e.getMessage());
-			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
-			ex.setErrMessage(error);
-			throw ex;
+			log.debug("Generate exception using an ConddbService exception..."+e.getMessage());
+			String msg = "Error updating association resource: internal server exception !";
+			throw buildException(msg+" \n "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
-		return resp;
 	}
 
 	@SuppressWarnings("unchecked")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	public CollectionResource list(@Context UriInfo info, @DefaultValue("false") @QueryParam("expand") boolean expand)
+	@ApiOperation(value = "Retrieve the full system description list.",
+    notes = "Retrieve all systems in the DB.",
+    response=SystemDescription.class)
+	public CollectionResource list(@Context UriInfo info, 
+			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false)
+			@DefaultValue("false") @QueryParam("expand") boolean expand)
 			throws ConddbWebException {
 		this.log.info(
 				"SystemDescriptionRestController processing request for system list (expansion = " + expand + ")");

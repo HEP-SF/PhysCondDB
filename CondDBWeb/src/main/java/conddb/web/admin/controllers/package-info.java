@@ -5,4 +5,4 @@
  * @author aformic
  *
  */
-package conddb.admin.web.controllers;
+package conddb.web.admin.controllers;

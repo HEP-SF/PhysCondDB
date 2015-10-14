@@ -20,18 +20,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import conddb.dao.admin.controllers.GlobalTagAdminController;
-import conddb.dao.controllers.GlobalTagService;
-import conddb.dao.exceptions.ConddbServiceException;
 import conddb.data.ErrorMessage;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.Tag;
+import conddb.svc.dao.controllers.GlobalTagAdminService;
+import conddb.svc.dao.controllers.GlobalTagService;
+import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.GlobalTagMapResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * @author aformic
@@ -39,6 +42,7 @@ import conddb.web.resources.SpringResourceFactory;
  */
 @Path(Link.EXPERT)
 @Controller
+@Api(value = Link.EXPERT)
 public class GlobalTagMapExpRestController extends BaseController {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
@@ -46,16 +50,19 @@ public class GlobalTagMapExpRestController extends BaseController {
 	@Autowired
 	private GlobalTagService globalTagService;
 	@Autowired
-	private GlobalTagAdminController globalTagAdminController;
+	private GlobalTagAdminService globalTagAdminService;
 	@Autowired
 	private SpringResourceFactory springResourceFactory;
 	
 	@POST
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path(Link.GLOBALTAGMAPS)
+	@ApiOperation(value = "Create a GlobalTagMap.",
+    notes = "Input data are in json, and should match all needed fields for a new global tag to tag association.\n"
+    +"These key fields are: globaltagname, tagname, record and label.",
+    response=GlobalTagMap.class)
 	public Response create(@Context UriInfo info, Map map) throws ConddbWebException {
 
-		ConddbWebException ex = new ConddbWebException();
 		try {
 			GlobalTagMap globaltagmap = createGlobalTagMap(map);
 			GlobalTagMap saved = globalTagService.insertGlobalTagMap(globaltagmap);
@@ -65,32 +72,28 @@ public class GlobalTagMapExpRestController extends BaseController {
 					saved);
 			return created(resource);
 		} catch (ConddbServiceException e) {
-			ErrorMessage error = new ErrorMessage("Error creating association resource ");
-			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			error.setInternalMessage("Cannot creating an association resource :"+e.getMessage());
-			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
-			ex.setErrMessage(error);
-			throw ex;
+			String msg = "Error creating association resource using "+map.toString();
+			throw buildException(msg+" "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	@Path(Link.GLOBALTAGMAPS+"/{id}")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response updateGlobalTagMap(@Context UriInfo info, @PathParam("id") Long id, Map map)
+	@ApiOperation(value = "Update a GlobalTagMap association.",
+    notes = "Input data are in json, and should match the fields that can be updated: record and label.",
+    response=GlobalTagMap.class)
+	public Response updateGlobalTagMap(@Context UriInfo info, 
+			@ApiParam(value = "id: id of the globaltagmap to be updated", required = true) 
+			@PathParam("id") Long id, Map map)
 			throws ConddbWebException {
 		Response resp;
-		ConddbWebException ex = new ConddbWebException();
 		try {
 			log.info("Request for updating global tag "+id+" using "+map.size());
 			GlobalTagMap existing = globalTagService.getGlobalTagMap(id);
 			if (existing == null) {
-				ErrorMessage error = new ErrorMessage("Error updating association resource "+id);
-				error.setCode(Response.Status.NOT_FOUND.getStatusCode());
-				error.setInternalMessage("Cannot updating an association resource because it was not found in the DB");
-				ex.setStatus(Response.Status.NOT_FOUND);
-				ex.setErrMessage(error);
-				throw ex;
+				String msg = "Error updating association resource: id "+id+" not found!";
+				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
 			if (map.containsKey("label")) {
 				existing.setLabel(String.valueOf(map.get("label")));
@@ -100,40 +103,36 @@ public class GlobalTagMapExpRestController extends BaseController {
 			}
 			existing = globalTagService.insertGlobalTagMap(existing);
 			resp = Response.ok(new GlobalTagMapResource(info, existing), MediaType.APPLICATION_JSON).build();
+			return resp;
 		} catch (ConddbServiceException e) {
-			ErrorMessage error = new ErrorMessage("Error updating association resource "+id);
-			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			error.setInternalMessage("Cannot updating an association resource :"+e.getMessage());
-			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
-			ex.setErrMessage(error);
-			throw ex;
+			log.debug("Generate exception using an ConddbService exception..."+e.getMessage());
+			String msg = "Error updating association resource: internal server exception !";
+			throw buildException(msg+" \n "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
-		return resp;
 	}
 
 	@Path(Link.GLOBALTAGMAPS+"/{id}")
 	@DELETE
-	public void deleteGlobalTagMap(@PathParam("id") Long id) throws ConddbWebException {
-		GlobalTagMap existing;
+	@ApiOperation(value = "Delete a globaltag.",
+    notes = "It should be used one global tag at the time. This method is meant for administration purposes.",
+    response=GlobalTagMap.class)
+	public Response deleteGlobalTagMap(
+			@ApiParam(value = "id: id of the association to be deleted", required = true) 
+			@PathParam("id") Long id) throws ConddbWebException {
+		Response resp;
+		GlobalTagMap existing = null;
 		try {
-			existing = globalTagAdminController.deleteGlobalTagMap(id);
+			existing = globalTagAdminService.deleteGlobalTagMap(id);
 			if (existing == null) {
-				ConddbWebException ex = new ConddbWebException();
-				ErrorMessage error = new ErrorMessage("Error removing association resource "+id);
-				error.setCode(Response.Status.NOT_FOUND.getStatusCode());
-				error.setInternalMessage("Cannot remove an association resource because id was not found");
-				ex.setStatus(Response.Status.NOT_FOUND);
-				ex.setErrMessage(error);
-				throw ex;
+				String msg = "Error removing association resource: id "+id+" not found!";
+				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
+			resp = Response.ok(existing).build();
+			return resp;
 		} catch (ConddbServiceException e) {
-			ConddbWebException ex = new ConddbWebException();
-			ErrorMessage error = new ErrorMessage("Error removing association resource "+id);
-			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			error.setInternalMessage("Cannot remove an association resource :"+e.getMessage());
-			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
-			ex.setErrMessage(error);
-			throw ex;
+			log.debug("Generate exception using a ConddbService exception..."+e.getMessage());
+			String msg = "Error removing an association resource: internal server exception !";
+			throw buildException(msg+" \n "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 
 	}

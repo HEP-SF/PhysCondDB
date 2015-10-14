@@ -15,7 +15,7 @@
  *   You should have received a copy of the GNU General Public License
  *   along with PhysCondDB.  If not, see <http://www.gnu.org/licenses/>.
  **/
-package conddb.dao.repositories.impl;
+package conddb.svc.dao.repositories.impl;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -38,12 +38,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
-import conddb.dao.baserepository.PayloadDataBaseCustom;
-import conddb.dao.repositories.IovRepository;
-import conddb.dao.repositories.PayloadRepository;
 import conddb.data.Payload;
 import conddb.data.PayloadData;
 import conddb.data.exceptions.PayloadEncodingException;
+import conddb.svc.dao.baserepository.PayloadDataBaseCustom;
+import conddb.svc.dao.repositories.IovRepository;
+import conddb.svc.dao.repositories.PayloadRepository;
 import conddb.utils.bytes.PayloadBytesHandler;
 import conddb.utils.data.PayloadGenerator;
 
@@ -85,7 +85,7 @@ public class PayloadDataJCRImpl implements PayloadDataBaseCustom {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * conddb.dao.baserepository.PayloadDataBaseCustom#find(java.lang.String)
+	 * conddb.svc.dao.baserepository.PayloadDataBaseCustom#find(java.lang.String)
 	 */
 	@Override
 	public PayloadData find(String id) {
@@ -116,7 +116,7 @@ public class PayloadDataJCRImpl implements PayloadDataBaseCustom {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * conddb.dao.baserepository.PayloadDataBaseCustom#save(conddb.data.PayloadData
+	 * conddb.svc.dao.baserepository.PayloadDataBaseCustom#save(conddb.data.PayloadData
 	 * )
 	 */
 	@Override

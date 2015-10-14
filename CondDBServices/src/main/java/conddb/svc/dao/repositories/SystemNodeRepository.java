@@ -1,13 +1,13 @@
 /**
  * 
  */
-package conddb.dao.repositories;
+package conddb.svc.dao.repositories;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.rest.core.annotation.RestResource;
 
-import conddb.dao.baserepository.SystemNodeBaseRepository;
 import conddb.data.SystemDescription;
+import conddb.svc.dao.baserepository.SystemNodeBaseRepository;
 
 /**
  * @author formica

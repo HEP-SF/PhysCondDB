@@ -18,11 +18,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import conddb.dao.admin.controllers.GlobalTagAdminController;
-import conddb.dao.exceptions.ConddbServiceException;
-import conddb.dao.expert.controllers.GlobalTagExpertController;
-import conddb.dao.repositories.GlobalTagRepository;
 import conddb.data.GlobalTag;
+import conddb.svc.dao.controllers.GlobalTagAdminService;
+import conddb.svc.dao.controllers.GlobalTagExpertService;
+import conddb.svc.dao.exceptions.ConddbServiceException;
+import conddb.svc.dao.repositories.GlobalTagRepository;
 
 /**
  * @author formica
@@ -36,9 +36,9 @@ public class GlobalTagRepositoryTest {
 	@Autowired
 	private GlobalTagRepository repo;
 	@Autowired
-	private GlobalTagAdminController gtagadmin;
+	private GlobalTagAdminService gtagadmin;
 	@Autowired
-	private GlobalTagExpertController gtagexpert;
+	private GlobalTagExpertService gtagexpert;
 
 	private String gtagtestname = "TEST_01";
 	

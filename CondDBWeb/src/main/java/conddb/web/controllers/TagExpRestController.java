@@ -22,13 +22,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import conddb.dao.admin.controllers.GlobalTagAdminController;
-import conddb.dao.controllers.GlobalTagService;
-import conddb.dao.exceptions.ConddbServiceException;
 import conddb.data.ErrorMessage;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.Tag;
+import conddb.svc.dao.controllers.GlobalTagAdminService;
+import conddb.svc.dao.controllers.GlobalTagService;
+import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.Link;
@@ -52,7 +52,7 @@ public class TagExpRestController extends BaseController {
 	@Autowired
 	private GlobalTagService globalTagService;
 	@Autowired
-	private GlobalTagAdminController globalTagAdminController;
+	private GlobalTagAdminService globalTagAdminService;
 	@Autowired
 	private SpringResourceFactory springResourceFactory;
 	
@@ -64,7 +64,6 @@ public class TagExpRestController extends BaseController {
     notes = "Creation requires the full needed information in json.",
     response = Tag.class)
 	public Response create(@Context UriInfo info, Tag tag) throws ConddbWebException {
-		ConddbWebException ex = new ConddbWebException();
 		try {
 			Tag saved = globalTagService.insertTag(tag);
 			saved.setResId(saved.getName());

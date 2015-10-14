@@ -15,7 +15,7 @@
  *   You should have received a copy of the GNU General Public License
  *   along with PhysCondDB.  If not, see <http://www.gnu.org/licenses/>.
  **/
-package conddb.dao.controllers;
+package conddb.svc.dao.controllers;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -30,25 +30,27 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import conddb.dao.baserepository.PayloadDataBaseCustom;
-import conddb.dao.exceptions.ConddbServiceException;
-import conddb.dao.repositories.IovRepository;
-import conddb.dao.repositories.PayloadRepository;
-import conddb.dao.repositories.TagRepository;
 import conddb.data.GlobalTagStatus;
 import conddb.data.Iov;
 import conddb.data.Payload;
 import conddb.data.PayloadData;
 import conddb.data.Tag;
 import conddb.data.handler.PayloadHandler;
+import conddb.svc.dao.baserepository.PayloadDataBaseCustom;
+import conddb.svc.dao.exceptions.ConddbServiceException;
+import conddb.svc.dao.repositories.IovRepository;
+import conddb.svc.dao.repositories.PayloadRepository;
+import conddb.svc.dao.repositories.TagRepository;
 import conddb.utils.bytes.PayloadBytesHandler;
 
 /**
  * @author formica
  *
  */
+@Service
 public class IovService {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());

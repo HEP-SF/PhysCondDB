@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
@@ -30,10 +31,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import conddb.dao.admin.controllers.GlobalTagAdminController;
-import conddb.dao.controllers.GlobalTagService;
-import conddb.dao.controllers.IovService;
-import conddb.dao.exceptions.ConddbServiceException;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.GlobalTagStatus;
@@ -41,6 +38,10 @@ import conddb.data.Iov;
 import conddb.data.Payload;
 import conddb.data.Tag;
 import conddb.data.exceptions.ConversionException;
+import conddb.svc.dao.controllers.GlobalTagAdminService;
+import conddb.svc.dao.controllers.GlobalTagService;
+import conddb.svc.dao.controllers.IovService;
+import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.utils.json.serializers.TimestampDeserializer;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
@@ -48,6 +49,9 @@ import conddb.web.resources.GlobalTagResource;
 import conddb.web.resources.IovResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * @author aformic
@@ -55,6 +59,7 @@ import conddb.web.resources.SpringResourceFactory;
  */
 @Path(Link.EXPERT)
 @Controller
+@Api(value = Link.EXPERT)
 public class IovExpRestController extends BaseController {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
@@ -69,6 +74,9 @@ public class IovExpRestController extends BaseController {
 	@POST
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path(Link.IOVS)
+	@ApiOperation(value = "Create an IOV entry.",
+    notes = "Input data are in json, and should match all needed fields for a new Iov. Here the problem is to know the hash of the payload.",
+    response=Iov.class)
 	public Response create(@Context UriInfo info, Iov iov) throws ConddbWebException {
 		try {
 			log.debug("Inserting iov "+iov);
@@ -77,8 +85,9 @@ public class IovExpRestController extends BaseController {
 			IovResource resource = (IovResource) springResourceFactory.getResource("iov", info,
 					saved);
 			return created(resource);
-		} catch (Exception e) {
-			throw new ConddbWebException("Cannot create entity " + iov.getSince() + " : " + e.getMessage());
+		} catch (ConddbServiceException e) {
+			String msg = "Error creating IOV resource using "+iov.toString();
+			throw buildException(msg+" "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -86,16 +95,28 @@ public class IovExpRestController extends BaseController {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Consumes({ MediaType.MULTIPART_FORM_DATA })
 	@Path(Link.IOVS+"/payload")
+	@ApiOperation(value = "Create an IOV entry with its own payload.",
+    notes = "Input data are inside a FORM. It should contain: file, streamerInfo, objectType, backendInfo, version, since, sinceString, tag.",
+    response=Iov.class)
+	@Transactional
 	public Response createIovWithPayload(
 			@Context UriInfo info, 
+			@ApiParam(value = "file: the filename of the input payload", required = true) 
 			@FormDataParam("file") InputStream uploadedInputStream,
 			@FormDataParam("file") FormDataContentDisposition fileDetail, 
+			@ApiParam(value = "streamerInfo: the streamer information of the input payload", required = true) 
 			@FormDataParam("streamerInfo") String strinfo, 
+			@ApiParam(value = "objectType: the object type of the input payload", required = true) 
 			@FormDataParam("objectType") String objtype, 
+			@ApiParam(value = "backendInfo: the backend system of the input payload", required = true) 
 			@FormDataParam("backendInfo") String bkinfo, 
+			@ApiParam(value = "version: the version of the input payload", required = true) 
 			@FormDataParam("version") String version,
+			@ApiParam(value = "since: the since time of the IOV.", required = true) 
 			@FormDataParam("since") BigDecimal since,
+			@ApiParam(value = "sinceString: the since time string representation of the IOV.", required = true) 
 			@FormDataParam("sinceString") String sincestr,
+			@ApiParam(value = "tag: the tag name where to store the IOV.", required = true) 
 			@FormDataParam("tag") String tagname
 			) throws ConddbWebException {
 		try {
@@ -128,24 +149,31 @@ public class IovExpRestController extends BaseController {
 			IovResource resource = (IovResource) springResourceFactory.getResource("iov", info,
 					saved);
 			return created(resource);
-		} catch (Exception e) {
-			throw new ConddbWebException("Cannot create entry for time since " + since + " : " + e.getMessage());
+		} catch (ConddbServiceException e) {
+			String msg = "Error creating IOV resource inside tag "+tagname;
+			throw buildException(msg+" "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 
 
 	@Path(Link.IOVS+"/{id}")
 	@DELETE
-	public Response deleteIov(@PathParam("id") Long id) throws ConddbWebException {
+	@ApiOperation(value = "Delete an IOV.",
+    notes = "It should be used one IOV at the time. This method is meant for administration purposes. The payload associated is not removed.",
+    response=Iov.class)
+	public Response deleteIov(
+			@ApiParam(value = "id: id of the IOV to be deleted", required = true) 
+			@PathParam("id") Long id) throws ConddbWebException {
 		Response resp;
 		try {
 			Iov existing = iovService.deleteIov(id);
 			resp = Response.ok(existing).build();
-
+			return resp;
 		} catch (ConddbServiceException e) {
-			throw new ConddbWebException("Cannot remove id " + id + " : " + e.getMessage());
+			log.debug("Generate exception using an ConddbService exception..."+e.getMessage());
+			String msg = "Error removing a IOV resource: internal server exception !";
+			throw buildException(msg+" \n "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);	
 		}
-		return resp;
 	}
 
 }

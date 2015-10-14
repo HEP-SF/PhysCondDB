@@ -1,7 +1,7 @@
 /**
  *
  */
-package conddb.dao.controllers;
+package conddb.svc.dao.controllers;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -13,14 +13,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 import conddb.annotations.ProfileExecution;
-import conddb.dao.exceptions.ConddbServiceException;
-import conddb.dao.repositories.GlobalTagMapRepository;
-import conddb.dao.repositories.GlobalTagRepository;
-import conddb.dao.repositories.TagRepository;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.GlobalTagStatus;
 import conddb.data.Tag;
+import conddb.svc.dao.exceptions.ConddbServiceException;
+import conddb.svc.dao.repositories.GlobalTagMapRepository;
+import conddb.svc.dao.repositories.GlobalTagRepository;
+import conddb.svc.dao.repositories.TagRepository;
 
 /**
  * @author formica
@@ -31,9 +31,9 @@ public class GlobalTagService {
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
-	private GlobalTagRepository gtagRepository;
+	private GlobalTagRepository globalTagRepository;
 	@Autowired
-	private GlobalTagMapRepository gtagMapRepository;
+	private GlobalTagMapRepository globalTagMapRepository;
 	@Autowired
 	private TagRepository tagRepository;
 
@@ -43,7 +43,7 @@ public class GlobalTagService {
 	 */
 	public Iterable<GlobalTag> findAllGlobalTags() throws ConddbServiceException {
 		try {
-			return gtagRepository.findAll();
+			return globalTagRepository.findAll();
 		} catch (Exception e) {
 			throw new ConddbServiceException("Cannot find global tag list " + e.getMessage());
 		}
@@ -57,7 +57,7 @@ public class GlobalTagService {
 		try {
 			if (preq == null)
 				throw new ConddbServiceException("Cannot query full table without pagination");
-			return gtagMapRepository.findAll(preq);
+			return globalTagMapRepository.findAll(preq);
 		} catch (Exception e) {
 			throw new ConddbServiceException("Cannot find global tag map list " + e.getMessage());
 		}
@@ -69,7 +69,7 @@ public class GlobalTagService {
 	 */
 	public GlobalTagMap getGlobalTagMap(Long id) throws ConddbServiceException {
 		try {
-			return gtagMapRepository.findOne(id);
+			return globalTagMapRepository.findOne(id);
 		} catch (Exception e) {
 			throw new ConddbServiceException("Cannot find global tag map element " + e.getMessage());
 		}
@@ -96,7 +96,7 @@ public class GlobalTagService {
 	 */
 	public List<GlobalTag> getGlobalTagByNameLike(String globaltagname) throws ConddbServiceException {
 		try {
-			return gtagRepository.findByNameLike(globaltagname);
+			return globalTagRepository.findByNameLike(globaltagname);
 		} catch (Exception e) {
 			throw new ConddbServiceException("Cannot find global tag by name: " + e.getMessage());
 		}
@@ -105,7 +105,7 @@ public class GlobalTagService {
 	@ProfileExecution
 	public GlobalTag getGlobalTagFetchTags(String globaltagname) throws ConddbServiceException {
 		try {
-			GlobalTag gtag = this.gtagRepository.findByNameAndFetchTagsEagerly(globaltagname);
+			GlobalTag gtag = this.globalTagRepository.findByNameAndFetchTagsEagerly(globaltagname);
 			return gtag;
 		} catch (Exception e) {
 			throw new ConddbServiceException("Cannot find global tag by name and fetch tags: " + e.getMessage());
@@ -115,7 +115,7 @@ public class GlobalTagService {
 	@ProfileExecution
 	public GlobalTag getGlobalTag(String globaltagname) throws ConddbServiceException {
 		try {
-			GlobalTag gtag = this.gtagRepository.findOne(globaltagname);
+			GlobalTag gtag = this.globalTagRepository.findOne(globaltagname);
 			return gtag;
 		} catch (Exception e) {
 			throw new ConddbServiceException("Cannot find global tag by name: " + e.getMessage());
@@ -125,7 +125,7 @@ public class GlobalTagService {
 	@ProfileExecution
 	public List<GlobalTag> getGlobalTagByNameLikeFetchTags(String globaltagnamepattern) throws ConddbServiceException {
 		try {
-			List<GlobalTag> gtaglist = this.gtagRepository.findByNameLikeAndFetchTagsEagerly(globaltagnamepattern);
+			List<GlobalTag> gtaglist = this.globalTagRepository.findByNameLikeAndFetchTagsEagerly(globaltagnamepattern);
 			return gtaglist;
 		} catch (Exception e) {
 			throw new ConddbServiceException("Cannot find global tag by name like " + globaltagnamepattern
@@ -137,7 +137,7 @@ public class GlobalTagService {
 	public List<GlobalTag> getGlobalTagByInsertionTimeBetween(Timestamp since, Timestamp until)
 			throws ConddbServiceException {
 		try {
-			List<GlobalTag> gtaglist = this.gtagRepository.findByInsertionTimeBetween(since, until);
+			List<GlobalTag> gtaglist = this.globalTagRepository.findByInsertionTimeBetween(since, until);
 			return gtaglist;
 		} catch (Exception e) {
 			throw new ConddbServiceException("Cannot find global tags by insertion time between " + since + " and "
@@ -152,7 +152,7 @@ public class GlobalTagService {
 	 */
 	public List<GlobalTagMap> getGlobalTagMapByGlobalTagName(String globaltagname) throws ConddbServiceException {
 		try {
-			return gtagMapRepository.findByGlobalTagName(globaltagname);
+			return globalTagMapRepository.findByGlobalTagName(globaltagname);
 		} catch (Exception e) {
 			throw new ConddbServiceException(
 					"Exception in retrieving maps using global tag name " + globaltagname + " : " + e.getMessage());
@@ -166,7 +166,7 @@ public class GlobalTagService {
 	 */
 	public List<GlobalTagMap> getGlobalTagMapByTagName(String tagname) throws ConddbServiceException {
 		try {
-			return gtagMapRepository.findByTagName(tagname);
+			return globalTagMapRepository.findByTagName(tagname);
 		} catch (Exception e) {
 			throw new ConddbServiceException(
 					"Exception in retrieving maps using tag name " + tagname + " : " + e.getMessage());
@@ -285,7 +285,7 @@ public class GlobalTagService {
 			log.debug("   compared with " + GlobalTagStatus.LOCKED.name() + ";");
 			throw new ConddbServiceException("Cannot add tags to a locked global tag..");
 		}
-		return gtagMapRepository.save(entity);
+		return globalTagMapRepository.save(entity);
 	}
 
 	/**
@@ -295,8 +295,12 @@ public class GlobalTagService {
 	 */
 	@Transactional
 	public GlobalTagMap insertGlobalTagMap(GlobalTagMap entity) throws ConddbServiceException {
-		GlobalTag gtag = gtagRepository.findOne(entity.getGlobalTagName());
+		GlobalTag gtag = globalTagRepository.findOne(entity.getGlobalTagName());
 		Tag atag = tagRepository.findByName(entity.getTagName());
+		if (gtag == null || atag == null) {
+			log.debug("Cannot find elements for association");
+			throw new ConddbServiceException("Cannot link tags and global tag...they are not found in the DB");			
+		}
 		entity.setGlobalTag(gtag);
 		entity.setSystemTag(atag);
 		if (gtag.islocked()) {
@@ -304,7 +308,7 @@ public class GlobalTagService {
 			log.debug("   compared with " + GlobalTagStatus.LOCKED.name() + ";");
 			throw new ConddbServiceException("Cannot link tags to a locked global tag..");
 		}
-		return gtagMapRepository.save(entity);
+		return globalTagMapRepository.save(entity);
 	}
 
 	/**
@@ -314,8 +318,8 @@ public class GlobalTagService {
 	 */
 	@Transactional
 	public GlobalTagMap removeGlobalTagMap(GlobalTagMap entity) throws ConddbServiceException {
-		GlobalTagMap removable = gtagMapRepository.findOne(entity.getId());
-		gtagMapRepository.delete(removable);
+		GlobalTagMap removable = globalTagMapRepository.findOne(entity.getId());
+		globalTagMapRepository.delete(removable);
 		return removable;
 	}
 
@@ -326,7 +330,7 @@ public class GlobalTagService {
 	 */
 	@Transactional
 	public GlobalTag insertGlobalTag(GlobalTag entity) throws ConddbServiceException {
-		return gtagRepository.save(entity);
+		return globalTagRepository.save(entity);
 	}
 
 }

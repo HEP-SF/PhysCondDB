@@ -37,12 +37,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
-import conddb.dao.controllers.IovService;
-import conddb.dao.exceptions.ConddbServiceException;
 import conddb.data.Payload;
 import conddb.data.PayloadData;
 import conddb.data.exceptions.PayloadEncodingException;
 import conddb.data.handler.PayloadHandler;
+import conddb.svc.dao.controllers.IovService;
+import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.utils.bytes.PayloadBytesHandler;
 import conddb.utils.collections.CollectionUtils;
 import conddb.web.config.BaseController;

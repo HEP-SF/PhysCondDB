@@ -9,8 +9,9 @@
            http://www.springframework.org/schema/aop  http://www.springframework.org/schema/aop/spring-aop.xsd
            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
+	<!-- JPA repositories are initialized elsewhere -->
 	<context:component-scan
-		base-package="conddb.dao,conddb.utils,conddb.calibration,conddb.web" />
+		base-package="conddb.svc,conddb.utils,conddb.web" />
 
 	<mvc:annotation-driven>
 		<mvc:message-converters>
@@ -33,20 +34,20 @@
 	</mvc:interceptors>
 
 	<!-- Services -->
-	<bean id="calibrationService" class="conddb.calibration.tools.CalibrationService" />
-	<bean id="globalTagAdminController" class="conddb.dao.admin.controllers.GlobalTagAdminController" />
-	<bean id="globalTagExpertController" class="conddb.dao.expert.controllers.GlobalTagExpertController" />
-	<bean id="globalTagService" class="conddb.dao.controllers.GlobalTagService" />
-	<bean id="iovService" class="conddb.dao.controllers.IovService" />
-	<bean id="systemNodeService" class="conddb.dao.controllers.SystemNodeService" />
-	<bean id="conddbClientService" class="conddb.dao.svc.ConddbClientService" />
+	<bean id="calibrationService" class="conddb.svc.calibration.tools.CalibrationService" />
+	<bean id="globalTagAdminService" class="conddb.svc.dao.controllers.GlobalTagAdminService" />
+	<bean id="globalTagExpertService" class="conddb.svc.dao.controllers.GlobalTagExpertService" />
+	<bean id="globalTagService" class="conddb.svc.dao.controllers.GlobalTagService" />
+	<bean id="iovService" class="conddb.svc.dao.controllers.IovService" />
+	<bean id="systemNodeService" class="conddb.svc.dao.controllers.SystemNodeService" />
+<!-- 	<bean id="conddbClientService" class="conddb.dao.svc.ConddbClientService" /> -->
 	<bean id="profilingAdvisor" class="conddb.utils.aop.ProfilingAdvisor"></bean>
 	<bean id="profilingMethodInterceptor" class="conddb.utils.aop.ProfilingMethodInterceptor"></bean>
 	<bean id="influxRepository" class="conddb.monitoring.influx.InfluxRepository"></bean>
-	<bean id="payloaddatajcrrepo" class="conddb.dao.repositories.impl.PayloadDataJCRImpl">
+	<bean id="payloaddatajcrrepo" class="conddb.svc.dao.repositories.impl.PayloadDataJCRImpl">
 		<property name="rootpath" value="/tmp/physconddb" />
 	</bean>
-	<bean id="payloaddatadbrepo" class="conddb.dao.repositories.impl.PayloadDataDBImpl"></bean>
+	<bean id="payloaddatadbrepo" class="conddb.svc.dao.repositories.impl.PayloadDataDBImpl"></bean>
 
 	<!-- Timestamp serializer and deserializer formatting methods -->
 	<bean id="timestampFormat" class="conddb.utils.json.serializers.TimestampFormat">
@@ -65,7 +66,7 @@
 	<aop:config>
 		<aop:aspect ref="profilingAspect">
 			<aop:pointcut id="getGlobalTagTrace"
-				expression="execution(* conddb.dao.svc.ConddbClientService.getGlobalTagTrace(String))
+				expression="execution(* conddb.svc.dao.controllers.GlobalTagService.getGlobalTagFetchTags(String))
                     and args(logAction)" />
 			<aop:around pointcut-ref="getGlobalTagTrace" method="logAction" />
 		</aop:aspect>

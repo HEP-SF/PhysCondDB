@@ -15,7 +15,7 @@
  *   You should have received a copy of the GNU General Public License
  *   along with PhysCondDB.  If not, see <http://www.gnu.org/licenses/>.
  **/
-package conddb.dao.repositories.impl;
+package conddb.svc.dao.repositories.impl;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -47,12 +47,12 @@ import org.springframework.jdbc.support.lob.LobCreator;
 import org.springframework.jdbc.support.lob.LobHandler;
 import org.springframework.transaction.annotation.Transactional;
 
-import conddb.dao.baserepository.PayloadDataBaseCustom;
-import conddb.dao.repositories.PayloadRepository;
 import conddb.data.Payload;
 import conddb.data.PayloadData;
 import conddb.data.exceptions.PayloadEncodingException;
 import conddb.data.mappers.PayloadDataMapper;
+import conddb.svc.dao.baserepository.PayloadDataBaseCustom;
+import conddb.svc.dao.repositories.PayloadRepository;
 import conddb.utils.bytes.PayloadBytesHandler;
 import conddb.utils.data.PayloadGenerator;
 
@@ -77,7 +77,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * conddb.dao.baserepository.PayloadDataBaseCustom#find(java.lang.String)
+	 * conddb.svc.dao.baserepository.PayloadDataBaseCustom#find(java.lang.String)
 	 */
 	@Override
 	@Transactional
@@ -101,7 +101,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see conddb.dao.baserepository.PayloadDataBaseCustom#save(conddb.data.
+	 * @see conddb.svc.dao.baserepository.PayloadDataBaseCustom#save(conddb.data.
 	 * PayloadData )
 	 */
 	@Override

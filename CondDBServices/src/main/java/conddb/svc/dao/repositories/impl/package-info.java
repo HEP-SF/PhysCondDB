@@ -19,4 +19,4 @@
  * @author formica
  *
  */
-package conddb.dao.repositories.impl;
+package conddb.svc.dao.repositories.impl;
