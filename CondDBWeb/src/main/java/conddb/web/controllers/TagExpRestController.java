@@ -26,6 +26,7 @@ import conddb.dao.admin.controllers.GlobalTagAdminController;
 import conddb.dao.controllers.GlobalTagService;
 import conddb.dao.exceptions.ConddbServiceException;
 import conddb.data.ErrorMessage;
+import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.Tag;
 import conddb.web.config.BaseController;
@@ -33,6 +34,9 @@ import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
 import conddb.web.resources.TagResource;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * @author aformic
@@ -40,6 +44,7 @@ import conddb.web.resources.TagResource;
  */
 @Path(Link.EXPERT)
 @Controller
+@Api(value = Link.EXPERT)
 public class TagExpRestController extends BaseController {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
@@ -55,6 +60,9 @@ public class TagExpRestController extends BaseController {
 	@POST
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path(Link.TAGS)
+	@ApiOperation(value = "Create a new Tag.",
+    notes = "Creation requires the full needed information in json.",
+    response = Tag.class)
 	public Response create(@Context UriInfo info, Tag tag) throws ConddbWebException {
 		ConddbWebException ex = new ConddbWebException();
 		try {
@@ -64,19 +72,20 @@ public class TagExpRestController extends BaseController {
 					saved);
 			return created(resource);
 		} catch (ConddbServiceException e) {
-			ErrorMessage error = new ErrorMessage("Error creating tag resource "+tag.getName());
-			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			error.setInternalMessage("Cannot create a tag resource :"+e.getMessage());
-			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
-			ex.setErrMessage(error);
-			throw ex;
+			String msg = "Error crerating tag resource using "+tag.toString();
+			throw buildException(msg+" "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	@Path(Link.TAGS+"/{id}")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response updateTag(@Context UriInfo info, @PathParam("id") String id, Map map)
+	@ApiOperation(value = "Update an existing Tag.",
+    notes = "Requires in the input json the needed fields to be updated. Cannot update a locked tag.",
+    response = Tag.class)
+	public Response updateTag(@Context UriInfo info, 
+			@ApiParam(value = "id: the name of the tag to be updated", required = true)
+			@PathParam("id") String id, Map map)
 			throws ConddbWebException {
 		Response resp;
 		ConddbWebException ex = new ConddbWebException();
@@ -84,22 +93,14 @@ public class TagExpRestController extends BaseController {
 			log.info("Request for updating tag "+id+" using "+map.size());
 			Tag existing = globalTagService.getTag(id);
 			if (existing == null) {
-				ErrorMessage error = new ErrorMessage("Error updating not existing Tag resource "+id);
-				error.setCode(Response.Status.NOT_FOUND.getStatusCode());
-				error.setInternalMessage("Cannot update tag because is not found in DB");
-				ex.setStatus(Response.Status.NOT_FOUND);
-				ex.setErrMessage(error);
-				throw ex;
+				String msg = "Error updating tag resource: id "+id+" not found!";
+				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
 			if (map.containsKey("name")) {
 				List<GlobalTagMap> maplist = globalTagService.getGlobalTagMapByTagName(id);
 				if (maplist != null && maplist.size()>0) {
-					ErrorMessage error = new ErrorMessage("Error updating tag name for Tag resource "+id);
-					error.setCode(Response.Status.NOT_MODIFIED.getStatusCode());
-					error.setInternalMessage("Cannot update tag name because it is already associated ");
-					ex.setStatus(Response.Status.NOT_MODIFIED);
-					ex.setErrMessage(error);
-					throw ex;
+					String msg = "Error updating tag resource: <name> cannot be modified!";
+					throw buildException(msg, msg, Response.Status.NOT_MODIFIED);
 				}
 				existing.setName(String.valueOf(map.get("name")));
 			}
@@ -126,39 +127,36 @@ public class TagExpRestController extends BaseController {
 			existing = globalTagService.insertTag(existing);
 			resp = Response.ok(new TagResource(info, existing), MediaType.APPLICATION_JSON).build();
 		} catch (ConddbServiceException e) {
-			ErrorMessage error = new ErrorMessage("Error updating tag resource "+id);
-			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			error.setInternalMessage("Cannot update a tag resource :"+e.getMessage());
-			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
-			ex.setErrMessage(error);
-			throw ex;
+			log.debug("Generate exception using an ConddbService exception..."+e.getMessage());
+			String msg = "Error updating tag resource: internal server exception !";
+			throw buildException(msg+" \n "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 		return resp;
 	}
 
 	@Path(Link.TAGS+"/{id}")
 	@DELETE
-	public void deleteTag(@PathParam("id") Long id) throws ConddbWebException {
-		Tag existing;
-		ConddbWebException ex = new ConddbWebException();
+	@ApiOperation(value = "Delete a tag.",
+    notes = "It should be used on one tag at the time. This method is meant for administration purposes.",
+    response=Tag.class)
+	public Response deleteTag(
+			@ApiParam(value = "id: the name of the tag to be updated", required = true)
+			@PathParam("id") Long id) throws ConddbWebException {
+		Response resp;
+		Tag existing = null;
 		try {
 			Tag entity = globalTagService.getTag(id);
-			existing = globalTagService.deleteTag(entity);
-			if (existing == null) {
-				ErrorMessage error = new ErrorMessage("Error removing not existing Tag resource "+id);
-				error.setCode(Response.Status.NOT_FOUND.getStatusCode());
-				error.setInternalMessage("Cannot remove tag because is not found in DB");
-				ex.setStatus(Response.Status.NOT_FOUND);
-				ex.setErrMessage(error);
-				throw ex;
+			if (entity == null) {
+				String msg = "Error in removing a tag resource: resource not found with id "+id;
+				throw buildException(msg, msg, Response.Status.NOT_MODIFIED);
 			}
+			existing = globalTagService.deleteTag(entity);
+			resp = Response.ok(existing).build();
+			return resp;
 		} catch (ConddbServiceException e) {
-			ErrorMessage error = new ErrorMessage("Error removing tag resource "+id);
-			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			error.setInternalMessage("Cannot remove a tag resource :"+e.getMessage());
-			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
-			ex.setErrMessage(error);
-			throw ex;
+			log.debug("Generate exception using an ConddbService exception..."+e.getMessage());
+			String msg = "Error removing a tag resource: internal server exception !";
+			throw buildException(msg+" \n "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);	
 		}
 
 	}
