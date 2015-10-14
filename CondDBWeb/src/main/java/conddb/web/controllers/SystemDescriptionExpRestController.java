@@ -62,7 +62,7 @@ public class SystemDescriptionExpRestController extends BaseController {
     notes = "Input data are in json, and should match all needed fields for a new System Description.\n"
     +"System Description has to be unique for the node fullpath name. The tagNameRoot is unique as well.",
     response=SystemDescription.class)
-	public Response create(@Context UriInfo info, SystemDescription systemdescription) throws ConddbWebException {
+	public Response createSystemDescription(@Context UriInfo info, SystemDescription systemdescription) throws ConddbWebException {
 		try {
 			log.debug("Controller will create system "+systemdescription);
 			SystemDescription saved = systemNodeService.insertSystemDescription(systemdescription);

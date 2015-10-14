@@ -77,7 +77,7 @@ public class IovExpRestController extends BaseController {
 	@ApiOperation(value = "Create an IOV entry.",
     notes = "Input data are in json, and should match all needed fields for a new Iov. Here the problem is to know the hash of the payload.",
     response=Iov.class)
-	public Response create(@Context UriInfo info, Iov iov) throws ConddbWebException {
+	public Response createIov(@Context UriInfo info, Iov iov) throws ConddbWebException {
 		try {
 			log.debug("Inserting iov "+iov);
 			Iov saved = iovService.insertIov(iov);
