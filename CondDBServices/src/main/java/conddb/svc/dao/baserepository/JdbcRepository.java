@@ -1,4 +1,4 @@
-package conddb.dao.baserepository;
+package conddb.svc.dao.baserepository;
 
 import java.util.List;
 

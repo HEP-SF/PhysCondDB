@@ -5,4 +5,4 @@
  * @author aformic
  *
  */
-package conddb.calibration.tools;
+package conddb.svc.calibration.tools;

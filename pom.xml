@@ -389,10 +389,10 @@
 	<!-- <repositories> <repository> <id>hibernatesqlite-maven</id> <url>https://hibernate-sqlite.googlecode.com/svn/trunk/mavenrepo</url> 
 		</repository> </repositories> -->
 	<modules>
-		<module>CondDBWeb</module>
 		<module>CondDBData</module>
-		<module>CondDBCool</module>
 		<module>CondDBServices</module>
+		<module>CondDBWeb</module>
+		<module>CondDBCool</module>
 	</modules>
 
 	<build>

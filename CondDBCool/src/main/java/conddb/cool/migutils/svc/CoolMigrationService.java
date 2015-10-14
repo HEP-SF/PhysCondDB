@@ -28,13 +28,6 @@ import conddb.cool.data.CoolIovType;
 import conddb.cool.data.GtagTagType;
 import conddb.cool.data.NodeType;
 import conddb.cool.migutils.CoolIov;
-import conddb.dao.baserepository.PayloadDataBaseCustom;
-import conddb.dao.repositories.GlobalTagMapRepository;
-import conddb.dao.repositories.GlobalTagRepository;
-import conddb.dao.repositories.IovRepository;
-import conddb.dao.repositories.PayloadRepository;
-import conddb.dao.repositories.SystemNodeRepository;
-import conddb.dao.repositories.TagRepository;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.Iov;
@@ -42,6 +35,13 @@ import conddb.data.Payload;
 import conddb.data.PayloadData;
 import conddb.data.SystemDescription;
 import conddb.data.Tag;
+import conddb.svc.dao.baserepository.PayloadDataBaseCustom;
+import conddb.svc.dao.repositories.GlobalTagMapRepository;
+import conddb.svc.dao.repositories.GlobalTagRepository;
+import conddb.svc.dao.repositories.IovRepository;
+import conddb.svc.dao.repositories.PayloadRepository;
+import conddb.svc.dao.repositories.SystemNodeRepository;
+import conddb.svc.dao.repositories.TagRepository;
 import conddb.utils.data.PayloadGenerator;
 
 /**
