@@ -6,6 +6,6 @@ import conddb.data.exceptions.ConversionException;
 
 public interface IIovConverter {
 
-	BigDecimal convert(String inputstr, String deststr, String value) throws ConversionException;
+	BigDecimal convert(CondTimeTypes input, CondTimeTypes dest, String value) throws ConversionException;
 
 }

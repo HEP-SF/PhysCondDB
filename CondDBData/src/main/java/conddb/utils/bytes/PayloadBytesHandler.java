@@ -16,7 +16,10 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.compress.utils.IOUtils;
 import org.hibernate.engine.jdbc.StreamUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -24,10 +27,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class PayloadBytesHandler {
 
+	private Logger log = LoggerFactory.getLogger(this.getClass());
+
 	@Autowired
 	@Qualifier("daoDataSource")
 	private DataSource ds;
 
+	private static Integer MAX_LENGTH=1024;
+	
 	public byte[] getBytesFromInputStream(InputStream is) {
 		try {
 			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -51,7 +58,7 @@ public class PayloadBytesHandler {
 		try {
 			OutputStream out = null;
 			int read = 0;
-			byte[] bytes = new byte[1024];
+			byte[] bytes = new byte[MAX_LENGTH];
 
 			out = new FileOutputStream(new File(uploadedFileLocation));
 			while ((read = uploadedInputStream.read(bytes)) != -1) {
@@ -121,25 +128,30 @@ public class PayloadBytesHandler {
 		return blob;
 	}
 	
-	public String dumpBlobIntoFile(Blob blob, String outfilelocation) {
+	@Deprecated
+	public File dumpBlobIntoFile(Blob blob, String outfilelocation) {
 		try {
 			File f = new File(outfilelocation);
 			OutputStream os = dumpBlobIntoStream(blob, new BufferedOutputStream(new FileOutputStream(f)));
 			os.close();
-			return f.getCanonicalPath();
+			if (f.exists()){
+				log.info("File created in server with length "+f.length()+" and name "+outfilelocation);
+			}
+			return new File(outfilelocation);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
 	
+	@Deprecated
 	public OutputStream dumpBlobIntoStream(Blob blob, OutputStream outstream) {
 		try {
 			InputStream bstream = blob.getBinaryStream();
 			BufferedOutputStream fstream = new BufferedOutputStream(outstream);
 			// stream copy runs a high-speed upload across the network
-			StreamUtils.copy(bstream, fstream);
-			return outstream;
+	        IOUtils.copy(bstream, fstream);
+			return fstream;
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (SQLException e) {

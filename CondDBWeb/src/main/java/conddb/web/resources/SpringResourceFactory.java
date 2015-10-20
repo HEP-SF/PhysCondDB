@@ -42,41 +42,35 @@ public class SpringResourceFactory {
 
 	public Link getResource(String resourceName, UriInfo info, Entity entity) {
 		if (resourceName.equals("globaltag")) {
-			GlobalTagResource resource = new GlobalTagResource(info,(GlobalTag)entity);
+			GlobalTagResource resource = new GlobalTagResource(info,(GlobalTag)entity,timestampFormat);
 			log.info("Create global tag resource: timestamp format is "+timestampFormat);
-			resource.serializeTimestamps(timestampFormat);
 			return resource;
 		} else if (resourceName.equals("globaltagmap")) {
-			GlobalTagMapResource resource = new GlobalTagMapResource(info,(GlobalTagMap)entity);
+			GlobalTagMapResource resource = new GlobalTagMapResource(info,(GlobalTagMap)entity,timestampFormat);
 			log.info("Create global tag map resource");
 			return resource;			
 		} else if (resourceName.equals("tag")) {
-			TagResource resource = new TagResource(info,(Tag)entity);
+			TagResource resource = new TagResource(info,(Tag)entity,timestampFormat);
 			log.info("Create tag resource");
-			resource.serializeTimestamps(timestampFormat);
 			return resource;			
 		} else if (resourceName.equals("iov")) {
-			IovResource resource = new IovResource(info,(Iov)entity);
+			IovResource resource = new IovResource(info,(Iov)entity,timestampFormat);
 			log.info("Create iov resource");
-			resource.serializeTimestamps(timestampFormat);
 			return resource;			
 		} else if (resourceName.equals("payload")) {
-			PayloadResource resource = new PayloadResource(info,(Payload)entity);
+			PayloadResource resource = new PayloadResource(info,(Payload)entity,timestampFormat);
 			log.info("Create payload resource");
-			resource.serializeTimestamps(timestampFormat);
 			return resource;			
 		} else if (resourceName.equals("payloaddata")) {
-			PayloadDataResource resource = new PayloadDataResource(info,(PayloadData)entity);
+			PayloadDataResource resource = new PayloadDataResource(info,(PayloadData)entity,timestampFormat);
 			log.info("Create payload data resource");
-			resource.serializeTimestamps(timestampFormat);
 			return resource;			
 		} else if (resourceName.equals("system")) {
-			SystemDescriptionResource resource = new SystemDescriptionResource(info,(SystemDescription)entity);
+			SystemDescriptionResource resource = new SystemDescriptionResource(info,(SystemDescription)entity,timestampFormat);
 			log.info("Create system resource");
-			resource.serializeTimestamps(timestampFormat);
 			return resource;			
 		} else {
-			Link link = new Link(info,entity);
+			Link link = new Link(info,entity, timestampFormat);
 			return link;
 		}
 	}

@@ -1,5 +1,6 @@
 package conddb.svc.dao.controllers;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -16,6 +17,7 @@ import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.Iov;
 import conddb.data.Tag;
+import conddb.data.exceptions.ConversionException;
 import conddb.data.handler.GlobalTagHandler;
 import conddb.data.handler.IovHandler;
 import conddb.data.handler.TagHandler;
@@ -24,6 +26,8 @@ import conddb.svc.dao.repositories.GlobalTagMapRepository;
 import conddb.svc.dao.repositories.GlobalTagRepository;
 import conddb.svc.dao.repositories.IovRepository;
 import conddb.svc.dao.repositories.TagRepository;
+import conddb.utils.converters.CondTimeTypes;
+import conddb.utils.converters.IovConversionHandler;
 
 @Service
 public class GlobalTagExpertService {
@@ -38,6 +42,8 @@ public class GlobalTagExpertService {
 	private TagRepository tagRepository;
 	@Autowired
 	private IovRepository iovRepository;
+	@Autowired
+	private IovConversionHandler iovConversionHandler;
 
 	/**
 	 * This method creates a new global tag by cloning an old one.
@@ -78,14 +84,21 @@ public class GlobalTagExpertService {
 	 * @param to
 	 * @param timetype
 	 * @throws ConddbServiceException
+	 * @throws ConversionException 
 	 */
 	@Transactional
 	public void cloneTag(String sourcetag, String desttag, String from, String to, String timetype)
-			throws ConddbServiceException {
+			throws ConddbServiceException, ConversionException {
 		
 		this.log.debug("Timetype parameter is ignored for the moment : " + timetype);
-//		BigDecimal since = new BigDecimal(from);
-//		BigDecimal until = new BigDecimal(to);
+		CondTimeTypes time = CondTimeTypes.valueOf(timetype);
+		BigDecimal since = iovConversionHandler.convert(time, CondTimeTypes.TIME, from);
+		BigDecimal until = null;
+		if (to.equalsIgnoreCase("INF")) {
+			until = new BigDecimal(Iov.MAX_TIME);
+		} else {
+			until = iovConversionHandler.convert(time, CondTimeTypes.TIME, to);
+		}
 		Tag atag = this.tagRepository.findByName(sourcetag);
 		this.log.debug("Retrieved tag for cloning: " + atag
 				+ " linked to " + atag.getIovs().size() + " iovs");
@@ -94,7 +107,8 @@ public class GlobalTagExpertService {
 		this.tagRepository.save(newtag);
 		Tag stored = this.tagRepository.findByName(desttag);
 				
-		Page<Iov> iovs = this.iovRepository.findAllByTagName(sourcetag,new PageRequest(0,20));
+		Page<Iov> iovs = this.iovRepository.findByRangeAndTag(atag.getId(), since, until, new PageRequest(0,200));
+//		Page<Iov> iovs = this.iovRepository.findAllByTagName(sourcetag,new PageRequest(0,20));
 		float nrOfPages = iovs.getTotalPages();
 		log.debug("Retrieved list of pages : "+nrOfPages);
 		

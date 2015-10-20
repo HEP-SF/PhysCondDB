@@ -22,12 +22,16 @@ public class IovConversionHandler implements IIovConverter {
 	TimestampFormat timestampFormat;
 
 	/* (non-Javadoc)
-	 * @see conddb.utils.converters.IIovConverter#convert(java.lang.String, java.lang.String, java.lang.String)
+	 * @see conddb.utils.converters.IIovConverter#convert(conddb.utils.converters.CondTimeTypes, conddb.utils.converters.CondTimeTypes, java.lang.String)
 	 */
 	@Override
-	public BigDecimal convert(String inputstr, String deststr, String value) throws ConversionException {
-		if (inputstr.equals("Date") & deststr.equals("Time")) {
+	public BigDecimal convert(CondTimeTypes input, CondTimeTypes dest, String value) throws ConversionException {
+		if (input.compareTo(CondTimeTypes.DATE) == 0 && dest.compareTo(CondTimeTypes.TIME) == 0) {
 			return this.convertDateStringToTime(value);
+		} else if (input.compareTo(CondTimeTypes.TIMEMILLI) == 0 && dest.compareTo(CondTimeTypes.TIME) == 0) {
+			return convertMillisecStringToTime(value);
+		} else if (input.compareTo(CondTimeTypes.RUN) == 0 && dest.compareTo(CondTimeTypes.TIME) == 0) {
+			return convertRunStringToTime(value);
 		}
 		return null;
 	}

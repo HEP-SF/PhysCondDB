@@ -170,7 +170,8 @@ public class GlobalTagExpRestController extends BaseController {
 			@Context UriInfo info, 
 			@ApiParam(value = "id: id of the globaltag to be updated", required = true) 
 			@PathParam("id") String id, 
-			@ApiParam(value = "action: {addtags|merge} default is addtags ", required = true) 
+			@ApiParam(value = "action: {addtags(default)|merge}. If merge is used, the input map should contain a global tag name. "
+			+"All associated tag will then be also associated to the global tag identified by {id}.", required = false) 
 			@DefaultValue("addtags") @QueryParam("action") final String action,
 			Map map)
 			throws ConddbWebException {
@@ -213,7 +214,9 @@ public class GlobalTagExpRestController extends BaseController {
 					globalTagService.mapAddTagToGlobalTag(tag, existing,record, label);
 				}
 			}
-			resp = Response.ok(existing).build();
+			GlobalTagResource resource = (GlobalTagResource) springResourceFactory.getResource("globaltag", info,
+					existing);
+			resp = Response.ok(resource, MediaType.APPLICATION_JSON).build();
 			return resp;
 
 		} catch (ConddbServiceException e) {

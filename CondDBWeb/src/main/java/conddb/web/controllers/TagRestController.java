@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 
-import conddb.data.ErrorMessage;
 import conddb.data.Tag;
 import conddb.svc.dao.controllers.GlobalTagService;
 import conddb.svc.dao.exceptions.ConddbServiceException;
@@ -34,7 +33,6 @@ import conddb.utils.collections.CollectionUtils;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
-import conddb.web.resources.GlobalTagResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
 import conddb.web.resources.TagResource;
@@ -141,6 +139,7 @@ public class TagRestController extends BaseController {
         return listToCollection(tags, expand, info);
 	}
 
+	@SuppressWarnings("unchecked")
 	protected CollectionResource listToCollection(Collection<Tag> tags, boolean expand, UriInfo info) {
 		Collection items = new ArrayList(tags.size());
 		for (Tag tag : tags) {

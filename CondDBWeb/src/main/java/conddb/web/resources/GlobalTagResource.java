@@ -1,10 +1,6 @@
 
 package conddb.web.resources;
 
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,8 +20,18 @@ public class GlobalTagResource extends Link {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
+	public GlobalTagResource(UriInfo info, GlobalTag globaltag, TimestampFormat tsformat) {
+		super(info, globaltag);
+		build(info, globaltag, tsformat);
+	}
+
 	public GlobalTagResource(UriInfo info, GlobalTag globaltag) {
 		super(info, globaltag);
+		build(info, globaltag, null);
+	}
+
+	protected void build(UriInfo info, GlobalTag globaltag, TimestampFormat tsformat) {
+		this.tsformat = tsformat;
 		put("name", globaltag.getName());
 		put("description", globaltag.getDescription());
 		put("insertionTime", globaltag.getInsertionTime());
@@ -33,41 +39,33 @@ public class GlobalTagResource extends Link {
 		put("release", globaltag.getRelease());
 		put("snapshotTime", globaltag.getSnapshotTime());
 		put("validity", globaltag.getValidity());
-		
+
 		CollectionResource mapsresource = null;
 		try {
 			log.debug("Loading fetched tags....");
 			if (globaltag.getGlobalTagMaps() != null) {
-				Collection<GlobalTagMap> globaltagmaps = CollectionUtils.iterableToCollection(globaltag.getGlobalTagMaps());
-		        Collection items = new ArrayList(globaltagmaps.size());
-		        for( GlobalTagMap globaltagmap : globaltagmaps) {
-		        	globaltagmap.setResId(globaltagmap.getId().toString());
-		        	globaltagmap.getGlobalTag().setResId(globaltagmap.getGlobalTagName());
-		        	globaltagmap.getSystemTag().setResId(globaltagmap.getTagName());
-		        	GlobalTagMapResource resource = new GlobalTagMapResource(info,(GlobalTagMap)globaltagmap);
-		            items.add(resource);
-		        }
-				mapsresource = new CollectionResource(info,Link.GLOBALTAGMAPS+"/trace?type=globaltag&id="+globaltag.getName(), items,0,items.size());
-
+				Collection<GlobalTagMap> globaltagmaps = CollectionUtils
+						.iterableToCollection(globaltag.getGlobalTagMaps());
+				Collection items = new ArrayList(globaltagmaps.size());
+				for (GlobalTagMap globaltagmap : globaltagmaps) {
+					globaltagmap.setResId(globaltagmap.getId().toString());
+					globaltagmap.getGlobalTag().setResId(globaltagmap.getGlobalTagName());
+					globaltagmap.getSystemTag().setResId(globaltagmap.getTagName());
+					GlobalTagMapResource resource = new GlobalTagMapResource(info, (GlobalTagMap) globaltagmap);
+					items.add(resource);
+				}
+				mapsresource = new CollectionResource(info,
+						Link.GLOBALTAGMAPS + "/trace?type=globaltag&id=" + globaltag.getName(), items, 0, items.size());
 			}
 		} catch (org.hibernate.LazyInitializationException e) {
 			log.debug("LazyInitialization Exception from hibernate: maps collection is empty ");
-			mapsresource = new CollectionResource(info,Link.GLOBALTAGMAPS+"/trace?type=globaltag&id="+globaltag.getName(), Collections.emptyList());
 		}
-		put("globalTagMaps",mapsresource);
+		if (mapsresource == null) {
+			mapsresource = new CollectionResource(info,
+					Link.GLOBALTAGMAPS + "/trace?type=globaltag&id=" + globaltag.getName(), Collections.emptyList());
+		}
+		put("globalTagMaps", mapsresource);
+		this.serializeTimestamps(this.tsformat);
 	}
 
-	public void serializeTimestamps(TimestampFormat tsformat) {
-		this.tsformat = tsformat;
-		Timestamp ts = (Timestamp) get("insertionTime");
-		if (ts != null) {
-			String tsstr = format(ts);
-			put("insertionTime", tsstr);
-		}
-		ts = (Timestamp) get("snapshotTime");
-		if (ts != null) {
-			String tsstr = format(ts);
-			put("snapshotTime", tsstr);
-		}		
-	}
 }

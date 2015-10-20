@@ -6,6 +6,9 @@
 			page</label> <input class="input-sm form-control" name="items" id="items"
 			type="number" ng-model="itemsByPage" />
 		<hr>
+		<label class="col-sm-2 control-label"> Filter by Name: </label>
+		<input type="text" ng-model="globaltagname" />
+		<hr>
 		<input type="submit" ng-click="refresh()" value="Refresh" /> <input
 			type="submit" ng-click="search()" value="Search" />
 
@@ -35,6 +38,12 @@
 				<tr st-select-row="gtag" st-select-mode="single"
 					ng-repeat="gtag in displayedCollection">
 
+					<td>
+						<button class="btn" ng-click="edit(gtag)">
+							<span class="glyphicon glyphicon-pencil"></span>Edit
+						</button>
+					</td>
+
 					<td data-title="'Name'">{{gtag.name}}</td>
 					<td data-title="'Insertion Time'">{{gtag.insertionTime}}</td>
 					<td data-title="'Description'">{{gtag.description}}</td>
@@ -46,13 +55,13 @@
 						<button class="btn btn-sm" popover-placement="top"
 							popover="Trace tags associated to {{gtag.name}}" type="button">
 							<i class="glyphicon glyphicon-eye-open"></i>
-						</button> <a ng-href="#/tracetags/{{gtag.name}}">trace</a>
+						</button> <a ng-href="#/globaltags/{{gtag.name}}/trace">trace</a>
 					</td>
 					<td>
 						<button class="btn btn-sm" popover-placement="top"
 							popover="Modify {{gtag.name}} mappings" type="button">
 							<i class="glyphicon glyphicon-link"></i>
-						</button> <a ng-href="#/maps/{{gtag.name}}">map</a>
+						</button> <a ng-href="#/globaltags/{{gtag.name}}/map">map</a>
 					</td>
 					<td>
 						<button popover="Remove {{gtag.name}}" type="button"

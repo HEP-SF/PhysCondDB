@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
+import conddb.web.admin.controllers.CondAdminWebController;
 import conddb.web.calib.controllers.CalibrationRestController;
 import conddb.web.controllers.GlobalTagExpRestController;
 import conddb.web.controllers.GlobalTagMapExpRestController;
@@ -85,6 +86,7 @@ public class JaxRsApplication extends ResourceConfig {
 		register(CalibrationRestController.class);
 		register(SystemDescriptionRestController.class);
 		register(SystemDescriptionExpRestController.class);
+		register(CondAdminWebController.class);
 
 		// register json provider
 		register(JacksonJsonProvider.class);

@@ -108,8 +108,7 @@ public class PayloadRestController extends BaseController {
 				log.debug("  - data :" + entitydata);
 			}
 			PayloadResource resource = (PayloadResource) springResourceFactory.getResource("payload", info, entity);
-			resp = Response.ok(resource).build();
-			return resp;
+			return created(resource);
 		} catch (ConddbServiceException e) {
 			resp = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
 			throw new ConddbWebException(e.getMessage());
@@ -129,35 +128,43 @@ public class PayloadRestController extends BaseController {
 			StreamingOutput stream = null;
 			// Initialization of an empty file name
 			String filename = "/tmp/none.blob";
-			File f = null;
 			PayloadData entitydata = iovService.getPayloadData(hash);
-			if (entitydata == null) {
+			Payload entity = iovService.getPayload(hash);
+
+			if (entitydata == null || entity == null) {
 				String msg = "Cannot find payload data corresponding to hash " + hash;
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
-			filename = "/tmp/" + entitydata.getHash() + ".blob";
-			payloadBytesHandler.dumpBlobIntoFile(entitydata.getData(), filename);
+			filename = entitydata.getHash() + "."+entity.getStreamerInfo();
+			File f = new File(entitydata.getUri());
+			//payloadBytesHandler.dumpBlobIntoFile(entitydata.getData(), filename);
 			// Open a file and an inputstream to read it
-			f = new File(filename);
+			//f = new File(filename);
 			final InputStream in = new FileInputStream(f);
 			// Set the output stream for the response
 			stream = new StreamingOutput() {
 				public void write(OutputStream out) throws IOException, WebApplicationException {
 					try {
 						int read = 0;
-						byte[] bytes = new byte[1024];
+						byte[] bytes = new byte[2048];
 
 						while ((read = in.read(bytes)) != -1) {
 							out.write(bytes, 0, read);
+							log.debug("Copying "+read+" bytes into the output...");
 						}
+						out.flush();
 					} catch (Exception e) {
 						throw new WebApplicationException(e);
+					} finally {
+						out.close();
+						in.close();
 					}
 				}
 			};
 
 			resp = Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM_TYPE)
-					.header("Content-Disposition", "attachment; filename=\"" + f.getName() + "\"").build();
+					.header("Content-Disposition", "attachment; filename=\"" + filename + "\"")
+					.header("Content-Length", new Long(f.length()).toString()).build();
 			return resp;
 
 		} catch (ConddbServiceException e) {

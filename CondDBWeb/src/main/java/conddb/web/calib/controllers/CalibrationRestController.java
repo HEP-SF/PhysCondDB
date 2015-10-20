@@ -53,6 +53,7 @@ import conddb.svc.dao.controllers.GlobalTagService;
 import conddb.svc.dao.controllers.IovService;
 import conddb.svc.dao.controllers.SystemNodeService;
 import conddb.svc.dao.exceptions.ConddbServiceException;
+import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.Link;
 
@@ -62,7 +63,7 @@ import conddb.web.resources.Link;
  */
 @Path(Link.CALIB)
 @Controller
-public class CalibrationRestController {
+public class CalibrationRestController  extends BaseController {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -97,7 +98,8 @@ public class CalibrationRestController {
 			// Check if path and tag do exists
 			SystemDescription sd = systemNodeService.getSystemNodesByNodeFullpath(path);
 			if (sd == null) {
-				resp = Response.status(Response.Status.BAD_REQUEST).build();
+				String msg = "Cannot find system corresponding to path " + path;
+				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			} else {
 				// Use the default HEAD tag for upload of the files...
 				// The first time this will create it, in future we will only add IOVs to it
@@ -117,13 +119,14 @@ public class CalibrationRestController {
 				Payload payload = uploadFile(fileDetail,uploadedInputStream,filename,"HEAD","none");
 				Iov storable = new Iov(new BigDecimal(0),"0",null, tagstored);
 				calibrationService.commit(tagstored, storable, payload);
+				resp = Response.ok(storable).build();
+				return resp;
 			}
 			
-		} catch (Exception e) {
-			resp = Response.status(Response.Status.BAD_REQUEST).build();
-			throw new ConddbWebException(e.getMessage());
+		} catch (ConddbServiceException e) {
+			String msg = "Cannot commit files for path " + path;
+			throw buildException(msg, msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
-		return resp;
 	}
 	
 	private Payload uploadFile(FormDataContentDisposition fileDetail, InputStream uploadedInputStream, String filename,
@@ -206,7 +209,6 @@ public class CalibrationRestController {
 	public Response getTarFromGlobalTag(
 			@PathParam("id") final String globaltagname) throws ConddbWebException {
 		Response resp = null;
-		ConddbWebException ex = new ConddbWebException();
 		try {
 			GlobalTag globaltag = globalTagService.getGlobalTag(globaltagname);
 			File f = directoryMapperService.createTar(globaltag);
@@ -227,18 +229,14 @@ public class CalibrationRestController {
 	        };
 			
 			resp = Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM_TYPE).header("Content-Disposition", "attachment; filename=\"" + f.getName() + "\"" ).build();
+			return resp;
 		} catch (ConddbServiceException e) {
-			ErrorMessage error = new ErrorMessage("Error dumping tree structure for global tag "+globaltagname);
-			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			error.setInternalMessage("Cannot dump tree structure :"+e.getMessage());
-			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
-			ex.setErrMessage(error);
-			throw ex;
+			String msg = "Error dumping tree structure for global tag "+globaltagname;
+			throw buildException(msg, msg+": "+e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
 		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			String msg = "Error dumping tree structure for global tag "+globaltagname+": file not found ";
+			throw buildException(msg, msg+": "+e1.getMessage(), Response.Status.NOT_FOUND);
 		}
-		return resp;
 	}
 
 	@GET
@@ -248,20 +246,15 @@ public class CalibrationRestController {
 	public Response dumpContent(
 			@PathParam("id") final String globaltagname) throws ConddbWebException {
 		Response resp = null;
-		ConddbWebException ex = new ConddbWebException();
 		try {
 			GlobalTag globaltag = globalTagService.getGlobalTag(globaltagname);
 			directoryMapperService.dumpGlobalTagOnDisk(globaltag);
 			resp = Response.ok().build();
+			return resp;
 		} catch (ConddbServiceException e) {
-			ErrorMessage error = new ErrorMessage("Error dumping tree structure for global tag "+globaltagname);
-			error.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
-			error.setInternalMessage("Cannot dump tree structure :"+e.getMessage());
-			ex.setStatus(Response.Status.INTERNAL_SERVER_ERROR);
-			ex.setErrMessage(error);
-			throw ex;
+			String msg = "Error dumping tree structure for global tag "+globaltagname;
+			throw buildException(msg, msg+": "+e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
 		}
-		return resp;
 	}
 
 	

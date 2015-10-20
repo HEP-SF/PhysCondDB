@@ -72,7 +72,8 @@ public class GlobalTagMapRestController  extends BaseController {
 			@ApiParam(value = "type: {globaltag|tag}", required = true)
 			@DefaultValue("globaltag") @QueryParam("type") final String type,
 			@ApiParam(value = "id: the name either of the tag or the global tag, patterns not allowed", required = true)
-			@DefaultValue("none") @QueryParam("id") final String name
+			@DefaultValue("none") @QueryParam("id") final String name,
+			@DefaultValue("true") @QueryParam("expand") final boolean expand
 			) throws ConddbWebException {
 		this.log.info("GlobalTagMapRestController processing request for type "
 				+ type + " and name "+name);
@@ -94,7 +95,7 @@ public class GlobalTagMapRestController  extends BaseController {
 			}
 			log.debug("Controller has retrieved a list of size "+list.size());
 			Collection<GlobalTagMap> globaltagmaps = CollectionUtils.iterableToCollection(list);
-			CollectionResource collres = listToCollection(globaltagmaps, true, info,null,null);
+			CollectionResource collres = listToCollection(globaltagmaps, expand, info,null,null);
 			return created(collres);
 			
 		} catch (ConddbServiceException e) {

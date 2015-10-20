@@ -1,10 +1,14 @@
 package conddb.web.admin.controllers;
 
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,19 +18,28 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import conddb.data.GlobalTag;
 import conddb.data.Tag;
+import conddb.data.exceptions.ConversionException;
 import conddb.svc.dao.controllers.GlobalTagExpertService;
 import conddb.svc.dao.controllers.GlobalTagService;
+import conddb.svc.dao.exceptions.ConddbServiceException;
+import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
+import conddb.web.resources.GlobalTagResource;
+import conddb.web.resources.Link;
+import conddb.web.resources.SpringResourceFactory;
+import conddb.web.resources.TagResource;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * @author formica
  *
  */
 @Controller
-@Path("/admin")
-@Api(value = "/admin")
-public class CondAdminWebController {
+@Path(Link.ADMIN)
+@Api(value = Link.ADMIN)
+public class CondAdminWebController extends BaseController {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -34,57 +47,64 @@ public class CondAdminWebController {
 	private GlobalTagExpertService globalTagExpertService;
 	@Autowired
 	private GlobalTagService globalTagService;
+	@Autowired
+	private SpringResourceFactory springResourceFactory;
 
 	@POST
-	@Path("/globaltag/clone")
+	@Path(Link.GLOBALTAGS+"/clone")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@ResponseBody
-	public GlobalTag cloneGlobalTag(@QueryParam(value = "sourcegtag") String sourcegtag,
-			@QueryParam(value = "destgtag") String destgtag) throws ConddbWebException {
+	@ApiOperation(value = "Clone a GlobalTag.",
+    notes = "Clone a source global tag into a destination global tag. It associates all tags from the source.",
+    response=GlobalTag.class)
+	public Response cloneGlobalTag(@Context UriInfo info,
+			@ApiParam(value = "source: name of the globaltag to be cloned", required = true) 
+			@QueryParam(value = "source") String sourcegtag,
+			@ApiParam(value = "dest: name of the destination global tag", required = true) 
+			@QueryParam(value = "dest") String destgtag) throws ConddbWebException {
 		try {
 			this.log.info("CondAdminWebController processing request for cloning " + sourcegtag + " into " + destgtag);
 			this.globalTagExpertService.cloneGlobalTag(sourcegtag, destgtag);
 			GlobalTag cloned = this.globalTagService.getGlobalTag(destgtag);
-
-			return cloned;
-		} catch (Exception e) {
-			throw new ConddbWebException(e);
+			GlobalTagResource resource = (GlobalTagResource) springResourceFactory.getResource("globaltag", info,
+					cloned);
+			return created(resource);			
+		} catch (ConddbServiceException e) {
+			String msg = "Error cloning globaltag resource "+sourcegtag;
+			throw buildException(msg+" "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	@POST
-	@Path("/tag/clone")
+	@Path(Link.TAGS+"/clone")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@ResponseBody
-	public Tag cloneTag(@QueryParam(value = "sourcetag") String sourcetag,
-			@QueryParam(value = "desttag") String desttag,
-			@QueryParam(value = "from") String from,
-			@QueryParam(value = "to") String to,
-			@QueryParam(value = "timetype") String timetype
+	@ApiOperation(value = "Clone a Tag.",
+    notes = "Clone a source  tag into a destination  tag. It copies all iovs from the source. A time range selection can be applied.",
+    response=Tag.class)
+	public Response cloneTag(@Context UriInfo info,
+			@ApiParam(value = "source: name of the globaltag to be cloned", required = true) 
+			@QueryParam(value = "source") String sourcetag,
+			@ApiParam(value = "dest: name of the destination global tag", required = true) 
+			@QueryParam(value = "dest") String desttag,
+			@ApiParam(value = "from: since time of the iov range to be copied", required = false) 
+			@DefaultValue("0") @QueryParam(value = "from") String from,
+			@ApiParam(value = "to: until time of the iov range to be copied", required = false) 
+			@DefaultValue("Inf") @QueryParam(value = "to") String to,
+			@ApiParam(value = "time: definition of time type {time|run|date|timemilli}", required = false) 
+			@DefaultValue("time") @QueryParam(value = "time") String timetype
 			) throws ConddbWebException {
 		try {
 			this.log.info("CondAdminWebController processing request for cloning " + sourcetag + " into " + desttag);
 			this.globalTagExpertService.cloneTag(sourcetag, desttag,from,to,timetype);
 			Tag cloned = this.globalTagService.getTag(desttag);
-			return cloned;
-		} catch (Exception e) {
-			throw new ConddbWebException(e);
-		}
-	}
-	@POST
-	@Path("/map/update")
-	@Produces({ MediaType.TEXT_HTML })
-	@ResponseBody
-	public String updateGlobalTagMap(@QueryParam(value = "sourcegtag") String sourcegtag,
-			@QueryParam(value = "oldtag") String oldtag, @QueryParam(value = "newtag") String newtag)
-					throws ConddbWebException {
-		try {
-			this.log.info("CondAdminWebController processing request for updating mapping " + sourcegtag + " from "
-					+ oldtag + " to " + newtag);
-			this.globalTagExpertService.updateTagMapping(sourcegtag, oldtag, newtag);
-			return "Success";
-		} catch (Exception e) {
-			throw new ConddbWebException(e);
+			TagResource resource = (TagResource) springResourceFactory.getResource("tag", info,
+					cloned);
+			return created(resource);			
+		} catch (ConddbServiceException e) {
+			String msg = "Error cloning tag resource "+sourcetag;
+			throw buildException(msg+" "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
+		} catch (ConversionException e) {
+			String msg = "Error cloning tag resource "+sourcetag+": conversion error occurred.";
+			throw buildException(msg+" "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 }

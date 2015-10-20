@@ -41,6 +41,7 @@ public class Link extends LinkedHashMap {
     public static final String IOVS = PATH_SEPARATOR + "iovs";
     public static final String PAYLOAD = PATH_SEPARATOR + "payload";
     public static final String EXPERT = PATH_SEPARATOR + "expert";
+    public static final String ADMIN = PATH_SEPARATOR + "admin";
     public static final String CALIB = PATH_SEPARATOR + "calibration";
     public static final String SYSTEMS = PATH_SEPARATOR + "systems";
     public static final String PAYLOADDATA = PAYLOAD + "/data";
@@ -50,6 +51,12 @@ public class Link extends LinkedHashMap {
 
     public Link(UriInfo info, Entity entity) {
         this(getFullyQualifiedContextPath(info), entity);
+    }
+
+    public Link(UriInfo info, Entity entity, TimestampFormat tsformat) {
+        this(getFullyQualifiedContextPath(info), entity);
+        this.tsformat = tsformat;
+        this.serializeTimestamps(tsformat);
     }
 
     public Link(String fqBasePath, Entity entity) {
@@ -92,6 +99,30 @@ public class Link extends LinkedHashMap {
 		}
 		return null;
 	}	
+    
+    public void serializeTimestamps(TimestampFormat tsformat) {
+		this.tsformat = tsformat;
+		log.debug("Timestamp serialization is using "+tsformat);
+		if (tsformat == null) {
+			return;
+		}
+		log.debug(" - time format "+tsformat.getPattern());
+		Timestamp ts = (Timestamp) get("insertionTime");
+		if (ts != null) {
+			String tsstr = format(ts);
+			put("insertionTime", tsstr);
+		}
+		ts = (Timestamp) get("modificationTime");
+		if (ts != null) {
+			String tsstr = format(ts);
+			put("modificationTime", tsstr);
+		}
+		ts = (Timestamp) get("snapshotTime");
+		if (ts != null) {
+			String tsstr = format(ts);
+			put("snapshotTime", tsstr);
+		}
+	}
     
     public String getHref() {
         return (String)get("href");

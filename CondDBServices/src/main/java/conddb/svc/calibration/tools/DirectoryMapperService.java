@@ -38,7 +38,6 @@ import conddb.svc.dao.controllers.GlobalTagService;
 import conddb.svc.dao.controllers.IovService;
 import conddb.svc.dao.controllers.SystemNodeService;
 import conddb.svc.dao.exceptions.ConddbServiceException;
-import conddb.utils.bytes.PayloadBytesHandler;
 
 /**
  * @author aformic
@@ -57,9 +56,7 @@ public class DirectoryMapperService {
 	private SystemNodeService systemNodeService;
 	@Autowired
 	private IovService iovService;
-	@Autowired
-	private PayloadBytesHandler payloadBytesHandler;
-
+	
 	public DirectoryMapperService() {
 		super();
 	}
@@ -69,6 +66,33 @@ public class DirectoryMapperService {
 		this.localrootdir = localrootdir;
 	}
 
+	public File createFileFromBlob(Payload payload) {
+		if (payload.getData()==null) {
+			return null;
+		}
+		PayloadData data = payload.getData();
+		String generatedFileName = payload.getObjectType();
+		try {
+			Resource resource = new FileSystemResource(localrootdir + "/");
+			log.info("create a file from payload " + payload.getHash());
+			if (!resource.exists()) {
+				log.error("Cannot create a file, file resource does not yet exists");
+			}
+			String outfilename = resource.getFile().getPath() + "/" + generatedFileName;
+			log.debug("Blob stored in " + data.getUri());
+			java.nio.file.Path path = Paths.get(data.getUri());
+			OutputStream out = new FileOutputStream(new File(outfilename));
+			Files.copy(path, out);
+			log.debug("File has been copied from " + path.toString() + " into " + outfilename);
+			File outfile = new File(outfilename);
+			return outfile;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	public void dumpBlobOnDisk(byte[] data, String path, String outputfile) {
 		return;
 	}
@@ -91,7 +115,7 @@ public class DirectoryMapperService {
 				Tag tag = globalTagMap.getSystemTag();
 				log.info("create directory for tag " + tag.getName());
 				String tagNameRoot = tag.getName().split("-HEAD")[0];
-				String filename = tag.getObjectType();
+				tag.getObjectType();
 				SystemDescription system = systemNodeService.getSystemNodesByTagname(tagNameRoot);
 				String nodefullpath = system.getNodeFullpath();
 				Resource tagresource = new FileSystemResource(resource.getFile().getPath() + nodefullpath);
@@ -169,8 +193,12 @@ public class DirectoryMapperService {
 	    for (File file : pathEntries) {
 	        files.addAll(this.recurseDirectory(file));
 	    }
+	    java.nio.file.Path rootpath = Paths.get(localrootdir);
 	    for (File file : files) {
-	        TarArchiveEntry tarArchiveEntry = new TarArchiveEntry(file, file.getPath());
+	    	java.nio.file.Path path = Paths.get(file.getPath());
+	    	java.nio.file.Path relativepath = rootpath.relativize(path);
+	    	log.info("Created relative file path "+relativepath.toString());
+	    	TarArchiveEntry tarArchiveEntry = new TarArchiveEntry(file, relativepath.toString());
 	        tarArchiveEntry.setSize(file.length());
 	        tarArchive.putArchiveEntry(tarArchiveEntry);
 	        FileInputStream fileInputStream = new FileInputStream(file);

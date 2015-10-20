@@ -37,6 +37,7 @@ import conddb.utils.collections.CollectionUtils;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
+import conddb.web.resources.IovResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
 import io.swagger.annotations.Api;
@@ -88,7 +89,7 @@ public class IovRestController extends BaseController {
 			if (!globaltagid.equals("none")) {
 				GlobalTag gtag = globalTagService.getGlobalTag(globaltagid);
 				snapshotTime = gtag.getSnapshotTime();
-				log.debug("Setting snapshot time to " + snapshotTime);
+				log.debug("Setting snapshot time to " + snapshotTime+ " for further queries based on globaltag id "+globaltagid);
 			}
 			if (until.equalsIgnoreCase("INF")) {
 				sincetime = new BigDecimal(since);
@@ -135,19 +136,19 @@ public class IovRestController extends BaseController {
 	@ApiOperation(value = "Finds Iovs by id",
     notes = "Usage of this method is essentially for href links.",
     response=Iov.class)
-	public Response getIovById(@ApiParam(value = "id: the iovid", required = true) @DefaultValue("1000")@PathParam("id") Long id) throws ConddbWebException {
+	public Response getIovById(
+			@Context UriInfo info,
+			@ApiParam(value = "id: the iovid", required = true) @DefaultValue("1000")@PathParam("id") Long id) throws ConddbWebException {
 		this.log.info("IovRestController processing request for iov id " + id);
-		Response resp = null;
 		try {
 			Iov entity = this.iovService.getIov(id);
-			entity.getPayload().setResId(entity.getPayload().getHash());
-			resp = Response.ok(entity).build();
-
+			entity.setResId(entity.getId().toString());
+			IovResource iovres = (IovResource) springResourceFactory.getResource("iov", info, entity);
+			return created(iovres);
 		} catch (Exception e) {
 			String msg = "Error retrieving iov by id "+id;
 			throw buildException(msg + " " + e.getMessage(), msg, Response.Status.NOT_FOUND);
 		}
-		return resp;
 	}
 
 	@SuppressWarnings("unchecked")

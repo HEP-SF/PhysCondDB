@@ -178,6 +178,7 @@ class PhysDBDriver():
             obj = self.restserver.getlink(url)
             return obj
         # Assume that data is a list of items
+        # NOT SURE THIS WORKS...
         for anobj in data:
             #print anobj
             href = anobj['href']
@@ -485,7 +486,12 @@ class PhysDBDriver():
                 #print 'Load linked item using ',href
                 tagdata = self.loadItems(atag)
                 amap['systemTag']=tagdata
-                #print 'Modified map to use ',amap['systemTag']
+                if self.debug:
+                    print 'Modified map to use ',amap['systemTag']
+                outputlist.append(amap)
+            else:
+                if self.debug:
+                    print 'Use the object found ',amap
                 outputlist.append(amap)
         return outputlist
 

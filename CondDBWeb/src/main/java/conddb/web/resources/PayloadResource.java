@@ -1,8 +1,6 @@
 
 package conddb.web.resources;
 
-import java.sql.Timestamp;
-
 import javax.ws.rs.core.UriInfo;
 
 import org.slf4j.Logger;
@@ -16,26 +14,27 @@ public class PayloadResource extends Link {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
+	public PayloadResource(UriInfo info, Payload payload, TimestampFormat tsformat) {
+		super(info, payload);
+		build(info, payload, tsformat);
+	}
+
 	public PayloadResource(UriInfo info, Payload payload) {
 		super(info, payload);
+		build(info, payload, null);
+	}
+
+	protected void build(UriInfo info, Payload payload, TimestampFormat tsformat) {
 		put("hash", payload.getHash());
 		put("backendInfo", payload.getBackendInfo());
 		put("objectType", payload.getObjectType());
 		put("streamerInfo", payload.getStreamerInfo());
 		put("version", payload.getVersion());
 		put("datasize", payload.getDatasize());
-		put("insertiontime", payload.getInsertionTime());
+		put("insertionTime", payload.getInsertionTime());
 		if (payload.getData() != null) {
-			put("data",new Link(getFullyQualifiedContextPath(info), payload.getData()));
+			put("data", new Link(info,Link.PAYLOADDATA + "/"+payload.getHash()));
 		}
-	}
-
-	public void serializeTimestamps(TimestampFormat tsformat) {
-		this.tsformat = tsformat;
-		Timestamp ts = (Timestamp) get("insertiontime");
-		if (ts != null) {
-			String tsstr = format(ts);
-			put("insertiontime", tsstr);
-		}
+		this.serializeTimestamps(tsformat);
 	}
 }
