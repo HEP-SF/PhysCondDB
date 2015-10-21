@@ -212,6 +212,39 @@ class PhysRestConnection:
              errno, errstr = error
              print 'An error occurred: ', errstr
 
+# This function should set appropriate values for POST type
+    def postForm(self, params):
+        if self.__debug:
+            print "Post form using url ", self.__url
+            # Sets request method to POST,
+            # Content-Type header to application/x-www-form-urlencoded
+            # and data to send in request body.
+        post_data = [("file", (self.__curl.FORM_FILE, params['file'])),
+                     ("path", str(params['path'])),
+                     ("package", str(params['package']))]
+        if self.__debug:
+            print post_data
+        self.setDefaultOptions()
+        self.__curl.setopt(self.__curl.POST,1)
+        self.__curl.setopt(self.__curl.HTTPPOST,post_data)
+        self.__curl.setopt(self.__curl.WRITEFUNCTION, self.write_out) # now passing own method
+        try:
+            self.__curl.perform()
+            response = self.__curl.getinfo(self.__curl.RESPONSE_CODE)
+            # HTTP response code, e.g. 200.
+            if self.__debug:
+                print('Status: %d' % response)
+                # Elapsed time for the transfer.
+                print('Status: %f' % self.__curl.getinfo(self.__curl.TOTAL_TIME))
+            #            data = { 'response' : response, 'data' : self.dataresponse }
+            data = self.dataresponse
+            jsondata = json.loads(data)
+            jsondata['code'] = response
+            return jsondata
+        except pycurl.error, error:
+            errno, errstr = error
+            print 'An error occurred: ', errstr
+
 
 # This function should set appropriate values for POST type
     def postPayload(self, params):
@@ -300,6 +333,9 @@ class PhysRestConnection:
 
     def close(self):
         self.__curl.close()
+
+    def getFormFile(self):
+        return self.__curl.FORM_FILE;
 
     def __init__(self):
         self.__curl = pycurl.Curl()
@@ -432,6 +468,15 @@ class PhysCurl(object):
         self.__curl.setHeader(['Content-Type:multipart/form-data'])
         return self.__curl.postPayload(params)
 
+    def commitCalibration(self,params,servicebase="/calibration"):
+        if self.__debug:
+            print 'Add calibration file using input '
+            print params
+        url = (self.baseurl + servicebase)
+        self.__curl.setUrl(url)
+        self.__curl.setHeader(['Content-Type:multipart/form-data'])
+        return self.__curl.postForm(params)
+
     def addWithPairs(self,data,params,servicebase="/globaltags"):
         if self.__debug:
             print 'Add object using parameter '
@@ -446,6 +491,20 @@ class PhysCurl(object):
             print 'Try to serialize in json '
         jsonobj = json.dumps(data)
         return self.__curl.postData(jsonobj)
+
+    def addPairs(self,params,servicebase="/globaltags"):
+        if self.__debug:
+            print 'Add object using parameter '
+            print params
+        url = (self.baseurl + servicebase )
+        self.__curl.setUrl(url)
+        self.__curl.setHeader(['Content-Type:application/json', 'Accept:application/json'])
+        urlquoted = urllib.quote_plus(url,safe=':/')
+        pairs = urllib.urlencode(params)
+        self.__curl.setUrl(urlquoted+'?'+pairs)
+        if self.__debug:
+            print 'Try to serialize in json '
+        return self.__curl.postAction(pairs)
 
 
     def addJsonEntity(self,params,servicebase="/globaltags"):
@@ -570,6 +629,9 @@ class PhysCurl(object):
         self.__debug = value
         self.__curl.setdebug(value)
 
+    def getFormFile(self):
+        return self.__curl.getFormFile()
+    
     def __init__(self, servicepath, usesocks=False):
         '''
         Constructor
