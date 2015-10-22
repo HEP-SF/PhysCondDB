@@ -50,8 +50,6 @@ public class PayloadDataMapper implements RowMapper<PayloadData> {
 		try {
 			LobHandler lobhandler = new DefaultLobHandler();
 			String uri = "/tmp/"+pyd.getHash()+".blob";
-//			Blob blob = rs.getBlob("DATA");
-//			InputStream istream = blob.getBinaryStream();
 			InputStream istream = lobhandler.getBlobAsBinaryStream(rs, "DATA");
 			log.debug("retrieved blob stream from handler : "+istream.available()+" !");
 			log.debug("copy stream into uri  : "+uri+" !");

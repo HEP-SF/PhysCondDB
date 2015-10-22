@@ -105,8 +105,10 @@ class PhysRestConnection:
             self.__curl.setopt(self.__curl.WRITEFUNCTION, buf.write)
             self.__curl.perform()
         # HTTP response code, e.g. 200.
+            response = self.__curl.getinfo(self.__curl.RESPONSE_CODE)
+
             if self.__debug:
-                print('Status: %d' % self.__curl.getinfo(self.__curl.RESPONSE_CODE))
+                print('Status: %d' % response)
         # Elapsed time for the transfer.
             if self.__debug:
                 print('Status: %f' % self.__curl.getinfo(self.__curl.TOTAL_TIME))
@@ -116,17 +118,15 @@ class PhysRestConnection:
             buf.close()
             if self.__debug:
                 print 'Retrieved data :' , data
-            if data is '':
-                return None
+            if data == '':
+                jsondata = {}
+                jsondata['code'] = response
+                return jsondata
             jsondata = json.loads(data)
-            return jsondata
+            return jsondata, response
         except pycurl.error, error:
-            response = self.__curl.getinfo(self.__curl.RESPONSE_CODE)
-            if response is not 200:
-                print colored.red('Problem in executing GET : status returned is %d' % response)
-            errno, errstr = error
-            print colored.red('An error occurred in GET method: %s ' % errstr)
-            return None
+             errno, errstr = error
+             print colored.red('An error occurred: %s ' % errstr)
         
     def deleteData(self):
         print "Delete data using url ", self.__url
@@ -193,21 +193,26 @@ class PhysRestConnection:
     def postAction(self, actionparams):
         if self.__debug:
             print "post data action using url ", self.__url
-# Sets request method to POST,
-# Content-Type header to application/x-www-form-urlencoded
-# and data to send in request body.
-#        self.__curl.setopt(self.__curl.POST,1)
             print actionparams
+        buf = cStringIO.StringIO()
         self.__curl.setopt(self.__curl.POSTFIELDS,actionparams)
         self.__curl.setopt(self.__curl.TIMEOUT, 30)
+        self.__curl.setopt(self.__curl.WRITEFUNCTION, buf.write)
         try:
             self.__curl.perform()
             response = self.__curl.getinfo(self.__curl.RESPONSE_CODE)
+            if self.__debug:
         # HTTP response code, e.g. 200.
-            print('Status: %d' % response)
+                print('Status: %d' % response)
         # Elapsed time for the transfer.
-            print('Status: %f' % self.__curl.getinfo(self.__curl.TOTAL_TIME))
-            return { 'response' : response }
+                print('Status: %f' % self.__curl.getinfo(self.__curl.TOTAL_TIME))
+            data = buf.getvalue()
+            if data is '':
+                return None
+            jsondata = json.loads(data)
+            jsondata['code'] = response
+            buf.close()
+            return jsondata
         except pycurl.error, error:
              errno, errstr = error
              print 'An error occurred: ', errstr

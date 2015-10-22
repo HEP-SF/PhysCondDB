@@ -550,6 +550,27 @@ class PhysDBDriver():
                 sys.exit("failed: %s" % (str(e)))
                 raise
             
+        elif (self.action=='COMMIT_CALIB'):
+            try:
+                calibargs=self.args
+                msg = '>>> Call method %s using arguments %s ' % (self.action,calibargs)
+                print colored.cyan(msg)
+                pkgname=calibargs[0]
+                filename=calibargs[1]
+                destpath=calibargs[2]
+                params = {}
+                params['file'] = filename
+                params['package'] = pkgname
+                params['path'] = destpath
+                post_data = [("file", (self.restserver.getFormFile(), str(filename))),
+                             ("package", str(pkgname)),
+                             ("path", str(destpath))]
+                self.restserver.commitCalibration(params,'/calibration/commit')
+    
+            except Exception, e:
+                sys.exit("failed: %s" % (str(e)))
+            raise
+        
         elif (self.action=='TAG'):
             try:
                 calibargs=self.args

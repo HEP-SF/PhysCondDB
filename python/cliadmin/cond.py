@@ -85,6 +85,10 @@ class PhysDBDriver():
         print "        ex: MyNewPkg-00-01 myfile : retrieve list of files containing 'myfile' string in global tag MyNewPkg-00-01."
         print "    List files under a given global tag, filtering by file name."
         print " "
+        print " - SHOW  <folder path> <tag-name> [tag-name defaults to -HEAD]"
+        print "        ex: /MY/FOLDER/PATH : retrieve list of files in the folder showing their insertion time and datasize."
+        print "    List files under a given folder (and tag)."
+        print " "
         print " - COLLECT  <global tag name>"
         print "        ex: MyNewPkg-00-01 : Dump the full directory structure for global tag in server file system."
         print "    The purpose is to trigger the copy to afs of all calibration files under a global tag."
@@ -416,9 +420,21 @@ class PhysDBDriver():
                 params = {}
                 params['globaltag'] = systemsglobaltag
                 params['package'] = systemname
-                self.restserver.addPairs(params,'/calibration/tag')
-                msg = '>>> Add globaltag %s for system %s ' % (systemsglobaltag,systemname)
+                response = self.restserver.addPairs(params,'/calibration/tag')
+                msg = 'Response Code: %s ' % (response['code'])
                 print colored.cyan(msg)
+                if response['code'] != 200:
+                    msg = 'Error in commit: %s ' % (response['code'])
+                    print colored.red(msg)
+                    return -1
+                if self.debug:
+                    print 'Received response ',response
+                maplist = response['globalTagMaps']
+                for amap in maplist:
+                    tag = amap['systemTag']
+                    msg = 'Associate tag %s for file %s to global tag %s' % (tag['name'], tag['objectType'],systemsglobaltag)
+                    print colored.green(msg)
+                return 0
             
             except Exception, e:
                 sys.exit("failed: %s" % (str(e)))
@@ -447,6 +463,51 @@ class PhysDBDriver():
                     calibargs.append('*')
                 self.listcalib(calibargs)
             
+            except Exception, e:
+                sys.exit("failed: %s" % (str(e)))
+                raise
+
+        elif (self.action=='SHOW'):
+            try:
+                calibargs=self.args
+                msg = '>>> Call method %s using arguments %s ' % (self.action,calibargs)
+                print colored.cyan(msg)
+                if len(calibargs) < 1:
+                    print 'Not enough arguments, type -h for help'
+                nodefullpath = calibargs[0]
+                systemdata = {}
+                systemdata['by']='node'
+                systemdata['name']=nodefullpath
+                msg = ' ==> Search for system by nodefullpath %s ' % nodefullpath
+                print colored.cyan(msg)
+                (systemobjlist, code) = self.restserver.getsystems(systemdata,'/systems/find')
+                if code != 200:
+                    msg = 'Error in show while retrieving systems: %s ' % (code)
+                    print colored.red(msg)
+                    return -1
+      
+                for systemobj in systemobjlist:
+                    #print 'Retrieved system ',systemobj
+                    tagnameroot = systemobj['tagNameRoot']
+                    tagname = tagnameroot+'-HEAD'
+                    msg = '>>> Check content for system %s using tag name root %s ' % (systemobj['nodeFullpath'],tagnameroot)
+                    print colored.cyan(msg)
+                    params = {}
+                    params['tag']=tagname
+                    params['expand']=True
+                    (iovlist, code) = self.restserver.getiovs(params, '/iovs/find')
+                    if code != 200:
+                        msg = 'Error in show while retrieving iovs for %s : %s ' % (tagname,code)
+                        print colored.red(msg)
+                    else:
+                        #print 'Retrieved iov list ',iovlist
+                        iovitems = iovlist['items']
+                        for iov in iovitems:
+                            payload=iov['payload']
+                            msg = '>>> Found entry for file %s with size %s inserted %s @ since %s [%s] ' % (payload['objectType'],payload['datasize'],payload['insertionTime'],iov['since'],payload['href'])
+                            print colored.green(msg)
+                            
+                
             except Exception, e:
                 sys.exit("failed: %s" % (str(e)))
                 raise
