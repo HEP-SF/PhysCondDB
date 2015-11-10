@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # encoding: utf-8
 '''
-cliadmin.CliAdmin -- shortdesc
+cliadmin.phconddb -- shortdesc
 
-cliadmin.CliAdmin is a description
+cliadmin.phconddb is a description
 
 It defines classes_and_methods
 
@@ -23,6 +23,7 @@ import pycurl
 import cStringIO
 import os.path
 
+from pygments import highlight, lexers, formatters
 from xml.dom import minidom
 from clint.textui import colored
 from datetime import datetime
@@ -65,9 +66,19 @@ class PhysDBDriver():
         print "Server url is needed in order to provide the system with the base url; defaults to localhost (see below)"
         print "Action determines which rest method to call"
         print "Actions list:"
-        print " - FIND <type> <id> [payload, iovs, tags, globaltags]"
+        print " - FIND <type> <id> [tags, globaltags, systems]"
         print "        ex: globaltags MY% : retrieve list of global tags following pattern name"
         print "        ex: --trace=on FIND globaltags MYTAG : retrieve one global tag and associated leaf tags"
+        print "   remarks: --trace=on will fail in case multiple object (id=xx%) are retrieved"
+        print " "
+        print " - ADD <type> [tags, globaltags, systems] <parameters string> [column separated key=val list]"
+        print "        ex: globaltags 'name=MYGTAG;description=A global tag; xxxx ' : create a global tag using the provided parameter list"
+        print " "
+        print " - LINK <globaltagname> <tagname> 'record=xxx;label=yyy'"
+        print "        ex: MYGTAG TAG_01 record=none;label=none : link a global tag to a tag, both should exists."
+        print " "
+        print " - UNLINK <globaltagname> <tagname> "
+        print "        ex: MYGTAG TAG_01 : remove link from global tag to a tag."
         print " "
         print "Options: "
         print "  --socks activate socks proxy on localhost 3129 "
@@ -103,7 +114,7 @@ class PhysDBDriver():
         
         # Assumes that data is a string using column separated field
         # Build a dictionary out of it then call createObj
-        print data
+        #print data
         argsarr = data.split(';')
         obj = {}
         outdata = {}
@@ -112,16 +123,16 @@ class PhysDBDriver():
             val = anarg.split('=')[1]
             obj[key]=val
         
-        print 'Created python dictionary ',obj
+        #print 'Created python dictionary ',obj
         objinst = self.createObj(type,{})
         keys = objinst.getKeys()
         for akey in keys:
-            print 'Search value for ',akey
+            #print 'Search value for ',akey
             if akey in obj:
                 outdata[akey] = obj[akey]
             else:
                 outdata[akey]=None
-                print 'No value is defined for ',akey
+                #print 'No value is defined for ',akey
         return outdata
 
 
@@ -188,129 +199,6 @@ class PhysDBDriver():
             print 'Use url link ',url
             obj = self.restserver.getlink(url)
             print obj
-
-    def commit(self, params):
-        filename=params[0]
-        destpath=params[1]
-        data={}
-    # Search tagRootName in systems
-        print 'Search for system given the node full path ',destpath
-        data['by']='node'
-        data['name']=destpath
-        obj = self.restserver.getsystems(data,'/systems/find')
-        print obj
-        if 'tagNameRoot' in obj:
-            print 'Found system...use the tagNameRoot ',obj['tagNameRoot']
-        # Now search for HEAD tag, if does exists create it
-            tagdata={}
-            tagdata['expand']='true'
-            tagdata['trace']= 'off'
-            tagdata['name']=obj['tagNameRoot']+'-HEAD'
-            print 'Search for tag HEAD using ',tagdata
-            tagobj = self.restserver.get(tagdata,'/tags')
-            print 'Retrieved ',tagobj
-            if tagobj is None:
-                print 'Create the tag HEAD...'
-                objparams={}
-                objparams['name']=tagdata['name']
-                objparams['timeType']='time'
-                objparams['objectType']=filename
-                objparams['synchronization']='none'
-                objparams['description']='main tag for calibration of '+destpath
-                objparams['lastValidatedTime']=0
-                objparams['endOfValidity']=0 # This means that it is always valid
-                print '    use parameters ',objparams
-                response = self.restserver.addJsonEntity(objparams,'/tags')
-                if response['response'] == 201:
-                    print 'Tag inserted, retrieve to verify'
-                else:
-                    print 'Error in inserting tag...'
-                    return
-                tagobj = self.restserver.get(tagdata,'/tags')
-
-# Now store file in IOV[since]=0
-            print 'Found tag ',tagobj
-            since=0
-            sincestr='0'
-            print 'Upload iov in tag ',tagdata['name']
-            tagid=tagobj['name']
-            pylddata = {}
-            filetype=filename.split('.')[1]
-            argsforpyld='version=1.0;objectType=file;streamerInfo=extension;backendInfo=database'
-            argsarr = argsforpyld.split(';')
-            for anarg in argsarr:
-                key = anarg.split('=')[0]
-                val = anarg.split('=')[1]
-                pylddata[key]=val
-            pylddata['objectType']=filetype
-            pylddata['since'] = since
-            pylddata['sinceString'] = sincestr
-            pylddata['file'] = filename
-            pylddata['tag'] = tagid
-            response=self.restserver.addPayload(pylddata,'/iovs/payload')
-            if response['response'] == 201:
-                print 'Iov and payload inserted, retrieve to verify'
-
-        else:
-            print 'System does not exists...create it before using commit!'
-        
-        print 'End of commit...'
- 
-    def tagit(self, params):
-        systemname=params[0]
-        systemsglobaltag=params[1]
-        data={}
-        # Search tagRootName in systems
-        print 'Search for system given the provided system name ',systemname
-        data['by']='tag'
-        data['name']=systemname+'%'
-        data['trace']='on'
-        systemlist = self.restserver.getsystems(data,'/systems/find')
-        print systemlist
-        # check if destination global tag exists: if not, create it
-        gtagparams = {}
-        gtagparams['name']=systemsglobaltag
-        gtagparams['trace']='off'
-        gtagparams['expand']='false'
-        gtag = self.restserver.get(gtagparams,'/globaltags')
-        print 'Found global tag ',gtag
-        if gtag is None:
-            print 'Create the tag HEAD...'
-            objparams={}
-            objparams['name']=systemsglobaltag
-            objparams['lockstatus']='unlocked'
-            objparams['validity']='0'
-            objparams['release']='1.0'
-            objparams['description']='first global tag for calibration of '+systemname
-            objparams['snapshotTime']='2050-01-01T00:00:00+02:00'   # Very large snapshot time
-            
-            print '    use parameters ',objparams
-            response = self.restserver.addJsonEntity(objparams,'/globaltags')
-            if response['response'] == 201:
-                print 'Tag inserted, retrieve to verify'
-            else:
-                print 'Error in inserting global tag...'
-                return
-            gtag = self.restserver.get(gtagparams,'/globaltags')
-        # Now make the associations
-        for asys in systemlist:
-            # get the tagNameRoot, search for the -HEAD and associate it to the global tag
-            print 'Analyse system ',asys['tagNameRoot']
-            tagname = asys['tagNameRoot']
-            tagparams = {}
-            tagparams['name']=tagname+'%HEAD'
-            tagparams['trace']='off'
-            tagparams['expand']='true'
-            taglist = self.restserver.get(tagparams,'/tags')
-            for atag in taglist:
-            # link it to the global tag
-                print 'Associate tag ',atag['name']
-                mapdata={}
-                mapdata['globaltagname']=gtag['name']
-                mapdata['tagname']=atag['name']
-                mapdata['label']='no label'
-                mapdata['record']='none'
-                self.restserver.addJsonEntity(mapdata,'/maps')
 
     def lockit(self, params):
         globaltagname=params[0]
@@ -417,93 +305,108 @@ class PhysDBDriver():
                 sys.exit("failed: %s" % (str(e)))
                 raise
         
-        if (self.action=='CALIB'):
-            try:
-                print 'Action CALIB is used to simulate calibration actions: commit, tag, lock ... '
-                print 'Found N arguments ',len(self.args)
-                calaction=self.args[0]
-                print 'Method ', calaction, ' will be called '
-                calibargs=self.args[1:]
-                print '    using arguments: ',calibargs
-                if calaction == 'commit':
-                    self.commit(calibargs)
-                elif calaction=='tag':
-                    self.tagit(calibargs)
-                elif calaction=='lock':
-                    self.lockit(calibargs)
-                else:
-                    print 'Cannot perform action...'
-            except Exception, e:
-                sys.exit("failed: %s" % (str(e)))
-                raise
-
-        
         if (self.action=='FIND'):
             try:
                 print 'Action FIND is used to retrieve object from the DB'
                 print 'Found N arguments ',len(self.args)
                 object=self.args[0]
-                print 'Selecting object type ', object
+                msg = ('FIND: selected object is %s ') % (object)
+                if object in { 'globaltags', 'tags', 'systems' }:
+                    print colored.cyan(msg)
+                else:
+                    msg = ('FIND: cannot apply command to object %s ') % (object)
+                    print colored.red(msg) 
+                    return
+                # load arguments and prepare the data structure for the GET request
+                # optional parameters like trace and expand are added
                 name = None
                 if len(self.args) > 1:
                     name=self.args[1]
-                    print '   use id ', name
+                    msg = ('FIND: selected id is %s ') % (name)
+                    print colored.cyan(msg)
                 data = {}
                 data['trace']=self.trace
                 data['expand']=self.expand
                 data['name']=name
                 objList = []
-                if name is None:
-                    #print 'Load all ',object
-                    linkList = self.restserver.get(data,'/'+object)
-                    objList = self.loadItems(linkList['items'])
+                traceList = []
+                msg = ('FIND: load data using trace %s ') % (self.trace)
+                print colored.cyan(msg)                   
 
-                if self.trace == 'off':
+                if self.trace == 'off':   
                     if objList is None or len(objList) == 0:
-                        objList = self.restserver.get(data,'/'+object)
+                        (objList,response) = self.restserver.get(data,'/'+object)
 
-                    json_string = json.dumps(objList,sort_keys=True,indent=4, separators=(',', ': '))
-                    print json_string
-#for obj in objList:
-                        #mpobj = self.createObj(object,obj)
-                        #print 'found object in list ', obj
                 else:
-                    obj = self.restserver.get(data,'/'+object)
+                    (obj,response) = self.restserver.get(data,'/'+object)
+                    if self.debug:
+                        msg = ('FIND: retrieved object from database %s ') % (obj)
+                        print colored.cyan(msg)                        
                     if obj is None:
-                        print 'Cannot find any object in database ',object
+                        msg = ('FIND: error, cannot find any object in database for type %s ') % (object)
+                        print colored.red(msg)
                         raise
-                    json_string = json.dumps(obj,sort_keys=True,indent=4, separators=(',', ': '))
-                    print json_string
-                    
-                    mpobj = self.createObj(object,obj)
-                    if mpobj.getValues()['globalTagMaps'] is not None:
-                        maplist = mpobj.getValues()['globalTagMaps']
-                        for amap in maplist:
-                            atag = Tag(amap['systemTag'])
-                            gtag = GlobalTag(amap['globalTag'])
-                            print atag.toJson()
-            
+                    objList.append(obj)
+                    # If trace is active, perform a special dump for the trace
+                    if object in { 'globaltags', 'tags' }:
+                        mpobj = self.createObj(object,obj)
+                        globaltagmaps = mpobj.getValues()['globalTagMaps']
+                        if globaltagmaps is not None:
+                            try:
+                                maplist = globaltagmaps['items']
+                                if hasattr(maplist, '__iter__'):
+                                    for amap in maplist:
+                                        traceList.append(('GlobalTag %s => Tag %s') % (amap['globalTagName'],amap['tagName']))
+                            except Exception, e:
+                                sys.exit("failed on looping over items: %s" % (str(e)))
+                                raise
+                                
+# Now dump the retrieved content
+                if response != 200 and response != 201:
+                    msg = ('FIND: error in data retrieval %s ') % (response)
+                    print colored.red(msg)
+                    return
+                json_string = json.dumps(objList,sort_keys=True,indent=4, separators=(',', ': '))
+                colorful_json = highlight(unicode(json_string, 'UTF-8'), lexers.JsonLexer(), formatters.TerminalFormatter())
+                print colorful_json
+                
+                if len(traceList) > 0:
+                    msg = ('FIND: found list of globaltags to tags associations')
+                    print colored.cyan(msg)
+                    for amsg in traceList:
+                        print colored.green(amsg)
+   
             
             except Exception, e:
-                sys.exit("failed: %s" % (str(e)))
+                sys.exit("failed on action FIND: %s" % (str(e)))
                 raise
 
         elif self.action == 'ADD':
             try:
                 print 'Action ADD is used to insert a metadata object (globaltags,tags,maps,...) into the DB'
                 object=self.args[0]
-                print 'Selecting object type ', object
-                if object not in ['globaltags','tags','maps','systems']:
-                    print 'To add an iov+payload use action STORE'
+                msg = ('ADD: selected object is %s ') % (object)
+                if object in { 'globaltags', 'tags', 'systems' }:
+                    print colored.cyan(msg)
+                else:
+                    msg = ('ADD: cannot apply command to object %s ') % (object)
+                    print colored.red(msg) 
+                    msg = ('ADD: to insert an IOV + Payload use STORE, see --help')
+                    print colored.cyan(msg) 
                     return
+
                 objparams = None
                 if len(self.args) > 1:
                     objparams=self.args[1]
-                print '   use object parameters: ', objparams
+                    
+                msg = ('ADD: object parameters %s ') % (objparams)
+                print colored.cyan(msg)
                 data = {}
                 if objparams is None:
-                    print self.helpAdd(object)
+                    msg = self.helpAdd(object)
+                    print colored.cyan(msg)
                     return
+                # Parameters have been provided in command line, try to create the json entity
                 data = self.createObjParsingArgs(object,objparams)
                 print json.dumps(data)
         
@@ -590,21 +493,54 @@ class PhysDBDriver():
                 print 'Action LINK is used to map a tag into a global tag'
                 gtagobject=self.args[0]
                 tagobject=self.args[1]
-                print 'Linking tag',tagobject,' into global tag ', gtagobject
+                msg = ('LINK: perform association between %s and %s ') % (gtagobject,tagobject)
+                print colored.cyan(msg)
                 data = {}
                 object = 'maps'
                 objparams = None
+
                 if len(self.args) > 2:
                     objparams=self.args[2]
-                    print '   use object parameters: ', objparams
                 else:
-                    print '   missing arguments: "record=xxx;label=yyyy"'
+                    msg = ('LINK: object parameters are missing %s ') % ("record=xxx;label=yyyy")
+                    print colored.red(msg)
                     return
+                msg = ('LINK: object parameters %s ') % (objparams)
+                print colored.cyan(msg)
+
                 data = self.createObjParsingArgs(object,objparams)
                 data['globaltagname']=gtagobject
                 data['tagname']=tagobject
 
-                self.restserver.addJsonEntity(data,'/'+object)
+                (response) = self.restserver.addJsonEntity(data,'/'+object)
+                if response is None:
+                    print colored.red('Failed in linking the objects: may be link already exists ?')
+                else:
+                    msg = ('LINK: performed association between %s and %s ') % (gtagobject,tagobject)
+                    print colored.green(msg)
+            
+            except Exception, e:
+                sys.exit("failed: %s" % (str(e)))
+                raise
+
+        elif self.action == 'UNLINK':
+            try:
+                print 'Action UNLINK is used to remove maping from a tag to a global tag'
+                gtagobject=self.args[0]
+                tagobject=self.args[1]
+                msg = ('UNLINK: remove association between %s and %s ') % (gtagobject,tagobject)
+                print colored.cyan(msg)
+                data = {}
+                object = 'maps'
+
+                data['globaltag']=gtagobject
+                data['tag']=tagobject
+                data['expand'] = 'true'
+                (entity, response) = self.restserver.getmaps(data)
+                mappingidlink = entity['href'] 
+                self.restserver.deletelink(mappingidlink)
+                msg = ('UNLINK: removed association between %s and %s ') % (gtagobject,tagobject)
+                print colored.green(msg)
             
             except Exception, e:
                 sys.exit("failed: %s" % (str(e)))

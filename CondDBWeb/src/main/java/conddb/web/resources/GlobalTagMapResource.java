@@ -44,16 +44,20 @@ public class GlobalTagMapResource extends Link {
 				if (systag.getGlobalTagMaps() != null) {
 					systag.setGlobalTagMaps(null);
 				}
-				tagres = new TagResource(info, (Tag) systag, this.tsformat);
+				//tagres = new TagResource(info, (Tag) systag, this.tsformat);
 			} 
 		} catch (org.hibernate.LazyInitializationException e) {
-			log.debug("LazyInitialization Exception from hibernate: maps collection is empty");
+			log.debug("LazyInitialization Exception from hibernate: map does not have a system tag loaded");
 		}
 		if (tagres == null) {
-			tagres = (TagResource) new Link(info, globaltagmap.getSystemTag());
+			Tag systag = globaltagmap.getSystemTag();
+			systag.setResId(systag.getName());
+			put("systemTag", new Link(getFullyQualifiedContextPath(info), systag));		
+		} else {
+			// This is for the moment never accessed...we probably should remove it
+			// FIXME: remove dead code
+			put("systemTag", tagres);
 		}
-		put("systemTag", tagres);
-
 		GlobalTag gtag = globaltagmap.getGlobalTag();
 		gtag.setResId(gtag.getName());
 		put("globalTag", new Link(getFullyQualifiedContextPath(info), gtag));		

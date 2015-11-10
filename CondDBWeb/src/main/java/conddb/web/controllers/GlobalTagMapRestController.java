@@ -5,7 +5,6 @@ package conddb.web.controllers;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import javax.ws.rs.DefaultValue;
@@ -14,7 +13,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -26,8 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 
-import conddb.data.ErrorMessage;
-import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.svc.dao.controllers.GlobalTagService;
 import conddb.svc.dao.exceptions.ConddbServiceException;
@@ -36,10 +32,8 @@ import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.GlobalTagMapResource;
-import conddb.web.resources.GlobalTagResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
-import conddb.web.resources.TagResource;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -67,7 +61,7 @@ public class GlobalTagMapRestController  extends BaseController {
     notes = "Usage of % allows to select based on patterns",
     response = CollectionResource.class,
     responseContainer = "List")
-	public Response getGlobalTagMap(
+	public Response getGlobalTagMapTrace(
 			@Context UriInfo info,
 			@ApiParam(value = "type: {globaltag|tag}", required = true)
 			@DefaultValue("globaltag") @QueryParam("type") final String type,
@@ -103,14 +97,55 @@ public class GlobalTagMapRestController  extends BaseController {
 			throw buildException(msg+" "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
-	
+
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Path("/find")
+	@ApiOperation(value = "Finds Tags to GlobalTag's mappings by name  of the tag and of the global tag",
+    notes = "Usage of % is forbidden, names should be complete, only one object should be returned",
+    response = CollectionResource.class,
+    responseContainer = "List")
+	public Response getGlobalTagMap(
+			@Context UriInfo info,
+			@ApiParam(value = "globaltag: the global tag name, patterns not allowed", required = true)
+			@DefaultValue("none") @QueryParam("globaltag") final String globaltagname,
+			@ApiParam(value = "tag: the tag name, patterns not allowed", required = true)
+			@DefaultValue("none") @QueryParam("tag") final String tagname,
+			@DefaultValue("true") @QueryParam("expand") final boolean expand
+			) throws ConddbWebException {
+		this.log.info("GlobalTagMapRestController processing request for global tag "
+				+ globaltagname + " and tag "+tagname);
+		try {
+			GlobalTagMap entity = null;
+			if (!globaltagname.contains("%") && !tagname.contains("%")) {
+				entity = this.globalTagService.getGlobalTagMapByTagAndGlobalTag(globaltagname, tagname);
+				log.debug("Controller has executed query for globaltag search...");
+			} else {
+				String msg = "Error in input arguments: globaltag or tag names contain pattern string !";
+				throw buildException(msg, msg, Response.Status.BAD_REQUEST);
+			}
+			if (entity == null) {
+				String msg = "Associations not found for "+globaltagname+" and "+tagname;
+				throw buildException(msg, msg, Response.Status.NOT_FOUND);
+			}
+			log.debug("Controller has retrieved one map object "+entity);
+			
+			entity.setResId(entity.getId().toString());
+			GlobalTagMapResource gtagres = (GlobalTagMapResource) springResourceFactory.getResource("globaltagmap", info, entity);
+			return created(gtagres);
+			
+		} catch (ConddbServiceException e) {
+			String msg = "Error retrieving association resource ";
+			throw buildException(msg+" "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
+		}
+	}
+
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/{id}")
 	@ApiOperation(value = "Finds Tags to GlobalTag's mappings by id (integer)",
     notes = "This is ment essentially for internal usage when finding dependencies",
-    response = CollectionResource.class,
-    responseContainer = "List")
+    response = GlobalTagMapResource.class)
 	public Response getGlobalTagMapById(
 			@Context UriInfo info,
 			@ApiParam(value = "id: id of the association", required = true)

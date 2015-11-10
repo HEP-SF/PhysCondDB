@@ -74,6 +74,18 @@ public class GlobalTagService {
 			throw new ConddbServiceException("Cannot find global tag map element " + e.getMessage());
 		}
 	}
+	
+	/**
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public GlobalTagMap getGlobalTagMapByTagAndGlobalTag(String globaltag, String tag) throws ConddbServiceException {
+		try {
+			return globalTagMapRepository.findByGlobalTagAndTagName(globaltag, tag);
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot find global tag map element " + e.getMessage());
+		}
+	}
 
 	/**
 	 * @return

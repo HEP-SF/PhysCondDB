@@ -122,25 +122,35 @@ class PhysRestConnection:
                 jsondata = {}
                 jsondata['code'] = response
                 return jsondata
+
+            if self.__debug:
+                print 'Parse data to get json...'
             jsondata = json.loads(data)
+            if self.__debug:
+                print 'Return json data ',jsondata,' and code ',response
             return jsondata, response
         except pycurl.error, error:
              errno, errstr = error
              print colored.red('An error occurred: %s ' % errstr)
         
     def deleteData(self):
-        print "Delete data using url ", self.__url
+        if self.__debug:
+            print "Delete data using url ", self.__url
+        buf = cStringIO.StringIO()
         self.setDefaultOptions()
         self.__curl.setopt(self.__curl.CUSTOMREQUEST,'DELETE')
         self.__curl.setopt(self.__curl.USERNAME, self.__username)
         self.__curl.setopt(self.__curl.PASSWORD, self.__password)
+        self.__curl.setopt(self.__curl.WRITEFUNCTION, buf.write)
         try:
             self.__curl.perform()
             response = self.__curl.getinfo(self.__curl.RESPONSE_CODE)
         # HTTP response code, e.g. 200.
-            print('Status: %d' % response)
+            if self.__debug:
+                print('Status: %d' % response)
         # Elapsed time for the transfer.
-            print('Status: %f' % self.__curl.getinfo(self.__curl.TOTAL_TIME))
+            if self.__debug:
+                print('Status: %f' % self.__curl.getinfo(self.__curl.TOTAL_TIME))
             return { 'response' : response }
         except pycurl.error, error:
              errno, errstr = error
@@ -188,7 +198,7 @@ class PhysRestConnection:
         except pycurl.error, error:
              errno, errstr = error
              print colored.red('An error occurred in POST: %s ' % errstr)
-
+             
 # This function should set appropriate values for POST type
     def postAction(self, actionparams):
         if self.__debug:
@@ -215,7 +225,7 @@ class PhysRestConnection:
             return jsondata
         except pycurl.error, error:
              errno, errstr = error
-             print 'An error occurred: ', errstr
+             print colored.red('An error occurred in POST Action: %s ' % errstr)
 
 # This function should set appropriate values for POST type
     def postForm(self, params):
@@ -389,22 +399,30 @@ class GlobalTag(PhysCond):
     _dictkeys = ['name','validity','description','release','lockstatus','snapshotTime','globalTagMaps']
     _dicttypes = ['String','BigDecimal','String','String','String','Timestamp','[]']
     _example = '''
-        The format of the time is fixed, and chosen to be the ISO 8601, as described in https://en.wikipedia.org/wiki/ISO_8601
-{ "name" : "MYTEST_01", "lockstatus" : "unlocked","validity" : 0, 
-  "description" : "First test gtag", "release" : "1.0", 
-  "snapshotTime" : "2014-12-12T01:00:10+02:00"}
-    '''
+The format of the time is fixed, and chosen to be the ISO 8601, as described in https://en.wikipedia.org/wiki/ISO_8601
+{ "name" : "MYTEST_01", 
+  "lockstatus" : "unlocked",
+  "validity" : 0, 
+  "description" : "First test gtag", 
+  "release" : "1.0", 
+  "snapshotTime" : "2014-12-12T01:00:10+02:00" }
+'''
  
 class Tag(PhysCond):
     ''' classdoc '''
     _dictkeys = ['name','timeType','objectType','synchronization','description','lastValidatedTime','endOfValidity','iovs']
     _dicttypes = ['String','String','String','String','String','BigDecimal','BigDecimal','[]']
     _example = '''
-{ "name" : "atag_02", "timeType" : "time", "objectType" : "test", 
-  "synchronization" : "none", "description" : "Fake object for test tag", 
+The timeType can be only time or run for the moment.
+The lastValidatedTime is in the same unit (BigDecimal at db level).
+{ "name" : "atag_02", 
+  "timeType" : "time", 
+  "objectType" : "test", 
+  "synchronization" : "none", 
+  "description" : "Fake object for test tag", 
   "lastValidatedTime" : 10000,
   "endOfValidity" : -1 }    
-    '''
+'''
 
 class GtagMap(PhysCond):
     ''' classdoc '''
@@ -437,11 +455,15 @@ class SystemDesc(PhysCond):
     _dictkeys = ['nodeFullpath','schemaName','tagNameRoot','nodeDescription','groupSize']
     _dicttypes = ['String','String','String','String','BigDecimal']
     _example = '''
-        The nodeFullpath is unique identifier, as well as tagNameRoot.
-        { "nodeFullpath" : "MY_NEW_SYSTEM", "schemaName" : "aschema",
-        "tagNameRoot" : "MyNewSystem-TagName", "nodeDescription" : "system description"
-        "groupSize" : "1000000"}
-        '''
+The nodeFullpath is unique identifier, as well as tagNameRoot.
+SchemaName is essentially for backward compatibility with COOL information.
+groupSize should be used for paging.
+{ "nodeFullpath" : "MY_NEW_SYSTEM", 
+  "schemaName" : "aschema",
+  "tagNameRoot" : "MyNewSystem-TagName", 
+  "nodeDescription" : "system description"
+  "groupSize" : "1000000" }
+'''
 
 class Payload(PhysCond):
     ''' classdoc '''
@@ -560,7 +582,7 @@ class PhysCurl(object):
 ###   - /tags       : <name> [optional: trace=on/off]
     def get(self,params,servicebase="/globaltags"):
         if self.__debug:
-            print 'Search object using parameter '
+            print 'get: search object using parameter '
             print params
         id = params['name']
         url = (self.userbaseurl + servicebase )
@@ -569,6 +591,9 @@ class PhysCurl(object):
         urlquoted = urllib.quote_plus(url,safe=':/')
         if params['trace'] is not None and params['trace'] == 'on':
             args = { 'trace' : 'on' }
+            if '%' in id:
+                msg = ('You are using pattern to select with trace=on: expect a failure from server !')
+                print colored.cyan(msg)
             pairs = urllib.urlencode(args)
             self.__curl.setUrl(urlquoted+'?'+pairs)
         elif params['expand'] is not None and params['expand'] == 'true':
@@ -582,7 +607,7 @@ class PhysCurl(object):
 
     def getfile(self,params,servicebase="/globaltags"):
         if self.__debug:
-            print 'Search object using parameter '
+            print 'getfile: search object using parameter '
             print params
         id = params['name']
         url = (self.userbaseurl + servicebase )
@@ -599,6 +624,19 @@ class PhysCurl(object):
             print 'Search object using parameter '
             print params
         id = params['tag']
+        url = (self.userbaseurl + servicebase )
+        urlquoted = urllib.quote_plus(url,safe=':/')
+        pairs = urllib.urlencode(params)
+        self.__curl.setUrl(urlquoted+'?'+pairs)
+        return self.__curl.getData()
+
+    def getmaps(self,params,servicebase="/maps/find"):
+        if self.__debug:
+            print 'Search object using parameter '
+            print params
+        gtag = params['globaltag']
+        tag = params['tag']
+        expand = params['expand']
         url = (self.userbaseurl + servicebase )
         urlquoted = urllib.quote_plus(url,safe=':/')
         pairs = urllib.urlencode(params)
@@ -622,6 +660,18 @@ class PhysCurl(object):
         urlquoted = urllib.quote_plus(url,safe='=&?:/')
         self.__curl.setUrl(urlquoted)
         return self.__curl.getData()
+
+    def deletelink(self,link,servicebase=None):
+        if self.__debug:
+            print 'follow href link ',link
+            print link
+        modurl = link.split("/")
+        urllength = len(modurl)
+        modurl.insert(urllength-2,'expert')
+        url = ('/'.join(modurl))
+        self.__curl.setUrl(url)
+        self.__curl.setHeader(['Content-Type:application/json', 'Accept:application/json'])
+        return self.__curl.deleteData()
 
 
     def setUserPassword(self,user,passwd):
