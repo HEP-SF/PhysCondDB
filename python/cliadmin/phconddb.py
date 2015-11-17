@@ -80,6 +80,9 @@ class PhysDBDriver():
         print " - UNLINK <globaltagname> <tagname> "
         print "        ex: MYGTAG TAG_01 : remove link from global tag to a tag."
         print " "
+        print " - DELETE <type> <id> [tags, globaltags, systems]"
+        print "        ex: globaltags MYGTAG : remove the global tag MYGTAG."
+        print " "
         print "Options: "
         print "  --socks activate socks proxy on localhost 3129 "
         print "  --debug activate debugging output "
@@ -413,24 +416,29 @@ class PhysDBDriver():
                 self.restserver.addJsonEntity(data,'/'+object)
         
             except Exception, e:
-                sys.exit("failed: %s" % (str(e)))
+                sys.exit("ADD failed: %s" % (str(e)))
                 raise
 
         elif self.action == 'DELETE':
             try:
-                print 'Action DELETE is used to remove an object (globaltags,tags,maps) from the DB'
+                print 'Action DELETE is used to remove an object (globaltags,tags,systems) from the DB'
                 object=self.args[0]
-                print 'Selecting object type ', object
-                if object not in ['globaltags','tags','maps']:
-                    print 'To remove an iov+payload ask an administrator'
-                    return
+                msg = ('DELETE: selected object is %s ') % (object)
+                if object in { 'globaltags', 'tags', 'systems' }:
+                    print colored.cyan(msg)
+                else:
+                    msg = ('DELETE: cannot apply command to object %s ') % (object)
+                    print colored.red(msg) 
+                    return                
+                
                 id = self.args[1]
-                print '   use id : ', id
+                msg = ('DELETE: selected object id is %s ') % (id)
+                print colored.cyan(msg)
                 
                 self.restserver.deleteEntity(id,'/'+object)
             
             except Exception, e:
-                sys.exit("failed: %s" % (str(e)))
+                sys.exit("DELETE failed: %s" % (str(e)))
                 raise
 
         elif self.action == 'STORE':
