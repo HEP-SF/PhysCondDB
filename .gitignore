@@ -15,3 +15,4 @@ CondDBServices/${release.javadoc.root.path}CondDBServices-1.0
 CondDBWeb/${release.javadoc.root.path}CondDBWeb-0.0.1
 CondDBWeb/src/main/resources/swagger
 CondDBRestClient/.settings
+*.pyc
