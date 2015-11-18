@@ -218,7 +218,7 @@ class PhysDBDriver():
         # Search globaltagname in global tags
         msg = ('>>> Collect all files in GlobalTag %s') % (globaltagname)
         print colored.cyan(msg)
-        self.restserver.get(data,'/calibration/collect')
+        self.restserver.get(data,'/expert/calibration/collect')
         msg = ('    + Tree structure for GlobalTag %s was dump on file system') % (globaltagname)
         print colored.green(msg)
 
@@ -230,7 +230,7 @@ class PhysDBDriver():
         # Search globaltagname in global tags
         msg = ('>>> Collect all files in GlobalTag %s and download tar file ') % (globaltagname)
         print colored.cyan(msg)
-        self.restserver.getfile(data,'/calibration/tar')
+        self.restserver.getfile(data,'/expert/calibration/tar')
     
 
 # List files under global tag
@@ -254,7 +254,10 @@ class PhysDBDriver():
             print colored.cyan(msg)
         
         for amap in maplist:
+            #print 'Map in loop is ',amap
             atag = Tag(amap['systemTag'])
+            #print 'Tag in loop is ', atag
+
             atagname = atag.getParameter('name')
             if filenamepattern not in atagname and filenamepattern != '*' :
                 msg = (' --- skip file for tag %s ') % (atagname)
@@ -268,21 +271,24 @@ class PhysDBDriver():
             data['page']=0
             data['size']=1000
             data['expand']=self.expand
-            objList = self.gettagiovs(data)
+            (objList, code) = self.gettagiovs(data)
             systemdata = {}
             systemdata['by']='tag'
             tagnameroot = data['tag'].split('-HEAD')[0]
             systemdata['name']=tagnameroot
             msg = ' ==> Search for system by tag name root %s ' % tagnameroot
             print colored.cyan(msg)
-            systemobj = self.restserver.getsystems(systemdata,'/systems/find')
+            (systemobj, code) = self.restserver.getsystems(systemdata,'/systems/find')
             nodepath = systemobj['nodeFullpath']
+            #print 'Node path for system is ',nodepath
             filename = atag.getParameter('objectType')
             msg = '     + (path,file) %s, %s : ' % (nodepath,filename)
             coloredmsg1 = colored.cyan(msg)
             for aniov in objList['items']:
                 #print ' The object link is ', aniov
-                iovobjlink = self.loadItems(aniov)
+                (iovobjlink, code) = self.loadItems(aniov)
+                #print 'IOV db link is  ',iovobjlink
+
                 since = iovobjlink['since']
                 sincestr = iovobjlink['sinceString']
                 instime = iovobjlink['insertionTime']
@@ -295,7 +301,7 @@ class PhysDBDriver():
                 datapyldget['name'] = pyldhash
                 datapyldget['expand'] = 'true'
                 datapyldget['trace'] = 'off'
-                datapyld = self.restserver.get(datapyldget,'/payload')
+                (datapyld, code) = self.restserver.get(datapyldget,'/payload')
                 msg = '[url] %s' % (datapyld['data']['href'])
                 print coloredmsg1, coloredmsg2, colored.yellow(msg)
 
@@ -323,7 +329,7 @@ class PhysDBDriver():
             if 'name' not in atag:
                 href = atag['href']
                 #print 'Load linked item using ',href
-                tagdata = self.loadItems(atag)
+                (tagdata, code) = self.loadItems(atag)
                 amap['systemTag']=tagdata
                 if self.debug:
                     print 'Modified map to use ',amap['systemTag']
@@ -337,14 +343,16 @@ class PhysDBDriver():
     def getgtagtags(self, data):
         obj = {}
         #print 'Select mappings using arguments ',data
-        obj = self.restserver.get(data,'/globaltags')
+        (obj, code) = self.restserver.get(data,'/globaltags')
         mpobj = self.createObj('globaltags',obj)
+        #print 'created object ',mpobj
+        #print 'from json ',obj
         maplist=[]
         # Now load associations
         globaltagmapsobj = obj['globalTagMaps']
         href = globaltagmapsobj['href']
         #print 'Retrieve a list of associated tags using url ',href
-        maplist = self.loadItems(globaltagmapsobj)
+        (maplist, code) = self.loadItems(globaltagmapsobj)
         #print 'Retrieved list of associated tags: ',maplist
         outputlist=[]
         if mpobj.getValues()['globalTagMaps'] is not None and len(maplist)==0:

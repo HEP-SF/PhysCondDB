@@ -1,9 +1,6 @@
 
 package conddb.web.resources;
 
-import java.sql.Timestamp;
-import java.util.Collections;
-
 import javax.ws.rs.core.UriInfo;
 
 import org.slf4j.Logger;
