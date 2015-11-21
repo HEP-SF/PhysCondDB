@@ -284,26 +284,29 @@ class PhysDBDriver():
             filename = atag.getParameter('objectType')
             msg = '     + (path,file) %s, %s : ' % (nodepath,filename)
             coloredmsg1 = colored.cyan(msg)
+            #printed = False
+            counter=0
+            print coloredmsg1
             for aniov in objList['items']:
+                counter = counter+1
                 #print ' The object link is ', aniov
                 (iovobjlink, code) = self.loadItems(aniov)
                 #print 'IOV db link is  ',iovobjlink
-
                 since = iovobjlink['since']
                 sincestr = iovobjlink['sinceString']
                 instime = iovobjlink['insertionTime']
                 payloadobj = iovobjlink['payload']
                 pyldhash = payloadobj['hash']
                 pyldsize = payloadobj['datasize']
-                msg = ' [size] %s [since] %s [%s] @ %s' % (pyldsize,since,sincestr,instime)
+                msg = '        (%d) [size] %s [since] %s [%s] @ %s' % (counter,pyldsize,since,sincestr,instime)
                 coloredmsg2 = colored.green(msg)
                 datapyldget = {}
                 datapyldget['name'] = pyldhash
                 datapyldget['expand'] = 'true'
                 datapyldget['trace'] = 'off'
                 (datapyld, code) = self.restserver.get(datapyldget,'/payload')
-                msg = '[url] %s' % (datapyld['data']['href'])
-                print coloredmsg1, coloredmsg2, colored.yellow(msg)
+                msg = ': [url] %s' % (datapyld['data']['href'])
+                print coloredmsg2, colored.yellow(msg)
 
 
     #print ' The object retrieved is ', iovobjlink
@@ -394,13 +397,25 @@ class PhysDBDriver():
                 pkgname=calibargs[0]
                 filename=calibargs[1]
                 destpath=calibargs[2]
+                since=0
+                sinceDescription="t0"
+                if (len(calibargs) > 3):
+                    since = calibargs[3]
+                if (len(calibargs) > 4):
+                    sinceDescription = calibargs[4]
+                    
                 params = {}
                 params['file'] = filename
                 params['package'] = pkgname
                 params['path'] = destpath
+                params['since'] = since
+                params['description'] = sinceDescription
+                
                 post_data = [("file", (self.restserver.getFormFile(), str(filename))),
                              ("package", str(pkgname)),
-                             ("path", str(destpath))]
+                             ("path", str(destpath)),
+                             ("since",since),
+                             ("description",sinceDescription)]
                 response = self.restserver.commitCalibration(params,'/calibration/commit')
                 msg = 'Response Code: %s ' % (response['code'])
                 print colored.cyan(msg)

@@ -39,6 +39,7 @@ public class TagResource extends Link {
 		put("lastValidatedTime", tag.getLastValidatedTime());
 		put("modificationTime", tag.getModificationTime());
 		put("synchronization", tag.getSynchronization());
+		put("objectType", tag.getObjectType());
 		put("timeType", tag.getTimeType());
 		CollectionResource mapsresource = null;
 		CollectionResource iovsresource = null;

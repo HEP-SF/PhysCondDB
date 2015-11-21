@@ -177,9 +177,25 @@ public interface IovBaseRepository extends CondDBPageAndSortingRepository<Iov, L
 			+ "(p.tag.id = (:tag) AND (p.since >= (:since) AND p.since < (:until))) " 
 			+ "AND p.insertionTime >= ALL("
 			+ "SELECT p2.insertionTime FROM Iov p2 WHERE " 
-			+ "p2.tag.id = p.tag.id AND (p2.since = p.since))")
+			+ "p2.tag.id = p.tag.id AND (p2.since = p.since)) ")
 	List<Iov> findByRangeAndTagAndInsertionTimeMax(@Param("tag") Long id, @Param("since") BigDecimal since,
 			@Param("until") BigDecimal until);
+
+	/**
+	 * @param tagname
+	 *            The name of the tag.
+	 * @param since
+	 *            The since time of the interval.
+	 * @param until
+	 *            The until time of the selected interva.
+	 * @return list of IOVs.
+	 */
+	@Query("SELECT distinct p FROM Iov p WHERE "
+			+ "p.tag.id = (:tag) " 
+			+ "AND p.insertionTime >= ALL("
+			+ "SELECT p2.insertionTime FROM Iov p2 WHERE " 
+			+ "p2.tag.id = p.tag.id AND (p2.since = p.since)) order by p.since desc ")
+	Page<Iov> findByTagAndInsertionTimeMax(@Param("tag") Long id, Pageable pageable);
 
 	/**
 	 * @param tagname

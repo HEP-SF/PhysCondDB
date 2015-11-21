@@ -140,6 +140,26 @@ public class IovService {
 	 * @return
 	 * @throws ConddbServiceException
 	 */
+	public List<Iov> getLastNIovsByTag(Long tagid, PageRequest preq)
+			throws ConddbServiceException {
+		try {		
+			// Retrieve only the last inserted iov for every since
+			Page<Iov> page = iovRepository.findByTagAndInsertionTimeMax(tagid,preq);
+			return page.getContent();
+		} catch (Exception e) {
+			throw new ConddbServiceException(
+					"Cannot look for last N iovs in tag " + tagid + ": " + e.getMessage());
+		}
+	}
+
+	/**
+	 * @param tag
+	 * @param since
+	 * @param until
+	 * @param preq
+	 * @return
+	 * @throws ConddbServiceException
+	 */
 	public List<Iov> getIovsByTagNameBetween(String tag, BigDecimal since, BigDecimal until, PageRequest preq, Timestamp snapshot)
 			throws ConddbServiceException {
 		try {

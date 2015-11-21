@@ -56,15 +56,18 @@ class PhysRestConnection:
     def setUrl(self, url):
         if self.__debug:
             print "Setting url ", url
-        if 'http' in str(url):
+        if 'http://' in str(url):
             self.__url = url
         else:
             self.__url = self.__baseurl + url
+        if self.__debug:
+            print "URL after checking for http string: ", url
+        
         self.__curl.setopt(pycurl.URL, self.__url)
         
     def downloadData(self, filename):
         if self.__debug:
-            print "Get data using url ", self.__url
+            print "Download data using url ", self.__url
         fp = open(filename, "wb")
         # buf is a ByteIO object...check documentation
         #        self.__curl.setopt(self.__curl.WRITEDATA, buf)
@@ -228,15 +231,15 @@ class PhysRestConnection:
              print colored.red('An error occurred in POST Action: %s ' % errstr)
 
 # This function should set appropriate values for POST type
-    def postForm(self, params):
+    def postForm(self, post_data):
         if self.__debug:
             print "Post form using url ", self.__url
             # Sets request method to POST,
             # Content-Type header to application/x-www-form-urlencoded
             # and data to send in request body.
-        post_data = [("file", (self.__curl.FORM_FILE, params['file'])),
-                     ("path", str(params['path'])),
-                     ("package", str(params['package']))]
+#         post_data = [("file", (self.__curl.FORM_FILE, params['file'])),
+#                      ("path", str(params['path'])),
+#                      ("package", str(params['package']))]
         if self.__debug:
             print post_data
         self.setDefaultOptions()
@@ -502,7 +505,13 @@ class PhysCurl(object):
         url = (self.baseurl + servicebase)
         self.__curl.setUrl(url)
         self.__curl.setHeader(['Content-Type:multipart/form-data'])
-        return self.__curl.postForm(params)
+        post_data = [("file", (self.__curl.getFormFile(), str(params['file']))),
+                     ("package", str(params['package'])),
+                     ("path", str(params['path'])),
+                     ("since",str(params['since'])),
+                     ("description",str(params['description']))]
+
+        return self.__curl.postForm(post_data)
 
     def addWithPairs(self,data,params,servicebase="/globaltags"):
         if self.__debug:
@@ -621,7 +630,7 @@ class PhysCurl(object):
 
     def getiovs(self,params,servicebase="/iovs/find"):
         if self.__debug:
-            print 'Search object using parameter '
+            print 'Search IOV object using parameter '
             print params
         id = params['tag']
         url = (self.userbaseurl + servicebase )
@@ -632,7 +641,7 @@ class PhysCurl(object):
 
     def getmaps(self,params,servicebase="/maps/find"):
         if self.__debug:
-            print 'Search object using parameter '
+            print 'Search Map object using parameter '
             print params
         gtag = params['globaltag']
         tag = params['tag']

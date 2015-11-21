@@ -19,6 +19,7 @@ import java.util.Set;
 
 import javax.transaction.Transactional;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -98,11 +99,13 @@ public class CalibrationRestController extends BaseController {
 			@Context UriInfo info,
 			@FormDataParam("package") final String packageName, 
 			@FormDataParam("path") final String path,
+			@DefaultValue("0") @FormDataParam("since") final BigDecimal since,
+			@DefaultValue("t0") @FormDataParam("description") final String sincestr,
 			@FormDataParam("file") InputStream uploadedInputStream,
 			@FormDataParam("file") FormDataContentDisposition fileDetail) throws ConddbWebException {
 		Response resp = null;
 		try {
-			log.debug("Calibration controller has received arguments: "+path+" "+packageName);
+			log.debug("Calibration controller has received arguments: "+path+" "+packageName+" "+since+" "+sincestr);
 			// Check if path and tag do exists
 			String filename = fileDetail.getFileName();
 			String filenamenoext = filename.substring(0, filename.lastIndexOf("."));
@@ -111,6 +114,9 @@ public class CalibrationRestController extends BaseController {
 			
 			String nodefullpath = (path.concat(PATH_SEPARATOR + filenamenoext));
 			nodefullpath = nodefullpath.replaceAll("//", "/");
+			if (!nodefullpath.startsWith("/")) {
+				nodefullpath = "/"+nodefullpath;
+			}
 			String tag = null;
 			log.info("Calibration controller is searching systems with node fullpath: "+nodefullpath);
 			SystemDescription sd = systemNodeService.getSystemNodesByNodeFullpath(nodefullpath);
@@ -137,6 +143,7 @@ public class CalibrationRestController extends BaseController {
 			if (tagstored == null) {
 				// The tag requested has not yet being stored in the DB
 				// Store the new tag as it is
+				log.debug("Create tag for "+tag+" using "+filename);
 				Tag entity = new Tag(tag, CondTimeTypes.RUN.name(), filename, "none", "Calibration for " + filename,
 						new BigDecimal(0), new BigDecimal(0));
 				tagstored = globalTagService.insertTag(entity);
@@ -154,7 +161,7 @@ public class CalibrationRestController extends BaseController {
 			log.info("Stored payload "+stored.getHash());
 			
 			// Create the iov and store it
-			Iov iov = new Iov(new BigDecimal(0), "t0",stored, tagstored);
+			Iov iov = new Iov(since, sincestr,stored, tagstored);
 			log.debug("Inserting iov "+iov);
 			iov = iovService.insertIov(iov);
 

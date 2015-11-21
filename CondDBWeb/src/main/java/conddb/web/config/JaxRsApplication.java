@@ -22,8 +22,10 @@ import javax.ws.rs.core.Response;
 
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.glassfish.jersey.message.GZipEncoder;
 import org.glassfish.jersey.process.Inflector;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.filter.EncodingFilter;
 import org.glassfish.jersey.server.model.Resource;
 import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
 import org.slf4j.Logger;
@@ -109,6 +111,12 @@ public class JaxRsApplication extends ResourceConfig {
 		
 		// Test swagger
 		initSwagger();
+		setEncoding();
+
+	}
+
+	protected void setEncoding() {
+	    EncodingFilter.enableFor(this, GZipEncoder.class);	
 	}
 	
 	protected void buildResources() {

@@ -65,13 +65,12 @@ public class IovRestController extends BaseController {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/find")
-	@ApiOperation(value = "Finds Iovs for a given tag using a specific globaltag for snapshotTime", 
-	notes = "This function takes parameters in input like the time range and pagination",
-	response=Iov.class)
+	@ApiOperation(value = "Finds Iovs for a given tag using a specific globaltag for snapshotTime", notes = "This function takes parameters in input like the time range and pagination", response = Iov.class)
 	public CollectionResource getIovsInTag(@Context UriInfo info,
 			@ApiParam(value = "tag: the tagname", required = true) @QueryParam("tag") final String id,
 			@ApiParam(value = "globaltag: the globaltag name", required = false) @DefaultValue("none") @QueryParam("globaltag") final String globaltagid,
 			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false) @DefaultValue("false") @QueryParam("expand") boolean expand,
+			@ApiParam(value = "last: {niovs} loads only the last N iovs", required = false) @DefaultValue("-1") @QueryParam("last") final Integer niovs,
 			@ApiParam(value = "since: the string representing since time", required = false) @DefaultValue("0") @QueryParam("since") final String since,
 			@ApiParam(value = "until: the string representing until time", required = false) @DefaultValue("Inf") @QueryParam("until") final String until,
 			@ApiParam(value = "page: the page number", required = false) @DefaultValue("0") @QueryParam("page") Integer ipage,
@@ -89,21 +88,29 @@ public class IovRestController extends BaseController {
 			if (!globaltagid.equals("none")) {
 				GlobalTag gtag = globalTagService.getGlobalTag(globaltagid);
 				snapshotTime = gtag.getSnapshotTime();
-				log.debug("Setting snapshot time to " + snapshotTime+ " for further queries based on globaltag id "+globaltagid);
+				log.debug("Setting snapshot time to " + snapshotTime + " for further queries based on globaltag id "
+						+ globaltagid);
 			}
 			if (until.equalsIgnoreCase("INF")) {
 				sincetime = new BigDecimal(since);
 				untiltime = new BigDecimal(Iov.MAX_TIME);
 
-				if (since.equals("0")) {
+				if (since.equals("0") && niovs<0) {
 					iovlist = this.iovService.getIovsByTag(atag, preq, snapshotTime);
-				}
+				} 
 			} else {
 				sincetime = new BigDecimal(since);
 				untiltime = new BigDecimal(until);
 			}
 			if (iovlist == null) {
-				iovlist = this.iovService.getIovsByTagBetween(atag.getId(), sincetime, untiltime, preq, snapshotTime);
+				if (niovs > 0) {
+					log.debug("Ignoring time ranges for the moment...take last " + niovs);
+					preq = new PageRequest(ipage, niovs);
+					iovlist = this.iovService.getLastNIovsByTag(atag.getId(), preq);
+				} else {
+					iovlist = this.iovService.getIovsByTagBetween(atag.getId(), sincetime, untiltime, preq,
+							snapshotTime);
+				}
 			}
 			entitylist = CollectionUtils.iterableToCollection(iovlist);
 
@@ -133,12 +140,10 @@ public class IovRestController extends BaseController {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/{id}")
-	@ApiOperation(value = "Finds Iovs by id",
-    notes = "Usage of this method is essentially for href links.",
-    response=Iov.class)
-	public Response getIovById(
-			@Context UriInfo info,
-			@ApiParam(value = "id: the iovid", required = true) @DefaultValue("1000")@PathParam("id") Long id) throws ConddbWebException {
+	@ApiOperation(value = "Finds Iovs by id", notes = "Usage of this method is essentially for href links.", response = Iov.class)
+	public Response getIovById(@Context UriInfo info,
+			@ApiParam(value = "id: the iovid", required = true) @DefaultValue("1000") @PathParam("id") Long id)
+					throws ConddbWebException {
 		this.log.info("IovRestController processing request for iov id " + id);
 		try {
 			Iov entity = this.iovService.getIov(id);
@@ -146,7 +151,7 @@ public class IovRestController extends BaseController {
 			IovResource iovres = (IovResource) springResourceFactory.getResource("iov", info, entity);
 			return created(iovres);
 		} catch (Exception e) {
-			String msg = "Error retrieving iov by id "+id;
+			String msg = "Error retrieving iov by id " + id;
 			throw buildException(msg + " " + e.getMessage(), msg, Response.Status.NOT_FOUND);
 		}
 	}
@@ -154,17 +159,12 @@ public class IovRestController extends BaseController {
 	@SuppressWarnings("unchecked")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@ApiOperation(value = "Finds all Iovs",
-    notes = "Usage of this method is essentially for test purposes.",
-    response = Iov.class,
-    responseContainer = "List")
-	public CollectionResource listIovs(@Context UriInfo info, 
-			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false)
-			@DefaultValue("false") @QueryParam("expand") boolean expand,
-			@ApiParam(value = "page: the page number", required = false)
-			@DefaultValue("0") @QueryParam("page") Integer ipage,
-			@ApiParam(value = "size: the page size", required = false)
-			@DefaultValue("1000") @QueryParam("size") Integer size) throws ConddbWebException {
+	@ApiOperation(value = "Finds all Iovs", notes = "Usage of this method is essentially for test purposes.", response = Iov.class, responseContainer = "List")
+	public CollectionResource listIovs(@Context UriInfo info,
+			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false) @DefaultValue("false") @QueryParam("expand") boolean expand,
+			@ApiParam(value = "page: the page number", required = false) @DefaultValue("0") @QueryParam("page") Integer ipage,
+			@ApiParam(value = "size: the page size", required = false) @DefaultValue("1000") @QueryParam("size") Integer size)
+					throws ConddbWebException {
 		this.log.info("IovRestController processing request for iov list (expansion = " + expand + ")");
 		Collection<Iov> entitylist;
 		try {

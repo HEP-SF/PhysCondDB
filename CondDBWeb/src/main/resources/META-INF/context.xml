@@ -26,9 +26,28 @@
         )
 )" />
 
-	<Resource name="java/OraIntr" auth="Container" type="javax.sql.DataSource"
-		maxActive="100" maxIdle="30" maxWait="10000" username="${devuser}"
-		password="${devpassword}" driverClassName="oracle.jdbc.OracleDriver"
+	<Resource name="java/OraIntr" 
+		auth="Container" 
+		type="javax.sql.DataSource"
+		maxActive="100" maxIdle="30" maxWait="10000" 
+		factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+        testWhileIdle="true"
+        testOnBorrow="true"
+        testOnReturn="false"
+        validationQuery="SELECT 1 FROM DUAL"
+        validationInterval="30000"
+        timeBetweenEvictionRunsMillis="30000"
+        initialSize="10"
+        removeAbandonedTimeout="60"
+        removeAbandoned="true"
+        logAbandoned="true"
+        minEvictableIdleTimeMillis="30000"
+        jmxEnabled="true"
+        jdbcInterceptors="org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;
+            org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer"
+		username="${devuser}"
+		password="${devpassword}" 
+		driverClassName="oracle.jdbc.OracleDriver"
 		url="jdbc:oracle:thin:@(DESCRIPTION =
         (ADDRESS= (PROTOCOL=TCP) (HOST=db-d0002.cern.ch) (PORT=10654) )
         (ENABLE=BROKEN)
