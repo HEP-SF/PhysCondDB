@@ -17,6 +17,9 @@
  **/
 package conddb.web.config;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Response;
 
@@ -26,6 +29,7 @@ import org.glassfish.jersey.message.GZipEncoder;
 import org.glassfish.jersey.process.Inflector;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.filter.EncodingFilter;
+import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.glassfish.jersey.server.model.Resource;
 import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
 import org.slf4j.Logger;
@@ -33,6 +37,9 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
+import conddb.utils.PropertyConfigurator;
+import conddb.utils.filters.CustomLoggingFilter;
+import conddb.utils.filters.CustomSecurityFilter;
 import conddb.web.admin.controllers.CondAdminWebController;
 import conddb.web.calib.controllers.CalibrationRestController;
 import conddb.web.controllers.GlobalTagExpRestController;
@@ -97,7 +104,11 @@ public class JaxRsApplication extends ResourceConfig {
 
 		// register filters
 		register(RequestContextFilter.class);
+		register(CustomLoggingFilter.class);
         register(ObjectMapperContextResolver.class);
+		register(CustomSecurityFilter.class);
+		register(RolesAllowedDynamicFeature.class);
+		register(GZipEncoder.class);
 
 		// register exception mappers
         register(CondDBExceptionMapper.class);
@@ -133,10 +144,46 @@ public class JaxRsApplication extends ResourceConfig {
 	}
 
 	protected void initSwagger() {
+		// This is only for CERN MW On Demand
+		String hostname = "localhost";
+		String port = "8080";
+		String protocol = "http";
+		String url = "";
+		try {
+			InetAddress localMachine = InetAddress.getLocalHost();
+			hostname = localMachine.getHostName();
+			hostname = localMachine.getCanonicalHostName();
+			log.debug("Property Configurator : " + PropertyConfigurator.getInstance().getServerPort());
+			port = PropertyConfigurator.getInstance().getServerPort();
+			if (port != null) {
+				if (!port.isEmpty() && !port.equals("none")) {
+					port = ":" + port;
+				} else {
+					port = "";
+				}
+			}
+			if (PropertyConfigurator.getInstance().getServerProtocol().startsWith("http")) {
+				protocol = PropertyConfigurator.getInstance().getServerProtocol();
+			}
+			if (PropertyConfigurator.getInstance().getServerHost() != null
+					&& !PropertyConfigurator.getInstance().getServerHost().isEmpty()) {
+				String host = PropertyConfigurator.getInstance().getServerHost();
+				if (!host.equals(hostname)) {
+					log.debug(
+							"Property Configurator is setting overriding host: was " + hostname + " and is " + host);
+					hostname = host;
+				}
+			}
+			url = hostname + port;
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		BeanConfig beanConfig = new BeanConfig();
 		beanConfig.setVersion("2.0");
-		beanConfig.setSchemes(new String[] { "http" });
-		beanConfig.setHost("localhost:8080");
+		beanConfig.setSchemes(new String[] { protocol });
+		beanConfig.setHost(url);
 		beanConfig.setBasePath("/physconddb/conddbweb/rest");
 		beanConfig.setResourcePackage("conddb.web.controllers");
 		beanConfig.setTitle("PhysCondDB REST API setting in JAX-RS");

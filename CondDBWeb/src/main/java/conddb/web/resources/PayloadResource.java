@@ -32,9 +32,9 @@ public class PayloadResource extends Link {
 		put("version", payload.getVersion());
 		put("datasize", payload.getDatasize());
 		put("insertionTime", payload.getInsertionTime());
-		if (payload.getData() != null) {
+//		if (payload.getData() != null) {
 			put("data", new Link(info,Link.PAYLOADDATA + "/"+payload.getHash()));
-		}
+//		}
 		this.serializeTimestamps(tsformat);
 	}
 }

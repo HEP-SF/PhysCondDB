@@ -302,10 +302,12 @@ class PhysDBDriver():
                 coloredmsg2 = colored.green(msg)
                 datapyldget = {}
                 datapyldget['name'] = pyldhash
-                datapyldget['expand'] = 'true'
+                datapyldget['expand'] = 'false'
                 datapyldget['trace'] = 'off'
                 (datapyld, code) = self.restserver.get(datapyldget,'/payload')
-                msg = ': [url] %s' % (datapyld['data']['href'])
+                datapyldhref = datapyld['href']
+                
+                msg = ': [url] %s' % (datapyldhref)
                 print coloredmsg2, colored.yellow(msg)
 
 
