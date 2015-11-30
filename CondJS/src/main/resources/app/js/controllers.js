@@ -69,37 +69,43 @@ condJSControllers
 							$scope.selectedglobaltagname = $routeParams.gtagname;
 							$scope.selglobaltag = [];
 							$scope.selectedtracetags = [];
-							$scope.itemsByPage = 5;
+							$scope.itemsByPage = 20;
 							$scope.displayedPages = 10;
 							$scope.displayedTagsCollection = [];
-							loadglobaltagtrace({id : $scope.selectedglobaltagname, trace : 'on'});
+							// Load system tags
+							loadglobaltagtrace({id : $scope.selectedglobaltagname, trace : 'on', expand : 'true'});
 							
 							$scope.$on('tagTraceDataChanged', function() {
-								console.log('data in model have changed: '+$scope.selectedtracetags);
-								$scope.displayedTagsCollection = [].concat($scope.selectedtracetags);
+								console.log('data in model have changed: '+JSON.stringify($scope.selectedtracetags));
+//								$scope.displayedTagsCollection = [].concat($scope.selectedtracetags);
 							}, true);
 							
 							function loadglobaltagtrace(queryargs) {
 								//Activate the trace
-								console.log('Loading global tag trace with args '+queryargs);
+								console.log('Loading global tag trace with args '+JSON.stringify(queryargs));
 								var promise = CondGlobalTag.query(queryargs);
 								promise.$promise.then(function (data) {
 									$scope.selglobaltag = data;
 									globaltagMaps = data.globalTagMaps.items;
 									var taglist = [];
 									for (i=0; i<globaltagMaps.length; i++) {
+										atag = globaltagMaps[i].systemTag;
+										console.log('Get system tag '+JSON.stringify(atag));
+										taglist.push(atag);
 										// load the specific global tags object
-										ataglink = globaltagMaps[i].systemTag.href;
-										console.log('Get link '+ataglink);
-										console.log('Updating selectedtracetags '+$scope.selectedtracetags);
-										taglist.push(GetHref.link(ataglink).then(function (response) {
-											console.log('Retrieved data '+response.data.name);
-											return response.data;
-										}));
-										console.log('Filling tag list '+taglist.length);
+//										ataglink = globaltagMaps[i].systemTag.href;
+//										console.log('Get link '+ataglink);
+//										console.log('Updating selectedtracetags '+$scope.selectedtracetags);
+//										taglist.push(GetHref.link(ataglink).then(function (response) {
+//											console.log('Retrieved data for '+response.data.name);
+//											console.log('  - dump '+JSON.stringify(response.data));
+//											return response.data;
+//										}));
 									}
-									console.log('Retrieved tag list '+taglist.length);
+									console.log('Retrieved tag list '+JSON.stringify(taglist));
 									$scope.selectedtracetags = taglist;
+									$scope.displayedTagsCollection = [].concat($scope.selectedtracetags);
+									
 									$rootScope.$broadcast('tagTraceDataChanged',
 											$scope.selectedtracetags);
 									return taglist;

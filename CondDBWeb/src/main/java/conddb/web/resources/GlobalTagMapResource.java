@@ -41,7 +41,8 @@ public class GlobalTagMapResource extends Link {
 				if (systag.getGlobalTagMaps() != null) {
 					systag.setGlobalTagMaps(null);
 				}
-				//tagres = new TagResource(info, (Tag) systag, this.tsformat);
+				tagres = new TagResource(info, (Tag) systag, this.tsformat);
+				tagres.remove("globalTagMaps"); // remove the map object since we are already filling it from maps.
 			} 
 		} catch (org.hibernate.LazyInitializationException e) {
 			log.debug("LazyInitialization Exception from hibernate: map does not have a system tag loaded");

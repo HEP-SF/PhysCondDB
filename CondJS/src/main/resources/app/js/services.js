@@ -94,6 +94,7 @@ condJSServices.constant('baseurl', {
 		[ '$resource', 'baseurl', 'userurl',
 				function($resource, baseurl, userurl) {
 					var url = baseurl.url + userurl.user + 'globaltags/:id';
+					console.log('Call CondGlobalTag using url '+url);
 					return $resource(url, {
 						id : '@id'
 					}, {

@@ -51,7 +51,7 @@ public class GlobalTagResource extends Link {
 					globaltagmap.setResId(globaltagmap.getId().toString());
 					globaltagmap.getGlobalTag().setResId(globaltagmap.getGlobalTagName());
 					globaltagmap.getSystemTag().setResId(globaltagmap.getTagName());
-					GlobalTagMapResource resource = new GlobalTagMapResource(info, (GlobalTagMap) globaltagmap);
+					GlobalTagMapResource resource = new GlobalTagMapResource(info, (GlobalTagMap) globaltagmap, this.tsformat);
 					items.add(resource);
 				}
 				mapsresource = new CollectionResource(info,
