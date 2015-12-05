@@ -45,9 +45,11 @@ public class Link extends LinkedHashMap {
     public static final String CALIB = PATH_SEPARATOR + "calibration";
     public static final String SYSTEMS = PATH_SEPARATOR + "systems";
     public static final String PAYLOADDATA = PAYLOAD + "/data";
+    public static final String MONITOR = PATH_SEPARATOR + "monitor";
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 	TimestampFormat tsformat = null;
+	protected Entity parent = null;
 
     public Link(UriInfo info, Entity entity) {
         this(getFullyQualifiedContextPath(info), entity);
@@ -56,6 +58,13 @@ public class Link extends LinkedHashMap {
     public Link(UriInfo info, Entity entity, TimestampFormat tsformat) {
         this(getFullyQualifiedContextPath(info), entity);
         this.tsformat = tsformat;
+        this.serializeTimestamps(tsformat);
+    }
+    
+    public Link(UriInfo info, Entity entity, Entity parent, TimestampFormat tsformat) {
+        this(getFullyQualifiedContextPath(info), entity);
+        this.tsformat = tsformat;
+        this.parent = parent;
         this.serializeTimestamps(tsformat);
     }
 

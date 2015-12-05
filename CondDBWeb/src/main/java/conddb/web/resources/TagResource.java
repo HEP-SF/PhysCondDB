@@ -65,10 +65,11 @@ public class TagResource extends Link {
 					globaltagmap.setResId(globaltagmap.getId().toString());
 					globaltagmap.getGlobalTag().setResId(globaltagmap.getGlobalTagName());
 					globaltagmap.getSystemTag().setResId(globaltagmap.getTagName());
-					GlobalTagMapResource mapresource = new GlobalTagMapResource(info, globaltagmap, this.tsformat);
+					GlobalTagMapResource mapresource = new GlobalTagMapResource(info, globaltagmap, tag, this.tsformat);
 					items.add(mapresource);
 				}
 				mapsresource = new CollectionResource(info, Link.GLOBALTAGMAPS, items);
+				mapsresource.remove("systemTag");
 			}
 		} catch (org.hibernate.LazyInitializationException e) {
 			// e.printStackTrace();

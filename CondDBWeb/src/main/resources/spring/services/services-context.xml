@@ -11,7 +11,7 @@
 
 	<!-- JPA repositories are initialized elsewhere -->
 	<context:component-scan
-		base-package="conddb.svc,conddb.utils,conddb.web" />
+		base-package="conddb.svc,conddb.utils,conddb.web,conddb.security" />
 
 	<mvc:annotation-driven>
 		<mvc:message-converters>

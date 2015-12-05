@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
+import conddb.security.web.controllers.LogCondRequestsRestController;
 import conddb.utils.PropertyConfigurator;
 import conddb.utils.filters.CustomLoggingFilter;
 import conddb.utils.filters.CustomSecurityFilter;
@@ -96,6 +97,9 @@ public class JaxRsApplication extends ResourceConfig {
 		register(SystemDescriptionRestController.class);
 		register(SystemDescriptionExpRestController.class);
 		register(CondAdminWebController.class);
+
+		// Logging controllers
+		register(LogCondRequestsRestController.class);
 
 		// register json provider
 		register(JacksonJsonProvider.class);

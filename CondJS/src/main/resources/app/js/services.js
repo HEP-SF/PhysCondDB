@@ -13,7 +13,7 @@ condJSServices.constant('baseurl', {
 		name : 'NEW_GTAG',
 		description : 'a fake global tag',
 		release : 'none',
-		lockstatus : 'unlocked',
+		lockstatus : 'UNLOCKED',
 		validity : '-1',
 		snapshotTime : '2014-01-01T02:00:00+02:00'
 	};
@@ -30,15 +30,15 @@ condJSServices.constant('baseurl', {
 		},
 		setData : function(newData) {
 			data = newData;
-			if (data.insertionTime != undefined) {
-				delete data.insertionTime;
-			}
+//			if (data.insertionTime != undefined) {
+//				delete data.insertionTime;
+//			}
 			if (data.isSelected != undefined) {
 				delete data.isSelected;
 			}
 		}
 	};
-} ]).factory('Tag', function() {
+} ]).factory('Tag', [function() {
 	var data = {
 		name : 'NEW_TAG',
 		description : 'a fake tag',
@@ -70,31 +70,68 @@ condJSServices.constant('baseurl', {
 			}
 		}
 	};
-})
-.factory(
-		'GetHref',
-		[ '$http', '$q', 
-			function( $http, $q ) {
-                // Return public API.
-                return({
-                    link: link
-                });
-                
-                function link(urlget) {
-                	console.log('Call http method with '+urlget);
-					return $http({
-						  method: 'GET',
-						  url: urlget
-						});
-                };
-                
-				} ])
-.factory(
+}]).factory(
+		'CondRest',
+		[
+				'$http',
+				'$q',
+				'baseurl',
+				'userurl',
+				'experturl',
+				function($http, $q, baseurl, userurl, experturl) {
+					// Return public API.
+					return ({
+						request : request
+					});
+
+					function request(requrl, httpmethod, mode, reqheader,
+							reqdata) {
+						var req = {
+							method : 'GET',
+							url : baseurl.url + requrl,
+						}
+						if (mode === 'expert') {
+							req.url = baseurl.url + experturl.expert + requrl;
+						} else if (mode === 'admin') {
+							req.url = baseurl.url + experturl.expert + requrl;
+						} else if (mode === 'user') {
+							req.url = baseurl.url + userurl.user + requrl;
+						}
+						if (httpmethod != null) {
+							req.method = httpmethod;
+						}
+						if (reqheader != null) {
+							req.headers = reqheader;
+						}
+						if (reqdata != null) {
+							req.data = reqdata;
+						}
+						console.log('Call http method' + httpmethod + ' with '
+								+ req.url);
+						return $http(req);
+					};
+
+} ]).factory('GetHref', [ '$http', '$q', function($http, $q) {
+	// Return public API.
+	return ({
+		link : link
+	});
+
+	function link(urlget) {
+		console.log('Call http method with ' + urlget);
+		return $http({
+			method : 'GET',
+			url : urlget
+		});
+	}
+	;
+
+} ]).factory(
 		'CondGlobalTag',
 		[ '$resource', 'baseurl', 'userurl',
 				function($resource, baseurl, userurl) {
 					var url = baseurl.url + userurl.user + 'globaltags/:id';
-					console.log('Call CondGlobalTag using url '+url);
+					console.log('Call CondGlobalTag using url ' + url);
 					return $resource(url, {
 						id : '@id'
 					}, {
@@ -107,28 +144,44 @@ condJSServices.constant('baseurl', {
 							isArray : false
 						}
 					});
-				} ])				
+				} ]).factory(
+		'CondTag',
+		[ '$resource', 'baseurl', 'userurl',
+				function($resource, baseurl, userurl) {
+					var url = baseurl.url + userurl.user + 'tags/:id';
+					console.log('Call CondTag using url ' + url);
+					return $resource(url, {
+						id : '@id'
+					}, {
+						query : {
+							method : 'GET',
+							params : {
+								id : '%',
+								expand : 'true'
+							},
+							isArray : false
+						}
+					});
+				} ])
+
 ;
 
 // I transform the error response, unwrapping the application dta from
 // the API response payload.
-function handleError( response ) {
-    // The API response from the server should be returned in a
-    // nomralized format. However, if the request was not handled by the
-    // server (or what not handles properly - ex. server error), then we
-    // may have to normalize it on our end, as best we can.
-    if (
-        ! angular.isObject( response.data ) ||
-        ! response.data.message
-        ) {
-        return( $q.reject( "An unknown error occurred." ) );
-    }
-    // Otherwise, use expected error message.
-    return( $q.reject( response.data.message ) );
+function handleError(response) {
+	// The API response from the server should be returned in a
+	// nomralized format. However, if the request was not handled by the
+	// server (or what not handles properly - ex. server error), then we
+	// may have to normalize it on our end, as best we can.
+	if (!angular.isObject(response.data) || !response.data.message) {
+		return ($q.reject("An unknown error occurred."));
+	}
+	// Otherwise, use expected error message.
+	return ($q.reject(response.data.message));
 }
 // I transform the successful response, unwrapping the application data
 // from the API response payload.
-function handleSuccess( response ) {
-	console.log('Success in retrieval...'+response.data);
-    return( response.data );
+function handleSuccess(response) {
+	console.log('Success in retrieval...' + response.data);
+	return (response.data);
 }

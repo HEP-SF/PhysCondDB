@@ -19,6 +19,10 @@ import conddb.svc.dao.baserepository.CondDBPageAndSortingRepository;
  */
 public interface LogCondRequestsBaseRepository extends CondDBPageAndSortingRepository<LogCondRequests, BigDecimal> {
 	
+	/**
+	 * @param username
+	 * @return
+	 */
 	@Query("SELECT distinct p FROM LogCondRequests p WHERE p.userName = (:username)")
 	List<LogCondRequests> findByUserName(@Param("username")String username);
 
@@ -35,5 +39,13 @@ public interface LogCondRequestsBaseRepository extends CondDBPageAndSortingRepos
 			+ "p.start > (:starttime) ")
 	List<LogCondRequests> findByStartTimeGt(@Param("starttime") Timestamp st);
 
+	/**
+	 * @param st
+	 * @param httpmeth
+	 * @return
+	 */
+	@Query("SELECT distinct p FROM LogCondRequests p WHERE " 
+			+ "p.start > (:starttime) and p.httpMethod=(:httpmeth) order by p.start asc")
+	List<LogCondRequests> findByStartTimeGtAndMethod(@Param("starttime") Timestamp st, @Param("httpmeth") String httpmeth);
 
 }

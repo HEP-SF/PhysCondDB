@@ -2,79 +2,6 @@
 
 	<h2>Tag Management page</h2>
 	<hr>
-	<div ng-controller="TagListCtrl">
-		<label class="col-sm-2 control-label"> Filter by Name: </label>
-		<input type="text" ng-model="tagname" />
-		<hr>
-
-		<label class="col-sm-2 control-label" for="items">items by page</label> <input
-			class="input-sm form-control" name="items" id="items" type="number"
-			ng-model="itemsByPage" /> <input type="submit" ng-click="refresh()"
-			value="Refresh" /> <input type="submit" ng-click="search()"
-			value="Search" />
-
-		<table st-table="displayedTagsCollection" st-safe-src="tags"
-			class="table table-striped" show-filter="true" export-csv="csv">
-			<thead>
-				<tr>
-					<th>edit</th>
-					<th st-sort="name">name</th>
-					<th st-sort="insertionTime">insertion time</th>
-					<th st-sort="modificationTime">modification time</th>
-					<th st-sort="endOfValidity">end of validity</th>
-					<th st-sort="lastValidatedTime">last valid time</th>
-					<th st-sort="description">description</th>
-					<th st-sort="synchronization">synchronization</th>
-					<th st-sort="objectType">object type</th>
-					<th st-sort="timeType">time type</th>
-				</tr>
-				<tr>
-					<th colspan="5"><input st-search="" class="form-control"
-						placeholder="global search ..." type="text" /></th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr st-select-row="atag" st-select-mode="single"
-					ng-repeat="atag in displayedTagsCollection">
-					<td>
-						<button class="btn" ng-click="edit(atag)">
-							<span class="glyphicon glyphicon-pencil"></span>Edit
-						</button>
-					</td>
-					<td data-title="'Name'">{{atag.name}}</td>
-					<td data-title="'Insertion Time'">{{atag.insertionTime}}</td>
-					<td data-title="'Modification Time'">{{atag.modificationTime}}</td>
-					<td data-title="'End of Validity'">{{atag.endOfValidity}}</td>
-					<td data-title="'Last Validated Time'">{{atag.lastValidatedTime}}</td>
-					<td data-title="'Description'">{{atag.description}}</td>
-					<td data-title="'Synchonization'">{{atag.synchronization}}</td>
-					<td data-title="'Object Type'">{{atag.objectType}}</td>
-					<td data-title="'Time Type'">{{atag.timeType}}</td>
-					<td>
-						<button class="btn btn-sm" popover-placement="top"
-							popover="{{atag.name}}" type="button">
-							<i class="glyphicon glyphicon-eye-open"></i>
-						</button> <a ng-href="#/backtracetags/{{atag.name}}">backtrace</a>
-					</td>
-					<td>
-						<button type="button" ng-click="remove(atag)"
-							popover="Removing {{atag.name}}"
-							class="btn btn-sm btn-danger">
-							<i class="glyphicon glyphicon-remove-circle"></i>
-						</button>
-					</td>
-				</tr>
-			</tbody>
-			<tfoot>
-				<tr>
-					<td colspan="5" class="text-center">
-						<div st-pagination="" st-items-by-page="itemsByPage"
-							st-displayed-pages="displayedPages"></div>
-					</td>
-				</tr>
-			</tfoot>
-		</table>
-	</div>
 		<div ng-controller="TagFormCtrl">
 		<button class="btn btn-success" ng-click="add('new')">
 			<span class="glyphicon glyphicon-plus-sign"></span>
@@ -87,50 +14,49 @@
 		
 		<form novalidate class="form-horizontal">
 			<div class="form-group">
-				<label class="col-sm-2 control-label">Tag Name:</label>
+				<label class="col-sm-2 control-label" for="tagname">Tag Name:</label>
 				<div class="col-sm-10">
-					<input type="text" ng-model="tag.name" />
+					<input class="form-control" type="text" ng-model="tag.name" id="tagname"/>
 				</div>
 			</div>
 			<div class="form-group">
-				<label class="col-sm-2 control-label">Description:</label>
+				<label class="col-sm-2 control-label" for="tagdesc">Description:</label>
 				<div class="col-sm-10">
-					<input type="text" ng-model="tag.description" />
+					<input class="form-control" type="text" ng-model="tag.description" id="tagdesc"/>
 				</div>
 			</div>
 			<div class="form-group">
-				<label class="col-sm-2 control-label">Time Type:</label>
+				<label class="col-sm-2 control-label" for="tagttype">Time Type:</label>
 				<div class="col-sm-10">
-					<input type="radio" ng-model="tag.timeType" value="time"/>time
-					<input type="radio" ng-model="tag.timeType" value="run"/>run
+				<label class="radio-inline"><input id="tagttype" type="radio" ng-model="tag.timeType" value="time"/>time</label>
+				<label class="radio-inline"><input id="tagttype" type="radio" ng-model="tag.timeType" value="run"/>run</label>
 				</div>
 			</div>
 			<div class="form-group">
-				<label class="col-sm-2 control-label">Object Type:</label>
+				<label class="col-sm-2 control-label" for="tagobjtype">Object Type:</label>
 				<div class="col-sm-10">
-					<input type="text" ng-model="tag.objectType" />
+					<input class="form-control" id="tagobjtype" type="text" ng-model="tag.objectType" />
 				</div>
 			</div>
 			<div class="form-group">
-				<label class="col-sm-2 control-label">Synchronization:</label>
+				<label class="col-sm-2 control-label" for="tagsyn">Synchronization:</label>
 				<div class="col-sm-10">
-					<input type="text" ng-model="tag.synchronization" />
+					<input class="form-control" id="tagsyn" type="text" ng-model="tag.synchronization" />
 				</div>
 			</div>
 			<div class="form-group">
-				<label class="col-sm-2 control-label">Last Validated Time:</label>
+				<label class="col-sm-2 control-label" for="taglvt">Last Validated Time:</label>
 				<div class="col-sm-10">
-					<input type="text" ng-model="tag.lastValidatedTime" />
+					<input class="form-control" id="taglvt" type="text" ng-model="tag.lastValidatedTime" />
 				</div>
 			</div>
 			<div class="form-group">
-				<label class="col-sm-2 control-label">End of Validity:</label>
+				<label class="col-sm-2 control-label" for="eov">End of Validity:</label>
 				<div class="col-sm-10">
-					<input type="text" ng-model="tag.endOfValidity" />
+					<input class="form-control" id="tageov" type="text" ng-model="tag.endOfValidity" />
 				</div>
 			</div>
 					
-			<br /> 
 <!-- 			<input -->
 <!-- 				type="button" ng-click="reset()" value="Reset" /> <input -->
 <!-- 				type="submit" ng-click="add(tag)" value="Add" /> <input -->
@@ -160,6 +86,92 @@
 			<pre>edit = {{edit | json}}</pre>
 		</div>
 	</div>
-	
+	<hr>
+	<h3>Table section: use it to visualize tags</h3>
+	<hr>
+	<div ng-controller="TagListCtrl">
+		<form novalidate class="form-horizontal">
+		<div class="form-group">
+		<label class="col-sm-2 control-label" for="filtername">Filter by Name:</label>
+		<div class="col-sm-10">
+		<input class="form-control" id="filtername" type="text" ng-model="tagname" />
+		</div>
+		</div>
+		<div class="form-group">
+		<label class="col-sm-2 control-label" for="items">Items by page</label> 
+		<div class="col-sm-4">
+		<input name="items" id="items" type="number" ng-model="itemsByPage" /> 
+		</div>
+		</div>
+		<div class="form-group">	
+			<input type="submit" ng-click="refresh()" value="Refresh" /> 
+			<input type="submit" ng-click="search()" value="Search" />
+		</div>
+		</form>
+		<table st-table="displayedTagsCollection" st-safe-src="tags"
+			class="table table-bordered table-striped" show-filter="true" export-csv="csv">
+			<thead>
+				<tr>
+					<th>edit</th>
+					<th st-sort="name">name</th>
+					<th st-sort="insertionTime">insertion time</th>
+					<th st-sort="modificationTime">modification time</th>
+					<th st-sort="endOfValidity">end of validity</th>
+					<th st-sort="lastValidatedTime">last valid time</th>
+					<th st-sort="description">description</th>
+					<th st-sort="synchronization">synchronization</th>
+					<th st-sort="objectType">object type</th>
+					<th st-sort="timeType">time type</th>
+				</tr>
+				<tr>
+					<th colspan="2"><input st-search="name"
+						placeholder="search for tag name"
+						class="input-sm form-control" type="search" /></th>
+					<th colspan="4"><input st-search class="form-control"
+						placeholder="global search ..." type="search" /></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr st-select-row="atag" st-select-mode="single"
+					ng-repeat="atag in displayedTagsCollection">
+					<td>
+						<button class="btn" ng-click="edit(atag)">
+							<span class="glyphicon glyphicon-pencil"></span>Edit
+						</button>
+					</td>
+					<td data-title="'Name'">{{atag.name}}</td>
+					<td data-title="'Insertion Time'">{{atag.insertionTime}}</td>
+					<td data-title="'Modification Time'">{{atag.modificationTime}}</td>
+					<td data-title="'End of Validity'">{{atag.endOfValidity}}</td>
+					<td data-title="'Last Validated Time'">{{atag.lastValidatedTime}}</td>
+					<td data-title="'Description'">{{atag.description}}</td>
+					<td data-title="'Synchonization'">{{atag.synchronization}}</td>
+					<td data-title="'Object Type'">{{atag.objectType}}</td>
+					<td data-title="'Time Type'">{{atag.timeType}}</td>
+					<td>
+						<button class="btn btn-sm" popover-placement="top"
+							popover="{{atag.name}}" type="button">
+							<i class="glyphicon glyphicon-eye-open"></i>
+						</button> <a ng-href="#/tags/{{atag.name}}/trace">backtrace</a>
+					</td>
+					<td>
+						<button type="button" ng-click="remove(atag)"
+							popover="Removing {{atag.name}}"
+							class="btn btn-sm btn-danger">
+							<i class="glyphicon glyphicon-remove-circle"></i>
+						</button>
+					</td>
+				</tr>
+			</tbody>
+			<tfoot>
+				<tr>
+					<td colspan="5" class="text-center">
+						<div st-pagination="" st-items-by-page="itemsByPage"
+							st-displayed-pages="displayedPages"></div>
+					</td>
+				</tr>
+			</tfoot>
+		</table>
+	</div>	
 </div>
 

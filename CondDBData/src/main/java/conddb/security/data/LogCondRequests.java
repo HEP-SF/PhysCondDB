@@ -86,6 +86,7 @@ public class LogCondRequests  extends conddb.data.Entity implements java.io.Seri
 
 	public void setId(BigDecimal id) {
 		this.id = id;
+		this.setResId(id.toString());
 	}
 
 
