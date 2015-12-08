@@ -74,6 +74,12 @@ class PhysDBDriver():
         print " - ADD <type> [tags, globaltags, systems] <parameters string> [column separated key=val list]"
         print "        ex: globaltags 'name=MYGTAG;description=A global tag; xxxx ' : create a global tag using the provided parameter list"
         print " "
+        print " - STORE <tag> <filename> <iov parameters string> <payload parameters string> [column separated key=val list]"
+        print "        ex: mytag01 local.file 'since=1000;sinceString=t1000; xxxx ' 'streamerInfo=an info; objectType=the object type; version=1.0': create an iov inside a tag using the provided parameter list and input file"
+        print " "
+        print " - LS <globaltag> <tag>:"
+        print "        ex: GTAG-01 mytag01 : list iovs in globaltag/tag combination; use t0 and tMax for time boundaries"
+        print " "
         print " - LINK <globaltagname> <tagname> 'record=xxx;label=yyy'"
         print "        ex: MYGTAG TAG_01 record=none;label=none : link a global tag to a tag, both should exists."
         print " "
@@ -82,6 +88,9 @@ class PhysDBDriver():
         print " "
         print " - DELETE <type> <id> [tags, globaltags, systems]"
         print "        ex: globaltags MYGTAG : remove the global tag MYGTAG."
+        print " "
+        print " - DESCRIBE <type>  [tags, globaltags, systems, iovs, payload]"
+        print "        ex: globaltags : describe the content of the globaltag object."
         print " "
         print "Options: "
         print "  --socks activate socks proxy on localhost 3129 "
@@ -111,6 +120,8 @@ class PhysDBDriver():
             return GtagMap(data)
         elif type == 'systems':
             return SystemDesc(data)
+        elif type == 'payload':
+            return Payload(data)
         return None
 
     def createObjParsingArgs(self, type, data):
@@ -149,6 +160,8 @@ class PhysDBDriver():
             mobj = Iov({})
         elif type == 'systems':
             mobj = SystemDesc({})
+        elif type == 'payload':
+            mobj = Payload({})
 
         print 'Help defined for ',mobj
         return mobj.help()
@@ -218,8 +231,7 @@ class PhysDBDriver():
         objList = []
         print 'Select iovs using arguments ',data
         objList = self.restserver.getiovs(data,'/iovs/find')
-        json_string = json.dumps(objList,sort_keys=True,indent=4, separators=(',', ': '))
-        print json_string
+        return objList
 
     def getgtagtags(self, data):
         obj = {}
@@ -384,6 +396,48 @@ class PhysDBDriver():
                 sys.exit("failed on action FIND: %s" % (str(e)))
                 raise
 
+        elif self.action == 'LS':
+            try:
+                print 'Action LS is used to iovs in a tag / globaltag pair; if globaltag info is missing do not use snapshottime'
+                tag=self.args[0]
+                globaltag = 'none'
+                if len(self.args) == 2:
+                    globaltag=self.args[1]
+                msg = ('LS: use tag %s and global tag  %s !') % (tag,globaltag)
+                print colored.cyan(msg)
+                data = {}
+                data['trace']=self.trace
+                data['expand']=self.expand
+                data['tag']=tag
+                data['globaltag']=globaltag
+                data['since']=self.t0
+                data['until']=self.tMax
+
+                objList=self.gettagiovs(data)
+                json_string = json.dumps(objList,sort_keys=True,indent=4, separators=(',', ': '))
+                colorful_json = highlight(unicode(json_string, 'UTF-8'), lexers.JsonLexer(), formatters.TerminalFormatter())
+                print colorful_json
+#                print json.dumps(data)
+                
+            except Exception, e:
+                sys.exit("LS failed: %s" % (str(e)))
+                raise
+            
+        elif self.action == 'LOCK':
+            try:
+                calibargs=self.args
+                msg = '>>> Call method %s using arguments %s ' % (self.action,calibargs)
+                #print colored.cyan(msg)
+                print msg
+                if len(calibargs) < 2:
+                    print 'Set default option for lockstatus to LOCKED (type -h for help)'
+                    calibargs.append('LOCKED')
+                self.lockit(calibargs)
+                    
+            except Exception, e:
+                sys.exit("failed: %s" % (str(e)))
+                raise
+            
         elif self.action == 'ADD':
             try:
                 print 'Action ADD is used to insert a metadata object (globaltags,tags,maps,...) into the DB'
@@ -417,6 +471,82 @@ class PhysDBDriver():
         
             except Exception, e:
                 sys.exit("ADD failed: %s" % (str(e)))
+                raise
+
+        elif self.action == 'STORE':
+            try:
+                print 'Action STORE is used to insert an iov object + its payload associated to a tag into the DB'
+                tag=self.args[0]
+                msg = ('STORE: selected object is %s ') % (tag)
+                data = {}
+                data['trace']="off"
+                data['expand']="true"
+                data['name']=tag
+                (obj,response) = self.restserver.get(data,'/tags')
+                if self.debug:
+                    msg = ('STORE: retrieved object from database %s ') % (obj)
+                    print colored.cyan(msg)                        
+                if obj is None:
+                    msg = ('STORE: error, cannot find any tag in database for name %s ') % (tag)
+                    print colored.red(msg)
+                    raise
+                
+                objparams = None
+                if len(self.args) != 4:
+                    msg = ('STORE: error, cannot find enough parameters for completing the request')
+                    print colored.red(msg)
+                    raise
+                    
+                filename=self.args[1]
+                iovobjparams=self.args[2]
+                pyldobjparams=self.args[3]
+
+                    
+                msg = ('STORE: iov parameters %s and filename %s (%s)') % (iovobjparams, filename,pyldobjparams)
+                print colored.cyan(msg)
+                data = {}
+                if iovobjparams is None:
+                    msg = self.helpAdd("iovs")
+                    print colored.cyan(msg)
+                    return
+                
+                iovdata = {}
+                iovdata = self.createObjParsingArgs("iovs",iovobjparams)
+                pylddata = {}
+                pylddata = self.createObjParsingArgs("payload",pyldobjparams)
+
+                params = {}
+                params['file'] = filename
+                params['tag'] = tag
+                params['since'] = iovdata['since']
+                params['sinceString'] = iovdata['sinceString']
+                params['backendInfo'] = pylddata['backendInfo']
+                params['objectType'] = pylddata['objectType']
+                params['streamerInfo'] = pylddata['streamerInfo']
+                params['version'] = pylddata['version']
+
+                self.restserver.addPayload(params,'/iovs/payload')
+        
+            except Exception, e:
+                sys.exit("STORE failed: %s" % (str(e)))
+                raise
+
+        elif self.action == 'DESCRIBE':
+            try:
+                print 'Action DESCRIBE is used to list the keys needed for filling the object ',self.args[0]
+                object=self.args[0]
+                msg = ('DESCRIBE: selected object is %s ') % (object)
+                if object in [ 'globaltags', 'tags', 'systems', 'iovs', 'payload' ]:
+                    print colored.cyan(msg)
+                    msg = self.helpAdd(object);
+                    print colored.green(msg) 
+                else:
+                    msg = ('DESCRIBE: cannot apply command to object %s ') % (object)
+                    print colored.red(msg) 
+                    return                
+            
+            except Exception, e:
+                sys.exit("DESCRIBE failed: %s" % (str(e)))
                 raise
 
         elif self.action == 'DELETE':

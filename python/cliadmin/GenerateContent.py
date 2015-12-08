@@ -27,7 +27,7 @@ from clint.textui import colored
 from datetime import datetime
 import hashlib
 
-from PhysCurlSvc import PhysCurl,GlobalTag,Tag,Iov,Payload,PayloadData
+from PhysCurlSvcJersey import PhysCurl,GlobalTag,Tag,Iov,Payload,PayloadData
 from __builtin__ import file
 
 class PhysDBGenerator():
@@ -45,8 +45,8 @@ class PhysDBGenerator():
             self.dump=False
             self.tag='atag'
             self.outfilename=''
-            self.urlsvc='localhost:8080'
-            longopts=['help','socks','out=','jsondump','size=','tag=','nObjs=','t0=','tMax=','iovspan=']
+            self.urlsvc='localhost:8080/physconddb'
+            longopts=['help','socks','out=','url=','jsondump','size=','tag=','nObjs=','t0=','tMax=','iovspan=']
             opts,args=getopt.getopt(sys.argv[1:],'',longopts)
             print opts, args
         except getopt.GetoptError,e:
@@ -74,6 +74,7 @@ class PhysDBGenerator():
         print "  --tag={root tag name to generate: will append _X depending on nObjs option } "
         print "  --nObjs={number of objects to generate} "
         print "  --size={size of generated payload in bytes} "
+        print "  --url [localhost:8080/physconddb]: use a specific server "
         print "  --t0={t0 for iovs} "
         print "  --tMax={tMax for iovs} "
         print "  --iovspan={time|date|runlb|timerun|daterun} "
@@ -102,6 +103,8 @@ class PhysDBGenerator():
                 self.fsize=int(a)
             if (o=='--nObjs'):
                 self.nobjs=int(a)
+            if (o=='--url'):
+                self.urlsvc=a
             if (o=='--tag'):
                 self.tag=a
             if (o=='--t0'):
@@ -118,9 +121,8 @@ class PhysDBGenerator():
         
         if (len(args)<2):
             raise getopt.GetoptError("Insufficient arguments - need at least 3, or try --help")
-        self.urlsvc=args[0]
-        self.action=args[1].upper()
-        self.args=args[2:]
+        self.action=args[0].upper()
+        self.args=args[1:]
         print self.args
         
     def randbin(self, d): 
@@ -160,40 +162,50 @@ class PhysDBGenerator():
         if (self.action=='GENERATE'):
             resp="No response"
             try:
-                filename = self.args[1]
-                print "Opening file ",filename
                 objecttype=self.args[0]
-                f = open(filename,"r")
-                print f
-                data = json.loads(f.read())
-                print "loaded data from file ",data
+                data = {}
+                if len(self.args) > 1:
+                    filename = self.args[1]
+                    print "Opening file ",filename
+                    f = open(filename,"r")
+                    print f
+                    data = json.loads(f.read())
+                print "loaded data from file: ",data
                 if objecttype == "iov":
                     restserver = PhysCurl(self.urlsvc, self.useSocks)
                     for it in range(0, self.nobjs):
                         print 'generate element ',it
-                        sincetime = random.randint(int(self.t0), int(self.tMax))
-                        iov = Iov(data)
-                        iov.setParameter('since', sincetime)
-                        iov.setParameter('tag', { 'name' : self.tag })
-                        print 'Generated element ',iov,' with since ',iov.getParameter('since')
-                        
+                        sincetime = random.randint(int(self.t0), int(self.tMax))                        
                         print 'create a new payload object from file '
                         fname = '.'.join(("test.out",str(sincetime)))
                         self.generateFile(self.fsize, fname)
                         hash = self.hashfile(open(fname, 'rb'), hashlib.sha256())
 #                    hash = self.hashfile(open("test.out", 'rb'), hashlib.md5())
                         print 'Hash for file is ',str(hash)
-                        dict = { 'file' : fname, 'objectType' : 'anobject', 'streamerInfo' : 'none', 'version' : '1.0' }
-                        resp = restserver.addPayload(dict)
-                        print 'Server send response ',resp
-                        if hash in resp['data']:
-                            print 'Found same key for payload !'
-                        else:
-                            print 'You are using different ways of hashing !!'
-                        iov.setParameter('payload',{ 'hash' : hash })
-                        data = json.loads(iov.toJson())
-                        resp = restserver.addIov(data)
-                        print 'Received response from server ',resp
+                        params = {}
+                        params['file'] = fname
+                        params['tag'] = self.tag
+                        params['since'] = sincetime
+                        params['sinceString'] = 't'+str(sincetime)
+                        params['backendInfo'] = 'database'
+                        params['objectType'] =  'anobject'
+                        params['streamerInfo'] = 'none'
+                        params['version'] = '1.0'
+                        print 'Generated element with since ',sincetime,' to store in tag ',self.tag
+
+                        resp = restserver.addPayload(params,'/iovs/payload')
+                        print resp
+#                        dict = { 'file' : fname, 'objectType' : 'anobject', 'streamerInfo' : 'none', 'version' : '1.0', 'backendInfo' : 'database' }
+#                        resp = restserver.addPayload(dict)
+#                        print 'Server send response ',resp
+#                         if hash in resp['data']:
+#                             print 'Found same key for payload !'
+#                         else:
+#                             print 'You are using different ways of hashing or returned data differs from expected ',resp
+#                         iov.setParameter('payload',{ 'hash' : hash })
+#                         data = json.loads(iov.toJson())
+#                         resp = restserver.addIov(data)
+#                         print 'Received response from server ',resp
                         
                 elif objecttype == "globaltag":
                     print 'create a new global tag object from file'

@@ -12,7 +12,7 @@ import os.path
 import urllib
 
 from xml.dom import minidom
-from clint.textui import colored
+#from clint.textui import colored
 from datetime import datetime
 
 try:
@@ -88,9 +88,11 @@ class PhysRestConnection:
         except pycurl.error, error:
             response = self.__curl.getinfo(self.__curl.RESPONSE_CODE)
             if response is not 200:
-                print colored.red('Problem in executing GET : status returned is %d' % response)
+                #print colored.red('Problem in executing GET : status returned is %d' % response)
+                print ('Problem in executing GET : status returned is %d' % response)
             errno, errstr = error
-            print colored.red('An error occurred in GET method: %s ' % errstr)
+            #print colored.red('An error occurred in GET method: %s ' % errstr)
+            print ('An error occurred in GET method: %s ' % errstr)
             return None
 
     def getData(self):
@@ -134,7 +136,8 @@ class PhysRestConnection:
             return jsondata, response
         except pycurl.error, error:
              errno, errstr = error
-             print colored.red('An error occurred: %s ' % errstr)
+             #print colored.red('An error occurred: %s ' % errstr)
+             print ('An error occurred: %s ' % errstr)
         
     def deleteData(self):
         if self.__debug:
@@ -157,7 +160,8 @@ class PhysRestConnection:
             return { 'response' : response }
         except pycurl.error, error:
              errno, errstr = error
-             print colored.red('An error occurred: %s ' % errstr)
+             #print colored.red('An error occurred: %s ' % errstr)
+             print ('An error occurred: %s ' % errstr)
 
         
     def setTimeout(self,to):
@@ -200,7 +204,8 @@ class PhysRestConnection:
             return jsondata
         except pycurl.error, error:
              errno, errstr = error
-             print colored.red('An error occurred in POST: %s ' % errstr)
+             #print colored.red('An error occurred in POST: %s ' % errstr)
+             print ('An error occurred in POST: %s ' % errstr)
              
 # This function should set appropriate values for POST type
     def postAction(self, actionparams):
@@ -228,7 +233,9 @@ class PhysRestConnection:
             return jsondata
         except pycurl.error, error:
              errno, errstr = error
-             print colored.red('An error occurred in POST Action: %s ' % errstr)
+             #print colored.red('An error occurred in POST Action: %s ' % errstr)
+             print ('An error occurred in POST Action: %s ' % errstr)
+
 
 # This function should set appropriate values for POST type
     def postForm(self, post_data):
@@ -470,8 +477,15 @@ groupSize should be used for paging.
 
 class Payload(PhysCond):
     ''' classdoc '''
-    _dictkeys = ['hash','version','objectType','data','datasize','streamerInfo']
-    _dicttypes = ['String','String','String','PayloadDataHash','Integer','String']
+    _dictkeys = ['hash','version','objectType','data','datasize','streamerInfo','backendInfo']
+    _dicttypes = ['String','String','String','PayloadDataHash','Integer','String','String']
+    _example = '''
+The payload metadata contains informations for the serialization and deserialization.
+{ "version" : "a version", 
+  "objectType" : "an object",
+  "streamerInfo" : "streamer clob", 
+  "backendInfo" : "the backend"}
+'''
 
 class PayloadData(PhysCond):
     ''' classdoc '''
@@ -602,7 +616,9 @@ class PhysCurl(object):
             args = { 'trace' : 'on' }
             if '%' in id:
                 msg = ('You are using pattern to select with trace=on: expect a failure from server !')
-                print colored.cyan(msg)
+                #print colored.cyan(msg)
+                print msg
+
             pairs = urllib.urlencode(args)
             self.__curl.setUrl(urlquoted+'?'+pairs)
         elif params['expand'] is not None and params['expand'] == 'true':
