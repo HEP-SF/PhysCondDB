@@ -314,7 +314,7 @@ class PhysDBDriver():
                 print 'Found N arguments ',len(self.args)
                 object=self.args[0]
                 msg = ('FIND: selected object is %s ') % (object)
-                if object in { 'globaltags', 'tags', 'systems' }:
+                if object in [ 'globaltags', 'tags', 'systems' ]:
                     print colored.cyan(msg)
                 else:
                     msg = ('FIND: cannot apply command to object %s ') % (object)
@@ -351,7 +351,7 @@ class PhysDBDriver():
                         raise
                     objList.append(obj)
                     # If trace is active, perform a special dump for the trace
-                    if object in { 'globaltags', 'tags' }:
+                    if object in [ 'globaltags', 'tags' ]:
                         mpobj = self.createObj(object,obj)
                         globaltagmaps = mpobj.getValues()['globalTagMaps']
                         if globaltagmaps is not None:
@@ -389,7 +389,7 @@ class PhysDBDriver():
                 print 'Action ADD is used to insert a metadata object (globaltags,tags,maps,...) into the DB'
                 object=self.args[0]
                 msg = ('ADD: selected object is %s ') % (object)
-                if object in { 'globaltags', 'tags', 'systems' }:
+                if object in [ 'globaltags', 'tags', 'systems' ]:
                     print colored.cyan(msg)
                 else:
                     msg = ('ADD: cannot apply command to object %s ') % (object)
@@ -424,7 +424,7 @@ class PhysDBDriver():
                 print 'Action DELETE is used to remove an object (globaltags,tags,systems) from the DB'
                 object=self.args[0]
                 msg = ('DELETE: selected object is %s ') % (object)
-                if object in { 'globaltags', 'tags', 'systems' }:
+                if object in [ 'globaltags', 'tags', 'systems' ]:
                     print colored.cyan(msg)
                 else:
                     msg = ('DELETE: cannot apply command to object %s ') % (object)
