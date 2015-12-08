@@ -103,7 +103,7 @@ public class Payload extends conddb.data.Entity implements java.io.Serializable 
 		this.objectType = objectType;
 	}
 	
-	@Column(name = "BACKEND_INFO", nullable = false)
+	@Column(name = "BACKEND_INFO", nullable = true)
 	@Lob @Basic(fetch=FetchType.LAZY)
 	public String getBackendInfo() {
 		return backendInfo;

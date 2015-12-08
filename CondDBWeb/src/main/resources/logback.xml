@@ -10,18 +10,33 @@ See here for more details: http://gordondickens.com/wordpress/2013/03/27/sawing-
     <!-- To enable JMX Management -->
     <jmxConfigurator/>
 
-    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%-5level %logger{0} - %msg%n</pattern>
-        </encoder>
-    </appender>
+        <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+                <encoder>
+                        <Pattern>.%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg %n
+                        </Pattern>
+                </encoder>
+                <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+                        <level>TRACE</level>
+                </filter>
+        </appender>
+
+<!--     <appender name="console" class="ch.qos.logback.core.ConsoleAppender"> -->
+<!--         <encoder> -->
+<!--             <pattern>%-5level %logger{0} - %msg%n</pattern> -->
+<!--         </encoder> -->
+<!--     </appender> -->
 
 	<!--<logger name="org.hibernate" level="debug"/> -->
    <!-- Uncomment and add your logger here:
     <logger name="org.springframework.samples.service.service" level="debug"/> -->
-    <logger name="org.hibernate" level="info"/> -->
-         
+    <logger name="org.hibernate" level="info"/> 
+
+        <logger name="conddb" additivity="false">
+            <level value="DEBUG" />
+                <appender-ref ref="consoleAppender" />
+        </logger>
+
     <root level="DEBUG">
-        <appender-ref ref="console"/>
+        <appender-ref ref="consoleAppender"/>
     </root>
 </configuration>

@@ -7,9 +7,14 @@
     "**/*.txt"
   ],
   "dependencies": {
+    "angular-bootstrap": "~0.14.3",
     "angular-bootstrap-datetimepicker": "latest",
     "angular-resource": "latest",
-    "angular-strap": "~2.0.0"
+    "angular-route": "~1.4.8",
+    "angular-smart-table": "~2.1.5",
+    "angular-strap": "~2.0.0",
+    "highcharts": "~4.1.10",
+    "highcharts-ng": "~0.0.11"
   },
   "resolutions": {
     "bootstrap": "~3.0.3",

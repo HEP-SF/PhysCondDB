@@ -7,11 +7,14 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Date;
 
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
@@ -39,7 +42,7 @@ public class LogCondRequests  extends conddb.data.Entity implements java.io.Seri
 	private static final long serialVersionUID = -8833064058310492100L;
 	
 	
-	private BigDecimal id;
+	private Long id;
 	private String userName;
 	private String userRole;
 	private String serverHost;
@@ -79,12 +82,13 @@ public class LogCondRequests  extends conddb.data.Entity implements java.io.Seri
 	 */
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
-	public BigDecimal getId() {
+	@Column(name = "REQ_ID", nullable=false, precision = 22, scale = 0)
+	public Long getId() {
 		return id;
 	}
 
 
-	public void setId(BigDecimal id) {
+	public void setId(Long id) {
 		this.id = id;
 		this.setResId(id.toString());
 	}
@@ -145,7 +149,8 @@ public class LogCondRequests  extends conddb.data.Entity implements java.io.Seri
 	}
 
 
-	@Column(name = "REQUEST_HEADER", nullable = false, length = 4000)
+	@Column(name = "REQUEST_HEADER", nullable = true)
+	@Lob @Basic(fetch=FetchType.LAZY)
 	public String getRequestHeader() {
 		return requestHeader;
 	}

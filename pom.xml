@@ -291,7 +291,7 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
+
 		<!-- Database drivers -->
 		<dependency>
 			<groupId>com.oracle</groupId>
@@ -300,6 +300,30 @@
 			<scope>compile</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.xerial</groupId>
+			<artifactId>sqlite-jdbc</artifactId>
+			<version>3.8.11.2</version>
+		</dependency>
+		<!-- hibernate sqlite dialect : does not work with hibernate 4 ... mapping problems
+		<dependency>
+			<groupId>com.applerao</groupId>
+			<artifactId>hibernatesqlite</artifactId>
+			<version>1.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.hibernate</groupId>
+					<artifactId>hibernate</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+
+		<dependency>
+		<groupId>net.kemitix</groupId>
+		<artifactId>sqlite-dialect</artifactId>
+		<version>0.1.0</version>
+		</dependency>
+ -->
 		<dependency>
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
@@ -310,11 +334,11 @@
 			<artifactId>h2</artifactId>
 			<version>1.4.182</version>
 		</dependency>
-		<dependency>
-			<groupId>org.xerial</groupId>
-			<artifactId>sqlite-jdbc</artifactId>
-			<version>3.8.7</version>
-		</dependency>
+		<!-- <dependency> -->
+		<!-- <groupId>org.xerial</groupId> -->
+		<!-- <artifactId>sqlite-jdbc</artifactId> -->
+		<!-- <version>3.8.7</version> -->
+		<!-- </dependency> -->
 
 		<dependency>
 			<groupId>commons-dbcp</groupId>
@@ -366,11 +390,11 @@
 			</exclusions>
 		</dependency>
 		<!-- use tomcat pool when in tomcat -->
-                <dependency>
-                        <groupId>org.apache.tomcat</groupId>
-                        <artifactId>tomcat-jdbc</artifactId>
-                        <version>7.0.65</version>
-                </dependency>
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-jdbc</artifactId>
+			<version>7.0.65</version>
+		</dependency>
 		<!-- Embedded web servers <dependency> <groupId>org.eclipse.jetty</groupId> 
 			<artifactId>jetty-webapp</artifactId> <version>${jetty.version}</version> 
 			<scope>provided</scope> </dependency> -->
@@ -397,6 +421,12 @@
 			<name>jcenter</name>
 			<url>https://jcenter.bintray.com/</url>
 		</repository>
+
+		<repository>
+			<id>hibernatesqlite-maven</id>
+			<url>https://hibernate-sqlite.googlecode.com/svn/trunk/mavenrepo</url>
+		</repository>
+
 	</repositories>
 
 

@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.stereotype.Component;
-import org.springframework.beans.factory.annotation.Value;
 
 import conddb.security.data.LogCondRequests;
 import conddb.security.svc.dao.repositories.LogCondRequestsRepository;
@@ -109,6 +108,7 @@ public class CustomLoggingFilter extends LoggingFilter implements ContainerReque
         logreq.setEnd(new Timestamp(end.toEpochMilli()));
         
         if (monitorLogging.equals("save")) {
+        	log.debug("Filter is ready to store log of request: "+logreq.toString());
         	logCondRequestRepository.save(logreq);
         }
         StringBuilder sb = new StringBuilder();

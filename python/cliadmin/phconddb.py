@@ -582,6 +582,35 @@ class PhysDBDriver():
                 params['action'] = action
                 
                 self.restserver.addWithPairs(data,params,'/globaltags/'+object+'/'+gtagobject)
+
+#         elif self.action == 'DESCRIBE':
+#             try:
+#                 print 'Action LINKALL is used to map a tag pattern into a global tag'
+#                 gtagobject=self.args[0]
+#                 tagobject=self.args[1]
+#                 action='addtags'
+#                 if len(self.args)>2:
+#                     action=self.args[2]
+#                 else:
+#                     print 'can define action as "addtags" or "merge"; in the latter case it will intepret ',tagobject,' as a global tag name '
+#                 print 'Linking tag',tagobject,' into global tag ', gtagobject, ' using action ',action
+#                 data = {}
+#                 object = 'maps'
+#                 objparams = None
+#                 if len(self.args) > 3:
+#                     objparams=self.args[3]
+#                     print '   use object parameters: ', objparams
+#                 else:
+#                     print '   missing arguments: "record=xxx;label=yyyy"'
+#                     return
+#                 mapparams = self.createObjParsingArgs(object,objparams)
+# 
+#                 data['name'] = tagobject
+#                 data['record'] = mapparams['record']
+#                 data['label'] = mapparams['label']
+#                 params['action'] = action
+#                 
+#                 self.restserver.addWithPairs(data,params,'/globaltags/'+object+'/'+gtagobject)
             
             except Exception, e:
                 sys.exit("failed: %s" % (str(e)))

@@ -6,8 +6,8 @@ condJSApp.config([ '$routeProvider', function($routeProvider) {
 		templateUrl : 'partials/globaltag-list.html',
 		controller : 'GlobalTagListCtrl'
 	}).when('/globaltags/:gtagname/trace', {
-		templateUrl : 'partials/tagtrace-list.html',
-		controller : 'TagTraceListCtrl'
+		templateUrl : 'partials/tagtrace-list.html'
+		//controller : 'TagTraceListCtrl'
 	}).when('/tags', {
 		templateUrl : 'partials/tag-list.html',
 		controller : 'TagListCtrl'
