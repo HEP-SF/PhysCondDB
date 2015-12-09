@@ -163,7 +163,60 @@ condJSServices.constant('baseurl', {
 						}
 					});
 				} ])
+.factory('GetChartOptions', [function() {
+	var data = {
+			options : {
+				chart : {
+					type: 'spline',
+					zoomType : 'x'
+				},
+				// Enable for both axes
+				tooltip : {
+					crosshairs : [ true, true ],
+					pointFormat : '[time] <b>{point.y:.2f} ms </b><br>{point.url}'
+				},
+				plotOptions: {
+					series: {
+					   	turboThreshold: 0
+					}
+			    }
+			},
+			xAxis : {
+				type : 'datetime'
+			},
+			yAxis : {
+				title : {
+					text : 'Count'
+				},
+				plotLines : [ {
+					value : 0,
+					width : 1,
+					color : '#808080'
+				} ]
+			},
+			legend : {
+				enabled : false
+			},
+			series : undefined,
+			title : {
+				text : 'Test HighChart'
+			},
+			credits : {
+				enabled : true
+			},
+			loading : false,
+			size : {}					
+	};
 
+	var defaultdata = angular.copy(data);
+
+	return {
+		getChart : function() {
+			console.log('GetChartOptions: getChart');
+			return data;
+		}
+	};
+}])
 ;
 
 // I transform the error response, unwrapping the application dta from
