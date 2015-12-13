@@ -18,6 +18,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -164,6 +165,8 @@ public class Tag extends conddb.data.Entity implements java.io.Serializable {
 	 * 	The tag name.
 	 */
 	@Column(name = "NAME", unique = true, nullable = false, updatable=false, length = 2000)
+	@Pattern(regexp="^([A-Z]+[a-zA-Z]+)_([A-Za-z0-9]+)-([0-9])++$",
+    message="{invalid.name}")
 	public String getName() {
 		return this.name;
 	}

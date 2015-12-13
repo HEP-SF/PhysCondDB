@@ -26,7 +26,7 @@ from xml.dom import minidom
 #from clint.textui import colored
 from datetime import datetime
 
-from PhysCurlSvcJersey import PhysCurl,GlobalTag,Tag,Iov,GtagMap,SystemDesc,Payload,PayloadData
+from PhysUrllib2SvcJersey import PhysCurl,GlobalTag,Tag,Iov,GtagMap,SystemDesc,Payload,PayloadData
 
 class PhysDBDriver():
     def __init__(self):
@@ -430,11 +430,6 @@ class PhysDBDriver():
                 params['since'] = since
                 params['description'] = sinceDescription
                 
-                post_data = [("file", (self.restserver.getFormFile(), str(filename))),
-                             ("package", str(pkgname)),
-                             ("path", str(destpath)),
-                             ("since",since),
-                             ("description",sinceDescription)]
                 response = self.restserver.commitCalibration(params,'/calibration/commit')
                 msg = 'Response Code: %s ' % (response['code'])
                 #print colored.cyan(msg)

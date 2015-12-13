@@ -23,7 +23,7 @@ echo "----------------------------------------------------------------"
 echo "REPLACE THE LOCALHOST WITH THE REAL URL..."
 echo "----------------------------------------------------------------"
 
-grep "http://localhost:8080/physconddb/conddbweb/" src/main/webapp/condjs/js/services.js | sed 's/http:\/\/localhost:8080\/physconddb\/conddbweb/https:\/\/test-physconddb.web.cern.ch\/test-physconddb/'
+grep "http://localhost:8080/physconddb/conddbweb/" src/main/webapp/condjs/js/services.js | sed 's/http:\/\/localhost:8080\/physconddb\/conddbweb/https:\/\/test-physconddb.web.cern.ch\/test-physconddb\/conddbweb/'
 
 echo "----------------------------------------------------------------"
 echo "CREATING WAR FILE..."

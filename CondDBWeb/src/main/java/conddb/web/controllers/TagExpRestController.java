@@ -71,8 +71,9 @@ public class TagExpRestController extends BaseController {
 					saved);
 			return created(resource);
 		} catch (ConddbServiceException e) {
-			String msg = "Error crerating tag resource using "+tag.toString();
-			throw buildException(msg+" "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
+			String msg = "Error creating tag resource using "+tag.toString();
+			log.debug("Got exception "+e.getMessage());
+			throw buildException(msg+" "+e.getMessage(), msg+" "+e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 

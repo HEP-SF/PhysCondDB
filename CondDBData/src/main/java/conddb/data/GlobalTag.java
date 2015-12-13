@@ -16,6 +16,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -97,6 +98,8 @@ public class GlobalTag extends conddb.data.Entity implements java.io.Serializabl
 
 	@Id
 	@Column(name = "NAME", unique = true, nullable = false, length = 100)
+	@Pattern(regexp="^([A-Z]+[A-Z0-9]+)-([A-Z0-9]+)-([0-9])++$",
+	         message="{invalid.name}")
 	public String getName() {
 		return this.name;
 	}

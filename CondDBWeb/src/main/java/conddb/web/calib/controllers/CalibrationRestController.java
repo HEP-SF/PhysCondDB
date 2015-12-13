@@ -105,6 +105,10 @@ public class CalibrationRestController extends BaseController {
 			log.debug("Calibration controller has received arguments: "+path+" "+packageName+" "+since+" "+sincestr);
 			// Check if path and tag do exists
 			String filename = fileDetail.getFileName();
+			if (filename.contains(PATH_SEPARATOR)) {
+				// Extract the filename only...not the path
+				filename = filename.substring(filename.lastIndexOf(PATH_SEPARATOR),filename.length());
+			}
 			String filenamenoext = filename.substring(0, filename.lastIndexOf("."));
 			String extension = filename.substring(filename.lastIndexOf("."),filename.length());
 			log.debug("Calibration controller has digested arguments: "+filename+" "+path+" "+packageName);

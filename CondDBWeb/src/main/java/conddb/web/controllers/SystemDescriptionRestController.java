@@ -135,7 +135,7 @@ public class SystemDescriptionRestController extends BaseController {
 				}
 				if (pagelist == null) {
 					log.debug("Controller could not retrieve any entity list....");
-					String msg = "Cannot find system using by="+system;
+					String msg = "Cannot find system using by="+type;
 					throw buildException(msg, msg, Response.Status.NOT_FOUND);				
 				}
 				log.debug("Retrieved list of systems " + pagelist.getNumberOfElements());				

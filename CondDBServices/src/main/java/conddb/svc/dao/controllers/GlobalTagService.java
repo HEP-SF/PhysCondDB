@@ -5,6 +5,9 @@ package conddb.svc.dao.controllers;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
+
+import javax.validation.ConstraintViolation;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -255,9 +258,20 @@ public class GlobalTagService {
 	 * @return
 	 * @throws ConddbServiceException
 	 */
-	@Transactional
+	@Transactional(rollbackFor= ConddbServiceException.class)
 	public Tag insertTag(Tag entity) throws ConddbServiceException {
-		return tagRepository.save(entity);
+		try {
+			return tagRepository.save(entity);
+		} catch (javax.validation.ConstraintViolationException e) {
+			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
+			StringBuffer buf = new StringBuffer();
+			for (ConstraintViolation<?> violates : violations) {
+				buf.append(violates.getMessage()+"\n");
+			}
+			throw new ConddbServiceException("Validation exception: "+buf.toString());
+		} catch (Exception e1) {
+			throw new ConddbServiceException(e1.getMessage());
+		}
 	}
 
 	/**
@@ -267,16 +281,22 @@ public class GlobalTagService {
 	 */
 	@Transactional
 	public Tag deleteTag(Tag entity) throws ConddbServiceException {
-		Tag existing = tagRepository.findByName(entity.getName());
-		Tag removable = tagRepository.findByNameAndFetchGlobalTagsWithLock(entity.getName(),
-				GlobalTagStatus.LOCKED.name());
-		if (removable != null && removable.getGlobalTagMaps() != null && removable.getGlobalTagMaps().size() > 0) {
-			log.debug("Cannot remove a tag which depends on a locked global tag...");
-			throw new ConddbServiceException(
-					"Cannot remova tag " + entity.getName() + " : a parent global tag is locked ");
+		
+		try {
+			Tag existing = tagRepository.findByName(entity.getName());
+			Tag removable = tagRepository.findByNameAndFetchGlobalTagsWithLock(entity.getName(),
+					GlobalTagStatus.LOCKED.name());
+			if (removable != null && removable.getGlobalTagMaps() != null && removable.getGlobalTagMaps().size() > 0) {
+				log.debug("Cannot remove a tag which depends on a locked global tag...");
+				throw new ConddbServiceException(
+						"Cannot remova tag " + entity.getName() + " : a parent global tag is locked ");
+			}
+			tagRepository.delete(existing);
+			return existing;
+		} catch (Exception e) {
+			throw new ConddbServiceException(e.getMessage());
 		}
-		tagRepository.delete(existing);
-		return existing;
+
 	}
 
 	/**
@@ -305,22 +325,27 @@ public class GlobalTagService {
 	 * @return
 	 * @throws ConddbServiceException
 	 */
-	@Transactional
+	@Transactional(rollbackFor= ConddbServiceException.class)
 	public GlobalTagMap insertGlobalTagMap(GlobalTagMap entity) throws ConddbServiceException {
-		GlobalTag gtag = globalTagRepository.findOne(entity.getGlobalTagName());
-		Tag atag = tagRepository.findByName(entity.getTagName());
-		if (gtag == null || atag == null) {
-			log.debug("Cannot find elements for association");
-			throw new ConddbServiceException("Cannot link tags and global tag...they are not found in the DB");			
+		
+		try {
+			GlobalTag gtag = globalTagRepository.findOne(entity.getGlobalTagName());
+			Tag atag = tagRepository.findByName(entity.getTagName());
+			if (gtag == null || atag == null) {
+				log.debug("Cannot find elements for association");
+				throw new ConddbServiceException("Cannot link tags and global tag...they are not found in the DB");			
+			}
+			entity.setGlobalTag(gtag);
+			entity.setSystemTag(atag);
+			if (gtag.islocked()) {
+				log.debug("Global tag lock string is " + gtag.getLockstatus() + ";");
+				log.debug("   compared with " + GlobalTagStatus.LOCKED.name() + ";");
+				throw new ConddbServiceException("Cannot link tags to a locked global tag..");
+			}
+			return globalTagMapRepository.save(entity);
+		} catch (Exception e1) {
+			throw new ConddbServiceException(e1.getMessage());
 		}
-		entity.setGlobalTag(gtag);
-		entity.setSystemTag(atag);
-		if (gtag.islocked()) {
-			log.debug("Global tag lock string is " + gtag.getLockstatus() + ";");
-			log.debug("   compared with " + GlobalTagStatus.LOCKED.name() + ";");
-			throw new ConddbServiceException("Cannot link tags to a locked global tag..");
-		}
-		return globalTagMapRepository.save(entity);
 	}
 
 	/**
@@ -340,9 +365,20 @@ public class GlobalTagService {
 	 * @return
 	 * @throws ConddbServiceException
 	 */
-	@Transactional
+	@Transactional(rollbackFor= ConddbServiceException.class)
 	public GlobalTag insertGlobalTag(GlobalTag entity) throws ConddbServiceException {
-		return globalTagRepository.save(entity);
+		try {
+			return globalTagRepository.save(entity);
+		} catch (javax.validation.ConstraintViolationException e) {
+			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
+			StringBuffer buf = new StringBuffer();
+			for (ConstraintViolation<?> violates : violations) {
+				buf.append(violates.getMessage()+"\n");
+			}
+			throw new ConddbServiceException("Validation exception: "+buf.toString());
+		} catch (Exception e1) {
+			throw new ConddbServiceException(e1.getMessage());
+		}
 	}
 
 }
