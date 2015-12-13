@@ -22,9 +22,9 @@ import json
 import cStringIO
 import os.path
 
-from pygments import highlight, lexers, formatters
+#from pygments import highlight, lexers, formatters
 from xml.dom import minidom
-from clint.textui import colored
+#from clint.textui import colored
 from datetime import datetime
 
 from PhysUrllib2SvcJersey import PhysCurl,GlobalTag,Tag,Iov,GtagMap,SystemDesc,Payload,PayloadData
@@ -247,7 +247,14 @@ class PhysDBDriver():
         return maplist
 
     def execute(self):
-        print colored.blue(('Execute the command for action %s and arguments : %s ' ) % (self.action, str(self.args)))
+        msg = ('Execute the command for action %s and arguments : %s ' ) % (self.action, str(self.args))
+        try:
+            from clint.textui import colored
+            print colored.blue(msg)
+        except:
+            print 'Cannot use colored messages'
+            print msg
+            
         start = datetime.now()
         self.restserver = PhysCurl(self.urlsvc, self.useSocks)
         if self.debug:
@@ -266,18 +273,36 @@ class PhysDBDriver():
                 object=self.args[0]
                 msg = ('FIND: selected object is %s ') % (object)
                 if object in [ 'globaltags', 'tags', 'systems' ]:
-                    print colored.cyan(msg)
+                    try:
+                        from clint.textui import colored
+                        print colored.cyan(msg)
+                    except:
+                        print 'Cannot use colored messages'
+                        print msg
                 else:
                     msg = ('FIND: cannot apply command to object %s ') % (object)
-                    print colored.red(msg) 
+                    try:
+                        from clint.textui import colored
+                        print colored.red(msg)
+                    except:
+                        print 'Cannot use colored messages'
+                        print msg
                     return
+                
+                
                 # load arguments and prepare the data structure for the GET request
                 # optional parameters like trace and expand are added
                 name = None
                 if len(self.args) > 1:
                     name=self.args[1]
                     msg = ('FIND: selected id is %s ') % (name)
-                    print colored.cyan(msg)
+                    try:
+                        from clint.textui import colored
+                        print colored.cyan(msg)
+                    except:
+                        print 'Cannot use colored messages'
+                        print msg
+                        
                     if '%' in name:
                         self.trace='off'
                         print 'Set trace=off because it cannot trace on generic global tag list, only on single object'
@@ -294,7 +319,12 @@ class PhysDBDriver():
                 objList = []
                 traceList = []
                 msg = ('FIND: load data using trace %s ') % (self.trace)
-                print colored.cyan(msg)                   
+                try:
+                    from clint.textui import colored
+                    print colored.cyan(msg)
+                except:
+                    print 'Cannot use colored messages'
+                    print msg
 
                 if self.trace == 'off':   
                     if objList is None or len(objList) == 0:
@@ -304,11 +334,23 @@ class PhysDBDriver():
                     (obj,response) = self.restserver.get(data,'/'+object)
                     if self.debug:
                         msg = ('FIND: retrieved object from database %s ') % (obj)
-                        print colored.cyan(msg)                        
+                        try:
+                            from clint.textui import colored
+                            print colored.cyan(msg)
+                        except:
+                            print 'Cannot use colored messages'
+                            print msg
+                        raise
                     if obj is None:
                         msg = ('FIND: error, cannot find any object in database for type %s ') % (object)
-                        print colored.red(msg)
+                        try:
+                            from clint.textui import colored
+                            print colored.red(msg)
+                        except:
+                            print 'Cannot use colored messages'
+                            print msg
                         raise
+                    
                     objList.append(obj)
                     # If trace is active, perform a special dump for the trace
                     if object in [ 'globaltags', 'tags' ]:
@@ -327,18 +369,39 @@ class PhysDBDriver():
 # Now dump the retrieved content
                 if response != 200 and response != 201:
                     msg = ('FIND: error in data retrieval %s ') % (response)
-                    print colored.red(msg)
+                    try:
+                        from clint.textui import colored
+                        print colored.red(msg)
+                    except:
+                        print 'Cannot use colored messages'
+                        print msg
                     return
                 json_string = json.dumps(objList,sort_keys=True,indent=4, separators=(',', ': '))
-                colorful_json = highlight(unicode(json_string, 'UTF-8'), lexers.JsonLexer(), formatters.TerminalFormatter())
+                colorful_json = json_string
+                try:
+                    from pygments import highlight, lexers, formatters
+                    colorful_json = highlight(unicode(json_string, 'UTF-8'), lexers.JsonLexer(), formatters.TerminalFormatter())
+                except:
+                    print 'Cannot use colored messages'
+                
+                #colorful_json = highlight(unicode(json_string, 'UTF-8'), lexers.JsonLexer(), formatters.TerminalFormatter())
                 print colorful_json
                 
                 if len(traceList) > 0:
                     msg = ('FIND: found list of globaltags to tags associations')
-                    print colored.cyan(msg)
+                    try:
+                        from clint.textui import colored
+                        print colored.cyan(msg)
+                    except:
+                        print 'Cannot use colored messages'
+                        print msg
                     for amsg in traceList:
-                        print colored.green(amsg)
-   
+                        try:
+                            from clint.textui import colored
+                            print colored.green(amsg)
+                        except:
+                            print 'Cannot use colored messages'
+                            print amsg   
             
             except Exception, e:
                 sys.exit("failed on action FIND: %s" % (str(e)))
@@ -352,7 +415,13 @@ class PhysDBDriver():
                 if len(self.args) == 2:
                     globaltag=self.args[1]
                 msg = ('LS: use tag %s and global tag  %s !') % (tag,globaltag)
-                print colored.cyan(msg)
+                try:
+                    from clint.textui import colored
+                    print colored.cyan(msg)
+                except:
+                    print 'Cannot use colored messages'
+                    print msg   
+                    
                 data = {}
                 data['trace']=self.trace
                 data['expand']=self.expand
@@ -363,7 +432,12 @@ class PhysDBDriver():
 
                 objList=self.gettagiovs(data)
                 json_string = json.dumps(objList,sort_keys=True,indent=4, separators=(',', ': '))
-                colorful_json = highlight(unicode(json_string, 'UTF-8'), lexers.JsonLexer(), formatters.TerminalFormatter())
+                colorful_json = json_string
+                try:
+                    from pygments import highlight, lexers, formatters
+                    colorful_json = highlight(unicode(json_string, 'UTF-8'), lexers.JsonLexer(), formatters.TerminalFormatter())
+                except:
+                    print 'Cannot use colored messages'
                 print colorful_json
 #                print json.dumps(data)
                 
@@ -375,8 +449,12 @@ class PhysDBDriver():
             try:
                 calibargs=self.args
                 msg = '>>> Call method %s using arguments %s ' % (self.action,calibargs)
-                #print colored.cyan(msg)
-                print msg
+                try:
+                    from clint.textui import colored
+                    print colored.cyan(msg)
+                except:
+                    print 'Cannot use colored messages'
+                    print msg   
                 if len(calibargs) < 2:
                     print 'Set default option for lockstatus to LOCKED (type -h for help)'
                     calibargs.append('LOCKED')
@@ -392,12 +470,24 @@ class PhysDBDriver():
                 object=self.args[0]
                 msg = ('ADD: selected object is %s ') % (object)
                 if object in [ 'globaltags', 'tags', 'systems' ]:
-                    print colored.cyan(msg)
+                    try:
+                        from clint.textui import colored
+                        print colored.cyan(msg)
+                    except:
+                        print 'Cannot use colored messages'
+                        print msg   
                 else:
                     msg = ('ADD: cannot apply command to object %s ') % (object)
-                    print colored.red(msg) 
-                    msg = ('ADD: to insert an IOV + Payload use STORE, see --help')
-                    print colored.cyan(msg) 
+                    try:
+                        from clint.textui import colored
+                        print colored.red(msg)
+                        msg = ('ADD: to insert an IOV + Payload use STORE, see --help')
+                        print colored.cyan(msg) 
+                    except:
+                        print 'Cannot use colored messages'
+                        print msg   
+                        msg = ('ADD: to insert an IOV + Payload use STORE, see --help')
+                        print msg
                     return
 
                 objparams = None
@@ -405,11 +495,21 @@ class PhysDBDriver():
                     objparams=self.args[1]
                     
                 msg = ('ADD: object parameters %s ') % (objparams)
-                print colored.cyan(msg)
+                try:
+                    from clint.textui import colored
+                    print colored.cyan(msg)
+                except:
+                    print 'Cannot use colored messages'
+                    print msg   
                 data = {}
                 if objparams is None:
                     msg = self.helpAdd(object)
-                    print colored.cyan(msg)
+                    try:
+                        from clint.textui import colored
+                        print colored.cyan(msg)
+                    except:
+                        print 'Cannot use colored messages'
+                        print msg   
                     return
                 # Parameters have been provided in command line, try to create the json entity
                 data = self.createObjParsingArgs(object,objparams)
@@ -433,16 +533,31 @@ class PhysDBDriver():
                 (obj,response) = self.restserver.get(data,'/tags')
                 if self.debug:
                     msg = ('STORE: retrieved object from database %s ') % (obj)
-                    print colored.cyan(msg)                        
+                    try:
+                        from clint.textui import colored
+                        print colored.cyan(msg)
+                    except:
+                        print 'Cannot use colored messages'
+                        print msg   
                 if obj is None:
                     msg = ('STORE: error, cannot find any tag in database for name %s ') % (tag)
-                    print colored.red(msg)
+                    try:
+                        from clint.textui import colored
+                        print colored.red(msg)
+                    except:
+                        print 'Cannot use colored messages'
+                        print msg   
                     raise
                 
                 objparams = None
                 if len(self.args) != 4:
                     msg = ('STORE: error, cannot find enough parameters for completing the request')
-                    print colored.red(msg)
+                    try:
+                        from clint.textui import colored
+                        print colored.red(msg)
+                    except:
+                        print 'Cannot use colored messages'
+                        print msg   
                     raise
                     
                 filename=self.args[1]
@@ -451,11 +566,21 @@ class PhysDBDriver():
 
                     
                 msg = ('STORE: iov parameters %s and filename %s (%s)') % (iovobjparams, filename,pyldobjparams)
-                print colored.cyan(msg)
+                try:
+                    from clint.textui import colored
+                    print colored.cyan(msg)
+                except:
+                    print 'Cannot use colored messages'
+                    print msg   
                 data = {}
                 if iovobjparams is None:
                     msg = self.helpAdd("iovs")
-                    print colored.cyan(msg)
+                    try:
+                        from clint.textui import colored
+                        print colored.cyan(msg)
+                    except:
+                        print 'Cannot use colored messages'
+                        print msg   
                     return
                 
                 iovdata = {}
@@ -487,10 +612,20 @@ class PhysDBDriver():
                 if object in [ 'globaltags', 'tags', 'systems', 'iovs', 'payload' ]:
                     print colored.cyan(msg)
                     msg = self.helpAdd(object);
-                    print colored.green(msg) 
+                    try:
+                        from clint.textui import colored
+                        print colored.green(msg)
+                    except:
+                        print 'Cannot use colored messages'
+                        print msg   
                 else:
                     msg = ('DESCRIBE: cannot apply command to object %s ') % (object)
-                    print colored.red(msg) 
+                    try:
+                        from clint.textui import colored
+                        print colored.red(msg)
+                    except:
+                        print 'Cannot use colored messages'
+                        print msg   
                     return                
             
             except Exception, e:
@@ -503,15 +638,30 @@ class PhysDBDriver():
                 object=self.args[0]
                 msg = ('DELETE: selected object is %s ') % (object)
                 if object in [ 'globaltags', 'tags', 'systems' ]:
-                    print colored.cyan(msg)
+                    try:
+                        from clint.textui import colored
+                        print colored.green(msg)
+                    except:
+                        print 'Cannot use colored messages'
+                        print msg   
                 else:
                     msg = ('DELETE: cannot apply command to object %s ') % (object)
-                    print colored.red(msg) 
+                    try:
+                        from clint.textui import colored
+                        print colored.red(msg)
+                    except:
+                        print 'Cannot use colored messages'
+                        print msg   
                     return                
                 
                 id = self.args[1]
                 msg = ('DELETE: selected object id is %s ') % (id)
-                print colored.cyan(msg)
+                try:
+                    from clint.textui import colored
+                    print colored.cyan(msg)
+                except:
+                    print 'Cannot use colored messages'
+                    print msg   
                 
                 self.restserver.deleteEntity(id,'/'+object)
             
@@ -580,7 +730,12 @@ class PhysDBDriver():
                 gtagobject=self.args[0]
                 tagobject=self.args[1]
                 msg = ('LINK: perform association between %s and %s ') % (gtagobject,tagobject)
-                print colored.cyan(msg)
+                try:
+                    from clint.textui import colored
+                    print colored.cyan(msg)
+                except:
+                    print 'Cannot use colored messages'
+                    print msg   
                 data = {}
                 object = 'maps'
                 objparams = None
@@ -589,10 +744,20 @@ class PhysDBDriver():
                     objparams=self.args[2]
                 else:
                     msg = ('LINK: object parameters are missing %s ') % ("record=xxx;label=yyyy")
-                    print colored.red(msg)
+                    try:
+                        from clint.textui import colored
+                        print colored.red(msg)
+                    except:
+                        print 'Cannot use colored messages'
+                        print msg   
                     return
                 msg = ('LINK: object parameters %s ') % (objparams)
-                print colored.cyan(msg)
+                try:
+                    from clint.textui import colored
+                    print colored.cyan(msg)
+                except:
+                    print 'Cannot use colored messages'
+                    print msg   
 
                 data = self.createObjParsingArgs(object,objparams)
                 data['globaltagname']=gtagobject
@@ -600,10 +765,21 @@ class PhysDBDriver():
 
                 (response) = self.restserver.addJsonEntity(data,'/'+object)
                 if response is None:
-                    print colored.red('Failed in linking the objects: may be link already exists ?')
+                    msg = ('Failed in linking the objects: may be link already exists ?')
+                    try:
+                        from clint.textui import colored
+                        print colored.red(msg)
+                    except:
+                        print 'Cannot use colored messages'
+                        print msg   
                 else:
                     msg = ('LINK: performed association between %s and %s ') % (gtagobject,tagobject)
-                    print colored.green(msg)
+                    try:
+                        from clint.textui import colored
+                        print colored.green(msg)
+                    except:
+                        print 'Cannot use colored messages'
+                        print msg   
             
             except Exception, e:
                 sys.exit("failed: %s" % (str(e)))
@@ -615,7 +791,13 @@ class PhysDBDriver():
                 gtagobject=self.args[0]
                 tagobject=self.args[1]
                 msg = ('UNLINK: remove association between %s and %s ') % (gtagobject,tagobject)
-                print colored.cyan(msg)
+                try:
+                    from clint.textui import colored
+                    print colored.green(msg)
+                except:
+                    print 'Cannot use colored messages'
+                    print msg   
+                    
                 data = {}
                 object = 'maps'
 
@@ -626,7 +808,13 @@ class PhysDBDriver():
                 mappingidlink = entity['href'] 
                 self.restserver.deletelink(mappingidlink)
                 msg = ('UNLINK: removed association between %s and %s ') % (gtagobject,tagobject)
-                print colored.green(msg)
+                try:
+                    from clint.textui import colored
+                    print colored.green(msg)
+                except:
+                    print 'Cannot use colored messages'
+                    print msg   
+                    
             
             except Exception, e:
                 sys.exit("failed: %s" % (str(e)))
