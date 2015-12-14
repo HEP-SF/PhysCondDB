@@ -58,7 +58,9 @@ import conddb.utils.converters.CondTimeTypes;
 import conddb.utils.data.TimeRanges;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
+import conddb.web.resources.GlobalTagResource;
 import conddb.web.resources.Link;
+import conddb.web.resources.SpringResourceFactory;
 
 /**
  * @author aformic
@@ -76,6 +78,9 @@ public class CalibrationRestController extends BaseController {
 	private IovService iovService;
 	@Autowired
 	private SystemNodeService systemNodeService;
+	@Autowired
+	private SpringResourceFactory springResourceFactory;
+
 	@Autowired
 	private DirectoryMapperService directoryMapperService;
 	@Autowired
@@ -107,7 +112,7 @@ public class CalibrationRestController extends BaseController {
 			String filename = fileDetail.getFileName();
 			if (filename.contains(PATH_SEPARATOR)) {
 				// Extract the filename only...not the path
-				filename = filename.substring(filename.lastIndexOf(PATH_SEPARATOR),filename.length());
+				filename = filename.substring(filename.lastIndexOf(PATH_SEPARATOR)+1,filename.length());
 			}
 			String filenamenoext = filename.substring(0, filename.lastIndexOf("."));
 			String extension = filename.substring(filename.lastIndexOf("."),filename.length());
@@ -136,7 +141,7 @@ public class CalibrationRestController extends BaseController {
 			// IOVs to it.
 			// The logic suppose that every system with a reasonable tag name
 			// was created before
-			tag = sd.getTagNameRoot() + "-HEAD";
+			tag = sd.getTagNameRoot() + Tag.DEFAULT_TAG_EXTENSION;
 
 			// The tag name requested is compatible with the existing tag name
 			// for the specified path
@@ -210,7 +215,7 @@ public class CalibrationRestController extends BaseController {
 			Set<GlobalTagMap> maplist = new HashSet<GlobalTagMap>();
 			for (SystemDescription systemDescription : systemlist) {
 				String tagnameroot = systemDescription.getTagNameRoot();
-				Tag systemtag = globalTagService.getTag(tagnameroot+"-HEAD");
+				Tag systemtag = globalTagService.getTag(tagnameroot+Tag.DEFAULT_TAG_EXTENSION);
 				if (systemtag == null) {
 					String msg = "Cannot associate global tag to null system tag " + tagnameroot+" for package "+packageName;
 					throw buildException(msg, msg, Response.Status.NOT_MODIFIED);					
@@ -234,11 +239,26 @@ public class CalibrationRestController extends BaseController {
 	@Produces({ MediaType.APPLICATION_OCTET_STREAM })
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Path("/tar/{id}")
-	public Response getTarFromGlobalTag(@PathParam("id") final String globaltagname) throws ConddbWebException {
+	public Response getTarFromGlobalTag(
+			@PathParam("id") final String globaltagname,
+			@DefaultValue("none")@QueryParam("package") final String packagename
+			) throws ConddbWebException {
 		Response resp = null;
 		try {
+			// TAR should also dump global tag on disk if it not already done...
+			// We could do it at the locking step, may be at client level
+			// by calling a dedicated method: dumpOnDisk ???
 			GlobalTag globaltag = globalTagService.getGlobalTag(globaltagname);
-			File f = directoryMapperService.createTar(globaltag);
+			String packagedir = null;
+			if (!packagename.equals("none")) {
+				SystemDescription sd = systemNodeService.findSystemNodesBySchemaNameLike(packagename, null).getContent().get(0);
+				packagedir = sd.getSchemaName();
+			}
+			//directoryMapperService.dumpGlobalTagOnDisk(globaltag,packagedir);
+			if (!directoryMapperService.isOnDisk(globaltag,packagedir)) {
+				directoryMapperService.dumpGlobalTagOnDisk(globaltag,packagedir);
+			}
+			File f = directoryMapperService.createTar(globaltag,packagedir);
 			final InputStream in = new FileInputStream(f);
 			StreamingOutput stream = new StreamingOutput() {
 				public void write(OutputStream out) throws IOException, WebApplicationException {
@@ -270,17 +290,71 @@ public class CalibrationRestController extends BaseController {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Consumes({ MediaType.APPLICATION_JSON })
-	@Path("/collect/{id}")
-	public Response dumpContent(@PathParam("id") final String globaltagname) throws ConddbWebException {
+	@Path("/dump/{id}")
+	public Response dumpContent(
+			@PathParam("id") final String globaltagname,
+			@DefaultValue("none") @QueryParam("package") final String packagename) throws ConddbWebException {
 		Response resp = null;
 		try {
+			// The dump on local disk could then be propagated to afs directory
 			GlobalTag globaltag = globalTagService.getGlobalTag(globaltagname);
-			directoryMapperService.dumpGlobalTagOnDisk(globaltag);
+			String packagedir = null;
+			if (!packagename.equals("none")) {
+				SystemDescription sd = systemNodeService.findSystemNodesBySchemaNameLike(packagename, null).getContent().get(0);
+				packagedir = sd.getSchemaName();
+			}
+			directoryMapperService.dumpGlobalTagOnDisk(globaltag,packagedir);
 			resp = Response.ok(globaltag).build();
 			return resp;
 		} catch (ConddbServiceException e) {
 			String msg = "Error dumping tree structure for global tag " + globaltagname;
 			throw buildException(msg, msg + ": " + e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@POST
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Path("/collect")
+	public Response collect(
+			@QueryParam("destgtag") final String globaltagname,
+			@QueryParam("packagetag") final String globaltagpackagename) throws ConddbWebException {
+		Response resp;
+		try {
+			log.info("Request to merge a package globaltag "+ globaltagpackagename + " to a globaltag " + globaltagname);
+			GlobalTag existing = globalTagService.getGlobalTag(globaltagname);
+			if (existing == null) {
+				// Create a new global tag for the package
+				if (!globaltagname.startsWith("ASG")) {
+					String msg = "Cannot create global ASG tag using the name " + globaltagname+" for package global tag"+globaltagpackagename;
+					throw buildException(msg, msg, Response.Status.NOT_MODIFIED);					
+				}
+				log.debug("Creating new global tag using "+globaltagname);
+				Timestamp maxsnapshottime = TimeRanges.toTimestamp();
+				existing = new GlobalTag(globaltagname,new BigDecimal(0),"New ASG global tag merging package global tag "+globaltagpackagename,"1.0",maxsnapshottime);
+				existing = globalTagService.insertGlobalTag(existing);
+			}
+			if (existing.islocked()) {
+				String msg = "Error in add a mapping to a locked globaltag resource: "+existing.toString();
+				throw buildException(msg, msg, Response.Status.NOT_MODIFIED);
+			}
+			
+			log.info("merge into "+globaltagname+" the global tag package name "+globaltagpackagename);
+			// In this case pattern indicates another global tag name
+			GlobalTag packagegtag = globalTagService.getGlobalTagFetchTags(globaltagpackagename);
+			Set<GlobalTagMap> tagmaplist = packagegtag.getGlobalTagMaps();
+			for (GlobalTagMap globalTagMap : tagmaplist) {
+				Tag tag = globalTagMap.getSystemTag();
+				String newlabel = packagegtag.getName();
+				globalTagService.mapAddTagToGlobalTag(tag, existing, globalTagMap.getRecord(), newlabel);
+			}
+			resp = Response.ok(packagegtag, MediaType.APPLICATION_JSON).build();
+			return resp;
+
+		} catch (ConddbServiceException e) {
+			log.debug("Generate exception using an ConddbService exception..."+e.getMessage());
+			String msg = "Error creating mappings for globaltag resource: internal server exception !";
+			throw buildException(msg+" \n "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);	
 		}
 	}
 
@@ -295,7 +369,7 @@ public class CalibrationRestController extends BaseController {
 	protected String getUniqueTagNameRoot(String nodefullpath, String pkgname, String filename, int i) throws ConddbWebException {
 		// Verify if tagnameroot exists, if not try to generate a unique name
 		try {
-			String tagnameroot = pkgname.concat("_" + filename);
+			String tagnameroot = pkgname.concat("-" + filename);
 			log.debug("Search for system having tagname like "+tagnameroot);
 			SystemDescription sd = systemNodeService.getSystemNodesByTagname(tagnameroot);
 			if (sd == null) {
@@ -303,7 +377,7 @@ public class CalibrationRestController extends BaseController {
 			}
 			String[] path = nodefullpath.split("/");
 			if (i<path.length) {
-				pkgname = pkgname.concat("_"+path[++i]);
+				pkgname = pkgname.concat("-"+path[++i]);
 				log.debug("Redefine package name to "+pkgname);
 				return getUniqueTagNameRoot(nodefullpath, pkgname, filename, i);
 			} else {

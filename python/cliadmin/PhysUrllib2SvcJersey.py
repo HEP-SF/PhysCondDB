@@ -81,35 +81,58 @@ class PhysRestConnection:
         
 #        self.__curl.setopt(pycurl.URL, self.__url)
         
-#     def downloadData(self, filename):
-#         if self.__debug:
-#             print "Download data using url ", self.__url
-#         fp = open(filename, "wb")
-#         # buf is a ByteIO object...check documentation
-#         #        self.__curl.setopt(self.__curl.WRITEDATA, buf)
-#         try:
-#             self.setDefaultOptions()
-#             self.__curl.setopt(self.__curl.HTTPGET, 1)
-#             self.__curl.setopt(self.__curl.FAILONERROR, True)
-#             self.__curl.setopt(self.__curl.WRITEDATA, fp)
-#             self.__curl.perform()
-#             # HTTP response code, e.g. 200.
-#             if self.__debug:
-#                 print('Status: %d' % self.__curl.getinfo(self.__curl.RESPONSE_CODE))
-#             # Elapsed time for the transfer.
-#             if self.__debug:
-#                 print('Status: %f' % self.__curl.getinfo(self.__curl.TOTAL_TIME))
-# 
-#             return fp
-#         except pycurl.error, error:
-#             response = self.__curl.getinfo(self.__curl.RESPONSE_CODE)
-#             if response is not 200:
-#                 #print colored.red('Problem in executing GET : status returned is %d' % response)
-#                 print ('Problem in executing GET : status returned is %d' % response)
-#             errno, errstr = error
-#             #print colored.red('An error occurred in GET method: %s ' % errstr)
-#             print ('An error occurred in GET method: %s ' % errstr)
-#             return None
+    def downloadData(self, filename):
+        if self.__debug:
+            print "Download data using url ", self.__url
+        fp = open(filename, "wb")
+        req = Request(self.__url)
+        try:
+            response = self.__opener.open(req)
+        except HTTPError as e:
+            print 'The server couldn\'t fulfill the request.'
+            print 'Error code: ', e.code
+            print 'Reason ',e.reason
+            details = e.read()
+            print 'Details: ',details
+            jsondata = json.loads(details)
+            print 'Extracted message: ',jsondata['internalMessage']
+        except URLError as e:
+            print 'We failed to reach a server.'
+            print 'Reason: ', e.reason
+        else:
+        # everything is fine
+            fp.write(response.read())
+            fp.close()
+            if self.__debug:
+                print 'Received data into output file ',filename
+
+            return      
+
+        # buf is a ByteIO object...check documentation
+        #        self.__curl.setopt(self.__curl.WRITEDATA, buf)
+        try:
+            self.setDefaultOptions()
+            self.__curl.setopt(self.__curl.HTTPGET, 1)
+            self.__curl.setopt(self.__curl.FAILONERROR, True)
+            self.__curl.setopt(self.__curl.WRITEDATA, fp)
+            self.__curl.perform()
+            # HTTP response code, e.g. 200.
+            if self.__debug:
+                print('Status: %d' % self.__curl.getinfo(self.__curl.RESPONSE_CODE))
+            # Elapsed time for the transfer.
+            if self.__debug:
+                print('Status: %f' % self.__curl.getinfo(self.__curl.TOTAL_TIME))
+ 
+            return fp
+        except pycurl.error, error:
+            response = self.__curl.getinfo(self.__curl.RESPONSE_CODE)
+            if response is not 200:
+                #print colored.red('Problem in executing GET : status returned is %d' % response)
+                print ('Problem in executing GET : status returned is %d' % response)
+            errno, errstr = error
+            #print colored.red('An error occurred in GET method: %s ' % errstr)
+            print ('An error occurred in GET method: %s ' % errstr)
+            return None
 
     def getData(self):
         if self.__debug:
@@ -576,6 +599,10 @@ class PhysCurl(object):
             args = { 'expand' : 'true' }
             pairs = urllib.urlencode(args)
             self.__curl.setUrl(urlquoted+'?'+pairs)
+        elif params['package'] is not None and params['package'] != 'none':
+            args = { 'package' : params['package'] }
+            pairs = urllib.urlencode(args)
+            self.__curl.setUrl(urlquoted+'?'+pairs)
         else:
             self.__curl.setUrl(urlquoted)
         
@@ -590,10 +617,15 @@ class PhysCurl(object):
         if id is not None:
             url = (self.userbaseurl + servicebase + '/' + id)
         urlquoted = urllib.quote_plus(url,safe=':/')
-        self.__curl.setUrl(urlquoted)
+        if params['package'] is not None and params['package'] != 'none':
+            args = { 'package' : params['package'] }
+            pairs = urllib.urlencode(args)
+            self.__curl.setUrl(urlquoted+'?'+pairs)
+        else:      
+            self.__curl.setUrl(urlquoted)
 
-#        return self.__curl.downloadData(id+'-temp.tar')
-        return 'Not implemented'
+        return self.__curl.downloadData(id+'-temp.tar')
+#        return 'Not implemented'
 
     def getiovs(self,params,servicebase="/iovs/find"):
         if self.__debug:

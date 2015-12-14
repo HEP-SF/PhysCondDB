@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -56,7 +57,9 @@ public class DirectoryMapperService {
 	private SystemNodeService systemNodeService;
 	@Autowired
 	private IovService iovService;
-	
+
+	public static final String PATH_SEPARATOR = "/";
+
 	public DirectoryMapperService() {
 		super();
 	}
@@ -67,7 +70,7 @@ public class DirectoryMapperService {
 	}
 
 	public File createFileFromBlob(Payload payload) {
-		if (payload.getData()==null) {
+		if (payload.getData() == null) {
 			return null;
 		}
 		PayloadData data = payload.getData();
@@ -78,7 +81,7 @@ public class DirectoryMapperService {
 			if (!resource.exists()) {
 				log.error("Cannot create a file, file resource does not yet exists");
 			}
-			String outfilename = resource.getFile().getPath() + "/" + generatedFileName;
+			String outfilename = resource.getFile().getPath() + PATH_SEPARATOR + generatedFileName;
 			log.debug("Blob stored in " + data.getUri());
 			java.nio.file.Path path = Paths.get(data.getUri());
 			OutputStream out = new FileOutputStream(new File(outfilename));
@@ -92,15 +95,19 @@ public class DirectoryMapperService {
 		}
 		return null;
 	}
-	
+
 	public void dumpBlobOnDisk(byte[] data, String path, String outputfile) {
 		return;
 	}
 
-	public void dumpGlobalTagOnDisk(GlobalTag globaltag) {
+	public void dumpGlobalTagOnDisk(GlobalTag globaltag, String schema) {
 		try {
+			String schemadir = "";
+			if (schema != null) {
+				schemadir = schema + PATH_SEPARATOR;
+			}
 			GlobalTag entity = globalTagService.getGlobalTagFetchTags(globaltag.getName());
-			Resource resource = new FileSystemResource(localrootdir + "/" + globaltag.getName());
+			Resource resource = new FileSystemResource(localrootdir + PATH_SEPARATOR + schemadir + globaltag.getName());
 			log.info("create directory for global tag " + globaltag.getName());
 			if (!resource.exists()) {
 				log.info("Creating directory " + resource.getFile().getPath());
@@ -112,13 +119,39 @@ public class DirectoryMapperService {
 			Timestamp snapshot = entity.getSnapshotTime();
 			Set<GlobalTagMap> tagmaplist = entity.getGlobalTagMaps();
 			for (GlobalTagMap globalTagMap : tagmaplist) {
+				log.debug("Analyse directory structure for a given TAG");
 				Tag tag = globalTagMap.getSystemTag();
-				log.info("create directory for tag " + tag.getName());
-				String tagNameRoot = tag.getName().split("-HEAD")[0];
-				tag.getObjectType();
+				log.info("Found tag " + tag.getName());
+				String tagNameRoot = tag.getName().split(Tag.DEFAULT_TAG_EXTENSION)[0];
+				String filename = tag.getObjectType();
+				filename = filename.substring(0, filename.lastIndexOf("."));
+				String fileext = tag.getObjectType();
+				fileext = fileext.substring(fileext.lastIndexOf(".") + 1, fileext.length());
+				log.debug("Extracted file name extension..." + fileext);
 				SystemDescription system = systemNodeService.getSystemNodesByTagname(tagNameRoot);
+				log.debug("Found system " + system.getSchemaName());
+				// Check if this is a link to a global tag
+				String labelisgtag = globalTagMap.getLabel();
+				Resource subresource = new FileSystemResource(
+						localrootdir + PATH_SEPARATOR + system.getSchemaName() + PATH_SEPARATOR + labelisgtag);
+				if (subresource.exists()) {
+					log.info("Creating link to " + subresource.getFile().getPath());
+					Path newLink = Paths.get(resource.getFile().getPath() + PATH_SEPARATOR + labelisgtag);
+					Path target = Paths.get(subresource.getFile().getPath());
+					try {
+						Files.createSymbolicLink(newLink, target);
+					} catch (IOException x) {
+						log.error(x.getMessage());
+					} catch (UnsupportedOperationException x) {
+						// Some file systems do not support symbolic links.
+						log.error(x.getMessage());
+					}
+					continue;
+				}
 				String nodefullpath = system.getNodeFullpath();
-				Resource tagresource = new FileSystemResource(resource.getFile().getPath() + nodefullpath);
+				Resource tagresource = new FileSystemResource(
+						resource.getFile().getPath() + nodefullpath + PATH_SEPARATOR + filename);
+				// If the tag resource exists we should create a link...???
 				if (!tagresource.exists()) {
 					log.info("Creating directory " + tagresource.getFile().getPath());
 					File tfile = tagresource.getFile();
@@ -128,7 +161,9 @@ public class DirectoryMapperService {
 				for (Iov iov : iovlist) {
 					PayloadData data = iovService.getPayloadData(iov.getPayload().getHash());
 					Payload info = iov.getPayload();
-					String generatedFileName = iov.getSinceString() + "." + info.getStreamerInfo();
+					String generatedFileName = iov.getSinceString() + "." + fileext;
+					// It was using this one, but now I am extracting the info
+					// on the filename : info.getStreamerInfo();
 					String outfilename = tagresource.getFile().getPath() + "/" + generatedFileName;
 					log.debug("Dump blob for tag " + tag.getName() + " into output file " + outfilename);
 					log.debug("Blob stored in " + data.getUri());
@@ -150,17 +185,21 @@ public class DirectoryMapperService {
 		}
 	}
 
-	public File createTar(GlobalTag globaltag) {
+	public File createTar(GlobalTag globaltag, String schema) {
 		try {
-			Resource resource = new FileSystemResource(localrootdir + "/" + globaltag.getName());
+			String schemadir = "";
+			if (schema != null && !schema.equals("")) {
+				schemadir = schema + PATH_SEPARATOR;
+			}
+			Resource resource = new FileSystemResource(localrootdir + PATH_SEPARATOR + schemadir + globaltag.getName());
 			log.info("create a tar file from global tag " + globaltag.getName());
 			if (!resource.exists()) {
 				log.error("Cannot create a tar, directory does not yet exists");
 			}
 			List<File> filelist = new ArrayList<File>();
 			filelist.add(resource.getFile());
-			String tarname = localrootdir+"/"+globaltag.getName()+".tar";
-			this.createTar(tarname, filelist);
+			String tarname = localrootdir + "/" + globaltag.getName() + ".tar";
+			this.createTar(tarname, schemadir, filelist);
 			File tarfile = new File(tarname);
 			return tarfile;
 		} catch (IOException e) {
@@ -168,45 +207,66 @@ public class DirectoryMapperService {
 			e.printStackTrace();
 		}
 		return null;
-
 	}
-	
+
+	public boolean isOnDisk(GlobalTag globaltag, String schema) {
+		Resource resource = new FileSystemResource(localrootdir + "/" + globaltag.getName());
+		if (resource.exists()) {
+			return true;
+		}
+		return false;
+	}
+
 	protected List<File> recurseDirectory(final File directory) {
-	    List<File> files = new ArrayList<File>();
-	    if (directory != null && directory.isDirectory()) {
-	        for (File file : directory.listFiles()) {
-	            if (file.isDirectory()) {
-	                files.addAll(recurseDirectory(file));
-	            } else {
-	                files.add(file);
-	            }
-	        }
-	    }
-	    return files;
+		List<File> files = new ArrayList<File>();
+		if (directory != null && directory.isDirectory()) {
+			for (File file : directory.listFiles()) {
+				if (file.isDirectory()) {
+					files.addAll(recurseDirectory(file));
+				} else {
+					files.add(file);
+				}
+			}
+		}
+		return files;
+	}
+
+	public void createTar(final String tarName, final String schema, final List<File> pathEntries) throws IOException {
+		OutputStream tarOutput = new FileOutputStream(new File(tarName));
+
+		ArchiveOutputStream tarArchive = new TarArchiveOutputStream(tarOutput);
+		List<File> files = new ArrayList<File>();
+		for (File file : pathEntries) {
+			files.addAll(this.recurseDirectory(file));
+		}
+		String schemadir = "";
+		if (schema != null && !schema.equals("")) {
+			schemadir = schema + PATH_SEPARATOR;
+		}
+		java.nio.file.Path rootpath = Paths.get(localrootdir + PATH_SEPARATOR + schemadir);
+		for (File file : files) {
+			java.nio.file.Path path = Paths.get(file.getPath());
+			java.nio.file.Path relativepath = rootpath.relativize(path);
+			log.info("Created relative file path " + relativepath.toString());
+			TarArchiveEntry tarArchiveEntry = new TarArchiveEntry(file, relativepath.toString());
+			tarArchiveEntry.setSize(file.length());
+			tarArchive.putArchiveEntry(tarArchiveEntry);
+			FileInputStream fileInputStream = new FileInputStream(file);
+			IOUtils.copy(fileInputStream, tarArchive);
+			fileInputStream.close();
+			tarArchive.closeArchiveEntry();
+		}
+		tarArchive.finish();
+		tarOutput.close();
+	}
+
+	public String getLocalrootdir() {
+		return localrootdir;
+	}
+
+	public void setLocalrootdir(String localrootdir) {
+		this.localrootdir = localrootdir;
 	}
 	
-	public void createTar(final String tarName, final List<File> pathEntries) throws IOException {
-	    OutputStream tarOutput = new FileOutputStream(new File(tarName));
-
-	    ArchiveOutputStream tarArchive = new TarArchiveOutputStream(tarOutput);
-	    List<File> files = new ArrayList<File>();
-	    for (File file : pathEntries) {
-	        files.addAll(this.recurseDirectory(file));
-	    }
-	    java.nio.file.Path rootpath = Paths.get(localrootdir);
-	    for (File file : files) {
-	    	java.nio.file.Path path = Paths.get(file.getPath());
-	    	java.nio.file.Path relativepath = rootpath.relativize(path);
-	    	log.info("Created relative file path "+relativepath.toString());
-	    	TarArchiveEntry tarArchiveEntry = new TarArchiveEntry(file, relativepath.toString());
-	        tarArchiveEntry.setSize(file.length());
-	        tarArchive.putArchiveEntry(tarArchiveEntry);
-	        FileInputStream fileInputStream = new FileInputStream(file);
-	        IOUtils.copy(fileInputStream, tarArchive);
-	        fileInputStream.close();
-	        tarArchive.closeArchiveEntry();
-	    }
-	    tarArchive.finish();
-	    tarOutput.close();
-	}
+	
 }

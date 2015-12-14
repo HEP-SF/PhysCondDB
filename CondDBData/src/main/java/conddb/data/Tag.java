@@ -41,6 +41,8 @@ public class Tag extends conddb.data.Entity implements java.io.Serializable {
 	 */
 	private static final long serialVersionUID = -1912445397860376582L;
 
+	public static final String DEFAULT_TAG_EXTENSION = "_HEAD_00";
+
 	private Long id;
 
 	private String name;
@@ -165,7 +167,7 @@ public class Tag extends conddb.data.Entity implements java.io.Serializable {
 	 * 	The tag name.
 	 */
 	@Column(name = "NAME", unique = true, nullable = false, updatable=false, length = 2000)
-	@Pattern(regexp="^([A-Z]+[a-zA-Z]+)_([A-Za-z0-9]+)-([0-9])++$",
+	@Pattern(regexp="^([A-Z]+[a-zA-Z0-9-]+)_([A-Za-z0-9-]+)_([0-9])++$",
     message="{invalid.name}")
 	public String getName() {
 		return this.name;

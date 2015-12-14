@@ -33,6 +33,7 @@ class PhysDBDriver():
     # process command line options
         try:
             self.restserver = {}
+            self.taxextension = '_HEAD_00'
             self._command = sys.argv[0]
             self.useSocks = False
             self.t0 = 0
@@ -71,7 +72,7 @@ class PhysDBDriver():
         print "        ex: MyNewPkg local.file /MyNewPkg/ASubPkg/SomeDir/: store file local.file into conditions DB "
         print "    Add a file from local system to destination path, storing it with iov t0 [see option --t0]"
         print "    Creates an entry for the new file in the systemdescription table if not already there."
-        print "    Creates a tag using package name and filename (appending -HEAD) if not already there."
+        print "    Creates a tag using package name and filename (appending _HEAD_00) if not already there."
         print " "
         print " - TAG <package-name> <global tag name>"
         print "        ex: MyNewPkg MyNewPkg-00-01 : creates new global tag and associate all tags (files) found in package MyNewPkg."
@@ -85,12 +86,12 @@ class PhysDBDriver():
         print "        ex: MyNewPkg-00-01 myfile : retrieve list of files containing 'myfile' string in global tag MyNewPkg-00-01."
         print "    List files under a given global tag, filtering by file name."
         print " "
-        print " - SHOW  <folder path> <tag-name> [tag-name defaults to -HEAD]"
+        print " - SHOW  <folder path> <tag-name> [tag-name defaults to _HEAD_00]"
         print "        ex: /MY/FOLDER/PATH : retrieve list of files in the folder showing their insertion time and datasize."
         print "    List files under a given folder (and tag)."
         print " "
-        print " - COLLECT  <global tag name>"
-        print "        ex: MyNewPkg-00-01 : Dump the full directory structure for global tag in server file system."
+        print " - COLLECT  <global tag name> <ASG global tag>"
+        print "        ex: MyNewPkg-00-01 ASG-00-01: Dump the full directory structure for global tag in server file system."
         print "    The purpose is to trigger the copy to afs of all calibration files under a global tag."
         print " "
         print "Options: "
@@ -199,39 +200,77 @@ class PhysDBDriver():
     def lockit(self, params):
         globaltagname=params[0]
         lockstatus=params[1]
+        package="none"
+        if len(params)>2:
+            package=params[2]
         data={}
         # Search globaltagname in global tags
-        msg = ('>>> Set lock for GlobalTag %s to %s') % (globaltagname,lockstatus)
+        msg = ('>>> Set lock for GlobalTag %s to %s using package name %s') % (globaltagname,lockstatus,package)
         #print colored.cyan(msg)
         print msg
 
         data['lockstatus']=lockstatus
         gtag = self.restserver.addJsonEntity(data,'/globaltags/'+globaltagname)
+        print gtag, ' status ',gtag['lockstatus']
         msg = ('    + Lock status has been set to %s for GlobalTag %s : snapshot time is %s') % (gtag['lockstatus'],gtag['href'],gtag['snapshotTime'])
+        print msg
+        if 'LOCKED' == lockstatus:
+            print 'Lock status is LOCKED, then you can dump the global tag...',globaltagname
+            dumpparams = []
+            dumpparams.append(gtag['name'])
+            dumpparams.append(package)
+            print 'Calling dump method using parameters ',dumpparams
+            self.dumpgtag(dumpparams)
+        else:
+            print 'No dumping on directory is performed when unlocking....'
+#        print colored.green(msg)
+
+# collect a global tag
+    def dumpgtag(self, params):
+        globaltagname=params[0]
+        package = params[1]
+        print 'Dump is using parameter ',globaltagname, package
+        data={}
+        data['name']=globaltagname
+        data['package']=package
+        data['trace']='off'
+        data['expand']='false'
+        # Search globaltagname in global tags
+        msg = ('>>> Dump all files in GlobalTag %s') % (globaltagname)
+#        print colored.cyan(msg)
+        print msg
+        self.restserver.get(data,'/expert/calibration/dump')
+        msg = ('    + Tree structure for GlobalTag %s was dump on file system') % (globaltagname)
 #        print colored.green(msg)
         print msg
 
 # collect a global tag
     def collect(self, params):
         globaltagname=params[0]
+        asgglobaltagname=params[1]
         data={}
-        data['name']=globaltagname
+        data['packagetag']=globaltagname
+        data['destgtag']=asgglobaltagname
         data['trace']='off'
         data['expand']='false'
         # Search globaltagname in global tags
-        msg = ('>>> Collect all files in GlobalTag %s') % (globaltagname)
+        msg = ('>>> Merge all files in GlobalTag %s into ASG global tag %s') % (globaltagname,asgglobaltagname)
 #        print colored.cyan(msg)
         print msg
-        self.restserver.get(data,'/expert/calibration/collect')
-        msg = ('    + Tree structure for GlobalTag %s was dump on file system') % (globaltagname)
+        self.restserver.addPairs(data,'/calibration/collect')
+        msg = ('    + Tree structure for GlobalTag %s was dump on file system == FIX THIS MESSAGE') % (globaltagname)
 #        print colored.green(msg)
         print msg
 
 # collect a global tag
     def gettar(self, params):
         globaltagname=params[0]
+        package="none"
+        if len(params)>1:
+            package=params[1]
         data={}
         data['name']=globaltagname
+        data['package']=package
         # Search globaltagname in global tags
         msg = ('>>> Collect all files in GlobalTag %s and download tar file ') % (globaltagname)
         #print colored.cyan(msg)
@@ -283,7 +322,7 @@ class PhysDBDriver():
             (objList, code) = self.gettagiovs(data)
             systemdata = {}
             systemdata['by']='tag'
-            tagnameroot = data['tag'].split('-HEAD')[0]
+            tagnameroot = data['tag'].split(self.taxextension)[0]
             systemdata['name']=tagnameroot
             msg = ' ==> Search for system by tag name root %s ' % tagnameroot
             #print colored.cyan(msg)
@@ -538,7 +577,7 @@ class PhysDBDriver():
                 for systemobj in systemobjlist:
                     #print 'Retrieved system ',systemobj
                     tagnameroot = systemobj['tagNameRoot']
-                    tagname = tagnameroot+'-HEAD'
+                    tagname = tagnameroot+self.taxextension
                     msg = '>>> Check content for system %s using tag name root %s ' % (systemobj['nodeFullpath'],tagnameroot)
                     #print colored.cyan(msg)
                     print msg

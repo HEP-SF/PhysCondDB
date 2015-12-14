@@ -38,21 +38,29 @@ public class GlobalTagMapResource extends Link {
 		put("tagName", globaltagmap.getTagName());
 		put("label", globaltagmap.getLabel());
 		put("record", globaltagmap.getRecord());
-		
-		if (parent != null && parent instanceof Tag) {
-			GlobalTagResource gtagres = null;
-			try {
+		GlobalTagResource gtagres = null;
+		TagResource tagres = null;
+		if (parent == null) {
+			// Add systemTag and globalTag resources because we are asking directly for maps.
+			gtagres = getGlobalTagResource(info, globaltagmap);
+			tagres = getTagResource(info, globaltagmap);
+			if (gtagres == null) {
 				GlobalTag gtag = globaltagmap.getGlobalTag();
 				gtag.setResId(gtag.getName());
-				gtagres = new GlobalTagResource(info, (GlobalTag) gtag, this.tsformat);
-				// remove the map object since
-				// we are already filling it
-				// from maps.
-				gtagres.remove("globalTagMaps"); 
-
-			} catch (org.hibernate.LazyInitializationException e) {
-				log.debug("LazyInitialization Exception from hibernate: map does not have a global tag loaded");
+				put("globalTag", new Link(getFullyQualifiedContextPath(info), gtag));
+			} else {
+				put("globalTag", gtagres);
 			}
+			if (tagres == null) {
+				Tag systag = globaltagmap.getSystemTag();
+				systag.setResId(systag.getName());
+				put("systemTag", new Link(getFullyQualifiedContextPath(info), systag));
+			} else {
+				put("systemTag", tagres);
+			}
+			
+		} else if (parent != null && parent instanceof Tag) {
+			gtagres = getGlobalTagResource(info, globaltagmap);
 			if (gtagres == null) {
 				GlobalTag gtag = globaltagmap.getGlobalTag();
 				gtag.setResId(gtag.getName());
@@ -65,24 +73,7 @@ public class GlobalTagMapResource extends Link {
 			put("systemTag", new Link(getFullyQualifiedContextPath(info), systag));
 
 		} else if (parent != null && parent instanceof GlobalTag) {
-			TagResource tagres = null;
-			try {
-				log.debug("Determine tag: " + globaltagmap.getSystemTag());
-				if (globaltagmap.getSystemTag() != null) {
-					Tag systag = globaltagmap.getSystemTag();
-					systag.setResId(systag.getName());
-					if (systag.getGlobalTagMaps() != null) {
-						systag.setGlobalTagMaps(null);
-					}
-					tagres = new TagResource(info, (Tag) systag, this.tsformat);
-					// remove the map object since
-					// we are already filling it
-					// from maps.
-					tagres.remove("globalTagMaps"); 
-				}
-			} catch (org.hibernate.LazyInitializationException e) {
-				log.debug("LazyInitialization Exception from hibernate: map does not have a system tag loaded");
-			}
+			tagres = getTagResource(info, globaltagmap);
 			if (tagres == null) {
 				Tag systag = globaltagmap.getSystemTag();
 				systag.setResId(systag.getName());
@@ -97,4 +88,44 @@ public class GlobalTagMapResource extends Link {
 		
 		this.serializeTimestamps(this.tsformat);
 	}
+	
+	private GlobalTagResource getGlobalTagResource(UriInfo info, GlobalTagMap globaltagmap) {
+		GlobalTagResource gtagres = null;
+		try {
+			GlobalTag gtag = globaltagmap.getGlobalTag();
+			gtag.setResId(gtag.getName());
+			gtagres = new GlobalTagResource(info, (GlobalTag) gtag, this.tsformat);
+			// remove the map object since
+			// we are already filling it
+			// from maps.
+			gtagres.remove("globalTagMaps"); 
+
+		} catch (org.hibernate.LazyInitializationException e) {
+			log.debug("LazyInitialization Exception from hibernate: map does not have a global tag loaded");
+		}	
+		return gtagres;
+	}
+	
+	private TagResource getTagResource(UriInfo info, GlobalTagMap globaltagmap) {
+		TagResource tagres = null;
+		try {
+			log.debug("Determine tag: " + globaltagmap.getSystemTag());
+			if (globaltagmap.getSystemTag() != null) {
+				Tag systag = globaltagmap.getSystemTag();
+				systag.setResId(systag.getName());
+				if (systag.getGlobalTagMaps() != null) {
+					systag.setGlobalTagMaps(null);
+				}
+				tagres = new TagResource(info, (Tag) systag, this.tsformat);
+				// remove the map object since
+				// we are already filling it
+				// from maps.
+				tagres.remove("globalTagMaps"); 
+			}
+		} catch (org.hibernate.LazyInitializationException e) {
+			log.debug("LazyInitialization Exception from hibernate: map does not have a system tag loaded");
+		}
+		return tagres;
+	}
+
 }

@@ -42,18 +42,22 @@ public class SpringResourceFactory {
 
 	public Link getResource(String resourceName, UriInfo info, Entity entity) {
 		if (resourceName.equals("globaltag")) {
+			entity.setResId(((GlobalTag)entity).getName());
 			GlobalTagResource resource = new GlobalTagResource(info,(GlobalTag)entity,timestampFormat);
 			log.info("Create global tag resource: timestamp format is "+timestampFormat);
 			return resource;
 		} else if (resourceName.equals("globaltagmap")) {
+			entity.setResId(((GlobalTagMap)entity).getId().toString());
 			GlobalTagMapResource resource = new GlobalTagMapResource(info,(GlobalTagMap)entity,timestampFormat);
 			log.info("Create global tag map resource");
 			return resource;			
 		} else if (resourceName.equals("tag")) {
+			entity.setResId(((Tag)entity).getName());
 			TagResource resource = new TagResource(info,(Tag)entity,timestampFormat);
 			log.info("Create tag resource");
 			return resource;			
 		} else if (resourceName.equals("iov")) {
+			entity.setResId(((Iov)entity).getId().toString());
 			IovResource resource = new IovResource(info,(Iov)entity,timestampFormat);
 			log.info("Create iov resource");
 			return resource;			

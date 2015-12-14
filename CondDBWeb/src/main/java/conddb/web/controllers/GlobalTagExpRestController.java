@@ -109,8 +109,14 @@ public class GlobalTagExpRestController extends BaseController {
 			}
 			//TODO: This should be activated in the final code
 			if (existing.islocked()) {
-				String msg = "Error updating locked globaltag resource: id "+id+" is locked!";
-				throw buildException(msg, msg, Response.Status.NOT_MODIFIED);
+				if (map.containsKey("lockstatus") && String.valueOf(map.get("lockstatus")).equalsIgnoreCase(GlobalTagStatus.UNLOCKED.name())) {
+					// Unlock the global tag and return immediately....no other action is allowed.
+					existing.lock(false);
+					map.clear();
+				} else {
+					String msg = "Error updating locked globaltag resource: id "+id+" is locked!";
+					throw buildException(msg, msg, Response.Status.NOT_MODIFIED);
+				}
 			}
 			if (map.containsKey("name")) {
 				List<GlobalTagMap> maplist = globalTagService.getGlobalTagMapByGlobalTagName(id);
@@ -211,7 +217,8 @@ public class GlobalTagExpRestController extends BaseController {
 				Set<GlobalTagMap> tagmaplist = sourcegtag.getGlobalTagMaps();
 				for (GlobalTagMap globalTagMap : tagmaplist) {
 					Tag tag = globalTagMap.getSystemTag();
-					globalTagService.mapAddTagToGlobalTag(tag, existing,record, label);
+					String newlabel = sourcegtag.getName();
+					globalTagService.mapAddTagToGlobalTag(tag, existing,record, newlabel);
 				}
 			}
 			GlobalTagResource resource = (GlobalTagResource) springResourceFactory.getResource("globaltag", info,

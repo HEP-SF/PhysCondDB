@@ -48,6 +48,9 @@
 		<property name="rootpath" value="/tmp/physconddb" />
 	</bean>
 	<bean id="payloaddatadbrepo" class="conddb.svc.dao.repositories.impl.PayloadDataDBImpl"></bean>
+	<bean id="directoryMapperService" class="conddb.svc.calibration.tools.DirectoryMapperService">
+		<property name="localrootdir" value="/tmp/physconddb-dump" />
+	</bean>
 
 	<!-- Timestamp serializer and deserializer formatting methods -->
 	<bean id="timestampFormat" class="conddb.utils.json.serializers.TimestampFormat">
