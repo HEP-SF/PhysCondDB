@@ -582,6 +582,16 @@ class PhysCurl(object):
             print 'get: search object using parameter '
             print params
         id = params['name']
+
+        if 'package' not in params:
+            params['package'] = 'none'
+            
+        if 'trace' not in params:
+            params['trace'] = 'off'
+            
+        if 'expand' not in params:
+            params['expand'] = 'false'
+            
         url = (self.userbaseurl + servicebase )
         if id is not None:
             url = (self.userbaseurl + servicebase + '/' + id)
