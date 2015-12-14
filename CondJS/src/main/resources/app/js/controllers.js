@@ -242,9 +242,11 @@ condJSControllers
 														.log('data in model have changed: '
 																+ JSON
 																		.stringify($scope.selectedtracetags));
-												// $scope.displayedTagsCollection
-												// =
-												// [].concat($scope.selectedtracetags);
+//												$scope.displayedTagsCollection = [].concat($scope.selectedtracetags);
+												console
+												.log('data in view should have changed: '
+														+ JSON
+																.stringify($scope.displayedTagsCollection));
 											}, true);
 
 							$scope.goToMaps = function(hash) {

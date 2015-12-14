@@ -21,6 +21,14 @@
 <!-- 		<a ng-href="#/maps/{{selectedglobaltagname}}">Update Mappings</a> -->
 		</div>
 		</form>
+		<br> Debug: <input type="checkbox" ng-model="checked"
+			aria-label="Toggle ngShow">
+		<div class="check-element animate-hide" ng-show="checked">
+			<span class="glyphicon glyphicon-thumbs-up"></span> check values of
+			scope variables.
+			<pre>globaltag = {{selectedglobaltagname | json}}</pre>
+			<pre>collection = {{displayedTagsCollection | json}}</pre>
+		</div>
 
 		<hr>
 		<table st-table="displayedTagsCollection"
