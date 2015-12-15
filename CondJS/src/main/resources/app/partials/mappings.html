@@ -1,7 +1,9 @@
-<div class="container-fluid">
+<div class="container">
 	<div ng-controller="MapCtrl">
-		<p>Update tags associations to {{globaltagname}}</p>
-		<p>The number of associated tags is {{noRow}}</p>
+		<h2>Update tags associations to {{globaltagname}}</h2>
+		<hr>
+		<p>The total number of associated tags is {{noRow}}</p>
+		<p>You can filter by name the tag list to show only filtered tags in the table.</p>
 		<label> Filter by Name: </label> <input type="text" ng-model="tagname" /><br />
 		<br /> 
 		<button class="btn" ng-click="mapit()">
@@ -24,6 +26,7 @@
 			<pre>select = {{select | json}}</pre>
 			<pre>globaltagmappings = {{globaltagmappings | json}}</pre>
 			<pre>displayedTagsCollection = {{displayedTagsCollection | json}}</pre>
+			<pre>tags = {{tags | json}}</pre>
 			<pre>gtags = {{gtags | json}}</pre>
 			<pre>assmap = {{assmap | json}}</pre>
 		</div>

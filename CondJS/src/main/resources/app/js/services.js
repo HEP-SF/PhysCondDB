@@ -70,6 +70,35 @@ condJSServices.constant('baseurl', {
 			}
 		}
 	};
+}]).factory('System', [ function() {
+	var data = {
+			nodeFullpath : 'NODE_FULLPATH',
+			nodeDescription : 'a fake node',
+			tagNameRoot : 'NodeFullPath',
+			groupSize : '1000',
+			schemaName : 'A schema name'
+	};
+	var defaultdata = angular.copy(data);
+
+	return {
+			getData : function() {
+				console.log('System: getData');
+				return data;
+			},
+			getDefaultData : function() {
+				console.log('System: getDefaultData');
+				return defaultdata;
+			},
+			setData : function(newData) {
+				data = newData;
+//				if (data.insertionTime != undefined) {
+//					delete data.insertionTime;
+//				}
+				if (data.isSelected != undefined) {
+					delete data.isSelected;
+				}
+			}
+	};
 }]).factory(
 		'CondRest',
 		[
@@ -96,6 +125,8 @@ condJSServices.constant('baseurl', {
 							req.url = baseurl.url + experturl.expert + requrl;
 						} else if (mode === 'user') {
 							req.url = baseurl.url + userurl.user + requrl;
+						} else if (mode === 'full') {
+							req.url = requrl;
 						}
 						if (httpmethod != null) {
 							req.method = httpmethod;
@@ -150,6 +181,25 @@ condJSServices.constant('baseurl', {
 				function($resource, baseurl, userurl) {
 					var url = baseurl.url + userurl.user + 'tags/:id';
 					console.log('Call CondTag using url ' + url);
+					return $resource(url, {
+						id : '@id'
+					}, {
+						query : {
+							method : 'GET',
+							params : {
+								id : '%',
+								expand : 'true'
+							},
+							isArray : false
+						}
+					});
+				} ])
+.factory(
+		'CondSystem',
+		[ '$resource', 'baseurl', 'userurl',
+				function($resource, baseurl, userurl) {
+					var url = baseurl.url + userurl.user + 'systems/:id';
+					console.log('Call CondSystem using url ' + url);
 					return $resource(url, {
 						id : '@id'
 					}, {

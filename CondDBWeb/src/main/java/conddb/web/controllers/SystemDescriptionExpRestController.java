@@ -123,6 +123,7 @@ public class SystemDescriptionExpRestController extends BaseController {
 
 		try {
 			Response resp;
+			log.info("Request for deleting system "+id);
 			SystemDescription existing = systemNodeService.getSystemDescription(id);
 			if (existing == null) {
 				String msg = "Error removing system description resource: id "+id+" not found!";

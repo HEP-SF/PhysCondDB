@@ -3,6 +3,7 @@ document.getElementById("nav01").innerHTML =
 "<li><a href='#/home'>Home</a></li>" +
 "<li><a href='#/globaltags'>Global Tags</a></li>" +
 "<li><a href='#/tags'>Tags</a></li>" +
+"<li><a href='#/systems'>Systems</a></li>" +
 "<li><a href='#/monitor'>Monitor</a></li>" +
 "</ul>";
 

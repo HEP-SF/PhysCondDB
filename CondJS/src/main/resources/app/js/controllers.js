@@ -296,9 +296,10 @@ condJSControllers
 						'$routeParams',
 						'Tag',
 						'CondTag',
+						'CondRest',
 						'GetHref',
 						function($rootScope, $scope, $routeParams, Tag,
-								CondTag, GetHref) {
+								CondTag, CondRest, GetHref) {
 
 							$scope.tags = [];
 							$scope.displayedTagsCollection = [];
@@ -352,24 +353,18 @@ condJSControllers
 							};
 
 							$scope.remove = function(atag) {
-								var delurl = 'tags/' + atag.name;
+								var delurl = 'tags/' + atag.id;
 								var httpmethod = 'DELETE';
-								CondRest
-										.request(delurl, httpmethod, 'expert')
-										.then(
+								CondRest.request(delurl, httpmethod, 'expert').then(
 												// success
-												function(response) {
-													console
-															.log('Received response '
-																	+ response);
-													$scope.refresh();
-												},
-												// error
-												function(error) {
-													console
-															.log('Error occurred in url call...');
-												});
-
+										function(response) {
+											console.log('Received response '+ response);
+											$scope.refresh();
+										},
+										// error
+										function(error) {
+											console.log('Error occurred in url call...');
+										});
 							};
 
 							$scope.edit = function(atag) {
@@ -539,11 +534,13 @@ condJSControllers
 				[
 						'$scope',
 						'$routeParams',
+						'$q',
 						'CondGlobalTag',
 						'CondTag',
-						function($scope, $routeParams, CondGlobalTag, CondTag) {
+						'CondRest',
+						function($scope, $routeParams, $q, CondGlobalTag, CondTag, CondRest) {
 							$scope.tags = [];
-							$scope.itemsByPage = 5;
+							$scope.itemsByPage = 10;
 							$scope.displayedPages = 10;
 							$scope.displayedTagsCollection = [];
 							$scope.tagname = '%';
@@ -568,63 +565,66 @@ condJSControllers
 								expand : 'true'
 							});
 
-							$scope
-									.$on(
-											'tagTraceDataChanged',
-											function() {
-												console
-														.log('data in model have changed: '
-																+ JSON
-																		.stringify($scope.selectedtracetags));
-												// $scope.displayedTagsCollection
-												// =
-												// [].concat($scope.selectedtracetags);
-											}, true);
+							$scope.$on('tagTraceDataChanged',
+								function() {
+									console.log('data in model have changed: '+ JSON.stringify($scope.selectedtracetags));
+								}, true);
 
+							function ismapped(tagname) {
+								console.log('Verify mapping for '+tagname);
+								mapped = $scope.globaltagmappings.filter(
+									function(row) {
+										//console.log('analyse row '+JSON.stringify(row));
+										if (row.systemTag.name == tagname) {
+											console.log('found '+tagname);
+											return row.systemTag.name === tagname;
+										}
+								})[0];
+								console.log('function is mapped is sending '+JSON.stringify(mapped));
+								if (mapped != undefined) {
+									mapped.status = true;
+								} else {
+									mapped = {};
+									mapped.status = false;
+								}
+								return mapped;
+							};
+							
 							$scope.initMappings = function() {
 								var disptagcoll = [];
 								$scope.assmap = [];
 
-								console.log('Loop over globaltagmaps...'
-										+ $scope.globaltagmappings.length);
-								for (var i = 0; i < $scope.globaltagmappings.length; ++i) {
-									console
-											.log('i = '
-													+ i
-													+ ' '
-													+ $scope.globaltagmappings[i].systemTag.name);
-									console
-											.log('Length of displayedTagsCollection is '
-													+ $scope.tags.length);
-									var selectedtags = [];
-									var nonseltags = [];
-									var isel = 0;
-									var inosel = 0;
-									for (var j = 0; j < $scope.tags.length; ++j) {
-										console.log($scope.tags[j]);
-										var atag = {};
-										atag.name = $scope.tags[j];
-										if ($scope.tags[j].name == $scope.globaltagmappings[i].systemTag.name) {
-											atag.select = true;
-											selectedtags.push(atag);
-											$scope.noRow = $scope.noRow + 1;
-											$scope.assmap.push({
-												name : $scope.tags[j].name
-											});
-											console
-													.log('Adding '
-															+ $scope.tags[j].name
-															+ ' to array of mapped tags ');
-											console.log(disptagcoll[j]);
-										} else {
-											atag.select = false;
-											nonseltags.push(atag);
-										}
+								console.log('Loop over tags...'+ $scope.tags.length);
+								
+								var selectedtags = [];
+								var nonseltags = [];
+								for (var j = 0; j < $scope.tags.length; ++j) {
+									//console.log('Loop over tags, tags[j] : '+j+' = '+JSON.stringify($scope.tags[j]));
+									var atag = {};
+									atag = $scope.tags[j];
+									var ismap = ismapped(atag.name);
+									if (ismap.status) {
+										atag.select = true;
+										selectedtags.push(atag);
+										$scope.noRow = $scope.noRow + 1;
+										var link = ismap.href;
+										var urlarr = link.split("/");
+										$scope.assmap.push({
+											name : $scope.tags[j].name,
+											mapref : urlarr[urlarr.length-1]
+										});
+										console.log('Adding '+ $scope.tags[j].name + ' to array of mapped tags ');
+										console.log(selectedtags[selectedtags.length-1]);										
+									} else {
+										atag.select = false;
+										nonseltags.push(atag);
+										console.log('Adding '+ $scope.tags[j].name + ' to array of un-mapped tags ');
+										console.log(nonseltags[nonseltags.length-1]);										
 									}
-									disptagcoll = [].concat(selectedtags);
-									disptagcoll = disptagcoll
-											.concat(nonseltags);
 								}
+								disptagcoll = [].concat(selectedtags);
+								disptagcoll = disptagcoll
+										.concat(nonseltags);
 								return disptagcoll;
 							};
 							//
@@ -634,11 +634,10 @@ condJSControllers
 									$scope.tags = data.items;
 									$scope.displayedTagsCollection = []
 											.concat($scope.tags);
-									console.log('Inside promise got data '
+									console.log('Inside loadtags promise got data '
 											+ data);
 								});
-							}
-							;
+							};
 
 							function loadglobaltagtrace(queryargs) {
 								// Activate the trace
@@ -650,30 +649,8 @@ condJSControllers
 										.then(function(data) {
 											$scope.selglobaltag = data;
 											$scope.globaltagmappings = data.globalTagMaps.items;
-											// var taglist = [];
-											// for (i=0; i<$scope.gtags.length;
-											// i++) {
-											// atag =
-											// $scope.globaltagmappings[i].systemTag;
-											// console.log('Get system tag
-											// '+JSON.stringify(atag));
-											// taglist.push(atag);
-											// // load the specific global tags
-											// object
-											// }
-											// console.log('Retrieved tag list
-											// '+JSON.stringify(taglist));
-											// $scope.selectedtracetags =
-											// taglist;
-											// $scope.displayedTagsCollection =
-											// [].concat($scope.selectedtracetags);
-
-											// $rootScope.$broadcast('tagTraceDataChanged',
-											// $scope.selectedtracetags);
-											// return taglist;
 										});
-							}
-							;
+							};
 
 							$scope.init = function() {
 								$scope.noRow = 0;
@@ -686,11 +663,7 @@ condJSControllers
 									trace : 'on',
 									expand : 'true'
 								});
-								// $scope.gtags = GlobalTagGet.trace({
-								// globaltagname : $routeParams.globaltagname
-								// });
-								// console.log($scope.gtags);
-							}
+							};
 
 							$scope.init();
 
@@ -702,35 +675,27 @@ condJSControllers
 									if (r.isSelected) {
 										console.log(r);
 										$scope.seltag = angular.copy(r);
+										console.log('Selected tag is '+JSON.stringify($scope.seltag));
 									}
 								})
 							}, true);
 
 							// fired when table rows are selected
-							$scope
-									.$watch(
-											'tags.length+globaltagmappings.length',
-											function() {
-												console
-														.log('Length of tags has changed');
-												if ($scope.tags.length > 0
-														&& $scope.globaltagmappings.length > 0) {
-													$scope.displayedTagsCollection = $scope
-															.initMappings();
-												}
-											}, true);
+							$scope.$watch('tags.length+globaltagmappings.length',
+									function() {
+										console.log('Length of tags has changed '+$scope.tags.length+' '+$scope.globaltagmappings.length);
+										if ($scope.tags.length > 0 && $scope.globaltagmappings.length > 0) {
+											$scope.displayedTagsCollection = $scope.initMappings();
+										}
+							}, true);
 
 							$scope.search = function() {
-								console
-										.log('Retrieve data using search parameter '
-												+ $scope.tagname);
+								console.log('Retrieve data using search parameter '+ $scope.tagname);
+								$scope.init();
 								loadtags({
 									id : '%' + $scope.tagname + '%',
 									expand : 'true'
 								});
-								// $scope.tags = TagGet.query({
-								// tagname : $scope.tagname
-								// })
 							};
 
 							$scope.refresh = function() {
@@ -739,111 +704,110 @@ condJSControllers
 									id : '%' + $scope.tagname + '%',
 									expand : 'true'
 								});
-								// $scope.tags = TagGet.query({
-								// tagname : $scope.tagname
-								// });
-								// $scope.displayedTagsCollection = []
-								// .concat($scope.tags);
+							};
+
+							function updateMaps(queryargs) {
+								var url = queryargs.url;
+								var httpmethod = queryargs.method;
+								var mode = queryargs.mode;
+								var data = queryargs.data;
+								
+								return $q(function(resolve, reject) {
+									CondRest.request(url, httpmethod, mode, null, data).then(
+										function(response) {
+											console.log("Called query and got result "+JSON.stringify(response));
+										},
+										function(error) {
+											console.log("Called query but got error "+JSON.stringify(error));
+											console.log("Error "+error.data.userMessage);
+										}
+									);
+								});								
 							};
 
 							$scope.mapit = function() {
-
 								for (var i = 0; i < $scope.assmap.length; ++i) {
 									var mapped = {};
 									var addtag = true;
 									console.log('Mapping tag : '
-											+ $scope.assmap[i].name);
-									mapped = $scope.globaltagmappings
-											.filter(function(row) {
-												if (row.systemTag.name == $scope.assmap[i].name) {
-													return row;
-												}
-											})[0];
-									if (mapped != undefined) {
-										console.log('Found mapped : ');
-										console.log(mapped);
-										if (mapped.systemTag != undefined) {
-											console
-													.log('Tag is already mapped '
-															+ mapped.systemTag.name);
-											addtag = false;
+											+ $scope.assmap[i].name+' for new status '+$scope.assmap[i].status);
+									if ($scope.assmap[i].status == undefined || $scope.assmap[i].status == 'ok') {
+										// Ignore these because they were already mapped and they are not requested to be unmapped
+										continue;
+									} else if ($scope.assmap[i].status == 'rem') {
+										console.log('Use mapref to remove a mapping '+$scope.assmap[i].mapref);
+										if ($scope.assmap[i].mapref == undefined) { 
+											console.log('There was a problem unmapping tag '+$scope.assmap[i].name);
+											continue;
 										}
-									}
-									if (addtag) {
-										console.log('Add tag to mapping: '
-												+ $scope.assmap[i].name
-												+ ' will be associated to '
-												+ $scope.globaltagname);
-										// MapUpd
-										// .addtoglobaltag({
-										// globaltagname : $scope.globaltagname,
-										// tagname : $scope.assmap[i].name
-										// });
-									}
-								}
-								for (var i = 0; i < $scope.globaltagmappings.length; ++i) {
-									var mapped = {};
-									var rmtag = false;
-									console
-											.log('UnMapping tag ?  '
-													+ $scope.globaltagmappings[i].systemTag.name);
-									mapped = $scope.assmap
-											.filter(function(row) {
-												if (row.name == $scope.globaltagmappings[i].systemTag.name) {
-													return row;
-												}
-											})[0];
-									console.log('Found mapped : ');
-									console.log(mapped);
-									if (mapped == undefined) {
-										rmtag = true;
-									}
-									if (rmtag) {
-										console
-												.log('Tag is requested to be un-mapped '
-														+ $scope.globaltagmappings[i].systemTag.name);
-										// MapRem
-										// .remove({
-										// globaltag : $scope.globaltagname,
-										// tag :
-										// $scope.globaltagmappings[i].systemTag.name
-										// });
+										var qry = { url : 'maps/'+$scope.assmap[i].mapref, method : 'DELETE', mode : 'expert' }
+										var promise = updateMaps(qry);
+										promise.then(function(response) {
+											console.log('mapit inside promise got successful answer '+response);
+										}, function(error) {
+											console.log("mapit received error "+error);
+										});
+
+									} else if ($scope.assmap[i].status == 'add') {
+										console.log('Add tag to mapping '+$scope.assmap[i].name);
+										var map = { globaltagname : $scope.globaltagname, tagname : $scope.assmap[i].name, record : 'test', label : 'test' }
+										var qry = { url : 'maps', method : 'POST', mode : 'expert', data : map }
+										var promise = updateMaps(qry);
+										promise.then(function(response) {
+											console.log('mapit inside promise got successful answer '+response);
+										}, function(error) {
+											console.log("getConfig received error "+error);
+										});
+										
 									}
 								}
 							};
 
-							$scope.manageSelected = function(select, tagname,
-									row) {
-								console.log('manageSelected using args '
-										+ select + ' ' + tagname);
+							$scope.manageSelected = function(select, tagname, row) {
+								console.log('manageSelected using args '+ select + ' ' + tagname);
 								row.select = select;
-								console.log(row);
+								console.log('analyse '+JSON.stringify(row));
 								if (select) {
-									$scope.noRow = $scope.noRow + 1;
-									$scope.assmap.push({
-										name : tagname
-									});
-									console.log('Adding ' + tagname
-											+ ' to array ');
+									var mappedobj = $scope.assmap.filter(
+											function(obj) {
+												if (obj.name === tagname) { 
+													if (obj.status == undefined) {
+														obj.status = 'ok';
+													} else if (obj.status === 'rem') {
+														obj.status = 'ok';
+													}
+													return true;
+												}
+											})[0];
+									if (mappedobj == undefined) {
+										$scope.noRow = $scope.noRow + 1;
+										$scope.assmap.push({
+											name : tagname,
+											status : 'add'
+										});
+										console.log('Adding ' + tagname + ' to array ');
+									} 
 								} else {
 									$scope.noRow = $scope.noRow - 1;
-									var removedobj = $scope.assmap
-											.filter(function(obj) {
-												return obj.name === tagname;
+									var removedobj = $scope.assmap.filter(
+											function(obj) {
+												if (obj.name === tagname) {
+													if (obj.status == undefined || obj.status == 'ok') { 
+														obj.status = 'rem';
+														return false;
+													}
+													return true;
+												}
 											})[0];
-
-									if (tagname === removedobj.name) {
-										console.log('Key exists in array '
-												+ tagname);
-										for (var i = 0; i < $scope.assmap.length; ++i) {
-											if ($scope.assmap[i].name == tagname) {
-												$scope.assmap.splice(i, 1);
-											}
+									if (removedobj != undefined) {
+										if (removedobj.status === 'add' && tagname === removedobj.name) {
+											for (var i = 0; i < $scope.assmap.length; ++i) {
+												if ($scope.assmap[i].name == tagname) {
+													$scope.assmap.splice(i, 1);
+												}
+											}											
 										}
-									} else {
-										console
-												.log('Key does not exists in array '
-														+ tagname);
+										
 									}
 								}
 								console.log($scope.assmap);
@@ -964,7 +928,7 @@ condJSControllers
 //								      }
 //								    }, 1000);
 								});								
-							}
+							};
 
 							function loadrequests(queryargs) {
 								var geturl = 'monitor/log/' + queryargs.id;
@@ -1023,6 +987,202 @@ condJSControllers
 								});								
 							};
 } ])
+		.controller(
+				'SystemFormCtrl',
+				[
+						'$scope',
+						'System',
+						'CondRest',
+						function($scope, System, CondRest) {
+							$scope.edit = true;
+							$scope.systemdata = {};
+							$scope.systemdata = System.getData();
+
+							if ($scope.system == undefined) {
+								$scope.system = $scope.systemdata;
+							}
+
+							$scope.$watch('systemdata', function(formdata) {
+								console.log('formdata has changed: '
+										+ formdata.nodeFullpath);
+								$scope.system = $scope.systemdata;
+							}, true);
+
+							$scope.$on('systemDataChanged', function() {
+								console.log('data in model have changed: ');
+								$scope.systemdata = System.getData();
+								$scope.edit = false;
+							}, true);
+
+							$scope.save = function(system) {
+								if ($scope.edit == true) {
+									console.log(system);
+									System.setData(system);
+									var delurl = 'systems';
+									var httpmethod = 'POST';
+									CondRest
+											.request(delurl, httpmethod,
+													'expert', null,
+													System.getData())
+											.then(
+													function(response) {
+														console
+																.log('Received response '
+																		+ response);
+													},
+													function(error) {
+														console
+																.log('Error occurred '
+																		+ error);
+													});
+								} else {
+									console.log('sending update for: ')
+									console.log(system);
+									System.setData(system);
+									var delurl = 'systems/' + system.nodeFullpath;
+									var httpmethod = 'POST';
+									CondRest
+											.request(delurl, httpmethod,
+													'expert', null,
+													System.getData())
+											.then(
+													function(response) {
+														console
+																.log('Received response '
+																		+ response);
+													},
+													function(error) {
+														console
+																.log('Error occurred '
+																		+ error);
+													});
+									// GlobalTagUpd.update(GlobalTag.getData());
+								}
+							};
+
+							$scope.add = function(system) {
+								if (system == 'new') {
+									console.log('Addition mode');
+									$scope.edit = true;
+									$scope.reset();
+								} else {
+									console.log('Edition mode');
+									$scope.edit = false;
+								}
+							};
+
+							$scope.reset = function() {
+								console.log('reset form data ')
+								$scope.systemdata = System.getDefaultData();
+								$scope.system = angular
+										.copy($scope.systemdata);
+							};
+							$scope.clean = function() {
+								console.log('clean form data ')
+								$scope.systemdata = {};
+								$scope.system = angular
+										.copy($scope.systemdata);
+							};
+							$scope.edit = function() {
+								$scope.edit = false;
+								$scope.systemdata = System.getData();
+								$scope.system = angular.copy($scope.systemdata);
+							};
+							$scope.onTimeSet = function(newDate, oldDate) {
+								console.log(newDate);
+								console.log(oldDate);
+							}
+						} ])
+		// Use this controller to retrieve global tag list
+		.controller(
+				'SystemListCtrl',
+				[
+						'$rootScope',
+						'$scope',
+						'$filter',
+						'System',
+						'CondSystem',
+						'CondRest',
+						function($rootScope, $scope, $filter, System, CondSystem, CondRest) {
+							$scope.systems = [];
+							$scope.displayedCollection = [];
+							loadsystems({
+								id : '%',
+								expand : 'true'
+							});
+							$scope.itemsByPage = 10;
+							$scope.displayedPages = 10;
+
+							function loadsystems(queryargs) {
+								var promise = CondSystem.query(queryargs);
+								promise.$promise.then(function(data) {
+									$scope.systems = data.items;
+									$scope.displayedCollection = []
+											.concat($scope.systems);
+									console.log('Inside promise got data '
+											+ data);
+								});
+							};
+
+							// fired when table rows are selected
+							$scope.$watch('displayedCollection', function(row) {
+								// get selected row
+								row.filter(function(r) {
+									if (r.isSelected) {
+										console.log(r);
+										sys = angular.copy(r);
+										System.setData(sys);
+										$scope.system = System.getData();
+									}
+								})
+							}, true);
+
+							$scope.refresh = function() {
+								$scope.systemtagnameroot = '%';
+								loadsystems({
+									id : encodeURIComponent($scope.systemtagnameroot),
+									expand : 'true'
+								});
+							}
+
+							$scope.search = function() {
+								var syssearch = '%' + $scope.systemtagnameroot
+										+ '%';
+								loadsystems({
+									id : encodeURIComponent(syssearch),
+									expand : 'true'
+								});
+							};
+							$scope.remove = function(sys) {
+								var delurl = 'systems/' + sys.id;
+								var httpmethod = 'DELETE';
+								CondRest
+										.request(delurl, httpmethod, 'expert')
+										.then(
+												// success
+												function(response) {
+													console
+															.log('Received response '
+																	+ response);
+													$scope.refresh();
+												},
+												// error
+												function(error) {
+													console
+															.log('Error occurred in url call...');
+												});
+
+							};
+
+							$scope.edit = function(sys) {
+								console.log('Edit system tag with name '
+										+ sys.tagNameRoot);
+								System.setData(sys);
+								$rootScope.$broadcast('systemDataChanged',
+										sys);
+							};
+
+						} ])
 ;
 
 condJSControllers.filter('myStrictFilter', function($filter) {

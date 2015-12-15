@@ -10,13 +10,16 @@ condJSApp.config([ '$routeProvider', function($routeProvider) {
 		controller : 'TagTraceListCtrl'
 	}).when('/tags', {
 		templateUrl : 'partials/tag-list.html'
+			//controller : 'TagListCtrl'
+	}).when('/systems', {
+		templateUrl : 'partials/system-list.html'
 		//controller : 'TagListCtrl'
 	}).when('/tags/:tagname/trace', {
 		templateUrl : 'partials/tagbacktrace-list.html',
 		controller : 'TagBackTraceListCtrl'
 	}).when('/globaltags/:globaltagname/maps', {
-		templateUrl : 'partials/mappings.html'
-		//controller : 'MapCtrl'
+		templateUrl : 'partials/mappings.html',
+		controller : 'MapCtrl'
 	}).when('/systems', {
 		templateUrl : 'partials/system-list.html'
 			//controller : 'TagListCtrl'

@@ -1,6 +1,9 @@
 <div class="container">
 	<h2>Global Tag Management page</h2>
 	<hr>
+	<p>You can create a new global tag or edit an existing one.</p>
+	<p>Use this page also to lock and unlock the global tag.</p>
+	
 	<div ng-controller="GlobalTagFormCtrl">
 		<button class="btn btn-success" ng-click="add('new')">
 			<span class="glyphicon glyphicon-plus-sign"></span> Add GlobalTag
@@ -171,7 +174,7 @@
 						<button class="btn btn-sm" popover-placement="top"
 							popover="Modify {{gtag.name}} mappings" type="button">
 							<i class="glyphicon glyphicon-link"></i>
-						</button> <a ng-href="#/globaltags/{{gtag.name}}/map">map</a>
+						</button> <a ng-href="#/globaltags/{{gtag.name}}/maps">map</a>
 					</td>
 					<td>
 						<button popover="Remove {{gtag.name}}" type="button"

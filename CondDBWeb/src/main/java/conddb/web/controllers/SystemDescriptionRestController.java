@@ -68,25 +68,32 @@ public class SystemDescriptionRestController extends BaseController {
     notes = "Use the input tagNameRoot string to search for information about a given system.",
     response=SystemDescription.class)
 	public Response getSystemDescription(
+			@Context UriInfo info,
 			@ApiParam(value = "tagname: root name of the tag associated to the system. Regexp % can be used.", required = true) 
 			@PathParam("tagname") final String id,
 			@ApiParam(value = "trace {off|on} allows to retrieve associated tags [not implemented]", required = false)
-			@DefaultValue("off") @QueryParam("trace") final String trace) throws ConddbWebException {
+			@DefaultValue("off") @QueryParam("trace") final String trace,
+			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false)
+			@DefaultValue("true") @QueryParam("expand") final boolean expand) throws ConddbWebException {
+
 		this.log.info("SystemDescriptionRestController processing request to get system using id " + id);
-		Response resp = null;
+
 		try {
 			if (id.contains("%")) {
 				List<SystemDescription> entitylist = this.systemNodeService.findSystemNodesByTagNameRootLike(id);
-				resp = Response.ok(entitylist).build();
+				Collection<SystemDescription> syslist = CollectionUtils.iterableToCollection(entitylist);
+				CollectionResource collres = listToCollection(syslist, expand, info);
+				return created(collres);
 			} else {
 				SystemDescription node = this.systemNodeService.getSystemNodesByTagname(id);
-				resp = Response.ok(node).build();
+				node.setResId(node.getTagNameRoot());
+				SystemDescriptionResource gtagres = (SystemDescriptionResource) springResourceFactory.getResource("system", info, node);
+				return created(gtagres);
 			}
 		} catch (ConddbServiceException e) {
-			resp = Response.status(Response.Status.NOT_FOUND).build();
-			throw new ConddbWebException(e.getMessage());
+			String msg = "Error retrieving system resource ";
+			throw buildException(msg+" "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
-		return resp;
 	}
 
 	@GET
@@ -196,16 +203,23 @@ public class SystemDescriptionRestController extends BaseController {
 			return (CollectionResource) springResourceFactory.getCollectionResource(info, Link.SYSTEMS,
 					Collections.emptyList());
 		}
-		Collection items = new ArrayList(systems.size());
-		for (SystemDescription system : systems) {
-			system.setResId(system.getTagNameRoot());
-			if (expand) {
-				items.add(springResourceFactory.getResource("system", info, system));
-			} else {
-				items.add(springResourceFactory.getResource("link", info, system));
-			}
-		}
-		return (CollectionResource) springResourceFactory.getCollectionResource(info, Link.SYSTEMS, items);
+		
+		CollectionResource collres = listToCollection(systems, expand, info);
+		return collres;
+	}
+	
+	
+	protected CollectionResource listToCollection(Collection<SystemDescription> systems, boolean expand, UriInfo info) {
+        Collection items = new ArrayList(systems.size());
+        for( SystemDescription system : systems) {
+        	system.setResId(system.getTagNameRoot());
+            if (expand) {
+                items.add(springResourceFactory.getResource("system", info, system));
+            } else {
+                items.add(springResourceFactory.getResource("link",info,system));
+            }
+        }
+        return (CollectionResource)springResourceFactory.getCollectionResource(info, Link.SYSTEMS, items);		
 	}
 
 }

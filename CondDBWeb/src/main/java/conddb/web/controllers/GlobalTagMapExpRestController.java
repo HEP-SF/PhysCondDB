@@ -63,6 +63,8 @@ public class GlobalTagMapExpRestController extends BaseController {
 	public Response create(@Context UriInfo info, Map map) throws ConddbWebException {
 
 		try {
+			log.info("Request for creating a new global tag mapping using data map of size "+map.size());
+
 			GlobalTagMap globaltagmap = createGlobalTagMap(map);
 			GlobalTagMap saved = globalTagService.insertGlobalTagMap(globaltagmap);
 			String resid = new String(saved.getId().toString());
@@ -72,7 +74,7 @@ public class GlobalTagMapExpRestController extends BaseController {
 			return created(resource);
 		} catch (ConddbServiceException e) {
 			String msg = "Error creating association resource using "+map.toString();
-			throw buildException(msg+" "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
+			throw buildException(msg+" "+e.getMessage(), msg+" "+e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 

@@ -32,6 +32,7 @@ public class TagResource extends Link {
 
 	protected void build(UriInfo info, Tag tag, TimestampFormat tsformat) {
 		this.tsformat = tsformat;
+		put("id", tag.getId());
 		put("name", tag.getName());
 		put("description", tag.getDescription());
 		put("insertionTime", tag.getInsertionTime());

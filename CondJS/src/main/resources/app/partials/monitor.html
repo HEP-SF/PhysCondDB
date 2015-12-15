@@ -1,6 +1,11 @@
 <div class="container">
 	<h2>Monitor requests page</h2>
 	<hr>
+	<p>The plots below represent the amount of milli-seconds that every request has taken at server level.</p>
+	<p>Requests are grouped in 2 different charts: the first for GET and the second for POST HTTP methods.</p>
+	<p>Every serie represents the beginning of the URL used. By clicking on the specific points you can get more
+	informations as a tooltip. You can also zoom on a specific time period. The requests of the last 10 days only are shown.</p>
+	<hr>
 	<div ng-controller="MonitorCtrl">
 	<highchart id="chart1" config="chartGetConfig"></highchart>
 	<highchart id="chart2" config="chartPostConfig"></highchart>
