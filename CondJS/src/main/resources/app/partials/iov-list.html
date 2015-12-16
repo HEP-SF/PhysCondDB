@@ -1,0 +1,73 @@
+<div class="container-fluid">
+	<div ng-controller="IovListCtrl">
+		<h2>List of IOVs associated to {{selectedtagname}}</h2>
+		<hr>
+		<form novalidate class="form-horizontal">
+		</div>
+		<div class="form-group">
+		<label class="col-sm-2 control-label" for="items">Items by page</label> 
+		<div class="col-sm-4">
+		<input name="items" id="items" type="number" ng-model="itemsByPage" /> 
+		</div>
+		</div>
+		</form>
+		<br> Debug: <input type="checkbox" ng-model="checked"
+			aria-label="Toggle ngShow">
+		<div class="check-element animate-hide" ng-show="checked">
+			<span class="glyphicon glyphicon-thumbs-up"></span> check values of
+			scope variables.
+			<pre>globaltag = {{selectedtagname | json}}</pre>
+			<pre>collection = {{displayedCollection | json}}</pre>
+		</div>
+
+		<hr>
+		<table st-table="displayedCollection"
+			st-safe-src="selectediovs" class="table table-bordered table-striped"
+			show-filter="true" export-csv="csv">
+			<thead>
+				<tr>
+					<th st-sort="id">id</th>
+					<th st-sort="insertionTime">insertion time</th>
+					<th st-sort="since">iov time</th>
+					<th st-sort="sinceString">iov as string</th>
+					<th st-sort="payload.objectType">object type</th>
+					<th st-sort="payload.streamerInfo">streamer info</th>
+					<th st-sort="payload.datasize">blob size</th>
+					<th st-sort="payload.data">blob</th>
+				</tr>
+				<tr>
+					<th colspan="4"><input st-search="" class="form-control"
+						placeholder="iov search ..." type="text" /></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr st-select-row="aniov" st-select-mode="single"
+					ng-repeat="aniov in displayedCollection">
+					<td data-title="'Id'">{{aniov.id}}</td>
+					<td data-title="'Insertion Time'">{{aniov.insertionTime}}</td>
+					<td data-title="'Iov Time'">{{aniov.since}}</td>
+					<td data-title="'Iov as String'">{{aniov.sinceString}}</td>
+					<td data-title="'Payload Obj'">{{aniov.payload.objectType}}</td>
+					<td data-title="'Payload Streamer'">{{aniov.payload.streamerInfo}}</td>
+					<td data-title="'Payload size'">{{aniov.payload.datasize}}</td>
+<!-- 					<td data-title="'Payload link'">{{aniov.payload.data.href}}</td> -->
+					<td data-title="'Payload link'">
+						<button class="btn btn-sm" popover-placement="top"
+							popover="{{aniov.payload.data.href}}" type="button">
+							<i class="glyphicon glyphicon-eye-open"></i>
+						</button> <a target="_self" href="{{aniov.payload.data.href}}" download>blob</a>
+					</td>
+				</tr>
+			</tbody>
+			<tfoot>
+				<tr>
+					<td colspan="8" class="text-center">
+						<div st-pagination="" st-items-by-page="itemsByPage"
+							st-displayed-pages="displayedPages"></div>
+					</td>
+				</tr>
+			</tfoot>
+		</table>
+	</div>
+</div>
+

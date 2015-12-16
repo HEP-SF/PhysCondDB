@@ -14,6 +14,9 @@ condJSApp.config([ '$routeProvider', function($routeProvider) {
 	}).when('/systems', {
 		templateUrl : 'partials/system-list.html'
 		//controller : 'TagListCtrl'
+	}).when('/iovs/:tagname/trace', {
+		templateUrl : 'partials/iov-list.html',
+		controller : 'IovListCtrl'
 	}).when('/tags/:tagname/trace', {
 		templateUrl : 'partials/tagbacktrace-list.html',
 		controller : 'TagBackTraceListCtrl'

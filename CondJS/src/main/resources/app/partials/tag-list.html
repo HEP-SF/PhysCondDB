@@ -127,7 +127,7 @@
 					<th colspan="2"><input st-search="name"
 						placeholder="search for tag name"
 						class="input-sm form-control" type="search" /></th>
-					<th colspan="4"><input st-search class="form-control"
+					<th colspan="5"><input st-search class="form-control"
 						placeholder="global search ..." type="search" /></th>
 				</tr>
 			</thead>
@@ -153,6 +153,12 @@
 							popover="{{atag.name}}" type="button">
 							<i class="glyphicon glyphicon-eye-open"></i>
 						</button> <a ng-href="#/tags/{{atag.name}}/trace">backtrace</a>
+					</td>
+					<td>
+						<button class="btn btn-sm" popover-placement="top"
+							popover="{{atag.name}}" type="button">
+							<i class="glyphicon glyphicon-eye-open"></i>
+						</button> <a ng-href="#/iovs/{{atag.name}}/trace">iovs</a>
 					</td>
 					<td>
 						<button type="button" ng-click="remove(atag)"

@@ -429,6 +429,46 @@ condJSControllers
 							;
 
 						} ])
+		// Tag backtrace controller...
+		.controller(
+				'IovListCtrl',
+				[
+						'$rootScope',
+						'$scope',
+						'$routeParams',
+						'CondRest',
+						function($rootScope, $scope, $routeParams, CondRest) {
+
+							console.log('Route is ' + $routeParams.tagname);
+							$scope.selectedtagname = $routeParams.tagname;
+							$scope.selectediovs = [];
+							$scope.itemsByPage = 10;
+							$scope.displayedPages = 10;
+							$scope.displayedCollection = [];
+
+							loadiovs({
+								tag : $scope.selectedtagname,
+								expand : 'true'
+							});
+							
+							function loadiovs(qry) {
+								var url = 'iovs/find?tag=' + qry.tag + '&expand=true';
+								var httpmethod = 'GET';
+								var headers = 'Accept: */*';
+								CondRest.request(url, httpmethod, 'user',headers,null).then(
+											// success
+									function(response) {
+										console.log('Received response '+ JSON.stringify(response));
+										$scope.selectediovs = response.data.items;
+										$scope.displayedCollection = []
+												.concat($scope.selectediovs);
+									},
+									// error
+									function(error) {
+										console.log('Error occurred in url call...');
+									});
+							};
+						} ])
 		// Tag form controller
 		.controller(
 				'TagFormCtrl',
@@ -840,23 +880,23 @@ condJSControllers
 								};
 							};
 
-							$scope.chartGetConfig = getConfig('GET');
-							$scope.chartPostConfig = getConfig('POST');
+							$scope.chartGetConfig = getConfig('GET','Time spent in GET requests','ms');
+							$scope.chartPostConfig = getConfig('POST', 'Time spent in POST requests','ms');
 
-							function getConfig(meth) {
+							function getConfig(meth, title, yaxis) {
 								var chartseries = [];
 								var qry = {
 									id : meth,
 									serie : chartseries
 								};
 								console.log("Calling loadrequests...." + qry);
-								// return {};
 								var charopt = angular.copy(GetChartOptions.getChart());
-//								var promise = loadrequests(qry);
 								var promise = asyncload(qry);
 								promise.then(function(response) {
 									console.log('getConfig Inside promise got successful answer ');
 									charopt.series = response;
+									charopt.title.text = title;
+									charopt.yAxis.title.text = yaxis;
 								}, function(error) {
 									console.log("getConfig received error "+error);
 								});
@@ -920,13 +960,6 @@ condJSControllers
 											reject('Buggy query');
 										}
 									);
-//								    setTimeout(function() {
-//								      if (queryargs.id == "GET") {
-//								        resolve('Hello, ' + queryargs.id + '!');
-//								      } else {
-//								        reject('Greeting ' + queryargs.id + ' is not allowed.');
-//								      }
-//								    }, 1000);
 								});								
 							};
 
@@ -969,8 +1002,6 @@ condJSControllers
 													highserie.data = [];
 												}
 											}
-													// highserie.data.push(xy);
-//											console.log('Add point '+ JSON.stringify(point));
 											highserie.data.push(point);
 										}
 										console.log('Add last serie to chartseries');
