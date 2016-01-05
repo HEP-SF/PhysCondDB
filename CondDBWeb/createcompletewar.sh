@@ -25,7 +25,9 @@ echo "----------------------------------------------------------------"
 
 grep "http://localhost:8080/physconddb/conddbweb/" src/main/webapp/condjs/js/services.js | sed 's/http:\/\/localhost:8080\/physconddb\/conddbweb/https:\/\/test-physconddb.web.cern.ch\/test-physconddb\/conddbweb/'
 
+sed -iE 's/http:\/\/localhost:8080\/physconddb\/conddbweb/https:\/\/test-physconddb.web.cern.ch\/test-physconddb\/conddbweb/' src/main/webapp/condjs/js/services.js
+
 echo "----------------------------------------------------------------"
 echo "CREATING WAR FILE..."
 echo "----------------------------------------------------------------"
-mvn clean package
+#mvn clean package

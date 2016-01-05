@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,7 @@ import conddb.svc.dao.controllers.GlobalTagService;
 import conddb.svc.dao.controllers.IovService;
 import conddb.svc.dao.controllers.SystemNodeService;
 import conddb.svc.dao.exceptions.ConddbServiceException;
+import conddb.utils.bytes.PayloadBytesHandler;
 
 /**
  * @author aformic
@@ -57,6 +59,9 @@ public class DirectoryMapperService {
 	private SystemNodeService systemNodeService;
 	@Autowired
 	private IovService iovService;
+	@Autowired
+	private PayloadBytesHandler payloadBytesHandler;
+
 
 	public static final String PATH_SEPARATOR = "/";
 
@@ -162,14 +167,22 @@ public class DirectoryMapperService {
 					PayloadData data = iovService.getPayloadData(iov.getPayload().getHash());
 					Payload info = iov.getPayload();
 					String generatedFileName = iov.getSinceString() + "." + fileext;
+					
 					// It was using this one, but now I am extracting the info
 					// on the filename : info.getStreamerInfo();
 					String outfilename = tagresource.getFile().getPath() + "/" + generatedFileName;
 					log.debug("Dump blob for tag " + tag.getName() + " into output file " + outfilename);
-					log.debug("Blob stored in " + data.getUri());
+					
+					// Check if the blob is on disk
 					java.nio.file.Path path = Paths.get(data.getUri());
 					OutputStream out = new FileOutputStream(new File(outfilename));
-					Files.copy(path, out);
+					if (Files.notExists(path)) {
+						log.debug("Blob is stored in memory as string....dump it directly on output");
+						payloadBytesHandler.saveToOutStream(data.getData().getBinaryStream(), out); 
+					} else {
+						log.debug("Blob stored in " + data.getUri());
+						Files.copy(path, out);
+					}
 					log.debug("File has been copied from " + path.toString() + " into " + outfilename);
 				}
 			}
@@ -180,6 +193,9 @@ public class DirectoryMapperService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ConddbServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

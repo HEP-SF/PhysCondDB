@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import conddb.data.PayloadData;
 import conddb.data.exceptions.PayloadEncodingException;
+import conddb.utils.data.IStreamHash;
 import conddb.utils.hash.HashGenerator;
 
 public class PayloadHandler {
@@ -19,6 +21,7 @@ public class PayloadHandler {
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
 	private PayloadData payload;
+	private InputStream payloadstream;
 
 	/**
 	 * @param payload
@@ -32,6 +35,15 @@ public class PayloadHandler {
 		}
 	}
 	
+	/**
+	 * @param payload
+	 * @throws IOException 
+	 */
+	public PayloadHandler(InputStream payloadstream) throws IOException {
+		super();
+		this.payloadstream = payloadstream;
+	}
+
 	public PayloadHandler(File data) throws IOException {
 		super();
 		this.payload = new PayloadData();
@@ -53,8 +65,21 @@ public class PayloadHandler {
 		}
 	}
 	
+	public InputStream getPayloadStream() {
+		return payloadstream;
+	}
 
-	public String createJavaHashFromStream(FileInputStream fstream) throws PayloadEncodingException {
+	public IStreamHash createJavaIStreamHashFromStream(InputStream fstream) throws PayloadEncodingException {
+		BufferedInputStream bis = new BufferedInputStream(fstream);
+		try {
+			IStreamHash ishash = HashGenerator.hashstream(bis);
+			return ishash;
+		} catch (NoSuchAlgorithmException | IOException e) {
+			throw new PayloadEncodingException(e.getMessage());
+		}
+	}
+
+	public String createJavaHashFromStream(InputStream fstream) throws PayloadEncodingException {
 		String hash = "ERROR_IN_HASH";
 		BufferedInputStream bis = new BufferedInputStream(fstream);
 		try {
@@ -64,6 +89,8 @@ public class PayloadHandler {
 			throw new PayloadEncodingException(e.getMessage());
 		}
 	}
+	
+
 	public String createJavaHashFromBytes(byte[] bytes) throws PayloadEncodingException {
 		String hash = "ERROR_IN_HASH";
 		hash = HashGenerator.md5Java(bytes);

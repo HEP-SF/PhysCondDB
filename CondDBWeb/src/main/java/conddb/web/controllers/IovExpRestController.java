@@ -31,6 +31,7 @@ import conddb.data.Tag;
 import conddb.svc.dao.controllers.GlobalTagService;
 import conddb.svc.dao.controllers.IovService;
 import conddb.svc.dao.exceptions.ConddbServiceException;
+import conddb.svc.dao.repositories.PayloadRepository;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.IovResource;
@@ -53,6 +54,8 @@ public class IovExpRestController extends BaseController {
 
 	@Autowired
 	private GlobalTagService globalTagService;
+	@Autowired
+	private PayloadRepository payloadRepository;
 	@Autowired
 	private IovService iovService;
 	@Autowired
@@ -109,14 +112,29 @@ public class IovExpRestController extends BaseController {
 		try {
 			Tag entity = globalTagService.getTag(tagname);
 			entity.setModificationTime(null); // This will be re-set later during the update
-			
-			Payload storable = new Payload(null,objtype,bkinfo,strinfo,version);
-			String filename = fileDetail.getFileName();
-			storable = iovService.createStorablePayload(filename, uploadedInputStream, storable);
+
+			Payload storable = new Payload(null,objtype,"db",strinfo,version);
+			storable = iovService.createStorablePayload(fileDetail.getFileName(),uploadedInputStream, storable);
+
+			log.info("Uploaded object has hash " + storable.getHash());
+			log.info("Uploaded object has data size " + storable.getDatasize());
+			Payload existing = payloadRepository.findOne(storable.getHash());
+			if (existing != null) {
+				String msg = "Error in creating a payload resource: hash already exists in the DB.";
+				throw buildException(msg, msg, Response.Status.NOT_MODIFIED);
+			}
+//			apayload.setBackendInfo(stored.getUri());
+//			Payload saved = payloadRepository.save(apayload);
+
+						
+//			Payload storable = new Payload(null,objtype,bkinfo,strinfo,version);
+//			String filename = fileDetail.getFileName();
+//			storable = iovService.createStorablePayload(filename, uploadedInputStream, storable);
 			
 			// Store the payload: this will then not be rolledback if something goes wrong later on
 			// We do not care too much since in that case the payload is simply already there
 			Payload stored = iovService.insertPayload(storable, storable.getData());
+
 			stored.setResId(stored.getHash());
 			log.info("Stored payload "+stored.getHash());
 			

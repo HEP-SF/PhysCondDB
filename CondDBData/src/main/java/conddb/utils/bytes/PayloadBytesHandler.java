@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Blob;
 import java.sql.SQLException;
 
@@ -23,6 +24,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+
+import conddb.data.exceptions.PayloadEncodingException;
+import conddb.utils.hash.HashGenerator;
 
 @Service
 public class PayloadBytesHandler {
@@ -69,6 +73,34 @@ public class PayloadBytesHandler {
 		} catch (IOException e) {
 
 			e.printStackTrace();
+		}
+	}
+	
+	public void saveToOutStream(InputStream uploadedInputStream, OutputStream out) {
+
+		try {
+			int read = 0;
+			byte[] bytes = new byte[MAX_LENGTH];
+			while ((read = uploadedInputStream.read(bytes)) != -1) {
+				out.write(bytes, 0, read);
+			}
+			out.flush();
+			out.close();
+			uploadedInputStream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+
+
+	public String saveToFileGetHash(InputStream uploadedInputStream, String uploadedFileLocation) throws PayloadEncodingException {
+
+		try {
+			OutputStream out = new FileOutputStream(new File(uploadedFileLocation));
+			return HashGenerator.hashoutstream(uploadedInputStream, out);
+		} catch (NoSuchAlgorithmException | IOException e) {
+			throw new PayloadEncodingException(e.getMessage());
 		}
 	}
 
@@ -128,6 +160,23 @@ public class PayloadBytesHandler {
 		return blob;
 	}
 	
+	public Blob createBlobFromStream(InputStream is) {
+		Blob blob=null;
+		try {
+			BufferedInputStream fstream = new BufferedInputStream(is);
+			blob = ds.getConnection().createBlob();
+			BufferedOutputStream bstream = new BufferedOutputStream(blob.setBinaryStream(1));
+			// stream copy runs a high-speed upload across the network
+			StreamUtils.copy(fstream, bstream);
+			return blob;
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return blob;
+	}
+
 	@Deprecated
 	public File dumpBlobIntoFile(Blob blob, String outfilelocation) {
 		try {

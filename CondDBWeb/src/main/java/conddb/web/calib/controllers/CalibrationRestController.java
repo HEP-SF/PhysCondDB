@@ -159,6 +159,7 @@ public class CalibrationRestController extends BaseController {
 			// since = 0
 			Payload storable = new Payload(null,filename,"database",extension,"1.0");
 			storable = iovService.createStorablePayload(filename, uploadedInputStream, storable);
+//			storable = iovService.createStorablePayloadInMemory(uploadedInputStream, storable);
 
 			// Store the payload: this will then not be rolledback if something goes wrong later on
 			// We do not care too much since in that case the payload is simply already there

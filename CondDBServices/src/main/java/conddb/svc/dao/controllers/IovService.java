@@ -38,7 +38,6 @@ import conddb.data.Iov;
 import conddb.data.Payload;
 import conddb.data.PayloadData;
 import conddb.data.Tag;
-import conddb.data.handler.PayloadHandler;
 import conddb.svc.dao.baserepository.PayloadDataBaseCustom;
 import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.svc.dao.repositories.IovRepository;
@@ -193,21 +192,26 @@ public class IovService {
 			String outfname = filename + "-uploaded";
 			String uploadedFileLocation = SERVER_UPLOAD_LOCATION_FOLDER+ "/" + outfname;
 			log.debug("Upload file location is "+SERVER_UPLOAD_LOCATION_FOLDER);
-			payloadBytesHandler.saveToFile(uploadedInputStream, uploadedFileLocation);
-//			byte[] bytes = payloadBytesHandler.readFromFile(uploadedFileLocation);
+//			payloadBytesHandler.saveToFile(uploadedInputStream, uploadedFileLocation);
+
+			// Dump into file and get the hash
+			String hash = payloadBytesHandler.saveToFileGetHash(uploadedInputStream, uploadedFileLocation);
+
+			// Retrieve the file size to store it in the DB
 			long fsize = payloadBytesHandler.lengthOfFile(uploadedFileLocation);
 			apayload.setDatasize((int)fsize);
 
 			PayloadData pylddata = new PayloadData();
 //			pylddata.setData(bytes);
+			pylddata.setHash(hash);
 			pylddata.setUri(uploadedFileLocation);
 
-			PayloadHandler phandler = new PayloadHandler(pylddata);
-			PayloadData storable = phandler.getPayloadWithHash();
-			apayload.setHash(storable.getHash());
-			apayload.setData(storable);
+//			PayloadHandler phandler = new PayloadHandler(pylddata);
+//			PayloadData storable = phandler.getPayloadWithHash();
+			apayload.setHash(hash);
+			apayload.setData(pylddata);
 			
-			log.info("Uploaded object has hash " + storable.getHash());
+			log.info("Uploaded object has hash " + pylddata.getHash());
 			log.info("Uploaded object has data size " + apayload.getDatasize());
 
 			return apayload;
@@ -215,6 +219,33 @@ public class IovService {
 			throw new ConddbServiceException("Cannot create storable payload "+e.getMessage());
 		}		
 	}
+	
+//	public Payload createStorablePayloadInMemory(InputStream uploadedInputStream, Payload apayload) throws ConddbServiceException {
+//		try {
+//			log.debug("Upload inputstream with no intermediate file ");
+//			PayloadHandler phandler = new PayloadHandler(uploadedInputStream);
+//			Blob blob = payloadBytesHandler.createBlobFromStream(uploadedInputStream);
+//			IStreamHash ishash = phandler.createJavaIStreamHashFromStream(uploadedInputStream);
+//			if (ishash == null) 
+//				throw new ConddbServiceException("Cannot create storable payload : null ishash object...");
+//			apayload.setDatasize((int)ishash.length);
+//
+//			PayloadData pylddata = new PayloadData();
+//			pylddata.setData(blob);
+//			pylddata.setHash(ishash.hash);
+//
+//			apayload.setHash(pylddata.getHash());
+//			apayload.setData(pylddata);
+//			
+//			log.info("Uploaded object has hash " + pylddata.getHash());
+//			log.info("Uploaded object has data size " + apayload.getDatasize());
+//
+//			return apayload;
+//		} catch (Exception e) {
+//			throw new ConddbServiceException("Cannot create storable payload "+e.getMessage());
+//		}		
+//	}
+
 
 	@Transactional
 	public Iov insertIov(Iov entity) throws ConddbServiceException {

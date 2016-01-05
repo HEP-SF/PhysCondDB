@@ -50,10 +50,12 @@ import org.springframework.transaction.annotation.Transactional;
 import conddb.data.Payload;
 import conddb.data.PayloadData;
 import conddb.data.exceptions.PayloadEncodingException;
+import conddb.data.handler.PayloadHandler;
 import conddb.data.mappers.PayloadDataMapper;
 import conddb.svc.dao.baserepository.PayloadDataBaseCustom;
 import conddb.svc.dao.repositories.PayloadRepository;
 import conddb.utils.bytes.PayloadBytesHandler;
+import conddb.utils.data.IStreamHash;
 import conddb.utils.data.PayloadGenerator;
 
 /**
@@ -88,15 +90,6 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 				new Object[] { id }, new PayloadDataMapper());
 	}
 
-//	@Transactional
-//	public PayloadData findBlob(String id) {
-//		log.info("Find blob " + id + " using JDBCTEMPLATE");
-//		JdbcTemplate jdbcTemplate = new JdbcTemplate(ds);
-////		jdbcTemplate.q
-//		LobHandler lobHandler = new DefaultLobHandler();
-//		lobHandler.
-//
-//	}
 
 	/*
 	 * (non-Javadoc)
@@ -202,6 +195,7 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 		blobIs.close();
 		return entity;
 	}
+
 
 	@Override
 	public void delete(String id) {
