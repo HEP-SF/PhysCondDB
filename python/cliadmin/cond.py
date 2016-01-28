@@ -34,6 +34,7 @@ class PhysDBDriver():
         try:
             self.restserver = {}
             self._command = sys.argv[0]
+            self.taxextension = '_HEAD_00'
             self.useSocks = False
             self.t0 = 0
             self.debug = False
@@ -283,7 +284,7 @@ class PhysDBDriver():
             (objList, code) = self.gettagiovs(data)
             systemdata = {}
             systemdata['by']='tag'
-            tagnameroot = data['tag'].split('-HEAD')[0]
+            tagnameroot = data['tag'].split(self.taxextension)[0]
             systemdata['name']=tagnameroot
             msg = ' ==> Search for system by tag name root %s ' % tagnameroot
             #print colored.cyan(msg)
@@ -543,7 +544,7 @@ class PhysDBDriver():
                 for systemobj in systemobjlist:
                     #print 'Retrieved system ',systemobj
                     tagnameroot = systemobj['tagNameRoot']
-                    tagname = tagnameroot+'-HEAD'
+                    tagname = tagnameroot+self.taxextension
                     msg = '>>> Check content for system %s using tag name root %s ' % (systemobj['nodeFullpath'],tagnameroot)
                     #print colored.cyan(msg)
                     print msg

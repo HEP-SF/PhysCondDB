@@ -24,6 +24,7 @@ This project contains utility libraries for the interaction with the server of c
 ## Calibration client:
 
 The python client `CalibAdmin.py` is conceived for the calibration files use case. It is a prototype created after discussions with Will Buttinger.
+Use `condurllib2.py` instead.
 
 Short list of commands as examples:
 
@@ -59,6 +60,8 @@ python CalibAdmin.py --url=aiatlas137.cern.ch:8080/physconddb LS JavaDocPkg-00-0
 ``` 
  python CalibAdmin.py LOCK <globaltagname> <lockstatus> (Default: LOCKED)
 ```
+Using condurllib2 command one can add the package name as last argument. In this case it will dump
+the correct directory structure. Otherwise the directory structure will start from the global tag name.
 Example:
 ```
 python CalibAdmin.py --url=aiatlas137.cern.ch:8080/physconddb LOCK JavaDocPkg-00-03
@@ -66,11 +69,11 @@ python CalibAdmin.py --url=aiatlas137.cern.ch:8080/physconddb LOCK JavaDocPkg-00
 
 * COLLECT a global tag (dump in the server /tmp/ area the full global tag directory structure)
 ``` 
- python CalibAdmin.py COLLECT <globaltagname> 
+ python CalibAdmin.py COLLECT <globaltagname> <asg global tag> 
 ```
 Example:
 ```
-python CalibAdmin.py --url=aiatlas137.cern.ch:8080/physconddb  COLLECT JavaDocPkg-00-03
+python CalibAdmin.py --url=aiatlas137.cern.ch:8080/physconddb  COLLECT JavaDocPkg-00-03 ASG-00-01
 ```
 
 * TAR a global tag (download a previously dumped global tag from the server into a local TAR file named globaltag-temp.tar)

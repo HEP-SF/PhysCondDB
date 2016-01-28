@@ -18,10 +18,8 @@
 package conddb.svc.dao.repositories.impl;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Blob;
@@ -33,7 +31,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.hibernate.engine.jdbc.StreamUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,12 +47,10 @@ import org.springframework.transaction.annotation.Transactional;
 import conddb.data.Payload;
 import conddb.data.PayloadData;
 import conddb.data.exceptions.PayloadEncodingException;
-import conddb.data.handler.PayloadHandler;
 import conddb.data.mappers.PayloadDataMapper;
 import conddb.svc.dao.baserepository.PayloadDataBaseCustom;
 import conddb.svc.dao.repositories.PayloadRepository;
 import conddb.utils.bytes.PayloadBytesHandler;
-import conddb.utils.data.IStreamHash;
 import conddb.utils.data.PayloadGenerator;
 
 /**

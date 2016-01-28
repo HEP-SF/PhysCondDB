@@ -108,37 +108,13 @@ class PhysRestConnection:
 
             return      
 
-        # buf is a ByteIO object...check documentation
-        #        self.__curl.setopt(self.__curl.WRITEDATA, buf)
-        try:
-            self.setDefaultOptions()
-            self.__curl.setopt(self.__curl.HTTPGET, 1)
-            self.__curl.setopt(self.__curl.FAILONERROR, True)
-            self.__curl.setopt(self.__curl.WRITEDATA, fp)
-            self.__curl.perform()
-            # HTTP response code, e.g. 200.
-            if self.__debug:
-                print('Status: %d' % self.__curl.getinfo(self.__curl.RESPONSE_CODE))
-            # Elapsed time for the transfer.
-            if self.__debug:
-                print('Status: %f' % self.__curl.getinfo(self.__curl.TOTAL_TIME))
- 
-            return fp
-        except pycurl.error, error:
-            response = self.__curl.getinfo(self.__curl.RESPONSE_CODE)
-            if response is not 200:
-                #print colored.red('Problem in executing GET : status returned is %d' % response)
-                print ('Problem in executing GET : status returned is %d' % response)
-            errno, errstr = error
-            #print colored.red('An error occurred in GET method: %s ' % errstr)
-            print ('An error occurred in GET method: %s ' % errstr)
-            return None
 
     def getData(self):
         if self.__debug:
             print "Get data using url ", self.__url
             
         req = Request(self.__url)
+        req.add_header("Accept",'application/json')
         try:
             response = self.__opener.open(req)
         except HTTPError as e:
@@ -207,6 +183,7 @@ class PhysRestConnection:
         
         req = Request(self.__url,post_data)
         req.add_header("Content-Type",'application/json')
+        req.add_header("Accept",'application/json')
         try:
             response = urlopen(req)
         except HTTPError as e:
@@ -242,6 +219,7 @@ class PhysRestConnection:
 
         req = Request(self.__url,actionparams)
         req.add_header("Content-Type",'application/json')
+        req.add_header("Accept",'application/json')
         try:
             response = urlopen(req)
         except HTTPError as e:
@@ -293,6 +271,7 @@ class PhysRestConnection:
 
 # Create the Request object
         req = Request(self.__url, datagen, headers)
+        req.add_header("Accept",'application/json')
         if self.__debug:
             print 'OUTGOING DATA:'
             print req.get_data()
@@ -381,7 +360,8 @@ class GlobalTag(PhysCond):
     _dicttypes = ['String','BigDecimal','String','String','String','Timestamp','[]']
     _example = '''
 The format of the time is fixed, and chosen to be the ISO 8601, as described in https://en.wikipedia.org/wiki/ISO_8601
-{ "name" : "MYTEST_01", 
+The format of the global tag name is ^([A-Z]+[A-Za-z0-9]+)-([A-Z0-9]+)-([0-9])++$
+{ "name" : "MyTest-T01-01", 
   "lockstatus" : "unlocked",
   "validity" : 0, 
   "description" : "First test gtag", 
@@ -396,7 +376,8 @@ class Tag(PhysCond):
     _example = '''
 The timeType can be only time or run for the moment.
 The lastValidatedTime is in the same unit (BigDecimal at db level).
-{ "name" : "atag_02", 
+The format of the tag name is ^([A-Z]+[a-zA-Z0-9-_]+)_([A-Za-z0-9-]+)_([0-9])++$
+{ "name" : "Atag_Tag01_01", 
   "timeType" : "time", 
   "objectType" : "test", 
   "synchronization" : "none", 
