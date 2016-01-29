@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <Context>
 	<Resource name="java/OraAtlrDB" auth="Container" type="javax.sql.DataSource"
-		maxActive="100" maxIdle="30" maxWait="10000" username="ATLAS_COND_TOOLS_R"
+		maxActive="20" maxIdle="10" maxWait="10000" username="ATLAS_COND_TOOLS_R"
 		password="${condreader}" driverClassName="oracle.jdbc.OracleDriver"
 		url="jdbc:oracle:thin:@(DESCRIPTION = (ADDRESS= (PROTOCOL=TCP) (HOST=atlr1-s.cern.ch) (PORT=10121) )
         (ADDRESS= (PROTOCOL=TCP) (HOST=atlr2-s.cern.ch) (PORT=10121) )
@@ -16,7 +16,7 @@
 )" />
 
 	<Resource name="java/OraDev11" auth="Container" type="javax.sql.DataSource"
-		maxActive="100" maxIdle="30" maxWait="10000" username="${devuser}"
+		maxActive="20" maxIdle="10" maxWait="10000" username="${devuser}"
 		password="${devpassword}" driverClassName="oracle.jdbc.OracleDriver"
 		url="jdbc:oracle:thin:@(DESCRIPTION = 
         (ADDRESS= (PROTOCOL=TCP) (HOST=devdb11-s.cern.ch) (PORT=10121) )
@@ -29,7 +29,7 @@
 	<Resource name="java/OraIntr" 
 		auth="Container" 
 		type="javax.sql.DataSource"
-		maxActive="100" maxIdle="30" maxWait="10000" 
+		maxActive="20" maxIdle="10" maxWait="10000" 
 		factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
         testWhileIdle="true"
         testOnBorrow="true"
@@ -37,7 +37,7 @@
         validationQuery="SELECT 1 FROM DUAL"
         validationInterval="30000"
         timeBetweenEvictionRunsMillis="30000"
-        initialSize="10"
+        initialSize="5"
         removeAbandonedTimeout="60"
         removeAbandoned="true"
         logAbandoned="true"
