@@ -26,21 +26,25 @@
         )
 )" />
 
+<!-- removed to test -->
+<!-- 		factory="org.apache.tomcat.jdbc.pool.DataSourceFactory" -->
+
 	<Resource name="java/OraIntr" 
 		auth="Container" 
 		type="javax.sql.DataSource"
-		maxActive="20" maxIdle="10" maxWait="10000" 
 		factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
-        testWhileIdle="true"
+		maxActive="20" maxIdle="10" maxWait="30000" 
+        testWhileIdle="false"
         testOnBorrow="true"
         testOnReturn="false"
         validationQuery="SELECT 1 FROM DUAL"
         validationInterval="30000"
-        timeBetweenEvictionRunsMillis="30000"
+        timeBetweenEvictionRunsMillis="5000"
         initialSize="5"
-        removeAbandonedTimeout="60"
+        removeAbandonedTimeout="120"
         removeAbandoned="true"
         logAbandoned="true"
+        closeMethod="close"
         minEvictableIdleTimeMillis="30000"
         jmxEnabled="true"
         jdbcInterceptors="org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;

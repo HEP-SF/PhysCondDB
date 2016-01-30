@@ -58,7 +58,7 @@ public class HTML5CorsFilter implements Filter {
 			throws IOException, ServletException {
 		 log.debug("Calling Cors Filter on request "+request.toString());
 		 String acrh = ((HttpServletRequest) request).getHeader("Access-Control-Request-Headers");
-		 log.debug("Request headers"+acrh); 
+		 log.debug("Request headers "+acrh); 
 
 		 HttpServletResponse res = (HttpServletResponse) response;
 	        res.addHeader("Access-Control-Allow-Origin", "*");
