@@ -14,7 +14,7 @@
                 (SERVICE_NAME=atlr.cern.ch)
         )
 )" />
-
+<!--
 	<Resource name="java/OraDev11" auth="Container" type="javax.sql.DataSource"
 		maxActive="20" maxIdle="10" maxWait="10000" username="${devuser}"
 		password="${devpassword}" driverClassName="oracle.jdbc.OracleDriver"
@@ -25,7 +25,7 @@
                 (SERVICE_NAME=devdb11.cern.ch)
         )
 )" />
-
+-->
 <!-- removed to test -->
 <!-- 		factory="org.apache.tomcat.jdbc.pool.DataSourceFactory" -->
 
