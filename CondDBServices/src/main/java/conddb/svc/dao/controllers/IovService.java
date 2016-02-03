@@ -259,8 +259,8 @@ public class IovService {
 			Payload pyld = payloadRepository.findOne(entity.getPayload().getHash());
 			if (pyld == null) {
 				log.error("Payload not found...store it before");
-				//pyld = payloadRepository.save(entity.getPayload());
-				throw new ConddbServiceException("Cannot store iov if the payload is not found..");
+				throw new ConddbServiceDataIntegrityException(
+					"Cannot insert iov " + entity.getSince() + " : the associated payload is not yet stored");
 			}
 			entity.setPayload(pyld);
 			/*
@@ -276,8 +276,10 @@ public class IovService {
 						+ oldiov.get(0).getInsertionTime());
 			}
 			return iovRepository.save(entity);
-		} catch (Exception e) {
-			throw new ConddbServiceException("Cannot insert entity: " + e.getMessage());
+		} catch (ConddbServiceDataIntegrityException e) {
+			ConddbServiceException ex = new ConddbServiceException(e.getMessage());
+			ex.initCause(e);
+			throw ex;
 		}
 	}
 
@@ -344,7 +346,9 @@ public class IovService {
 			}
 			return stored;
 		} catch (Exception e) {
-			throw new ConddbServiceException("Cannot insert payload..."+e.getMessage());
+			ConddbServiceException ex = new ConddbServiceException(e.getMessage());
+			ex.initCause(e);
+			throw ex;
 		}
 	}
 	

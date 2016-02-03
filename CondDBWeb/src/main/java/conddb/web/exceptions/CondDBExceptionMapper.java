@@ -51,9 +51,10 @@ public class CondDBExceptionMapper implements ExceptionMapper<ConddbWebException
 			errorMessage.setUserMessage("Data integrity violation inside conditions DB");
 		} else {
 			errorMessage.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()); //defaults to internal server error 500
-			StringWriter errorStackTrace = new StringWriter();
-			ex.printStackTrace(new PrintWriter(errorStackTrace));
-			errorMessage.setUserMessage(errorStackTrace.toString());
+//			StringWriter errorStackTrace = new StringWriter();
+//			ex.printStackTrace(new PrintWriter(errorStackTrace));
+//			errorMessage.setUserMessage(errorStackTrace.toString());
+			errorMessage.setUserMessage("Internal server exception.");
 		}
 	}
 }

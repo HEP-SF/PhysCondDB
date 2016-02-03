@@ -118,11 +118,11 @@ public class IovExpRestController extends BaseController {
 
 			log.info("Uploaded object has hash " + storable.getHash());
 			log.info("Uploaded object has data size " + storable.getDatasize());
-			Payload existing = payloadRepository.findOne(storable.getHash());
-			if (existing != null) {
-				String msg = "Error in creating a payload resource: hash already exists in the DB.";
-				throw buildException(msg, msg, Response.Status.NOT_MODIFIED);
-			}
+//			Payload existing = payloadRepository.findOne(storable.getHash());
+//			if (existing != null) {
+//				String msg = "Error in creating a payload resource: hash already exists in the DB.";
+//				throw buildException(msg, msg, Response.Status.NOT_MODIFIED);
+//			}
 //			apayload.setBackendInfo(stored.getUri());
 //			Payload saved = payloadRepository.save(apayload);
 

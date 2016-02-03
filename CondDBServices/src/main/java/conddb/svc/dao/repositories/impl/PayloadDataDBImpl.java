@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.support.AbstractLobCreatingPreparedStatementCallback;
 import org.springframework.jdbc.core.support.SqlLobValue;
@@ -165,8 +166,9 @@ public class PayloadDataDBImpl implements PayloadDataBaseCustom {
 			log.info("Insertion done...");
 			entity.setUri(sql + " ; hash=" + entity.getHash());
 		} catch (DataAccessException | SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			DataIntegrityViolationException ex = new DataIntegrityViolationException(e.getMessage());
+			ex.initCause(e);
+			throw ex;
 		}
 		return entity;
 	}
