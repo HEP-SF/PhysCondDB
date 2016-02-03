@@ -17,11 +17,17 @@ import conddb.svc.dao.baserepository.TagBaseRepository;
 @RestResource(exported = false)
 public interface TagRepository extends CrudRepository<Tag, Long>, TagBaseRepository {
 
-//	public List<Tag> findByNameLike(@Param("name") String name);
-//
-//	public Tag findByName(@Param("name") String name);
-//	
-//	@Query("SELECT p FROM Tag p JOIN FETCH p.iovs iovs WHERE p.name = (:name)")
-//    public Tag findByNameAndFetchIovsEagerly(@Param("name") String name);
+    @Override
+    @RestResource(exported = false)
+    void delete(Long id);
+
+    @Override
+    @RestResource(exported = false)
+    void delete(Tag entity);
+
+    @SuppressWarnings("unchecked")
+	@Override
+    @RestResource(exported = false)
+    Tag save(Tag entity);
 
 }

@@ -3,7 +3,6 @@
  */
 package conddb.svc.dao.baserepository;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.Query;

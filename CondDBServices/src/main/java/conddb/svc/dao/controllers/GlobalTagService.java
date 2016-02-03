@@ -3,15 +3,19 @@
  */
 package conddb.svc.dao.controllers;
 
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
+import org.hibernate.JDBCException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +24,7 @@ import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.GlobalTagStatus;
 import conddb.data.Tag;
+import conddb.svc.dao.exceptions.ConddbServiceDataIntegrityException;
 import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.svc.dao.repositories.GlobalTagMapRepository;
 import conddb.svc.dao.repositories.GlobalTagRepository;
@@ -77,7 +82,7 @@ public class GlobalTagService {
 			throw new ConddbServiceException("Cannot find global tag map element " + e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * @return
 	 * @throws ConddbServiceException
@@ -258,20 +263,8 @@ public class GlobalTagService {
 	 * @return
 	 * @throws ConddbServiceException
 	 */
-	@Transactional(rollbackFor= ConddbServiceException.class)
 	public Tag insertTag(Tag entity) throws ConddbServiceException {
-		try {
-			return tagRepository.save(entity);
-		} catch (javax.validation.ConstraintViolationException e) {
-			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
-			StringBuffer buf = new StringBuffer();
-			for (ConstraintViolation<?> violates : violations) {
-				buf.append(violates.getMessage()+"\n");
-			}
-			throw new ConddbServiceException("Validation exception: "+buf.toString());
-		} catch (Exception e1) {
-			throw new ConddbServiceException(e1.getMessage());
-		}
+		return tagRepository.save(entity);
 	}
 
 	/**
@@ -279,22 +272,24 @@ public class GlobalTagService {
 	 * @return
 	 * @throws ConddbServiceException
 	 */
-	@Transactional
 	public Tag deleteTag(Tag entity) throws ConddbServiceException {
-		
+
 		try {
 			Tag existing = tagRepository.findByName(entity.getName());
+
 			Tag removable = tagRepository.findByNameAndFetchGlobalTagsWithLock(entity.getName(),
 					GlobalTagStatus.LOCKED.name());
 			if (removable != null && removable.getGlobalTagMaps() != null && removable.getGlobalTagMaps().size() > 0) {
 				log.debug("Cannot remove a tag which depends on a locked global tag...");
-				throw new ConddbServiceException(
+				throw new ConddbServiceDataIntegrityException(
 						"Cannot remova tag " + entity.getName() + " : a parent global tag is locked ");
 			}
 			tagRepository.delete(existing);
 			return existing;
-		} catch (Exception e) {
-			throw new ConddbServiceException(e.getMessage());
+		} catch (ConddbServiceDataIntegrityException e) {
+			ConddbServiceException ex = new ConddbServiceException(e.getMessage());
+			ex.initCause(e);
+			throw ex;
 		}
 
 	}
@@ -325,15 +320,15 @@ public class GlobalTagService {
 	 * @return
 	 * @throws ConddbServiceException
 	 */
-	@Transactional(rollbackFor= ConddbServiceException.class)
+	@Transactional(rollbackFor = ConddbServiceException.class)
 	public GlobalTagMap insertGlobalTagMap(GlobalTagMap entity) throws ConddbServiceException {
-		
+
 		try {
 			GlobalTag gtag = globalTagRepository.findOne(entity.getGlobalTagName());
 			Tag atag = tagRepository.findByName(entity.getTagName());
 			if (gtag == null || atag == null) {
 				log.debug("Cannot find elements for association");
-				throw new ConddbServiceException("Cannot link tags and global tag...they are not found in the DB");			
+				throw new ConddbServiceException("Cannot link tags and global tag...they are not found in the DB");
 			}
 			entity.setGlobalTag(gtag);
 			entity.setSystemTag(atag);
@@ -365,7 +360,7 @@ public class GlobalTagService {
 	 * @return
 	 * @throws ConddbServiceException
 	 */
-	@Transactional(rollbackFor= ConddbServiceException.class)
+	@Transactional(rollbackFor = ConddbServiceException.class)
 	public GlobalTag insertGlobalTag(GlobalTag entity) throws ConddbServiceException {
 		try {
 			return globalTagRepository.save(entity);
@@ -373,9 +368,9 @@ public class GlobalTagService {
 			Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
 			StringBuffer buf = new StringBuffer();
 			for (ConstraintViolation<?> violates : violations) {
-				buf.append(violates.getMessage()+"\n");
+				buf.append(violates.getMessage() + "\n");
 			}
-			throw new ConddbServiceException("Validation exception: "+buf.toString());
+			throw new ConddbServiceException("Validation exception: " + buf.toString());
 		} catch (Exception e1) {
 			throw new ConddbServiceException(e1.getMessage());
 		}

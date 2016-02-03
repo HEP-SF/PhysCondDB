@@ -56,6 +56,7 @@ import conddb.web.controllers.SystemDescriptionRestController;
 import conddb.web.controllers.TagExpRestController;
 import conddb.web.controllers.TagRestController;
 import conddb.web.exceptions.CondDBExceptionMapper;
+import conddb.web.exceptions.GlobalControllerExceptionMapper;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.models.Info;
 
@@ -116,6 +117,7 @@ public class JaxRsApplication extends ResourceConfig {
 
 		// register exception mappers
         register(CondDBExceptionMapper.class);
+        register(GlobalControllerExceptionMapper.class);
         
 		// register features
 		register(JacksonFeature.class);

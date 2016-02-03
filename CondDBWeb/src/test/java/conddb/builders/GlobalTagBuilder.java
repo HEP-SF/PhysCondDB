@@ -15,7 +15,7 @@ import conddb.data.GlobalTag;
  */
 public class GlobalTagBuilder implements ICondBuilder<GlobalTag>{
 	
-	private String name = new String("TEST_GTAG_01");
+	private String name = new String("TEST-GTAG-01");
 	private BigDecimal validity = new BigDecimal(0);
 	private String description = new String("This is a test global tag");
 	private String release = new String("none");

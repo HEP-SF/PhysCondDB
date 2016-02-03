@@ -39,6 +39,7 @@ import conddb.data.Payload;
 import conddb.data.PayloadData;
 import conddb.data.Tag;
 import conddb.svc.dao.baserepository.PayloadDataBaseCustom;
+import conddb.svc.dao.exceptions.ConddbServiceDataIntegrityException;
 import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.svc.dao.repositories.IovRepository;
 import conddb.svc.dao.repositories.PayloadRepository;
@@ -327,11 +328,11 @@ public class IovService {
 		}
 	}
 
-	@Transactional
+	@Transactional(rollbackFor= ConddbServiceException.class)
 	public Payload insertPayload(Payload entity, PayloadData pylddata) throws ConddbServiceException {
 		try {
 			// Assume that hash key is already filled
-			log.debug("Search for hash "+entity.getHash()+" "+pylddata.getHash());
+			log.debug("Search for hash "+entity.getHash()+" , verify data hash ["+pylddata.getHash()+"]");
 			Payload stored = payloadRepository.findOne(pylddata.getHash());
 			if (stored == null) {
 				log.debug("Hash not found in DB....store the payload");
@@ -354,12 +355,14 @@ public class IovService {
 			Tag tag = removable.getTag();
 			Tag tagwithmap = tagRepository.findByNameAndFetchGlobalTagsWithLock(tag.getName(), GlobalTagStatus.LOCKED.name());
 			if (tagwithmap.getGlobalTagMaps().size()>0) {
-				throw new ConddbServiceException("Cannot remove IOV from a tag associated to a locked global tag");
+				throw new ConddbServiceDataIntegrityException("Cannot remove IOV "+id+" from a tag associated to a locked global tag");
 			}
 			iovRepository.delete(id);
 			return removable;
-		} catch (Exception e) {
-			throw new ConddbServiceException("Cannot remove IOV :"+id+" - "+e.getMessage());
+		} catch (ConddbServiceDataIntegrityException e) {
+			ConddbServiceException ex = new ConddbServiceException(e.getMessage());
+			ex.initCause(e);
+			throw ex;
 		}
 	}
 
