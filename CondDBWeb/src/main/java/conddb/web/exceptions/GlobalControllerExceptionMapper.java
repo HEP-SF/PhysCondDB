@@ -27,7 +27,15 @@ public class GlobalControllerExceptionMapper implements ExceptionMapper<Throwabl
 
 	@Override
 	public Response toResponse(Throwable ex) {
-		log.info("Exception mapper has catched exception "+ex.getCause().toString());
+		if (ex == null) {
+			ErrorMessage errorMessage = new ErrorMessage("Unknown exception...is null");		
+			errorMessage.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+			return Response.status(errorMessage.getCode())
+					.entity(errorMessage)
+					.type(MediaType.APPLICATION_JSON)
+					.build();
+		}
+		log.info("Exception mapper has catched exception "+ex.getMessage());
 		ErrorMessage errorMessage = new ErrorMessage(ex.getMessage());		
 		setHttpStatus(ex, errorMessage);
 		errorMessage.setInternalMessage(ex.getMessage());
@@ -46,9 +54,10 @@ public class GlobalControllerExceptionMapper implements ExceptionMapper<Throwabl
 			errorMessage.setUserMessage("Data integrity violation");
 		} else {
 			errorMessage.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()); //defaults to internal server error 500
-			StringWriter errorStackTrace = new StringWriter();
-			ex.printStackTrace(new PrintWriter(errorStackTrace));
-			errorMessage.setUserMessage(errorStackTrace.toString());
+//			StringWriter errorStackTrace = new StringWriter();
+//			ex.printStackTrace(new PrintWriter(errorStackTrace));
+//			errorMessage.setUserMessage(errorStackTrace.toString());
+			errorMessage.setUserMessage("Internal server exception");
 		}
 	}
 }

@@ -33,6 +33,7 @@ except ImportError:
 
 class RequestWithMethod(urllib2.Request):
   def __init__(self, method, *args, **kwargs):
+    print 'Calling constructor of RequestWithMethod ',method,' ',args
     self._method = method
     urllib2.Request.__init__(*args, **kwargs)
 
@@ -147,7 +148,10 @@ class PhysRestConnection:
         if self.__debug:
             print "Delete data using url ", self.__url
 
-        req = RequestWithMethod('DELETE',self.__url)
+        req = Request(self.__url)
+        #####req = RequestWithMethod('DELETE',self.__url)
+        req.get_method = lambda: 'DELETE'
+        
         try:
             response = self.__opener.open(req)
         except HTTPError as e:
@@ -185,7 +189,8 @@ class PhysRestConnection:
         req.add_header("Content-Type",'application/json')
         req.add_header("Accept",'application/json')
         try:
-            response = urlopen(req)
+            response = self.__opener.open(req)
+            ### was response = urlopen(req)
         except HTTPError as e:
             print 'The server couldn\'t fulfill the request.'
             print 'Error code: ', e.code

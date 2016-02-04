@@ -187,6 +187,10 @@ def get_handlers():
         handlers.append(StreamingHTTPSHandler)
     return handlers
     
+def add_sockshandler(host,port):
+    opener = urllib2.build_opener(socksipyhandler.SocksiPyHandler(socks.PROXY_TYPE_SOCKS5, host, port))
+    return opener
+    
 def register_openers():
     """Register the streaming http handlers in the global urllib2 default
     opener object.
