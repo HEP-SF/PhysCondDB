@@ -13,6 +13,8 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -113,7 +115,7 @@ public class IovExpRestController extends BaseController {
 			Tag entity = globalTagService.getTag(tagname);
 			entity.setModificationTime(null); // This will be re-set later during the update
 
-			Payload storable = new Payload(null,objtype,"db",strinfo,version);
+			Payload storable = new Payload(null,objtype,bkinfo,strinfo,version);
 			storable = iovService.createStorablePayload(fileDetail.getFileName(),uploadedInputStream, storable);
 
 			log.info("Uploaded object has hash " + storable.getHash());
@@ -158,6 +160,88 @@ public class IovExpRestController extends BaseController {
 			String msg = "Error creating IOV resource inside tag "+tagname;
 			throw buildException(msg+" "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
+	}
+
+	@POST
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Consumes({ MediaType.MULTIPART_FORM_DATA })
+	@Path(Link.IOVS+"/async/payload")
+	@ApiOperation(value = "Create an IOV entry with its own payload.",
+    notes = "Input data are inside a FORM. It should contain: file, streamerInfo, objectType, backendInfo, version, since, sinceString, tag.",
+    response=Iov.class)
+	public void asyncCreateIovWithPayload(
+			@Context UriInfo info, 
+			@ApiParam(value = "file: the filename of the input payload", required = true) 
+			@FormDataParam("file") InputStream uploadedInputStream,
+			@FormDataParam("file") FormDataContentDisposition fileDetail, 
+			@ApiParam(value = "streamerInfo: the streamer information of the input payload", required = true) 
+			@FormDataParam("streamerInfo") String strinfo, 
+			@ApiParam(value = "objectType: the object type of the input payload", required = true) 
+			@FormDataParam("objectType") String objtype, 
+			@ApiParam(value = "backendInfo: the backend system of the input payload", required = true) 
+			@FormDataParam("backendInfo") String bkinfo, 
+			@ApiParam(value = "version: the version of the input payload", required = true) 
+			@FormDataParam("version") String version,
+			@ApiParam(value = "since: the since time of the IOV.", required = true) 
+			@FormDataParam("since") BigDecimal since,
+			@ApiParam(value = "sinceString: the since time string representation of the IOV.", required = true) 
+			@FormDataParam("sinceString") String sincestr,
+			@ApiParam(value = "tag: the tag name where to store the IOV.", required = true) 
+			@FormDataParam("tag") String tagname,
+			@Suspended final AsyncResponse asyncResponse
+			) throws ConddbWebException {
+
+		new Thread(new Runnable() {
+		    @Override
+		    public void run() {
+		        Response result;
+				try {
+					Payload storable = new Payload(null,objtype,"db",strinfo,version);
+					storable = iovService.createStorablePayload(fileDetail.getFileName(),uploadedInputStream, storable);
+					Iov iov = new Iov();
+					iov.setSince(since);
+					iov.setSinceString(sincestr);
+					Iov saved = storePayload(storable, iov, tagname);
+					IovResource resource = (IovResource) springResourceFactory.getResource("iov", info,
+							saved);
+					result =  created(resource);
+
+				} catch (ConddbServiceException e) {
+					String msg = "Error creating IOV resource inside tag "+tagname;
+					ConddbWebException webex = buildException(msg+" "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
+					result = Response.status(webex.getErrMessage().getCode())
+					.entity(webex.getErrMessage())
+					.type(MediaType.APPLICATION_JSON).
+					build();
+				}
+		        asyncResponse.resume(result);
+		    }
+		    
+		    @Transactional
+		    private Iov storePayload(Payload storable, Iov iov, String tagname) throws ConddbServiceException {
+				Tag entity = globalTagService.getTag(tagname);
+				entity.setModificationTime(null); // This will be re-set later during the update
+
+
+				log.info("Uploaded object has hash " + storable.getHash());
+				log.info("Uploaded object has data size " + storable.getDatasize());
+				Payload stored = iovService.insertPayload(storable, storable.getData());
+
+				stored.setResId(stored.getHash());
+				log.info("Stored payload "+stored.getHash());
+				iov.setPayload(stored);
+				iov.setTag(entity);
+				log.debug("Inserting iov "+iov);
+				Iov saved = iovService.insertIov(iov);
+				entity = globalTagService.insertTag(entity);
+				entity.setResId(entity.getName());
+				// Create the IovResource for the Response
+				saved.setResId(saved.getId().toString());
+				saved.setTag(entity);
+				saved.setPayload(stored);
+				return saved;
+		    }
+		}).start();
 	}
 
 

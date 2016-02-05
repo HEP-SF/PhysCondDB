@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@WebFilter(filterName = "ConddbMonitorFilter", urlPatterns = { "/conddbweb/rest/*" })
+//@WebFilter(filterName = "ConddbMonitorFilter", urlPatterns = { "/conddbweb/rest/*" })
 public class MonitorRequestFilter implements Filter {
 	 
 	private Logger log = LoggerFactory.getLogger(this.getClass());

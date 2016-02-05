@@ -71,7 +71,7 @@ public class TagRestController extends BaseController {
 			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false)
 			@DefaultValue("true") @QueryParam("expand") final boolean expand) throws ConddbWebException {
 
-		this.log.info("TagRestController processing request for getting tag name" + tagname);
+		this.log.info("TagRestController processing request for getting tag name " + tagname);
 
 		try {
 			CacheControl control = new CacheControl();

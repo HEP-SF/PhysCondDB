@@ -49,7 +49,7 @@
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-jdbc</artifactId>
 			<version>7.0.64</version>
-<!-- 			<optional>true</optional> -->
+			<!-- <optional>true</optional> -->
 		</dependency>
 		<dependency>
 			<groupId>org.mockito</groupId>
@@ -64,6 +64,11 @@
 		</dependency>
 
 		<!-- Jersey-Spring http://mvnrepository.com/artifact/org.glassfish.jersey.ext/jersey-spring3/2.4.1 -->
+		<dependency>
+			<groupId>org.glassfish.jersey.containers</groupId>
+			<artifactId>jersey-container-servlet</artifactId>
+			<version>${jersey.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.ext</groupId>
 			<artifactId>jersey-spring3</artifactId>

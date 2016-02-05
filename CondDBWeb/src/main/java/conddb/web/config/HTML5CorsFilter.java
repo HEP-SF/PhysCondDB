@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * @author formica
  *
  */
-@WebFilter(filterName = "HTML5CorsFilter", urlPatterns = {"/conddbweb/rest/*"})
+//@WebFilter(filterName = "HTML5CorsFilter", urlPatterns = {"/conddbweb/rest/*"})
 public class HTML5CorsFilter implements Filter {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());

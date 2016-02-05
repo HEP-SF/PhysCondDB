@@ -434,8 +434,8 @@ groupSize should be used for paging.
 
 class Payload(PhysCond):
     ''' classdoc '''
-    _dictkeys = ['hash','version','objectType','data','datasize','streamerInfo']
-    _dicttypes = ['String','String','String','PayloadDataHash','Integer','String']
+    _dictkeys = ['hash','version','objectType','data','datasize','streamerInfo','backendInfo']
+    _dicttypes = ['String','String','String','PayloadDataHash','Integer','String','String']
 
 class PayloadData(PhysCond):
     ''' classdoc '''

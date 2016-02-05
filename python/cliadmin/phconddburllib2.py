@@ -591,7 +591,7 @@ class PhysDBDriver():
                 iovdata = self.createObjParsingArgs("iovs",iovobjparams)
                 pylddata = {}
                 pylddata = self.createObjParsingArgs("payload",pyldobjparams)
-
+                print 'created payload data ',pylddata
                 params = {}
                 params['file'] = filename
                 params['tag'] = tag
@@ -602,7 +602,7 @@ class PhysDBDriver():
                 params['streamerInfo'] = pylddata['streamerInfo']
                 params['version'] = pylddata['version']
 
-                self.restserver.addPayload(params,'/iovs/payload')
+                self.restserver.addPayload(params,'/iovs/async/payload')
         
             except Exception, e:
                 sys.exit("STORE failed: %s" % (str(e)))
