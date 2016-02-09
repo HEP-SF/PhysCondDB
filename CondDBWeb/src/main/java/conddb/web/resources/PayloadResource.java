@@ -7,24 +7,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import conddb.data.Payload;
-import conddb.utils.json.serializers.TimestampFormat;
 
 @SuppressWarnings("unchecked")
 public class PayloadResource extends Link {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6592964075205126409L;
 	private Logger log = LoggerFactory.getLogger(this.getClass());
-
-	public PayloadResource(UriInfo info, Payload payload, TimestampFormat tsformat) {
-		super(info, payload);
-		build(info, payload, tsformat);
-	}
 
 	public PayloadResource(UriInfo info, Payload payload) {
 		super(info, payload);
-		build(info, payload, null);
+		build(info, payload);
 	}
 
-	protected void build(UriInfo info, Payload payload, TimestampFormat tsformat) {
+	protected void build(UriInfo info, Payload payload) {
 		put("hash", payload.getHash());
 		put("backendInfo", payload.getBackendInfo());
 		put("objectType", payload.getObjectType());
@@ -35,6 +33,6 @@ public class PayloadResource extends Link {
 //		if (payload.getData() != null) {
 			put("data", new Link(info,Link.PAYLOADDATA + "/"+payload.getHash()));
 //		}
-		this.serializeTimestamps(tsformat);
+		this.serializeTimestamps();
 	}
 }

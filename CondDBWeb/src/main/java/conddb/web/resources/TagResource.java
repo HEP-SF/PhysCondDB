@@ -13,25 +13,22 @@ import org.slf4j.LoggerFactory;
 
 import conddb.data.GlobalTagMap;
 import conddb.data.Tag;
-import conddb.utils.json.serializers.TimestampFormat;
 
 @SuppressWarnings("unchecked")
 public class TagResource extends Link {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5874322478554484276L;
 	private Logger log = LoggerFactory.getLogger(this.getClass());
-
-	public TagResource(UriInfo info, Tag tag, TimestampFormat tsformat) {
-		super(info, tag);
-		build(info, tag, tsformat);
-	}
 
 	public TagResource(UriInfo info, Tag tag) {
 		super(info, tag);
-		build(info, tag, null);
+		build(info, tag);
 	}
 
-	protected void build(UriInfo info, Tag tag, TimestampFormat tsformat) {
-		this.tsformat = tsformat;
+	protected void build(UriInfo info, Tag tag) {
 		put("id", tag.getId());
 		put("name", tag.getName());
 		put("description", tag.getDescription());
@@ -66,7 +63,7 @@ public class TagResource extends Link {
 					globaltagmap.setResId(globaltagmap.getId().toString());
 					globaltagmap.getGlobalTag().setResId(globaltagmap.getGlobalTagName());
 					globaltagmap.getSystemTag().setResId(globaltagmap.getTagName());
-					GlobalTagMapResource mapresource = new GlobalTagMapResource(info, globaltagmap, tag, this.tsformat);
+					GlobalTagMapResource mapresource = new GlobalTagMapResource(info, globaltagmap, tag);
 					items.add(mapresource);
 				}
 				mapsresource = new CollectionResource(info, Link.GLOBALTAGMAPS, items);
@@ -82,6 +79,6 @@ public class TagResource extends Link {
 		}
 		put("globalTagMaps", mapsresource);
 		put("iovs", iovsresource);
-		this.serializeTimestamps(this.tsformat);
+		this.serializeTimestamps();
 	}
 }

@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import conddb.data.Entity;
+import conddb.utils.PropertyConfigurator;
 import conddb.utils.json.serializers.TimestampFormat;
 
 import java.sql.Timestamp;
@@ -33,7 +34,12 @@ import java.util.LinkedHashMap;
 @SuppressWarnings("unchecked")
 public class Link extends LinkedHashMap {
 
-    public static final String PATH_SEPARATOR = "/";
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -7923124693141346797L;
+
+	public static final String PATH_SEPARATOR = "/";
 
     public static final String GLOBALTAGS = PATH_SEPARATOR + "globaltags";
     public static final String GLOBALTAGMAPS = PATH_SEPARATOR + "maps";
@@ -48,24 +54,17 @@ public class Link extends LinkedHashMap {
     public static final String MONITOR = PATH_SEPARATOR + "monitor";
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
-	TimestampFormat tsformat = null;
 	protected Entity parent = null;
 
     public Link(UriInfo info, Entity entity) {
         this(getFullyQualifiedContextPath(info), entity);
-    }
-
-    public Link(UriInfo info, Entity entity, TimestampFormat tsformat) {
-        this(getFullyQualifiedContextPath(info), entity);
-        this.tsformat = tsformat;
-        this.serializeTimestamps(tsformat);
+        this.serializeTimestamps();
     }
     
-    public Link(UriInfo info, Entity entity, Entity parent, TimestampFormat tsformat) {
+    public Link(UriInfo info, Entity entity, Entity parent) {
         this(getFullyQualifiedContextPath(info), entity);
-        this.tsformat = tsformat;
         this.parent = parent;
-        this.serializeTimestamps(tsformat);
+        this.serializeTimestamps();
     }
 
     public Link(String fqBasePath, Entity entity) {
@@ -102,20 +101,15 @@ public class Link extends LinkedHashMap {
 		try {
 			Instant fromEpochMilli = Instant.ofEpochMilli(ts.getTime());
 			ZonedDateTime zdt = fromEpochMilli.atZone(ZoneId.of("Europe/Paris"));
-			return zdt.format(tsformat.getLocformatter());
+			return zdt.format(PropertyConfigurator.getInstance().getLocformatter());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
 	}	
-    
-    public void serializeTimestamps(TimestampFormat tsformat) {
-		this.tsformat = tsformat;
-		log.debug("Timestamp serialization is using "+tsformat);
-		if (tsformat == null) {
-			return;
-		}
-		log.debug(" - time format "+tsformat.getPattern());
+    //TimestampFormat tsformat
+    public void serializeTimestamps() {
+		log.debug("time format "+PropertyConfigurator.getInstance().getPattern());
 		Timestamp ts = (Timestamp) get("insertionTime");
 		if (ts != null) {
 			String tsstr = format(ts);

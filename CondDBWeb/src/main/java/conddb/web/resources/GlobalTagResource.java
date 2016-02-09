@@ -13,25 +13,22 @@ import org.slf4j.LoggerFactory;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.utils.collections.CollectionUtils;
-import conddb.utils.json.serializers.TimestampFormat;
 
 @SuppressWarnings("unchecked")
 public class GlobalTagResource extends Link {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 999263344224387632L;
 	private Logger log = LoggerFactory.getLogger(this.getClass());
-
-	public GlobalTagResource(UriInfo info, GlobalTag globaltag, TimestampFormat tsformat) {
-		super(info, globaltag);
-		build(info, globaltag, tsformat);
-	}
 
 	public GlobalTagResource(UriInfo info, GlobalTag globaltag) {
 		super(info, globaltag);
-		build(info, globaltag, null);
+		build(info, globaltag);
 	}
 
-	protected void build(UriInfo info, GlobalTag globaltag, TimestampFormat tsformat) {
-		this.tsformat = tsformat;
+	protected void build(UriInfo info, GlobalTag globaltag) {
 		put("name", globaltag.getName());
 		put("description", globaltag.getDescription());
 		put("insertionTime", globaltag.getInsertionTime());
@@ -51,7 +48,7 @@ public class GlobalTagResource extends Link {
 					globaltagmap.setResId(globaltagmap.getId().toString());
 					globaltagmap.getGlobalTag().setResId(globaltagmap.getGlobalTagName());
 					globaltagmap.getSystemTag().setResId(globaltagmap.getTagName());
-					GlobalTagMapResource resource = new GlobalTagMapResource(info, (GlobalTagMap) globaltagmap, globaltag, this.tsformat);
+					GlobalTagMapResource resource = new GlobalTagMapResource(info, (GlobalTagMap) globaltagmap, globaltag);
 					resource.remove("globalTag");
 					items.add(resource);
 				}
@@ -66,7 +63,7 @@ public class GlobalTagResource extends Link {
 					Link.GLOBALTAGMAPS + "/trace?type=globaltag&id=" + globaltag.getName(), Collections.emptyList());
 		}
 		put("globalTagMaps", mapsresource);
-		this.serializeTimestamps(this.tsformat);
+		this.serializeTimestamps();
 	}
 
 }

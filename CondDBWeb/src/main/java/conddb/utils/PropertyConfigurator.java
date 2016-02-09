@@ -3,6 +3,8 @@
  */
 package conddb.utils;
 
+import java.time.format.DateTimeFormatter;
+
 import org.springframework.beans.factory.annotation.Value;
 
 /**
@@ -21,6 +23,10 @@ public class PropertyConfigurator {
 	private String serverHost;
 	@Value("${conddb.monitor.logging}")
 	public String monitorLogging;
+	@Value("${conddb.time.format}")
+	private String pattern = "yyyyMMddHHmmss:z";
+
+	private DateTimeFormatter locFormatter;
 	
 	private PropertyConfigurator () {
 		
@@ -48,5 +54,23 @@ public class PropertyConfigurator {
 	public String getMonitorLogging() {
 		return monitorLogging;
 	}
+	public DateTimeFormatter getLocformatter() throws IllegalArgumentException {
+		if (pattern.equals("ISO_OFFSET_DATE_TIME")) {
+			locFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+		} else if (pattern.equals("ISO_LOCAL_DATE_TIME")) {
+			locFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+		} else {
+			locFormatter = DateTimeFormatter.ofPattern(pattern);
+		}
+		return locFormatter;
+	}
+
+	/**
+	 * @return the pattern
+	 */
+	public String getPattern() {
+		return pattern;
+	}
+
 	
 }

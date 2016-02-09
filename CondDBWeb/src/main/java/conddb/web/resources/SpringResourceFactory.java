@@ -43,38 +43,38 @@ public class SpringResourceFactory {
 	public Link getResource(String resourceName, UriInfo info, Entity entity) {
 		if (resourceName.equals("globaltag")) {
 			entity.setResId(((GlobalTag)entity).getName());
-			GlobalTagResource resource = new GlobalTagResource(info,(GlobalTag)entity,timestampFormat);
-			log.info("Create global tag resource: timestamp format is "+timestampFormat);
+			GlobalTagResource resource = new GlobalTagResource(info,(GlobalTag)entity);
+			log.info("Create global tag resource ");
 			return resource;
 		} else if (resourceName.equals("globaltagmap")) {
 			entity.setResId(((GlobalTagMap)entity).getId().toString());
-			GlobalTagMapResource resource = new GlobalTagMapResource(info,(GlobalTagMap)entity,timestampFormat);
+			GlobalTagMapResource resource = new GlobalTagMapResource(info,(GlobalTagMap)entity);
 			log.info("Create global tag map resource");
 			return resource;			
 		} else if (resourceName.equals("tag")) {
 			entity.setResId(((Tag)entity).getName());
-			TagResource resource = new TagResource(info,(Tag)entity,timestampFormat);
+			TagResource resource = new TagResource(info,(Tag)entity);
 			log.info("Create tag resource");
 			return resource;			
 		} else if (resourceName.equals("iov")) {
 			entity.setResId(((Iov)entity).getId().toString());
-			IovResource resource = new IovResource(info,(Iov)entity,timestampFormat);
+			IovResource resource = new IovResource(info,(Iov)entity);
 			log.info("Create iov resource");
 			return resource;			
 		} else if (resourceName.equals("payload")) {
-			PayloadResource resource = new PayloadResource(info,(Payload)entity,timestampFormat);
+			PayloadResource resource = new PayloadResource(info,(Payload)entity);
 			log.info("Create payload resource");
 			return resource;			
 		} else if (resourceName.equals("payloaddata")) {
-			PayloadDataResource resource = new PayloadDataResource(info,(PayloadData)entity,timestampFormat);
+			PayloadDataResource resource = new PayloadDataResource(info,(PayloadData)entity);
 			log.info("Create payload data resource");
 			return resource;			
 		} else if (resourceName.equals("system")) {
-			SystemDescriptionResource resource = new SystemDescriptionResource(info,(SystemDescription)entity,timestampFormat);
+			SystemDescriptionResource resource = new SystemDescriptionResource(info,(SystemDescription)entity);
 			log.info("Create system resource");
 			return resource;			
 		} else {
-			Link link = new Link(info,entity, timestampFormat);
+			Link link = new Link(info,entity);
 			return link;
 		}
 	}
@@ -84,14 +84,5 @@ public class SpringResourceFactory {
 	}
 	public Link getCollectionResource(UriInfo info, String subPath, Collection c, int offset, int limit) {
 		return new CollectionResource(info,subPath,c,offset,limit);
-	}
-
-	public TimestampFormat getTimestampFormat() {
-		return timestampFormat;
-	}
-
-	public void setTimestampFormat(TimestampFormat timestampFormat) {
-		log.info("Update tsformat using autowiring: "+timestampFormat.getPattern());
-		this.timestampFormat = timestampFormat;
 	}
 }

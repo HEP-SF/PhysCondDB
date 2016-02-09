@@ -10,30 +10,27 @@ import conddb.data.Entity;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.Tag;
-import conddb.utils.json.serializers.TimestampFormat;
 
 @SuppressWarnings("unchecked")
 public class GlobalTagMapResource extends Link {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5000165341237066181L;
 	private Logger log = LoggerFactory.getLogger(this.getClass());
-
-	public GlobalTagMapResource(UriInfo info, GlobalTagMap globaltagmap, TimestampFormat tsformat) {
-		super(info, globaltagmap);
-		build(info, globaltagmap, tsformat);
-	}
-
-	public GlobalTagMapResource(UriInfo info, GlobalTagMap globaltagmap, Entity parent, TimestampFormat tsformat) {
-		super(info, globaltagmap,parent,tsformat);
-		build(info, globaltagmap, tsformat);
-	}
 
 	public GlobalTagMapResource(UriInfo info, GlobalTagMap globaltagmap) {
 		super(info, globaltagmap);
-		build(info, globaltagmap, null);
+		build(info, globaltagmap);
 	}
 
-	protected void build(UriInfo info, GlobalTagMap globaltagmap, TimestampFormat tsformat) {
-		this.tsformat = tsformat;
+	public GlobalTagMapResource(UriInfo info, GlobalTagMap globaltagmap, Entity parent) {
+		super(info, globaltagmap,parent);
+		build(info, globaltagmap);
+	}
+
+	protected void build(UriInfo info, GlobalTagMap globaltagmap) {
 		put("globalTagName", globaltagmap.getGlobalTagName());
 		put("tagName", globaltagmap.getTagName());
 		put("label", globaltagmap.getLabel());
@@ -86,7 +83,7 @@ public class GlobalTagMapResource extends Link {
 			put("globalTag", new Link(getFullyQualifiedContextPath(info), gtag));
 		}
 		
-		this.serializeTimestamps(this.tsformat);
+		this.serializeTimestamps();
 	}
 	
 	private GlobalTagResource getGlobalTagResource(UriInfo info, GlobalTagMap globaltagmap) {
@@ -94,7 +91,7 @@ public class GlobalTagMapResource extends Link {
 		try {
 			GlobalTag gtag = globaltagmap.getGlobalTag();
 			gtag.setResId(gtag.getName());
-			gtagres = new GlobalTagResource(info, (GlobalTag) gtag, this.tsformat);
+			gtagres = new GlobalTagResource(info, (GlobalTag) gtag);
 			// remove the map object since
 			// we are already filling it
 			// from maps.
@@ -116,7 +113,7 @@ public class GlobalTagMapResource extends Link {
 				if (systag.getGlobalTagMaps() != null) {
 					systag.setGlobalTagMaps(null);
 				}
-				tagres = new TagResource(info, (Tag) systag, this.tsformat);
+				tagres = new TagResource(info, (Tag) systag);
 				// remove the map object since
 				// we are already filling it
 				// from maps.

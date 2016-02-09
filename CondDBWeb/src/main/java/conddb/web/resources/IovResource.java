@@ -9,25 +9,18 @@ import org.slf4j.LoggerFactory;
 import conddb.data.Iov;
 import conddb.data.Payload;
 import conddb.data.Tag;
-import conddb.utils.json.serializers.TimestampFormat;
 
 @SuppressWarnings("unchecked")
 public class IovResource extends Link {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
-	public IovResource(UriInfo info, Iov iov, TimestampFormat tsformat) {
-		super(info, iov);
-		build(info, iov, tsformat);
-	}
-
 	public IovResource(UriInfo info, Iov iov) {
 		super(info, iov);
-		build(info, iov, null);
+		build(info, iov);
 	}
 
-	protected void build(UriInfo info, Iov iov, TimestampFormat tsformat) {
-		this.tsformat = tsformat;
+	protected void build(UriInfo info, Iov iov) {
 		put("id", iov.getId());
 		put("since", iov.getSince());
 		put("sinceString", iov.getSinceString());
@@ -41,7 +34,7 @@ public class IovResource extends Link {
 				if (payload.getIovs() != null) {
 					payload.setIovs(null);
 				}
-				pyldres = new PayloadResource(info, (Payload) payload, this.tsformat);
+				pyldres = new PayloadResource(info, (Payload) payload);
 			} 
 		} catch (org.hibernate.LazyInitializationException e) {
 			log.debug("LazyInitialization Exception from hibernate: maps collection is empty");
@@ -55,6 +48,6 @@ public class IovResource extends Link {
 			atag.setResId(atag.getName());
 		}
 		put("tag",new Link(info, atag));
-		this.serializeTimestamps(this.tsformat);
+		this.serializeTimestamps();
 	}
 }
