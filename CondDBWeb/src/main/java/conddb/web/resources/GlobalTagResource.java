@@ -43,7 +43,7 @@ public class GlobalTagResource extends Link {
 			if (globaltag.getGlobalTagMaps() != null) {
 				Collection<GlobalTagMap> globaltagmaps = CollectionUtils
 						.iterableToCollection(globaltag.getGlobalTagMaps());
-				Collection items = new ArrayList(globaltagmaps.size());
+				Collection<GlobalTagMapResource> items = new ArrayList<GlobalTagMapResource>(globaltagmaps.size());
 				for (GlobalTagMap globaltagmap : globaltagmaps) {
 					globaltagmap.setResId(globaltagmap.getId().toString());
 					globaltagmap.getGlobalTag().setResId(globaltagmap.getGlobalTagName());

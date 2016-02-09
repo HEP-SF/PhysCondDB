@@ -13,6 +13,10 @@ import conddb.data.Tag;
 @SuppressWarnings("unchecked")
 public class IovResource extends Link {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6630815429637571088L;
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
 	public IovResource(UriInfo info, Iov iov) {

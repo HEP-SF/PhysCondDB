@@ -28,7 +28,7 @@ public abstract class BaseController {
     protected Response created(Link resource) {
         String href = (String)resource.get("href");
         URI uri = URI.create(href);
-        return Response.created(uri).entity(resource).build();
+        return Response.created(uri).status(Response.Status.OK).entity(resource).build();
     }
 
     protected ConddbWebException buildException(String msg, String internalmsg, Response.Status status) {

@@ -58,7 +58,7 @@ public class TagResource extends Link {
 			log.debug("Loading maps....");
 			if (tag.getGlobalTagMaps() != null && tag.getGlobalTagMaps().size() > 0) {
 				Set<GlobalTagMap> maps = tag.getGlobalTagMaps();
-				Collection items = new ArrayList(maps.size());
+				Collection<GlobalTagMapResource> items = new ArrayList<GlobalTagMapResource>(maps.size());
 				for (GlobalTagMap globaltagmap : maps) {
 					globaltagmap.setResId(globaltagmap.getId().toString());
 					globaltagmap.getGlobalTag().setResId(globaltagmap.getGlobalTagName());

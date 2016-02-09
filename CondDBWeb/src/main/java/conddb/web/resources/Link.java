@@ -16,6 +16,12 @@
 package conddb.web.resources;
 
 
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.LinkedHashMap;
+
 import javax.ws.rs.core.UriInfo;
 
 import org.slf4j.Logger;
@@ -23,13 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import conddb.data.Entity;
 import conddb.utils.PropertyConfigurator;
-import conddb.utils.json.serializers.TimestampFormat;
-
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.LinkedHashMap;
 
 @SuppressWarnings("unchecked")
 public class Link extends LinkedHashMap {

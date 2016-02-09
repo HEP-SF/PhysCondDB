@@ -22,7 +22,11 @@ import java.util.Collections;
 @SuppressWarnings("unchecked")
 public class CollectionResource extends Link {
 
-    public static final int DEFAULT_LIMIT = 25;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -3641836199158578100L;
+	public static final int DEFAULT_LIMIT = 25;
 
     public CollectionResource(UriInfo info, String subPath, Collection c) {
         this(info, subPath, c, 0, getLimit(c));
