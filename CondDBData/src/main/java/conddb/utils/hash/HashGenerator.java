@@ -1,5 +1,9 @@
 package conddb.utils.hash;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -9,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.DigestUtils;
 
 import conddb.data.exceptions.PayloadEncodingException;
+import conddb.utils.data.IStreamHash;
 
 /**
  * @author formica
@@ -124,5 +129,84 @@ public class HashGenerator {
 		return DigestUtils.md5DigestAsHex(text);
 	}
 	
+	public static String hash(BufferedInputStream in) throws IOException, NoSuchAlgorithmException {
+
+		String digest_hash;
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		byte [] buffer = new byte[1024];
+	    int sizeRead = -1;
+	    while ((sizeRead = in.read(buffer)) != -1) {
+	        digest.update(buffer, 0, sizeRead);
+	    }
+	    in.close();
+
+	    byte [] hash = null;
+	    hash = new byte[digest.getDigestLength()];
+	    hash = digest.digest();
+	 // converting byte array to Hexadecimal String
+	 	StringBuilder sb = new StringBuilder(2 * hash.length);
+	 	for (byte b : hash) {
+	 		sb.append(String.format("%02x", b & 0xff));
+	 	}
+	 	digest_hash = sb.toString();
+	    return digest_hash;
+	}
+
+	public static String hashoutstream(InputStream in, OutputStream os) throws IOException, NoSuchAlgorithmException {
+
+		String digest_hash;
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		byte [] buffer = new byte[1024];
+	    int sizeRead = -1;
+	    int loop = 0;
+	    while ((sizeRead = in.read(buffer)) != -1) {
+	        digest.update(buffer, 0, sizeRead);
+	        os.write(buffer, 0, sizeRead);
+	        loop++;
+	        if (loop%100 == 0) {
+	        	os.flush();
+	        }
+	    }
+		os.flush();
+		os.close();
+	    in.close();
+
+	    byte [] hash = null;
+	    hash = new byte[digest.getDigestLength()];
+	    hash = digest.digest();
+	 // converting byte array to Hexadecimal String
+	 	StringBuilder sb = new StringBuilder(2 * hash.length);
+	 	for (byte b : hash) {
+	 		sb.append(String.format("%02x", b & 0xff));
+	 	}
+	 	digest_hash = sb.toString();
+	    return digest_hash;
+	}
+
+	public static IStreamHash hashstream(BufferedInputStream in) throws IOException, NoSuchAlgorithmException {
+
+		String digest_hash;
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		byte [] buffer = new byte[2048];
+	    int sizeRead = -1;
+	    int length = 0;
+	    while ((sizeRead = in.read(buffer)) != -1) {
+	        digest.update(buffer, 0, sizeRead);
+	        length += sizeRead;
+	    }
+	    in.close();
+	    byte [] hash = null;
+	    hash = new byte[digest.getDigestLength()];
+	    hash = digest.digest();
+	 // converting byte array to Hexadecimal String
+	 	StringBuilder sb = new StringBuilder(2 * hash.length);
+	 	for (byte b : hash) {
+	 		sb.append(String.format("%02x", b & 0xff));
+	 	}
+	 	digest_hash = sb.toString();
+	 	IStreamHash ishash = new IStreamHash(digest_hash,length);
+	    return ishash;
+	}
+
 }
 

@@ -62,6 +62,7 @@ public class AsyncCoolUpload {
 	
 	@RequestMapping(value = "/loadiovs", method = RequestMethod.POST)
 	@ResponseBody
+	@Async
 	public String loadCoolIovs(@RequestParam(value="tag", defaultValue="M%") String tagpattern) throws Exception {
 
 		log.info("Asynchronous processing request for loadCoolIovs");

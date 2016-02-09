@@ -20,6 +20,8 @@ package conddb.data.mappers;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.RowMapper;
 
 import conddb.data.PayloadData;
@@ -30,11 +32,23 @@ import conddb.data.PayloadData;
  */
 public class PayloadDataMapper implements RowMapper<PayloadData> {
 
+	private Logger log = LoggerFactory.getLogger(this.getClass());
+
 	@Override
 	public PayloadData mapRow(ResultSet rs, int rownum) throws SQLException {
 		PayloadData pyd = new PayloadData();
 		pyd.setHash(rs.getString("HASH"));
-		pyd.setData(rs.getBytes("DATA"));
+		String uri = "mem";
+//			LobHandler lobhandler = new DefaultLobHandler();
+//			String uri = "/tmp/"+pyd.getHash()+".blob";
+//			InputStream istream = lobhandler.getBlobAsBinaryStream(rs, "DATA");
+//			log.debug("retrieved blob stream from handler : "+istream.available()+" !");
+//			log.debug("copy stream into uri  : "+uri+" !");
+//			OutputStream out = new FileOutputStream(new File(uri));
+//			StreamUtils.copy(istream, out);
+//			out.close();
+		pyd.setData(rs.getBlob("DATA"));
+		pyd.setUri(uri);		
 		return pyd;
 	}
 

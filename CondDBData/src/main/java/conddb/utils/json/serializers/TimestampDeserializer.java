@@ -33,6 +33,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 
+import conddb.data.exceptions.ConversionException;
+
 /**
  * @author formica
  *
@@ -41,7 +43,7 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 public class TimestampDeserializer extends JsonDeserializer<Timestamp> {
 
 	@Autowired
-	TimestampFormat tsformat;
+	TimestampFormat timestampFormat;
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
@@ -50,44 +52,49 @@ public class TimestampDeserializer extends JsonDeserializer<Timestamp> {
 	}
 
 	@Override
-	public Timestamp deserialize(JsonParser jp, DeserializationContext dc)
-			throws IOException, JsonProcessingException {
+	public Timestamp deserialize(JsonParser jp, DeserializationContext dc) throws IOException, JsonProcessingException {
+		try {
+			String tstampstr = jp.getText();
+			Timestamp tstamp = this.timestampFromString(tstampstr);
+			return tstamp;
+		} catch (Exception ex) {
+			log.error("Failed to deserialize using format " + timestampFormat.getLocformatter().toString());
+			throw new JsonParseException(ex.getMessage(), jp.getCurrentLocation());
+		}
+	}
+
+	public Timestamp timestampFromString(String tsstr) throws ConversionException {
 		Timestamp tstamp = null;
 		try {
-			if (tsformat == null) {
+			if (timestampFormat == null) {
 				log.warn("Get an instance of the format here if no autowiring...but the pattern can be different!!");
-				tsformat = new TimestampFormat();
+				timestampFormat = new TimestampFormat();
 			}
-			log.debug("Use private version of deserializer...."
-					+ tsformat.getLocformatter().toString());
-			ZonedDateTime zdt = ZonedDateTime.parse(jp.getText(),
-					tsformat.getLocformatter());
+			log.debug("Use private version of deserializer...." + timestampFormat.getLocformatter().toString());
+			ZonedDateTime zdt = ZonedDateTime.parse(tsstr, timestampFormat.getLocformatter());
 			tstamp = new Timestamp(zdt.toInstant().toEpochMilli());
 		} catch (Exception ex) {
 			// If an exception is catch on parsing, try as if it was
 			// milliseconds
 			log.error(ex.getMessage());
-			log.warn("Failed parsing date, try with milliseconds: "
-					+ jp.getText());
-			log.error("Failed to deserialize using format "+tsformat.getLocformatter().toString());
+			log.warn("Failed parsing date, try with milliseconds: " + tsstr);
+			log.error("Failed to deserialize using format " + timestampFormat.getLocformatter().toString());
 			try {
-				String millisec = jp.getText();
+				String millisec = tsstr;
 				tstamp = new Timestamp(new Long(millisec));
 			} catch (Exception e) {
-				log.error("Failed to deserialize using format "+tsformat.getLocformatter().toString());
-				throw new JsonParseException(e.getMessage(),
-						jp.getCurrentLocation());
+				throw new ConversionException(e.getMessage());
 			}
 		}
 		return tstamp;
 	}
 
-	public TimestampFormat getTsformat() {
-		return tsformat;
+	public TimestampFormat getTimestampFormat() {
+		return timestampFormat;
 	}
 
-	public void setTsformat(TimestampFormat tsformat) {
-		this.tsformat = tsformat;
+	public void setTimestampFormat(TimestampFormat timestampFormat) {
+		this.timestampFormat = timestampFormat;
 	}
 
 }

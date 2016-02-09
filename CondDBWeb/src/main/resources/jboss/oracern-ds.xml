@@ -43,7 +43,7 @@
 		</timeout>
 	</datasource>
 
-	<datasource jndi-name="java:jboss/datasources/OraDevCondDBDs"
+<!-- 	<datasource jndi-name="java:jboss/datasources/OraDevCondDBDs"
 		pool-name="CondDBPool" enabled="true" use-java-context="true">
 		<connection-url>jdbc:oracle:thin:@(DESCRIPTION =
 			(ADDRESS= (PROTOCOL=TCP) (HOST=devdb11-s.cern.ch) (PORT=10121) )
@@ -56,7 +56,40 @@
 		<driver>ojdbc6.jar</driver>
 		<pool>
 			<min-pool-size>10</min-pool-size>
-			<max-pool-size>30</max-pool-size>
+			<max-pool-size>60</max-pool-size>
+			<prefill>true</prefill>
+		</pool>
+		<security>
+			<user-name>${devuser}</user-name>
+			<password>${devpassword}</password>
+		</security>
+		<validation>
+			<valid-connection-checker
+				class-name="org.jboss.jca.adapters.jdbc.extensions.oracle.OracleValidConnectionChecker" />
+			<validate-on-match>false</validate-on-match>
+			<background-validation>false</background-validation>
+			<exception-sorter
+				class-name="org.jboss.jca.adapters.jdbc.extensions.oracle.OracleExceptionSorter" />
+		</validation>
+		<timeout>
+			<blocking-timeout-millis>30000</blocking-timeout-millis>
+			<idle-timeout-minutes>5</idle-timeout-minutes>
+		</timeout>
+	</datasource>
+ -->
+	<datasource jndi-name="java:jboss/datasources/OraIntrCondDBDs"
+		pool-name="CondDBPool" enabled="true" use-java-context="true">
+		<connection-url>jdbc:oracle:thin:@(DESCRIPTION =
+			(ADDRESS= (PROTOCOL=TCP) (HOST=db-d0002.cern.ch) (PORT=10654) )
+        	(ENABLE=BROKEN)
+        	(CONNECT_DATA=
+            (SERVICE_NAME=intr.cern.ch)
+			))
+		</connection-url>
+		<driver>ojdbc6.jar</driver>
+		<pool>
+			<min-pool-size>5</min-pool-size>
+			<max-pool-size>20</max-pool-size>
 			<prefill>true</prefill>
 		</pool>
 		<security>

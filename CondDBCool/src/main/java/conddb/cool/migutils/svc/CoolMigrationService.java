@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -19,6 +20,7 @@ import javax.xml.xpath.XPathFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.xml.sax.InputSource;
 
 import conddb.cool.dao.JdbcCondDBRepository;
@@ -26,18 +28,21 @@ import conddb.cool.data.CoolIovType;
 import conddb.cool.data.GtagTagType;
 import conddb.cool.data.NodeType;
 import conddb.cool.migutils.CoolIov;
-import conddb.dao.repositories.GlobalTagMapRepository;
-import conddb.dao.repositories.GlobalTagRepository;
-import conddb.dao.repositories.IovRepository;
-import conddb.dao.repositories.PayloadRepository;
-import conddb.dao.repositories.SystemNodeRepository;
-import conddb.dao.repositories.TagRepository;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.Iov;
 import conddb.data.Payload;
+import conddb.data.PayloadData;
 import conddb.data.SystemDescription;
 import conddb.data.Tag;
+import conddb.svc.dao.baserepository.PayloadDataBaseCustom;
+import conddb.svc.dao.repositories.GlobalTagMapRepository;
+import conddb.svc.dao.repositories.GlobalTagRepository;
+import conddb.svc.dao.repositories.IovRepository;
+import conddb.svc.dao.repositories.PayloadRepository;
+import conddb.svc.dao.repositories.SystemNodeRepository;
+import conddb.svc.dao.repositories.TagRepository;
+import conddb.utils.data.PayloadGenerator;
 
 /**
  * @author formica
@@ -57,6 +62,10 @@ public class CoolMigrationService {
 	private IovRepository iovRepository;
 	@Autowired
 	private PayloadRepository pyldRepository;
+	@Autowired
+	@Qualifier("payloaddatadbrepo")
+	private PayloadDataBaseCustom payloadDataBaseCustom;
+
 	@Autowired
 	private SystemNodeRepository sdRepository;
 
@@ -88,7 +97,7 @@ public class CoolMigrationService {
 
 			// create global tag
 			GlobalTag conddbgtag = new GlobalTag(cooltag.getGtagName(),
-					new BigDecimal(0), description, "1.0", new java.sql.Timestamp(instimestr.getTime()),
+					new BigDecimal(0), description, "1.0", 
 					new java.sql.Timestamp(new Date().getTime()));
 			
 			// set tagdescription
@@ -144,7 +153,10 @@ public class CoolMigrationService {
 
 	public void migrateCoolIovs(String tagpattern) throws Exception {
 		Iterable<Tag> taglist = tagRepository.findByNameLike(tagpattern);
-		Payload defaultpyld = new Payload();
+		Map<String,Object> defaultmap = PayloadGenerator.createDefaultPayload();
+		Payload defaultpyld = (Payload) defaultmap.get("payload");
+		PayloadData defaultpylddata = (PayloadData) defaultmap.get("payloaddata");
+		
 		for (Tag atag : taglist) {
 			log.info("Search for node description related information using "+atag
 					.getSynchronization());
@@ -157,7 +169,7 @@ public class CoolMigrationService {
 					.getSchemaName(), "CONDBR2", sd.getNodeFullpath(), atag
 					.getName(), "%", new BigDecimal(0), new BigDecimal(
 					CoolIov.COOL_MAX_DATE));
-
+			// 
 			Timestamp now = new Timestamp(new Date().getTime());
 			for (CoolIovType ciov : cooliovs) {
 				// Use default empty payload for the moment...
@@ -166,9 +178,10 @@ public class CoolMigrationService {
 				Payload pyld = pyldRepository.findOne(defaultpyld.getHash());
 				if (pyld == null) {
 					pyldRepository.save(defaultpyld);
+					payloadDataBaseCustom.save(defaultpylddata);
 					pyld = pyldRepository.findOne(defaultpyld.getHash());
 				}
-				Iov conddbiov = new Iov(ciov.getIovSince(), sincestring, now,
+				Iov conddbiov = new Iov(ciov.getIovSince(), sincestring,
 						pyld, atag);
 				Iov storediov = iovRepository
 						.fetchBySinceAndInsertionTimeAndTagName(atag.getName(),

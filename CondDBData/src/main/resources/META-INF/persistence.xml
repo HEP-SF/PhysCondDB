@@ -24,6 +24,7 @@
 			<property name="hibernate.cache.provider_class" value="org.hibernate.cache.EhCacheProvider" />
 			<property name="hibernate.jdbc.fetch_size" value="1000" />
 			<property name="hibernate.jdbc.batch_size" value="60" />
+			<property name="hibernate.jdbc.use_streams_for_binary" value="true"/>
 			<property name="show_sql" value="${jpa.show.sql}" />
 		</properties>
 	</persistence-unit>

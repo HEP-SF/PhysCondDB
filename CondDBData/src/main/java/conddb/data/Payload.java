@@ -19,8 +19,10 @@ import javax.persistence.Lob;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 /**
@@ -33,7 +35,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 //		  })
 
 @JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="hash", scope = Payload.class)
-public class Payload implements java.io.Serializable {
+public class Payload extends conddb.data.Entity implements java.io.Serializable {
 
 	/**
 	 * 
@@ -46,6 +48,7 @@ public class Payload implements java.io.Serializable {
 	private String streamerInfo;
 	private String backendInfo="db://PHCOND_PAYLOAD_DATA";
 	private Timestamp insertionTime;
+	private PayloadData data = null;
 	private Set<Iov> iovs = new HashSet<Iov>(0);
 
 	public Payload() {
@@ -53,12 +56,11 @@ public class Payload implements java.io.Serializable {
 	}
 
 	public Payload(String hash, String objectType, String backendInfo,
-			String streamerInfo, Timestamp insertionTime, String version) {
+			String streamerInfo, String version) {
 		this.hash = hash;
 		this.objectType = objectType;
 		this.backendInfo = backendInfo;
 		this.streamerInfo = streamerInfo;
-		this.insertionTime = insertionTime;
 		this.version = version;
 	}
 
@@ -101,7 +103,7 @@ public class Payload implements java.io.Serializable {
 		this.objectType = objectType;
 	}
 	
-	@Column(name = "BACKEND_INFO", nullable = false)
+	@Column(name = "BACKEND_INFO", nullable = true)
 	@Lob @Basic(fetch=FetchType.LAZY)
 	public String getBackendInfo() {
 		return backendInfo;
@@ -141,13 +143,21 @@ public class Payload implements java.io.Serializable {
 	}
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "payload")
-	//@JsonBackReference
 	public Set<Iov> getIovs() {
 		return this.iovs;
 	}
 
 	public void setIovs(Set<Iov> iovs) {
 		this.iovs = iovs;
+	}
+	
+	@Transient
+	public PayloadData getData() {
+		return data;
+	}
+
+	public void setData(PayloadData data) {
+		this.data = data;
 	}
 
 	@PrePersist
@@ -159,12 +169,9 @@ public class Payload implements java.io.Serializable {
 
 	@Override
 	public String toString() {
-		StringBuffer outbf = new StringBuffer();
-		outbf.append(this.getHash()+", ");
-		outbf.append(this.getObjectType()+", ");
-		outbf.append(this.getStreamerInfo()+", ");
-		outbf.append(this.getVersion()+" ");
-		return outbf.toString();
+		return "Payload [hash=" + hash + ", version=" + version + ", objectType=" + objectType + ", datasize="
+				+ datasize + ", streamerInfo=" + streamerInfo + ", backendInfo=" + backendInfo + ", insertionTime="
+				+ insertionTime + "]";
 	}
 
 }

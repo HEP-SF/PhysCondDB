@@ -169,3 +169,6 @@ mvn -DskipTests=true
 ```
 test are not executed
 
+## Some useful commands to test services
+* Insert a global tag:
+ - ```time curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d '{ "name" : "BGTAG_02", "lockstatus" : "unlocked","validity" : 4, "description" : "Second test gtag", "release" : "3.0", "snapshotTime" : "2013-06-01T10:10:10+02:00"}' --proxy socks5h://localhost:3129 http://aiatlas137.cern.ch:8080/physconddb/conddbweb/rest/expert/globaltags```

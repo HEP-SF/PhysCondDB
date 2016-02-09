@@ -1,17 +1,38 @@
-<div class="container">
+<div class="container-fluid">
 	<div ng-controller="TagTraceListCtrl">
-		<p>List of tags associated to {{selectedglobaltagname}}</p>
-		<button class="btn btn-sm" popover-placement="top"
-			popover="{{selectedglobaltagname}}" type="button">
-			<i class="glyphicon glyphicon-link"></i>
+		<h2>List of tags associated to {{selectedglobaltagname}}</h2>
+		<hr>
+		<form novalidate class="form-horizontal">
+		</div>
+		<div class="form-group">
+		<label class="col-sm-2 control-label" for="items">Items by page</label> 
+		<div class="col-sm-4">
+		<input name="items" id="items" type="number" ng-model="itemsByPage" /> 
+		</div>
+		</div>
+		<div  class="form-group">
+		<button class="btn" ng-click='goToMaps(selectedglobaltagname)'>
+			<span class="glyphicon glyphicon-paperclip"></span>Mappings
 		</button>
-		<a ng-href="#/maps/{{selectedglobaltagname}}">Update Mappings</a><br> 
-		<label for="items">items
-			by page</label> <input class="input-sm form-control" name="items" id="items"
-			type="number" ng-model="itemsByPage" />
+<!-- 		<button class="btn btn-sm" popover-placement="top" -->
+<!-- 			popover="{{selectedglobaltagname}}" type="button"> -->
+<!-- 			<i class="glyphicon glyphicon-link"></i> -->
+<!-- 		</button> -->
+<!-- 		<a ng-href="#/maps/{{selectedglobaltagname}}">Update Mappings</a> -->
+		</div>
+		</form>
+		<br> Debug: <input type="checkbox" ng-model="checked"
+			aria-label="Toggle ngShow">
+		<div class="check-element animate-hide" ng-show="checked">
+			<span class="glyphicon glyphicon-thumbs-up"></span> check values of
+			scope variables.
+			<pre>globaltag = {{selectedglobaltagname | json}}</pre>
+			<pre>collection = {{displayedTagsCollection | json}}</pre>
+		</div>
 
+		<hr>
 		<table st-table="displayedTagsCollection"
-			st-safe-src="selectedtracetags" class="table table-striped"
+			st-safe-src="selectedtracetags" class="table table-bordered table-striped"
 			show-filter="true" export-csv="csv">
 			<thead>
 				<tr>
@@ -33,20 +54,26 @@
 			<tbody>
 				<tr st-select-row="atag" st-select-mode="single"
 					ng-repeat="atag in displayedTagsCollection">
-					<td data-title="'Name'">{{atag.systemTag.name}}</td>
-					<td data-title="'Insertion Time'">{{atag.systemTag.insertionTime}}</td>
-					<td data-title="'Modification Time'">{{atag.systemTag.modificationTime}}</td>
-					<td data-title="'End of Validity'">{{atag.systemTag.endOfValidity}}</td>
-					<td data-title="'Last Validated Time'">{{atag.systemTag.lastValidatedTime}}</td>
-					<td data-title="'Description'">{{atag.systemTag.description}}</td>
-					<td data-title="'Synchonization'">{{atag.systemTag.synchronization}}</td>
-					<td data-title="'Object Type'">{{atag.systemTag.objectType}}</td>
-					<td data-title="'Time Type'">{{atag.systemTag.timeType}}</td>
+					<td data-title="'Name'">{{atag.name}}</td>
+					<td data-title="'Insertion Time'">{{atag.insertionTime}}</td>
+					<td data-title="'Modification Time'">{{atag.modificationTime}}</td>
+					<td data-title="'End of Validity'">{{atag.endOfValidity}}</td>
+					<td data-title="'Last Validated Time'">{{atag.lastValidatedTime}}</td>
+					<td data-title="'Description'">{{atag.description}}</td>
+					<td data-title="'Synchonization'">{{atag.synchronization}}</td>
+					<td data-title="'Object Type'">{{atag.objectType}}</td>
+					<td data-title="'Time Type'">{{atag.timeType}}</td>
+					<td>
+						<button class="btn btn-sm" popover-placement="top"
+							popover="{{atag.name}}" type="button">
+							<i class="glyphicon glyphicon-eye-open"></i>
+						</button> <a ng-href="#/tags/{{atag.name}}/trace">backtrace</a>
+					</td>
 				</tr>
 			</tbody>
 			<tfoot>
 				<tr>
-					<td colspan="5" class="text-center">
+					<td colspan="10" class="text-center">
 						<div st-pagination="" st-items-by-page="itemsByPage"
 							st-displayed-pages="displayedPages"></div>
 					</td>

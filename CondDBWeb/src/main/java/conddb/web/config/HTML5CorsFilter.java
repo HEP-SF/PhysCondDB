@@ -26,6 +26,7 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebFilter;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
@@ -35,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * @author formica
  *
  */
-@WebFilter(filterName = "HTML5CorsFilter", urlPatterns = {"/conddbweb/rest/*"})
+//@WebFilter(filterName = "HTML5CorsFilter", urlPatterns = {"/conddbweb/rest/*"})
 public class HTML5CorsFilter implements Filter {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
@@ -55,7 +56,10 @@ public class HTML5CorsFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
-		 log.info("Calling Cors Filter on request "+request.toString());
+		 log.debug("Calling Cors Filter on request "+request.toString());
+		 String acrh = ((HttpServletRequest) request).getHeader("Access-Control-Request-Headers");
+		 log.debug("Request headers "+acrh); 
+
 		 HttpServletResponse res = (HttpServletResponse) response;
 	        res.addHeader("Access-Control-Allow-Origin", "*");
 	        res.addHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT");

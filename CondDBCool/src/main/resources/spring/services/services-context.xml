@@ -12,6 +12,10 @@
 	<bean id="coolMigrationService" class="conddb.cool.migutils.svc.CoolMigrationService">
 		<constructor-arg ref="jdbcCondDBRepository" />
 	</bean>
+	<bean id="payloaddatajcrrepo" class="conddb.svc.dao.repositories.impl.PayloadDataJCRImpl">
+		<property name="rootpath" value="/tmp/physconddb" />
+	</bean>
+	<bean id="payloaddatadbrepo" class="conddb.svc.dao.repositories.impl.PayloadDataDBImpl"></bean>
 	
 	<bean id="taskExecutor"
 		class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">

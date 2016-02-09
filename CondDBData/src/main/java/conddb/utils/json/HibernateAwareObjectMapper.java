@@ -5,6 +5,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.cfg.HandlerInstantiator;
 import com.fasterxml.jackson.datatype.hibernate4.Hibernate4Module;
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
@@ -29,8 +30,8 @@ public class HibernateAwareObjectMapper extends ObjectMapper {
 	public HibernateAwareObjectMapper() {
 		System.out.println("INITIALIZE OBJECT MAPPER FOR HIBERNATE");
 		Hibernate4Module hm = new Hibernate4Module();
-//		this.setDateFormat(dateFormat);
 //		hm.enable(Hibernate4Module.Feature.FORCE_LAZY_LOADING);
+		enable(SerializationFeature.INDENT_OUTPUT);
 		registerModule(hm);
 		registerModule(new JSR310Module());
 	}
@@ -38,7 +39,6 @@ public class HibernateAwareObjectMapper extends ObjectMapper {
 	@Override
 	@Autowired
 	public Object setHandlerInstantiator(HandlerInstantiator hi) {
-		// TODO Auto-generated method stub
 		System.out.println("Setting handler in objectmapper "+hi.getClass().getName());
 		return super.setHandlerInstantiator(hi);
 	}	

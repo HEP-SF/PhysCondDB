@@ -1,12 +1,20 @@
 <div class="container">
 	<div ng-controller="TagBackTraceListCtrl">
-		<p>List of global tags associated to {{selectedtagname}}</p>
-		<label for="items">items by page</label> <input
-			class="input-sm form-control" name="items" id="items" type="number"
-			ng-model="itemsByPage" />
 
+		<h2>List of global tags associated to {{selectedtagname}}</h2>
+		<hr>
+		<form novalidate class="form-horizontal">
+		</div>
+		<div class="form-group">
+		<label class="col-sm-2 control-label" for="items">Items by page</label> 
+		<div class="col-sm-4">
+		<input name="items" id="items" type="number" ng-model="itemsByPage" /> 
+		</div>
+		</div>
+		</form>
+		<br>
 		<table st-table="displayedCollection"
-			st-safe-src="selectedbacktracetags" class="table table-striped"
+			st-safe-src="selectedbacktracetags" class="table table-bordered table-striped"
 			show-filter="true" export-csv="csv">
 			<thead>
 				<tr>
@@ -26,18 +34,18 @@
 			<tbody>
 				<tr st-select-row="gtag" st-select-mode="single"
 					ng-repeat="gtag in displayedCollection">
-					<td data-title="'Name'">{{gtag.globalTag.name}}</td>
-					<td data-title="'Insertion Time'">{{gtag.globalTag.insertionTime}}</td>
-					<td data-title="'Description'">{{gtag.globalTag.description}}</td>
-					<td data-title="'Validity'">{{gtag.globalTag.validity}}</td>
-					<td data-title="'Release'">{{gtag.globalTag.release}}</td>
-					<td data-title="'Lock'">{{gtag.globalTag.lockstatus}}</td>
-					<td data-title="'SnapshotTime'">{{gtag.globalTag.snapshotTime}}</td>
+					<td data-title="'Name'">{{gtag.name}}</td>
+					<td data-title="'Insertion Time'">{{gtag.insertionTime}}</td>
+					<td data-title="'Description'">{{gtag.description}}</td>
+					<td data-title="'Validity'">{{gtag.validity}}</td>
+					<td data-title="'Release'">{{gtag.release}}</td>
+					<td data-title="'Lock'">{{gtag.lockstatus}}</td>
+					<td data-title="'SnapshotTime'">{{gtag.snapshotTime}}</td>
 					<td>
 						<button class="btn btn-sm" popover-placement="top"
 							popover="{{gtag.name}}" type="button">
 							<i class="glyphicon glyphicon-eye-open"></i>
-						</button> <a ng-href="#/tracetags/{{gtag.globalTag.name}}">trace</a>
+						</button> <a ng-href="#/globaltags/{{gtag.name}}/trace">trace</a>
 					</td>
 					<td>
 						<button type="button" ng-click="remove(gtag)" class="btn btn-sm btn-danger">
@@ -48,7 +56,7 @@
 			</tbody>
 			<tfoot>
 				<tr>
-					<td colspan="5" class="text-center">
+					<td colspan="9" class="text-center">
 						<div st-pagination="" st-items-by-page="itemsByPage"
 							st-displayed-pages="displayedPages"></div>
 					</td>

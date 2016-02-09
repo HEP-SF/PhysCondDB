@@ -1,5 +1,8 @@
 package conddb.data;
 
+import java.sql.Blob;
+import java.util.Arrays;
+
 // Generated Aug 25, 2014 4:52:00 PM by Hibernate Tools 3.4.0.CR1
 
 //import conddb.data.deserialiser.*;
@@ -21,23 +24,28 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 @Entity
 @Table(name = "PHCOND_PAYLOAD_DATA")
 @JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="hash")
-public class PayloadData implements java.io.Serializable {
+public class PayloadData extends conddb.data.Entity implements java.io.Serializable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 6319755970273574624L;
 	private String hash;
-	private byte[]  data;
+	private Blob   data;
 	private String uri;
 
 	public PayloadData() {
-		this.data = "EMPTY".getBytes();
+//		this.data = "EMPTY".getBytes();
 	}
 
-	public PayloadData(String hash, byte[] data) {
+//	public PayloadData(String hash, byte[] data) {
+//		this.hash = hash;
+//		this.data = data;
+//	}
+
+	public PayloadData(String hash) {
+		super();
 		this.hash = hash;
-		this.data = data;
 	}
 
 	@Id
@@ -52,13 +60,22 @@ public class PayloadData implements java.io.Serializable {
 
 	@Column(name = "DATA", nullable = false)
 	@Lob 
-	public byte[] getData() {
+	public Blob getData() {
 		return this.data;
 	}
 
-	public void setData(byte[]  data) {
+	public void setData(Blob  data) {
 		this.data = data;
 	}
+//	@Column(name = "DATA", nullable = false)
+//	@Lob 
+//	public byte[] getData() {
+//		return this.data;
+//	}
+//
+//	public void setData(byte[]  data) {
+//		this.data = data;
+//	}
 
 	@Transient
 	public String getUri() {
@@ -67,6 +84,11 @@ public class PayloadData implements java.io.Serializable {
 
 	public void setUri(String uri) {
 		this.uri = uri;
+	}
+
+	@Override
+	public String toString() {
+		return "PayloadData [hash=" + hash + "]";
 	}
 	
 	

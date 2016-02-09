@@ -42,12 +42,12 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 public class TimestampSerializer extends JsonSerializer<Timestamp> {
 
 	@Autowired
-	TimestampFormat tsformat;
+	TimestampFormat timestampFormat;
 	
 	private Logger log = LoggerFactory.getLogger(this.getClass()); 
 
 	public TimestampSerializer(){
-        SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);    
+        SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);   
     }
 	
 	@Override
@@ -55,26 +55,30 @@ public class TimestampSerializer extends JsonSerializer<Timestamp> {
 			SerializerProvider sp) throws IOException,
 			JsonProcessingException {
 		try {
-			if (tsformat == null) {
+			if (timestampFormat == null) {
 				log.warn("Get an instance of the format here if no autowiring...but the pattern can be different!!");
-				tsformat = new TimestampFormat();
+				timestampFormat = new TimestampFormat();
 			}
-			log.debug("Use private version of serializer...."+tsformat.getLocformatter().toString());
-			Instant fromEpochMilli = Instant.ofEpochMilli(ts.getTime());
-			ZonedDateTime zdt = fromEpochMilli.atZone(ZoneId.of("Europe/Paris"));
-			jg.writeString(zdt.format(tsformat.getLocformatter()));
+			log.debug("Use private version of serializer...."+timestampFormat.getLocformatter().toString());
+			jg.writeString(this.format(ts));
 		} catch (Exception ex) {
-			log.error("Failed to serialize using format "+tsformat.getLocformatter().toString());
+			log.error("Failed to serialize using format "+timestampFormat.getLocformatter().toString());
 			ex.printStackTrace();
 		}
 	}
 
-	public TimestampFormat getTsformat() {
-		return tsformat;
+	public TimestampFormat getTimestampFormat() {
+		return timestampFormat;
 	}
 
-	public void setTsformat(TimestampFormat tsformat) {
-		this.tsformat = tsformat;
+	public void setTimestampFormat(TimestampFormat timestampFormat) {
+		log.info("Set timestampFormat from Spring: "+timestampFormat.getPattern());
+		this.timestampFormat = timestampFormat;
 	}
 
+	protected String format(Timestamp ts) throws Exception {
+		Instant fromEpochMilli = Instant.ofEpochMilli(ts.getTime());
+		ZonedDateTime zdt = fromEpochMilli.atZone(ZoneId.of("Europe/Paris"));
+		return zdt.format(timestampFormat.getLocformatter());
+	}
 }

@@ -15,43 +15,17 @@ http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 		<param-name>contextConfigLocation</param-name>
 		<param-value>classpath:spring/services-context.xml</param-value>
 	</context-param>
+<!-- CAREFUL : this should be uncommented for MW on DEMAND AT CERN -->
+     <context-param> 
+            <param-name>spring.profiles.active</param-name>
+            <param-value>prod,oracle</param-value>
+     </context-param> 
 
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>
 
 
-	<!-- - Servlet that dispatches request to repository handlers (Repository 
-		implementations). -->
-	<!-- This init is not working <init-param> <param-name>contextConfigLocation</param-name> 
-		<param-value>/WEB-INF/mvc-config.xml</param-value> </init-param> -->
-	<servlet>
-		<servlet-name>rest</servlet-name>
-		<servlet-class>org.springframework.data.rest.webmvc.RepositoryRestDispatcherServlet</servlet-class>
-		<load-on-startup>2</load-on-startup>
-		<async-supported>true</async-supported>		
-	</servlet>
-
-	<servlet-mapping>
-		<servlet-name>rest</servlet-name>
-		<url-pattern>/conddb/*</url-pattern>
-	</servlet-mapping>
-
-	<servlet>
-		<servlet-name>conddb-web</servlet-name>
-		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-		<init-param>
-			<param-name>contextConfigLocation</param-name>
-			<param-value>classpath:spring/web/conddb-web-config.xml</param-value>
-		</init-param>
-		<load-on-startup>3</load-on-startup>
-	</servlet>
-	<!-- mapping of the servlet -->
-	<servlet-mapping>
-		<servlet-name>conddb-web</servlet-name>
-		<url-pattern>/conddbweb/*</url-pattern>
-	</servlet-mapping>
-	
 	<!--  Jersey servlet  -->
 	<servlet>
 		<servlet-name>jersey-servlet</servlet-name>
@@ -63,28 +37,17 @@ http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 			<param-name>javax.ws.rs.Application</param-name>
 			<param-value>conddb.web.config.JaxRsApplication</param-value>			
 		</init-param>
-		<load-on-startup>4</load-on-startup>
+		<load-on-startup>1</load-on-startup>
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>jersey-servlet</servlet-name>
 		<url-pattern>/conddbweb/rest/*</url-pattern>
 	</servlet-mapping>	
 	
-	<!-- Springfox
-	<servlet>
-		<servlet-name>springfox</servlet-name>
-		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
-		<init-param>
-			<param-name>contextConfigLocation</param-name>
-			<param-value>classpath:spring/springfox-config.xml</param-value>
-		</init-param>
-		<load-on-startup>4</load-on-startup>
-	</servlet>
-	<servlet-mapping>
-		<servlet-name>springfox</servlet-name>
-		<url-pattern>/springfox/*</url-pattern>
-	</servlet-mapping>
-	 -->
-	
-
+<!-- 	<servlet> -->
+<!--         <servlet-name>SwaggerBootstrap</servlet-name> -->
+<!--         <servlet-class>conddb.web.config.SwaggerBootstrap</servlet-class> -->
+<!--         <load-on-startup>2</load-on-startup> -->
+<!--     </servlet> -->
+        	
 </web-app>

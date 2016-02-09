@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 
 import conddb.data.Payload;
+import conddb.data.PayloadData;
 
 /**
  * @author formica
@@ -28,12 +29,16 @@ public class PayloadSerializer extends JsonSerializer<Payload> {
 		String objtype = "NO_TYPE";
 		String version = "NO_VERSION";
 		Integer size = new Integer(0);
+		String data = "DATA_NOT_LOADED";
 		if (pyld != null) {
 			hashpayload = pyld.getHash();
 			streamer = pyld.getStreamerInfo();
 			objtype = pyld.getObjectType();
 			size = pyld.getDatasize();
 			version = pyld.getVersion();
+			PayloadData pd = pyld.getData();
+//			data = new String(pd.getData());
+			data = new String("payload blob stored in "+pd.getUri());
 		} 
 		jgen.writeStartObject();
 		jgen.writeStringField("hash", hashpayload);
@@ -41,6 +46,7 @@ public class PayloadSerializer extends JsonSerializer<Payload> {
 		jgen.writeStringField("objectType", objtype);
 		jgen.writeStringField("version", version);
 		jgen.writeNumberField("datasize", size);
+		jgen.writeStringField("data", data);		
 		jgen.writeEndObject();
 	}
 

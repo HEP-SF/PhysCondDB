@@ -19,23 +19,41 @@ import conddb.utils.json.HibernateAwareObjectMapper;
  * @author formica
  *
  */
-@Named
 @Provider
+@Named
 public class ObjectMapperContextResolver implements ContextResolver<ObjectMapper> {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
-    @Autowired
-    private HibernateAwareObjectMapper objectMapper;
+
+	@Autowired
+    private HibernateAwareObjectMapper hibernateAwareObjectMapper;
 
     public ObjectMapperContextResolver() {
         super();
-        log.info("Creating objectMapperContextResolver using HibernateAwareObjectMapper "+objectMapper);
+        log.info("Creating objectMapperContextResolver using HibernateAwareObjectMapper "+hibernateAwareObjectMapper);
+//        if (hibernateAwareObjectMapper == null) {
+//        	hibernateAwareObjectMapper = (HibernateAwareObjectMapper) createDefaultMapper();
+//        }
     }
+    
+    private static ObjectMapper createDefaultMapper() {
+        final HibernateAwareObjectMapper result = new HibernateAwareObjectMapper();
+        return result;
+    }
+    
+    public HibernateAwareObjectMapper getHibernateAwareObjectMapper() {
+		return hibernateAwareObjectMapper;
+	}
 
-    @Override
+	public void setHibernateAwareObjectMapper(HibernateAwareObjectMapper hibernateAwareObjectMapper) {
+		log.info("Setting hibernateAwareObjectMapper in contextresolver");
+		this.hibernateAwareObjectMapper = hibernateAwareObjectMapper;
+	}
+
+	@Override
     public ObjectMapper getContext(Class<?> type) {
-    	log.info("Return context objectMapper "+objectMapper);
-        return objectMapper;
+    	log.info("Return context objectMapper "+hibernateAwareObjectMapper);
+        return hibernateAwareObjectMapper;
     }
 
 }

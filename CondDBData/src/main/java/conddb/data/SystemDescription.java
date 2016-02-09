@@ -3,12 +3,17 @@
  */
 package conddb.data;
 
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 /**
@@ -18,7 +23,7 @@ import javax.persistence.UniqueConstraint;
 @Entity
 @Table(name = "PHCOND_SYSTEM_NODE", uniqueConstraints = { @UniqueConstraint(columnNames = {
 		"NODE_FULLPATH"}) })
-public class SystemDescription {
+public class SystemDescription extends conddb.data.Entity implements Serializable {
 
 	private Long id;
 	private String nodeFullpath;
@@ -28,7 +33,9 @@ public class SystemDescription {
 	 */
 	private String tagNameRoot;
 	private String nodeDescription;
-	private Integer groupSize=1000;
+	private BigDecimal groupSize=new BigDecimal(1000000000L);
+	
+	private List<Tag> tags;
 	/**
 	 * 
 	 */
@@ -87,7 +94,7 @@ public class SystemDescription {
 	 * @return
 	 * 	The node full path.
 	 */
-	@Column(name = "NODE_FULLPATH", nullable = false, length = 500)
+	@Column(name = "NODE_FULLPATH", unique = true, updatable = false, nullable = false, length = 500)
 	public String getNodeFullpath() {
 		return nodeFullpath;
 	}
@@ -121,7 +128,7 @@ public class SystemDescription {
 	 * @return
 	 * 	The tag name root for this system.
 	 */
-	@Column(name = "TAG_NAME_ROOT", nullable = false, length = 1000)
+	@Column(name = "TAG_NAME_ROOT", unique = true, updatable = false, nullable = false, length = 1000)
 	public String getTagNameRoot() {
 		return tagNameRoot;
 	}
@@ -138,8 +145,8 @@ public class SystemDescription {
 	 * @return
 	 * 	The iov group size.
 	 */
-	@Column(name = "IOVGROUP_SIZE", nullable = false)
-	public Integer getGroupSize() {
+	@Column(name = "IOVGROUP_SIZE", nullable = false, precision = 22, scale = 0)
+	public BigDecimal getGroupSize() {
 		return groupSize;
 	}
 	
@@ -147,9 +154,24 @@ public class SystemDescription {
 	 * @param groupSize
 	 * 	The group size to set.
 	 */
-	public void setGroupSize(Integer groupSize) {
+	public void setGroupSize(BigDecimal groupSize) {
 		this.groupSize = groupSize;
 	}
-
+	
+	@Transient
+	public List<Tag> getTags() {
+		return tags;
+	}
+	
+	public void setTags(List<Tag> tags) {
+		this.tags = tags;
+	}
+	
+	@Override
+	public String toString() {
+		return "SystemDescription [id=" + id + ", nodeFullpath=" + nodeFullpath + ", schemaName=" + schemaName
+				+ ", tagNameRoot=" + tagNameRoot + ", nodeDescription=" + nodeDescription + ", groupSize=" + groupSize
+				+ "]";
+	}
 	
 }

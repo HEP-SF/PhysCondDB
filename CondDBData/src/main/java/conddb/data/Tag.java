@@ -18,6 +18,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
+import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -33,12 +34,14 @@ import conddb.utils.json.serializers.TimestampSerializer;
 @Entity
 @Table(name = "PHCOND_TAG")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = Tag.class)
-public class Tag implements java.io.Serializable {
+public class Tag extends conddb.data.Entity implements java.io.Serializable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -1912445397860376582L;
+
+	public static final String DEFAULT_TAG_EXTENSION = "_HEAD_00";
 
 	private Long id;
 
@@ -163,7 +166,9 @@ public class Tag implements java.io.Serializable {
 	 * @return
 	 * 	The tag name.
 	 */
-	@Column(name = "NAME", unique = true, nullable = false, updatable=false, length = 255)
+	@Column(name = "NAME", unique = true, nullable = false, updatable=false, length = 2000)
+	@Pattern(regexp="^([A-Z]+[a-zA-Z0-9-_]+)_([A-Za-z0-9-]+)_([0-9])++$",
+    message="{invalid.name}")
 	public String getName() {
 		return this.name;
 	}
@@ -298,8 +303,17 @@ public class Tag implements java.io.Serializable {
 
 	@PreUpdate
     public void preUpdate() {
+		System.out.println("TAG entity: Calling pre update method...");
         Timestamp now = new Timestamp(new Date().getTime());
         this.modificationTime = now;
     }
+
+	@Override
+	public String toString() {
+		return "Tag [id=" + id + ", name=" + name + ", timeType=" + timeType + ", objectType=" + objectType
+				+ ", synchronization=" + synchronization + ", description=" + description + ", lastValidatedTime="
+				+ lastValidatedTime + ", endOfValidity=" + endOfValidity + ", insertionTime=" + insertionTime
+				+ ", modificationTime=" + modificationTime + "]";
+	}
 
 }

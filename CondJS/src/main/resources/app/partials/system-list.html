@@ -1,0 +1,146 @@
+<div class="container">
+	<h2>System Management page</h2>
+	<hr>
+	<p>You can create a new system or edit an existing one.</p>
+	
+	<div ng-controller="SystemFormCtrl">
+		<button class="btn btn-success" ng-click="add('new')">
+			<span class="glyphicon glyphicon-plus-sign"></span> Add System
+		</button>
+		<hr>
+
+		<h3 ng-init="edit = true" ng-show="edit">Create New System:</h3>
+		<h3 ng-init="edit = true" ng-hide="edit">Edit System:</h3>
+
+		<form novalidate class="form-horizontal">
+			<div class="form-group">
+				<label class="col-sm-2 control-label" for="stname">System Node:</label>
+				<div class="col-sm-10">
+					<input class="form-control" id="stname" type="text" ng-model="system.nodeFullpath" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label" for="stdesc">Description:</label>
+				<div class="col-sm-10">
+					<input class="form-control" id="stdesc" type="text" ng-model="system.nodeDescription" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label" for="sttag">Tag Name:</label>
+				<div class="col-sm-10">
+					<input class="form-control" id="sttag" type="text" ng-model="system.tagNameRoot" />
+				</div>
+			</div>
+			<div class="form-group">
+				<label class="col-sm-2 control-label" for="stschema">Schema:</label>
+				<div class="col-sm-10">
+					<input class="form-control" id="stschema" type="text" ng-model="system.schemaName" />
+				</div>
+			</div>
+		</form>
+		<hr>
+
+		<button class="btn" ng-click="save(system)">
+			<span class="glyphicon glyphicon-saved"></span>Save
+		</button>
+		<button class="btn" ng-click="clean()">
+			<span class="glyphicon glyphicon-erase"></span>Clean Form
+		</button>
+		<button class="btn" ng-click="reset()">
+			<span class="glyphicon glyphicon-step-backward"></span>Reset
+		</button>
+		<br> Debug: <input type="checkbox" ng-model="checked"
+			aria-label="Toggle ngShow">
+		<div class="check-element animate-hide" ng-show="checked">
+			<span class="glyphicon glyphicon-thumbs-up"></span> check values of
+			scope variables.
+			<pre>form = {{system | json}}</pre>
+			<pre>master = {{master | json}}</pre>
+		</div>
+	</div>
+	<hr>
+	<h3>Table section: use it to visualize systems</h3>
+	<hr>
+	<div ng-controller="SystemListCtrl">
+		<form novalidate class="form-horizontal">
+		<div class="form-group">
+		<label class="col-sm-2 control-label" for="filtername">Filter by Name:</label>
+		<div class="col-sm-10">
+		<input class="form-control" id="filtername" type="text" ng-model="systemtagnameroot" />
+		</div>
+		</div>
+		<div class="form-group">
+		<label class="col-sm-2 control-label" for="items">Items by page</label> 
+		<div class="col-sm-4">
+		<input name="items" id="items" type="number" ng-model="itemsByPage" /> 
+		</div>
+		</div>
+		<div class="form-group">	
+			<input type="submit" ng-click="refresh()" value="Refresh" /> 
+			<input type="submit" ng-click="search()" value="Search" />
+		</div>
+		</form>
+
+		<table st-table="displayedCollection" st-safe-src="systems" 
+			class="table table-bordered table-striped" show-filter="true"
+			export-csv="csv">
+
+			<thead>
+				<tr>
+					<th>edit</th>
+					<th st-sort="nodeFullpath">node path</th>
+					<th st-sort="nodeDescription">description</th>
+					<th st-sort="tagNameRoot">tag</th>
+					<th st-sort="schemaName">schema</th>
+					<th></th>
+				</tr>
+				<tr>
+					<th colspan="4"><input st-search class="form-control"
+						placeholder="system search ..." type="search" /></th>
+
+					<th><select st-search="schemaName">
+							<option value="">All</option>
+							<option
+								ng-repeat="row in systems | unique:'schemaName'"
+								value="{{row.schemaName}}">{{row.schemaName}}</option>
+					</select>
+					</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr st-select-row="sys" st-select-mode="single"
+					ng-repeat="sys in displayedCollection">
+
+					<td>
+						<button class="btn" ng-click="edit(sys)">
+							<span class="glyphicon glyphicon-pencil"></span>Edit
+						</button>
+					</td>
+
+					<td data-title="'Node path'">{{sys.nodeFullpath}}</td>
+					<td data-title="'Description'">{{sys.nodeDescription}}</td>
+					<td data-title="'Tag'">{{sys.tagNameRoot}}</td>
+					<td data-title="'Schema'">{{sys.schemaName}}</td>
+					<td>
+						<button popover="Remove {{sys.nodeFullpath}}" type="button"
+							ng-click="remove(sys)" class="btn btn-sm btn-danger">
+							<i class="glyphicon glyphicon-remove-circle"></i>
+						</button>
+					</td>
+				</tr>
+			</tbody>
+			<tfoot>
+				<tr>
+					<td colspan="6">
+						<div class="text-center" st-pagination=""
+							st-items-by-page="itemsByPage"
+							st-displayed-pages="displayedPages"></div>
+					</td>
+				</tr>
+			</tfoot>
+		</table>
+	</div>
+	<hr>
+</div>
+

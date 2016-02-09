@@ -23,23 +23,49 @@ package conddb.data;
  */
 public class ErrorMessage {
 
-	private String message;
+	private String userMessage;
+	private String internalMessage;
+	private String info;
+	private Integer code;
 
 	/**
 	 * @param message
 	 */
 	public ErrorMessage(String message) {
 		super();
-		this.message = message;
+		this.userMessage = message;
 	}
 
-	public String getMessage() {
-		return message;
+	public String getUserMessage() {
+		return userMessage;
 	}
 
-	public void setMessage(String message) {
-		this.message = message;
+	public void setUserMessage(String message) {
+		this.userMessage = message;
 	}
-	
+
+	public String getInternalMessage() {
+		return internalMessage;
+	}
+
+	public void setInternalMessage(String internalMessage) {
+		this.internalMessage = internalMessage;
+	}
+
+	public String getInfo() {
+		return info;
+	}
+
+	public void setInfo(String info) {
+		this.info = info;
+	}
+
+	public Integer getCode() {
+		return code;
+	}
+
+	public void setCode(Integer code) {
+		this.code = code;
+	}
 	
 }
