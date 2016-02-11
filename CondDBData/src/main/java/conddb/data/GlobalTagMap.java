@@ -85,7 +85,7 @@ public class GlobalTagMap extends conddb.data.Entity implements java.io.Serializ
 	 * @return
 	 * 	The global tag object.
 	 */
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "GLOBAL_TAG_NAME", nullable=false)
 	public GlobalTag getGlobalTag() {
 		return this.globalTag;
@@ -104,7 +104,7 @@ public class GlobalTagMap extends conddb.data.Entity implements java.io.Serializ
 	 * @return
 	 * 	The tag object.
 	 */
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "TAG_ID", nullable=false)
 	public Tag getSystemTag() {
 		return systemTag;

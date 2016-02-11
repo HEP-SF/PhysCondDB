@@ -5,6 +5,7 @@ package conddb.svc.dao.controllers;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -125,7 +126,10 @@ public class GlobalTagService {
 	@ProfileExecution
 	public GlobalTag getGlobalTagFetchTags(String globaltagname) throws ConddbServiceException {
 		try {
-			GlobalTag gtag = this.globalTagRepository.findByNameAndFetchTagsEagerly(globaltagname);
+			GlobalTag gtag = null;
+			/////gtag = this.globalTagRepository.findOne(globaltagname);
+			// I have modified the sql query to try to load maps+systemTag in one select
+			gtag = this.globalTagRepository.findByNameAndFetchTagsEagerly(globaltagname);
 			return gtag;
 		} catch (Exception e) {
 			throw new ConddbServiceException("Cannot find global tag by name and fetch tags: " + e.getMessage());
@@ -145,7 +149,8 @@ public class GlobalTagService {
 	@ProfileExecution
 	public List<GlobalTag> getGlobalTagByNameLikeFetchTags(String globaltagnamepattern) throws ConddbServiceException {
 		try {
-			List<GlobalTag> gtaglist = this.globalTagRepository.findByNameLikeAndFetchTagsEagerly(globaltagnamepattern);
+			List<GlobalTag> gtaglist =  null;
+			gtaglist = this.globalTagRepository.findByNameLikeAndFetchTagsEagerly(globaltagnamepattern);
 			return gtaglist;
 		} catch (Exception e) {
 			throw new ConddbServiceException("Cannot find global tag by name like " + globaltagnamepattern

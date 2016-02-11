@@ -4,8 +4,10 @@ package conddb.data;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -52,7 +54,7 @@ public class GlobalTag extends conddb.data.Entity implements java.io.Serializabl
 	private Timestamp insertionTime;
 	private Timestamp snapshotTime;
 	private Set<GlobalTagMap> globalTagMaps = new HashSet<GlobalTagMap>(0);
-
+	
 	public GlobalTag() {
 	}
 
@@ -199,6 +201,5 @@ public class GlobalTag extends conddb.data.Entity implements java.io.Serializabl
     public void prePersist() {
         Timestamp now = new Timestamp(new Date().getTime());
         this.insertionTime = now;
-    }
- 
+    } 	
 }
