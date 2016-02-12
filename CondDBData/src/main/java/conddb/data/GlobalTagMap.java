@@ -22,7 +22,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
  */
 @Entity
 @Table(name = "PHCOND_GLOBAL_TAG_MAP",
-	uniqueConstraints=@UniqueConstraint(columnNames={"TAG_ID", "GLOBAL_TAG_NAME"}))
+	uniqueConstraints=@UniqueConstraint(columnNames={"TAG_ID", "G_ID"}))
 @JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id", scope = GlobalTagMap.class)
 public class GlobalTagMap extends conddb.data.Entity implements java.io.Serializable {
 
@@ -86,7 +86,7 @@ public class GlobalTagMap extends conddb.data.Entity implements java.io.Serializ
 	 * 	The global tag object.
 	 */
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "GLOBAL_TAG_NAME", nullable=false)
+	@JoinColumn(name = "G_ID", nullable=false)
 	public GlobalTag getGlobalTag() {
 		return this.globalTag;
 	}

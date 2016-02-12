@@ -115,7 +115,7 @@ public class JaxRsApplication extends ResourceConfig {
 //		register(GZipEncoder.class);
 
 		// register exception mappers
-        register(ObjectMapperContextResolver.class);
+//        register(ObjectMapperContextResolver.class);
         register(CondDBExceptionMapper.class);
         register(GlobalControllerExceptionMapper.class);
         

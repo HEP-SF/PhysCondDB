@@ -13,6 +13,8 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
@@ -42,6 +44,7 @@ public class GlobalTag extends conddb.data.Entity implements java.io.Serializabl
 	 *
 	 */
 	private static final long serialVersionUID = 996548260134268579L;
+	private Long id;
 	private String name;
 	private BigDecimal validity;
 	private String description;
@@ -99,6 +102,17 @@ public class GlobalTag extends conddb.data.Entity implements java.io.Serializabl
 	}
 
 	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	@Column(name = "G_ID", unique = true, nullable = false)
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	
 	@Column(name = "NAME", unique = true, nullable = false, length = 100)
 	@Pattern(regexp="^([A-Z]+[A-Za-z0-9]+)-([A-Z0-9]+)-([0-9])++$",
 	         message="{invalid.name}")

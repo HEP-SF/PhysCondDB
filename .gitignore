@@ -17,3 +17,5 @@ CondDBWeb/src/main/resources/swagger
 CondDBRestClient/.settings
 *.pyc
 CondDBWeb/src/main/webapp/condjs
+CondDBData/bin
+CondDBServices/bin

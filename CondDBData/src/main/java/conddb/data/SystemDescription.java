@@ -25,6 +25,10 @@ import javax.persistence.UniqueConstraint;
 		"NODE_FULLPATH"}) })
 public class SystemDescription extends conddb.data.Entity implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2590694477609404759L;
 	private Long id;
 	private String nodeFullpath;
 	private String schemaName;

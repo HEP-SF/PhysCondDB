@@ -12,11 +12,14 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.glassfish.jersey.server.ManagedAsync;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +68,24 @@ public class GlobalTagRestController extends BaseController {
 
 		Response result = doTask(globaltagname, expand, trace, info);
 		return result;
+	}
+
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Path("/async/{gtagname}")
+	@ManagedAsync
+	@ApiOperation(value = "Finds GlobalTags by name", notes = "Usage of % allows to select based on patterns", response = GlobalTag.class, responseContainer = "List")
+	public void findGlobalTagAsync(@Context UriInfo info,
+			@ApiParam(value = "name pattern for the search", required = true) @PathParam("gtagname") final String globaltagname,
+			@ApiParam(value = "trace {off|on} allows to retrieve associated global tags", required = false) @DefaultValue("off") @QueryParam("trace") final String trace,
+			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false) @DefaultValue("true") @QueryParam("expand") final boolean expand,
+			@Suspended final AsyncResponse asyncResponse)
+					throws ConddbWebException {
+		this.log.info("GlobalTagRestController processing request for get global tag name " + globaltagname);
+
+		Response result = doTask(globaltagname, expand, trace, info);
+        asyncResponse.resume(result);
+		//return result;
 	}
 
 	@GET
