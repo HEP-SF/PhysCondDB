@@ -19,7 +19,9 @@ import conddb.data.GlobalTag;
  */
 @RepositoryRestResource
 @Transactional(readOnly = true)
-public interface GlobalTagBaseRepository extends CondDBPageAndSortingRepository<GlobalTag, String> {
+public interface GlobalTagBaseRepository extends CondDBPageAndSortingRepository<GlobalTag, Long> {
+
+	GlobalTag findByName(@Param("name") String name);
 
 	List<GlobalTag> findByNameLike(@Param("name") String name);
 

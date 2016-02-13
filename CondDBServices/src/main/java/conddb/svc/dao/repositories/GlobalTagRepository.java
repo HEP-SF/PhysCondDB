@@ -14,11 +14,11 @@ import conddb.svc.dao.baserepository.GlobalTagBaseRepository;
  *
  */
 @RestResource(exported = false)
-public interface GlobalTagRepository extends CrudRepository<GlobalTag, String>, GlobalTagBaseRepository {
+public interface GlobalTagRepository extends CrudRepository<GlobalTag, Long>, GlobalTagBaseRepository {
 
     @Override
     @RestResource(exported = false)
-    void delete(String id);
+    void delete(Long id);
 
     @Override
     @RestResource(exported = false)

@@ -135,6 +135,12 @@ public class CoolMigrationService {
 				conddbtag = dbtag;
 			}
 			
+			// Check if global tag already exists
+			GlobalTag gtsaved = gtagRepository.findByName(conddbgtag.getName());
+			if (gtsaved != null) {
+				continue;
+			}
+			
 			// Register entries in PhysCondDb
 			gtagRepository.save(conddbgtag);
 			tagRepository.save(conddbtag);

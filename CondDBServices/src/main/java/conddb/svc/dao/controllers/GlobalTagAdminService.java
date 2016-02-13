@@ -33,7 +33,7 @@ public class GlobalTagAdminService {
 	public GlobalTag deleteGlobalTag(String sourcegtag)
 			throws ConddbServiceException {
 		GlobalTag sgtag = this.globalTagRepository
-				.findOne(sourcegtag);
+				.findByName(sourcegtag);
 		int ntags = 0;
 		if (sgtag != null && sgtag.getGlobalTagMaps() != null) {
 			ntags = sgtag.getGlobalTagMaps().size();

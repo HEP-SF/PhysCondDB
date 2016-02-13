@@ -139,7 +139,7 @@ public class GlobalTagService {
 	@ProfileExecution
 	public GlobalTag getGlobalTag(String globaltagname) throws ConddbServiceException {
 		try {
-			GlobalTag gtag = this.globalTagRepository.findOne(globaltagname);
+			GlobalTag gtag = this.globalTagRepository.findByName(globaltagname);
 			return gtag;
 		} catch (Exception e) {
 			throw new ConddbServiceException("Cannot find global tag by name: " + e.getMessage());
@@ -329,7 +329,7 @@ public class GlobalTagService {
 	public GlobalTagMap insertGlobalTagMap(GlobalTagMap entity) throws ConddbServiceException {
 
 		try {
-			GlobalTag gtag = globalTagRepository.findOne(entity.getGlobalTagName());
+			GlobalTag gtag = globalTagRepository.findByName(entity.getGlobalTagName());
 			Tag atag = tagRepository.findByName(entity.getTagName());
 			if (gtag == null || atag == null) {
 				log.debug("Cannot find elements for association");
