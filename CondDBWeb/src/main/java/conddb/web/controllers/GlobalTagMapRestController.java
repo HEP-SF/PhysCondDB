@@ -183,7 +183,7 @@ public class GlobalTagMapRestController  extends BaseController {
             @DefaultValue("0") @QueryParam("page") Integer ipage, 
 			@ApiParam(value = "size: size of the page, defaults to 25", required = false)
             @DefaultValue("25") @QueryParam("size") Integer size) throws ConddbWebException {
-		this.log.info("GlobalTagRestController processing request for global tag list (expansion = "
+		this.log.info("GlobalTagMapRestController processing request for global tag 2 tag mapping list (expansion = "
 				+ expand+")");
 		Collection<GlobalTagMap> globaltagmaps;
 		try {
@@ -204,8 +204,8 @@ public class GlobalTagMapRestController  extends BaseController {
         Collection items = new ArrayList(globaltagmaps.size());
         for( GlobalTagMap globaltagmap : globaltagmaps) {
         	globaltagmap.setResId(globaltagmap.getId().toString());
-        	globaltagmap.getGlobalTag().setResId(globaltagmap.getGlobalTagName());
-        	globaltagmap.getSystemTag().setResId(globaltagmap.getTagName());
+ //       	globaltagmap.getGlobalTag().setResId(globaltagmap.getGlobalTagName());
+ //       	globaltagmap.getSystemTag().setResId(globaltagmap.getTagName());
             if (expand) {
                 items.add(springResourceFactory.getResource("globaltagmap", info, globaltagmap));
             } else {
