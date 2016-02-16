@@ -33,6 +33,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import conddb.annotations.ProfileExecution;
 import conddb.data.GlobalTagStatus;
 import conddb.data.Iov;
 import conddb.data.Payload;
@@ -331,6 +332,7 @@ public class IovService {
 	}
 
 	@Transactional(rollbackFor= ConddbServiceException.class)
+	@ProfileExecution
 	public Payload insertPayload(Payload entity, PayloadData pylddata) throws ConddbServiceException {
 		try {
 			// Assume that hash key is already filled

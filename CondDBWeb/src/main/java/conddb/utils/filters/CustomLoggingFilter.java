@@ -44,6 +44,8 @@ public class CustomLoggingFilter extends LoggingFilter implements ContainerReque
     	if (monitorLogging.equals("skip")) {
     		return;
     	}
+        log.debug("FILTERING HTTP REQUEST : ");
+
     	start = Instant.now();
         StringBuilder sb = new StringBuilder();
         Principal user = requestContext.getSecurityContext().getUserPrincipal();
@@ -102,6 +104,8 @@ public class CustomLoggingFilter extends LoggingFilter implements ContainerReque
     	if (monitorLogging.equals("skip")) {
     		return;
     	}
+        log.debug("FILTERING HTTP RESPONSE : ");
+
     	end = Instant.now();
         start = (Instant) requestContext.getProperty("timespent");
         LogCondRequests logreq = (LogCondRequests)requestContext.getProperty("logreq");

@@ -67,7 +67,7 @@
 	<bean id="profilingAspect" class="conddb.utils.aop.ProfilingAspect" />
 
 	<aop:config>
-		<aop:aspect ref="profilingAspect">
+		<aop:aspect id="profTrace" ref="profilingAspect">
 			<aop:pointcut id="getGlobalTagTrace"
 				expression="execution(* conddb.svc.dao.controllers.GlobalTagService.getGlobalTagFetchTags(String))
                     and args(logAction)" />

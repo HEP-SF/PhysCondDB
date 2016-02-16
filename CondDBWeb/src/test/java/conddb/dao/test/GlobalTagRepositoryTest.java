@@ -70,7 +70,7 @@ public class GlobalTagRepositoryTest {
 	public void updateGlobalTagLocking() {
 		try {
 			gtagexpert.updateGlobalTagLocking(gtagtestname, "locked");
-			GlobalTag gtag = repo.findOne(gtagtestname);
+			GlobalTag gtag = repo.findByName(gtagtestname);
 			assertThat(gtag.getLockstatus(), is("locked"));
 		} catch (ConddbServiceException e) {
 			// TODO Auto-generated catch block
