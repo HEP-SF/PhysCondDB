@@ -197,7 +197,8 @@ public class IovExpRestController extends BaseController {
 		        Response result;
 				try {
 					Payload storable = new Payload(null,objtype,"db",strinfo,version);
-					storable = iovService.createStorablePayload(fileDetail.getFileName(),uploadedInputStream, storable);
+					String uploadedfilename = tagname+"_"+fileDetail.getFileName();
+					storable = iovService.createStorablePayload(uploadedfilename,uploadedInputStream, storable);
 					Iov iov = new Iov();
 					iov.setSince(since);
 					iov.setSinceString(sincestr);
