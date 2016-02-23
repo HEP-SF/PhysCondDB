@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import conddb.annotations.Href;
 import conddb.utils.json.serializers.TimestampDeserializer;
 import conddb.utils.json.serializers.TimestampSerializer;
 
@@ -166,6 +167,7 @@ public class Tag extends conddb.data.Entity implements java.io.Serializable {
 	 * @return
 	 * 	The tag name.
 	 */
+	@Href
 	@Column(name = "NAME", unique = true, nullable = false, updatable=false, length = 2000)
 	@Pattern(regexp="^([A-Z]+[a-zA-Z0-9-_]+)_([A-Za-z0-9-]+)_([0-9])++$",
     message="{invalid.name}")

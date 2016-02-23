@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import conddb.annotations.Href;
 import conddb.utils.json.serializers.TimestampDeserializer;
 import conddb.utils.json.serializers.TimestampSerializer;
 import io.swagger.annotations.ApiModel;
@@ -112,7 +113,7 @@ public class GlobalTag extends conddb.data.Entity implements java.io.Serializabl
 		this.id = id;
 	}
 
-	
+	@Href
 	@Column(name = "NAME", unique = true, nullable = false, length = 100)
 	@Pattern(regexp="^([A-Z]+[A-Za-z0-9]+)-([A-Z0-9]+)-([0-9])++$",
 	         message="{invalid.name}")

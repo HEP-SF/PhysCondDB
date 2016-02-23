@@ -16,9 +16,23 @@ See here for more details: http://gordondickens.com/wordpress/2013/03/27/sawing-
                         </Pattern>
                 </encoder>
                 <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-                        <level>INFO</level>
+                        <level>TRACE</level>
                 </filter>
         </appender>
+        
+   <appender name="fileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+	  <file>${catalina.base}/logs/phcond-rest-api.log</file>
+	  <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<FileNamePattern>phcond-rest-api.%d{yyyy-MM-dd}.log</FileNamePattern>
+			<maxHistory>30</maxHistory>			
+		</rollingPolicy>
+     	<encoder>
+			<Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg %n</Pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>TRACE</level>
+		</filter>
+   </appender>
 
 <!--     <appender name="console" class="ch.qos.logback.core.ConsoleAppender"> -->
 <!--         <encoder> -->
@@ -30,10 +44,15 @@ See here for more details: http://gordondickens.com/wordpress/2013/03/27/sawing-
    <!-- Uncomment and add your logger here:
     <logger name="org.springframework.samples.service.service" level="debug"/> -->
     <logger name="org.hibernate" level="warn"/> 
+    <logger name="org.springframework" level="warn"/> 
 
+        <logger name="conddb.web.resources.generic" additivity="false">
+            <level value="DEBUG" />
+                <appender-ref ref="fileAppender" />
+        </logger>
         <logger name="conddb" additivity="false">
             <level value="DEBUG" />
-                <appender-ref ref="consoleAppender" />
+                <appender-ref ref="fileAppender" />
         </logger>
 
     <root level="INFO">

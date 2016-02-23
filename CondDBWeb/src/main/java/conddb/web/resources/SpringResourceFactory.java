@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
+import conddb.annotations.ProfileExecution;
 import conddb.data.Entity;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
@@ -22,6 +23,7 @@ import conddb.data.Payload;
 import conddb.data.PayloadData;
 import conddb.data.SystemDescription;
 import conddb.utils.json.serializers.TimestampFormat;
+import conddb.web.resources.generic.GenericPojoResource;
 
 /**
  * @author aformic
@@ -40,6 +42,7 @@ public class SpringResourceFactory {
 		SpringBeanAutowiringSupport.processInjectionBasedOnCurrentContext(this);  
 	}
 
+	@ProfileExecution
 	public Link getResource(String resourceName, UriInfo info, Entity entity) {
 		if (resourceName.equals("globaltag")) {
 			entity.setResId(((GlobalTag)entity).getName());
@@ -73,10 +76,27 @@ public class SpringResourceFactory {
 			SystemDescriptionResource resource = new SystemDescriptionResource(info,(SystemDescription)entity);
 			log.info("Create system resource");
 			return resource;			
+		} else if (resourceName.equals("generic-gt")) {
+			GenericPojoResource<GlobalTag> resource = new GenericPojoResource<GlobalTag>(info,
+					entity,2,null);
+			log.info("Create generic globaltag resource");
+			return resource;			
+		} else if (resourceName.equals("generic-gtmap")) {
+			GenericPojoResource<GlobalTagMap> resource = new GenericPojoResource<GlobalTagMap>(info,
+					entity,1,null);
+			log.info("Create generic globaltag map resource");
+			return resource;			
 		} else {
 			Link link = new Link(info,entity);
 			return link;
 		}
+	}
+	
+	@ProfileExecution
+	public <T extends Entity> Link getGenericResource(UriInfo info, T entity, int level, T parent) {
+		GenericPojoResource<T> resource = new GenericPojoResource<T>(info,entity,level,parent);
+		log.info("Create generic resource for type "+entity.getClass().getName());
+		return resource;			
 	}
 	
 	public Link getCollectionResource(UriInfo info, String subPath, Collection c) {

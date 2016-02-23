@@ -16,17 +16,22 @@
 package conddb.web.resources;
 
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.LinkedHashMap;
 
+import javax.persistence.Id;
 import javax.ws.rs.core.UriInfo;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import conddb.annotations.Href;
 import conddb.data.Entity;
 import conddb.utils.PropertyConfigurator;
 
@@ -88,13 +93,81 @@ public class Link extends LinkedHashMap {
         return fq;
     }
 
+//    protected String createHref(String fqBasePath, Entity entity) {
+//    	log.debug("Create href link from "+fqBasePath+" for entity "+entity);
+//        StringBuilder sb = new StringBuilder(fqBasePath);
+//        ResourcePath path = ResourcePath.forClass(entity.getClass());
+//        sb.append(path.getPath()).append(PATH_SEPARATOR).append(entity.getResId());
+//        return sb.toString();
+//    }
+    
     protected String createHref(String fqBasePath, Entity entity) {
     	log.debug("Create href link from "+fqBasePath+" for entity "+entity);
         StringBuilder sb = new StringBuilder(fqBasePath);
         ResourcePath path = ResourcePath.forClass(entity.getClass());
-        sb.append(path.getPath()).append(PATH_SEPARATOR).append(entity.getResId());
+        String href = entity.getHref();
+        if (href.equals("none")) {
+        try {
+			Method getid = this.getHref(entity);
+			href = getid.invoke(entity, null).toString();
+		} catch (NoSuchMethodException | SecurityException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        }
+        sb.append(path.getPath()).append(PATH_SEPARATOR).append(href);
         return sb.toString();
     }
+
+    
+    /**
+     * This method looks for annotation HREF in order to create the links. If no @Href is found
+     * then it uses the annotation @Id.
+     * @param entity
+     * @return
+     * @throws NoSuchMethodException
+     * @throws SecurityException
+     */
+    protected Method getHref(Entity entity) throws NoSuchMethodException, SecurityException {
+    	Field[] fields = entity.getClass().getDeclaredFields();
+    	Method getiddefault = null;
+    	for (int i=0 ; i<fields.length ; i++) {
+    		Field afield = fields[i];
+    		Href hrefid = afield.getAnnotation(Href.class);
+    		if (hrefid != null) {
+    			String methname = "get"+afield.getName().substring(0, 1).toUpperCase()+afield.getName().substring(1);
+    			Method getid = entity.getClass().getMethod(methname, null);
+    			return getid;
+    		}
+    		javax.persistence.Id annid = afield.getAnnotation(javax.persistence.Id.class);
+    		if (annid != null) {
+    			String methname = "get"+afield.getName().substring(0, 1).toUpperCase()+afield.getName().substring(1);
+    			getiddefault = entity.getClass().getMethod(methname, null);
+    		}
+
+    	}
+		Method methods[] = entity.getClass().getDeclaredMethods();
+		for (int i = 0; i < methods.length; i++) {
+			String akey = methods[i].getName();
+			if (methods[i].getAnnotation(Id.class) != null && akey.startsWith("get")) {
+				getiddefault = methods[i];
+			}
+			if (methods[i].getAnnotation(Href.class) != null && akey.startsWith("get")) {
+				return methods[i];
+			}
+		}
+    	return getiddefault;
+    }
+
 
     protected String format(Timestamp ts) {
 		try {
