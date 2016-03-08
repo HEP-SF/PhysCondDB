@@ -4,10 +4,8 @@ package conddb.data;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -30,7 +28,6 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import conddb.annotations.Href;
 import conddb.utils.json.serializers.TimestampDeserializer;
 import conddb.utils.json.serializers.TimestampSerializer;
-import io.swagger.annotations.ApiModel;
 
 
 /**

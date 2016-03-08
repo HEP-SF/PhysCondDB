@@ -39,6 +39,8 @@ import conddb.data.Iov;
 import conddb.data.Payload;
 import conddb.data.PayloadData;
 import conddb.data.Tag;
+import conddb.data.view.IovGroups;
+import conddb.svc.dao.baserepository.JdbcRepository;
 import conddb.svc.dao.baserepository.PayloadDataBaseCustom;
 import conddb.svc.dao.exceptions.ConddbServiceDataIntegrityException;
 import conddb.svc.dao.exceptions.ConddbServiceException;
@@ -68,6 +70,9 @@ public class IovService {
 	@Autowired
 	private PayloadBytesHandler payloadBytesHandler;
 
+	@Autowired
+	private JdbcRepository jdbcRepository;
+	
 	@Value( "${physconddb.upload.dir:/tmp}" )
 	private String SERVER_UPLOAD_LOCATION_FOLDER;
 
@@ -79,7 +84,8 @@ public class IovService {
 	 */
 	public Iov getIov(Long id) throws ConddbServiceException {
 		try {
-			return iovRepository.findOne(id);
+//			return iovRepository.findOne(id);
+			return iovRepository.findByIdFetchPayload(id);
 		} catch (Exception e) {
 			throw new ConddbServiceException("Cannot find iov " + id + ": " + e.getMessage());
 		}
@@ -351,6 +357,16 @@ public class IovService {
 			ConddbServiceException ex = new ConddbServiceException(e.getMessage());
 			ex.initCause(e);
 			throw ex;
+		}
+	}
+	
+	public List<IovGroups> getIovGroupsForTag(String tagname) throws ConddbServiceException {
+		try {
+			List<IovGroups> entitylist = jdbcRepository.selectGroups2(tagname);
+			log.debug("Retrieved group list of size "+entitylist.size());
+			return entitylist;
+		} catch (Exception e) {
+			throw new ConddbServiceException(e.getMessage());
 		}
 	}
 	

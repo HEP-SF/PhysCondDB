@@ -50,7 +50,8 @@ public class Iov extends conddb.data.Entity implements java.io.Serializable {
 
 	private Payload payload;
 	private Tag tag;
-
+	private String hash;
+	
 	public Iov() {
 	}
 
@@ -91,8 +92,6 @@ public class Iov extends conddb.data.Entity implements java.io.Serializable {
 		this.sinceString = sinceString;
 	}
 
-//	@JsonSerialize(using = DateSerializer.class)
-//	@Temporal(TemporalType.TIMESTAMP)
 	@JsonDeserialize(using = TimestampDeserializer.class)
 	@JsonSerialize(using = TimestampSerializer.class)
 	@Column(name = "INSERTION_TIME", nullable = false)
@@ -103,12 +102,18 @@ public class Iov extends conddb.data.Entity implements java.io.Serializable {
 	public void setInsertionTime(Timestamp insertionTime) {
 		this.insertionTime = insertionTime;
 	}
+	
+	@Column(name = "PAYLOAD_HASH", nullable = false, updatable = false, insertable=false)
+	public String getHash() {
+		return this.hash;
+	}
+	
+	public void setHash(String hash) {
+		this.hash = hash;
+	}
 
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "PAYLOAD_HASH", nullable = false, updatable = false)
-	//@//JsonSerialize(using = PayloadSerializer.class)
-	//@//JsonIgnore
-	//@JsonManagedReference
 	public Payload getPayload() {
 		return this.payload;
 	}
@@ -117,7 +122,7 @@ public class Iov extends conddb.data.Entity implements java.io.Serializable {
 		this.payload = payload;
 	}
 
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "TAG_ID", nullable = false, updatable = false)
 	public Tag getTag() {
 		return this.tag;
@@ -137,7 +142,7 @@ public class Iov extends conddb.data.Entity implements java.io.Serializable {
 	@Override
 	public String toString() {
 		return "Iov [id=" + id + ", since=" + since + ", sinceString=" + sinceString + ", insertionTime="
-				+ insertionTime + ", payload=" + payload.getHash() + ", tag=" + tag.getName() + "]";
+				+ insertionTime + "]";
 	}
 
 }

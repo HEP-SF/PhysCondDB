@@ -37,11 +37,6 @@ public class PayloadData extends conddb.data.Entity implements java.io.Serializa
 //		this.data = "EMPTY".getBytes();
 	}
 
-//	public PayloadData(String hash, byte[] data) {
-//		this.hash = hash;
-//		this.data = data;
-//	}
-
 	public PayloadData(String hash) {
 		super();
 		this.hash = hash;
