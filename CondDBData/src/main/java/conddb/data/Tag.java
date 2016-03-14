@@ -169,8 +169,9 @@ public class Tag extends conddb.data.Entity implements java.io.Serializable {
 	 */
 	@Href
 	@Column(name = "NAME", unique = true, nullable = false, updatable=false, length = 2000)
-	@Pattern(regexp="^([A-Z]+[a-zA-Z0-9-_]+)_([A-Za-z0-9-]+)_([0-9])++$",
-    message="{invalid.name}")
+//---Cannot use any name check for calibration files application, the following will be disabled
+// @Pattern(regexp="^([A-Z]+[a-zA-Z0-9-_]+)_([A-Za-z0-9-]+)_([0-9])++$",
+//    message="{invalid.name}")
 	public String getName() {
 		return this.name;
 	}
