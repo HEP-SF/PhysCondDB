@@ -19,6 +19,7 @@ package conddb.svc.dao.controllers;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.net.URI;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
@@ -198,6 +199,11 @@ public class IovService {
 	public Payload createStorablePayload(String filename, InputStream uploadedInputStream, Payload apayload) throws ConddbServiceException {
 		try {
 			String outfname = filename + "-uploaded";
+			String fname[] = filename.split("/");
+			if (fname.length>0) {
+				outfname = fname[fname.length-1] + "-uploaded";
+			}
+			
 			String uploadedFileLocation = SERVER_UPLOAD_LOCATION_FOLDER+ "/" + outfname;
 			log.debug("Upload file location is "+SERVER_UPLOAD_LOCATION_FOLDER);
 //			payloadBytesHandler.saveToFile(uploadedInputStream, uploadedFileLocation);

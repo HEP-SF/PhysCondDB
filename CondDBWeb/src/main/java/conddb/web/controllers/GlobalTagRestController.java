@@ -117,7 +117,7 @@ public class GlobalTagRestController extends BaseController {
 				gtaglist = CollectionUtils.iterableToCollection(globalTagService.getGlobalTagByNameLike(globaltagname));
 			}
 		} catch (ConddbServiceException e) {
-			log.error("Cannot retrieve global tag list for patter " + globaltagname);
+			log.error("Cannot retrieve global tag list for pattern " + globaltagname);
 		}
 		return gtaglist;
 	}

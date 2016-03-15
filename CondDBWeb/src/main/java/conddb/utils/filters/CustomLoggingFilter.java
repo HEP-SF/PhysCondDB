@@ -95,7 +95,7 @@ public class CustomLoggingFilter extends LoggingFilter implements ContainerReque
         logreq.setRequestUrl(path);
         requestContext.setProperty("logreq", logreq);
 
-        log.debug("HTTP REQUEST : " + sb.toString());
+        log.debug("HTTP REQUEST summary from filter : " + sb.toString());
     }
  
     @Override
@@ -121,6 +121,6 @@ public class CustomLoggingFilter extends LoggingFilter implements ContainerReque
         sb.append(" - Time spent (ms) : "+(end.toEpochMilli()-start.toEpochMilli()));
         
         //sb.append(" - Entity: ").append(responseContext.getEntity());
-        log.debug("HTTP RESPONSE : " + sb.toString());
+        log.debug("HTTP RESPONSE summary from filter : " + sb.toString());
     }
 }

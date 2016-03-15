@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
+import conddb.data.GlobalTag;
 import conddb.data.Iov;
 import conddb.data.Payload;
 import conddb.data.Tag;
@@ -39,6 +40,7 @@ import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.IovResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
+import conddb.web.resources.generic.GenericPojoResource;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -114,47 +116,39 @@ public class IovExpRestController extends BaseController {
 		try {
 			Tag entity = globalTagService.getTag(tagname);
 			entity.setModificationTime(null); // This will be re-set later during the update
-
+			
 			Payload storable = new Payload(null,objtype,bkinfo,strinfo,version);
 			storable = iovService.createStorablePayload(fileDetail.getFileName(),uploadedInputStream, storable);
 
 			log.info("Uploaded object has hash " + storable.getHash());
-			log.info("Uploaded object has data size " + storable.getDatasize());
-//			Payload existing = payloadRepository.findOne(storable.getHash());
-//			if (existing != null) {
-//				String msg = "Error in creating a payload resource: hash already exists in the DB.";
-//				throw buildException(msg, msg, Response.Status.NOT_MODIFIED);
-//			}
-//			apayload.setBackendInfo(stored.getUri());
-//			Payload saved = payloadRepository.save(apayload);
+			log.debug("Uploaded object has data size " + storable.getDatasize());
 
-						
-//			Payload storable = new Payload(null,objtype,bkinfo,strinfo,version);
-//			String filename = fileDetail.getFileName();
-//			storable = iovService.createStorablePayload(filename, uploadedInputStream, storable);
-			
 			// Store the payload: this will then not be rolledback if something goes wrong later on
 			// We do not care too much since in that case the payload is simply already there
 			Payload stored = iovService.insertPayload(storable, storable.getData());
 
 			stored.setResId(stored.getHash());
-			log.info("Stored payload "+stored.getHash());
+			log.debug("Stored payload "+stored.getHash());
 			
 			// Create the iov and store it
 			Iov iov = new Iov(since,sincestr,stored,entity);
 			log.debug("Inserting iov "+iov);
 			Iov saved = iovService.insertIov(iov);
+			log.debug("Stored iov "+iov);
 
 			// This update will change the modification time 
 			entity = globalTagService.insertTag(entity);
 			entity.setResId(entity.getName());
+			log.debug("Updated tag modification time");
 			
 			// Create the IovResource for the Response
 			saved.setResId(saved.getId().toString());
 			saved.setTag(entity);
 			saved.setPayload(stored);
-			IovResource resource = (IovResource) springResourceFactory.getResource("iov", info,
-					saved);
+			
+			log.info("Upload of payload in iov "+iov+" was successful");
+			GenericPojoResource<Iov> resource = (GenericPojoResource<Iov>) springResourceFactory.getGenericResource(info, iov, 0, null);
+
 			return created(resource);
 		} catch (ConddbServiceException e) {
 			String msg = "Error creating IOV resource inside tag "+tagname;

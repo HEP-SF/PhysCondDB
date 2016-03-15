@@ -86,6 +86,11 @@ public class SpringResourceFactory {
 					entity,1,null);
 			log.info("Create generic globaltag map resource");
 			return resource;			
+		} else if (resourceName.equals("generic-tag")) {
+			GenericPojoResource<Tag> resource = new GenericPojoResource<Tag>(info,
+					entity,2,null);
+			log.info("Create generic tag resource");
+			return resource;			
 		} else if (resourceName.equals("generic-iov")) {
 			GenericPojoResource<Iov> resource = new GenericPojoResource<Iov>(info,
 					entity,1,null);

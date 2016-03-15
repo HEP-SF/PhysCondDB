@@ -251,7 +251,7 @@ class PhysDBDriver():
         print msg
         data = {}
         data['expand']='true'
-        data['trace']='off'
+        data['trace']='on'
         data['name']=globaltagname
         maplist = self.getgtagtags(data)
         if self.debug:
@@ -265,7 +265,7 @@ class PhysDBDriver():
         for amap in maplist:
             #print 'Map in loop is ',amap
             atag = Tag(amap['systemTag'])
-            #print 'Tag in loop is ', atag
+            print 'Tag in loop is ', atag
 
             atagname = atag.getParameter('name')
             if filenamepattern not in atagname and filenamepattern != '*' :
@@ -366,12 +366,12 @@ class PhysDBDriver():
         #print 'Select mappings using arguments ',data
         (obj, code) = self.restserver.get(data,'/globaltags')
         mpobj = self.createObj('globaltags',obj)
-        #print 'created object ',mpobj
-        #print 'from json ',obj
+        print 'created object ',mpobj
+        print 'from json ',obj
         maplist=[]
         # Now load associations
         globaltagmapsobj = obj['globalTagMaps']
-        href = globaltagmapsobj['href']
+        #href = globaltagmapsobj['href']
         #print 'Retrieve a list of associated tags using url ',href
         (maplist, code) = self.loadItems(globaltagmapsobj)
         #print 'Retrieved list of associated tags: ',maplist

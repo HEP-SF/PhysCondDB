@@ -176,6 +176,7 @@ public class CalibrationRestController extends BaseController {
 			tagstored = globalTagService.insertTag(tagstored);
 			
 			resp = Response.ok(iov).build();
+            log.debug("Providing response "+resp+" with code "+resp.getStatus());
 			return resp;
 
 		} catch (ConddbServiceException e) {

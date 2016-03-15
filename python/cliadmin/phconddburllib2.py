@@ -27,13 +27,14 @@ from xml.dom import minidom
 #from clint.textui import colored
 from datetime import datetime
 
-from PhysUrllib2SvcJersey import PhysCurl,GlobalTag,Tag,Iov,GtagMap,SystemDesc,Payload,PayloadData
+from PhysUrllib2SvcJersey import PhysCurl,PhysUtils,GlobalTag,Tag,Iov,GtagMap,SystemDesc,Payload,PayloadData
 
 class PhysDBDriver():
     def __init__(self):
     # process command line options
         try:
             self.restserver = {}
+            self.resttools = {}
             self._command = sys.argv[0]
             self.useSocks = False
             self.t0 = 0
@@ -236,18 +237,24 @@ class PhysDBDriver():
         objList = self.restserver.getiovs(data,'/iovs/find')
         return objList
 
+#    def getgtagtags(self, data):
+#        obj = {}
+#        print 'Select mappings using arguments ',data
+#        obj = self.restserver.get(data,'/globaltags')
+#        mpobj = self.createObj('globaltags',obj)
+#        maplist=[]
+#        if mpobj.getValues()['globalTagMaps'] is not None:
+#            maplist = mpobj.getValues()['globalTagMaps']
+#            for amap in maplist:
+#                atag = Tag(amap['systemTag'])
+#                gtag = GlobalTag(amap['globalTag'])
+#                print atag.toJson()
+#        return maplist
+
     def getgtagtags(self, data):
-        obj = {}
-        print 'Select mappings using arguments ',data
-        obj = self.restserver.get(data,'/globaltags')
-        mpobj = self.createObj('globaltags',obj)
-        maplist=[]
-        if mpobj.getValues()['globalTagMaps'] is not None:
-            maplist = mpobj.getValues()['globalTagMaps']
-            for amap in maplist:
-                atag = Tag(amap['systemTag'])
-                gtag = GlobalTag(amap['globalTag'])
-                print atag.toJson()
+        resttools = PhysUtils(self.restserver)
+        maplist = []
+        maplist = resttools.getgtagstags(data)
         return maplist
 
     def execute(self):
@@ -261,6 +268,8 @@ class PhysDBDriver():
             
         start = datetime.now()
         self.restserver = PhysCurl(self.urlsvc, self.useSocks)
+        self.resttools = PhysUtils(self.restserver)
+        
         if self.debug:
             self.restserver.setdebug(True)
         
@@ -344,7 +353,7 @@ class PhysDBDriver():
                         except:
                             print 'Cannot use colored messages'
                             print msg
-                        raise
+                        
                     if obj is None:
                         msg = ('FIND: error, cannot find any object in database for type %s ') % (object)
                         try:
@@ -353,19 +362,21 @@ class PhysDBDriver():
                         except:
                             print 'Cannot use colored messages'
                             print msg
-                        raise
                     
                     objList.append(obj)
                     # If trace is active, perform a special dump for the trace
                     if object in [ 'globaltags', 'tags' ]:
+                        print 'Create object from ',obj, ' type is ',object
                         mpobj = self.createObj(object,obj)
+                        print 'Create mp obj ',mpobj
                         globaltagmaps = mpobj.getValues()['globalTagMaps']
                         if globaltagmaps is not None:
                             try:
-                                maplist = globaltagmaps['items']
+                                maplist = globaltagmaps
+###                                maplist = globaltagmaps['items']
                                 if hasattr(maplist, '__iter__'):
                                     for amap in maplist:
-                                        traceList.append(('GlobalTag %s => Tag %s') % (amap['globalTagName'],amap['tagName']))
+                                        traceList.append(('GlobalTag %s => Tag %s') % (mpobj.getValues()['name'],amap['systemTag']['name']))
                             except Exception, e:
                                 sys.exit("failed on looping over items: %s" % (str(e)))
                                 raise
@@ -551,7 +562,7 @@ class PhysDBDriver():
                     except:
                         print 'Cannot use colored messages'
                         print msg   
-                    raise
+                        
                 
                 objparams = None
                 if len(self.args) != 4:
@@ -562,7 +573,7 @@ class PhysDBDriver():
                     except:
                         print 'Cannot use colored messages'
                         print msg   
-                    raise
+                        
                     
                 filename=self.args[1]
                 iovobjparams=self.args[2]
@@ -602,8 +613,9 @@ class PhysDBDriver():
                 params['streamerInfo'] = pylddata['streamerInfo']
                 params['version'] = pylddata['version']
 
-                self.restserver.addPayload(params,'/iovs/async/payload')
-        
+##self.restserver.addPayload(params,'/iovs/payload')
+                self.resttools.storePayload(params)
+        		
             except Exception, e:
                 sys.exit("STORE failed: %s" % (str(e)))
                 raise

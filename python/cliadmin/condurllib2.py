@@ -289,7 +289,7 @@ class PhysDBDriver():
         print msg
         data = {}
         data['expand']='true'
-        data['trace']='off'
+        data['trace']='on'
         data['name']=globaltagname
         maplist = self.getgtagtags(data)
         if self.debug:

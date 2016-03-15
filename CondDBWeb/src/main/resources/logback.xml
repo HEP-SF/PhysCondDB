@@ -50,10 +50,12 @@
 	<logger name="conddb.web.resources.generic" additivity="false">
 		<level value="DEBUG" />
 		<appender-ref ref="fileAppender" />
+		<appender-ref ref="consoleAppender" />
 	</logger>
 	<logger name="conddb" additivity="false">
-		<level value="INFO" />
+		<level value="DEBUG" />
 		<appender-ref ref="fileAppender" />
+		<appender-ref ref="consoleAppender" />
 	</logger>
 
 	<root level="DEBUG">

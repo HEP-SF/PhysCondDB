@@ -724,3 +724,80 @@ class PhysCurl(object):
         if usesocks == True:
             self.__curl.setSocks('localhost', 3129)
 #print 'Init Business Delegate with servicepath ', self.__servicepath
+
+class PhysUtils(object):
+    '''
+    classdocs
+    '''
+    __debug = False
+    __restserver = {}
+    
+    def __init__(self, restserver):
+        '''
+        Constructor
+        '''
+        if self.__debug:
+            print 'Function utils for command lines'
+        self.__restserver = restserver
+       
+    def loadItems(self, data):
+    # Assume that data is a list of items
+        for anobj in data:
+            print anobj
+            href = anobj['href']
+            url = {}
+            url['href'] = href
+            print 'Use url link ',url
+            obj = self.__restserver.getlink(url)
+            print obj
+
+    def createObj(self, type, data):
+        if type == 'globaltags':
+            return GlobalTag(data)
+        elif type == 'tags':
+            return Tag(data)
+        elif type == 'iovs':
+            return Iov(data)
+        elif type == 'maps':
+            return GtagMap(data)
+        elif type == 'systems':
+            return SystemDesc(data)
+        elif type == 'payload':
+            return Payload(data)
+        return None
+
+
+    def lockit(self, params):
+        globaltagname=params[0]
+        lockstatus=params[1]
+        data={}
+        # Search globaltagname in global tags
+        print 'Search for global tag name ',globaltagname
+        data['lockstatus']=lockstatus
+        gtag = self.__restserver.addJsonEntity(data,'/globaltags/'+globaltagname)
+        print 'Updated status of global tag ', gtag
+
+
+    def gettagiovs(self, data):
+        objList = []
+        print 'Select iovs using arguments ',data
+        objList = self.__restserver.getiovs(data,'/iovs/find')
+        return objList
+
+    def getgtagtags(self, data):
+        obj = {}
+        print 'Select mappings using arguments ',data
+        obj = self.__restserver.get(data,'/globaltags')
+        mpobj = self.createObj('globaltags',obj)
+        maplist=[]
+        if mpobj.getValues()['globalTagMaps'] is not None:
+            maplist = mpobj.getValues()['globalTagMaps']
+            for amap in maplist:
+                atag = Tag(amap['systemTag'])
+                gtag = GlobalTag(amap['globalTag'])
+                print atag.toJson()
+        return maplist
+    
+
+
+
