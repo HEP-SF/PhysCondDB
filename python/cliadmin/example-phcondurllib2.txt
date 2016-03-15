@@ -1,0 +1,7 @@
+       python phconddburllib2.py ADD globaltags "name=MYGTAG-01-00;lockstatus=unlocked;description=a test gtag;release=1.0;validity=0"
+  610  python phconddburllib2.py ADD tags "name=testtag-01;timeType=time;objectType=none;synchronization=none;description=a test tag;lastValidatedTime=20000;endOfValidity=-1"
+  611  python phconddburllib2.py LINK MYGTAG-01-00 testtag-01 "record=a gtag mapping;label=none"
+  612  python phconddburllib2.py DESCRIBE globaltags
+  613  python phconddburllib2.py DESCRIBE tags
+  614  python phconddburllib2.py FIND globaltags
+  615  python phconddburllib2.py --trace=on FIND globaltags MYGTAG-01-00
