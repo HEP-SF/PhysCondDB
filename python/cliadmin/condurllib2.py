@@ -195,23 +195,7 @@ class PhysDBDriver():
             self.resttools.dumpgtag(gtag['name'],package)
         else:
             print 'No dumping on directory is performed when unlocking....'
-#        print colored.green(msg)
-
-# collect a global tag
-    def gettar(self, params):
-        globaltagname=params[0]
-        package="none"
-        if len(params)>1:
-            package=params[1]
-        data={}
-        data['name']=globaltagname
-        data['package']=package
-        # Search globaltagname in global tags
-        msg = ('>>> Collect all files in GlobalTag %s and download tar file ') % (globaltagname)
-        #print colored.cyan(msg)
-        print msg
-        self.restserver.getfile(data,'/expert/calibration/tar')
-    
+#        print colored.green(msg)    
 
 # List files under global tag
     def listcalib(self, params):
@@ -325,7 +309,7 @@ class PhysDBDriver():
                     sinceDescription = calibargs[4]
                 print 'calling commit: ',filename,' ',pkgname,' ',destpath,' ',since,' ',sinceDescription
                 response = self.resttools.commit(filename,pkgname,destpath,since,sinceDescription)    
-                print 'Response: ',response                
+##                print 'Response: ',response                
                 msg = 'Response Code: %s ' % (response['code'])
                 #print colored.cyan(msg)
                 print msg
@@ -461,7 +445,9 @@ class PhysDBDriver():
                 msg = '>>> Call method %s using arguments %s ' % (self.action,calibargs)
                 #print colored.cyan(msg)
                 print msg
-                self.collect(calibargs)
+                globaltagname = calibargs[0]
+                asgglobaltagname = calibargs[1]
+                self.resttools.collect(globaltagname, asgglobaltagname)
             
             except Exception, e:
                 sys.exit("failed: %s" % (str(e)))
@@ -473,7 +459,11 @@ class PhysDBDriver():
                 msg = '>>> Call method %s using arguments %s ' % (self.action,calibargs)
                 #print colored.cyan(msg)
                 print msg
-                self.gettar(calibargs)
+                globaltagname = calibargs[0]
+                package="none"
+                if len(calibargs)>1:
+                   package=calibargs[1]
+                self.resttools.gettar(globaltagname,package)
             
             except Exception, e:
                 sys.exit("failed: %s" % (str(e)))

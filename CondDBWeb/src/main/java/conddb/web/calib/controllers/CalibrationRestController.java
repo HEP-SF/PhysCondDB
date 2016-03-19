@@ -58,7 +58,6 @@ import conddb.utils.converters.CondTimeTypes;
 import conddb.utils.data.TimeRanges;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
-import conddb.web.resources.GlobalTagResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
 import conddb.web.resources.generic.GenericPojoResource;
@@ -259,8 +258,10 @@ public class CalibrationRestController extends BaseController {
 			}
 			//directoryMapperService.dumpGlobalTagOnDisk(globaltag,packagedir);
 			if (!directoryMapperService.isOnDisk(globaltag,packagedir)) {
+				log.debug("Global tag resource "+globaltag+" for package dir "+packagedir+" not yet on disk...dumping it");
 				directoryMapperService.dumpGlobalTagOnDisk(globaltag,packagedir);
 			}
+			log.debug("Creating tar file...");
 			File f = directoryMapperService.createTar(globaltag,packagedir);
 			final InputStream in = new FileInputStream(f);
 			StreamingOutput stream = new StreamingOutput() {

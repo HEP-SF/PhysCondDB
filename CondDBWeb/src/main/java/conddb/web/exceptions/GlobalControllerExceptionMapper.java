@@ -58,6 +58,8 @@ public class GlobalControllerExceptionMapper implements ExceptionMapper<Throwabl
 //			ex.printStackTrace(new PrintWriter(errorStackTrace));
 //			errorMessage.setUserMessage(errorStackTrace.toString());
 			errorMessage.setUserMessage("Internal server exception");
+			log.debug("Dump stack trace ");
+			ex.printStackTrace();
 		}
 	}
 }

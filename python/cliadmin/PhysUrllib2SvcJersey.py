@@ -802,7 +802,7 @@ class PhysUtils(object):
         return maps
 
     def calibtagandlink(self, systemsglobaltag,systemname):
-        print 'Create global tag ',globaltagname,' and link it to all tags in package ',pkgname
+        print 'Create global tag ',systemsglobaltag,' and link it to all tags in package ',systemname
         params = {}
         params['globaltag'] = systemsglobaltag
         params['package'] = systemname
@@ -841,6 +841,17 @@ class PhysUtils(object):
         msg = ('    + Tree structure for GlobalTag %s was dump on file system == FIX THIS MESSAGE') % (globaltagname)
 #        print colored.green(msg)
         print msg
+        
+# get tar from a global tag
+    def gettar(self, globaltagname, package):
+        data={}
+        data['name']=globaltagname
+        data['package']=package
+        # Search globaltagname in global tags
+        msg = ('>>> Collect all files in GlobalTag %s and download tar file ') % (globaltagname)
+        #print colored.cyan(msg)
+        print msg
+        self.__restserver.getfile(data,'/expert/calibration/tar')
 
     def linkall(self, tagname, action, globaltagname, record, label):
         print 'Link global tag ',globaltagname,' to tag ',tagname,' using action ',action

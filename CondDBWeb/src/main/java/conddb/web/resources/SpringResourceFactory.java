@@ -105,7 +105,7 @@ public class SpringResourceFactory {
 	@ProfileExecution
 	public <T extends Entity> Link getGenericResource(UriInfo info, T entity, int level, T parent) {
 		GenericPojoResource<T> resource = new GenericPojoResource<T>(info,entity,level,parent);
-		log.info("Create generic resource for type "+entity.getClass().getName());
+		log.info("Created generic resource for type "+entity.getClass().getName());
 		return resource;			
 	}
 	

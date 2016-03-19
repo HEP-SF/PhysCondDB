@@ -16,9 +16,11 @@
 package conddb.web.resources;
 
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -124,7 +126,15 @@ public class Link extends LinkedHashMap {
 			e.printStackTrace();
 		}
         }
-        sb.append(path.getPath()).append(PATH_SEPARATOR).append(href);
+        // Now URLEncode the href obtained, before creating the full href string with the path
+        String encodedhref = href;
+        try {
+			encodedhref = URLEncoder.encode(href,"UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        sb.append(path.getPath()).append(PATH_SEPARATOR).append(encodedhref);
         return sb.toString();
     }
 
