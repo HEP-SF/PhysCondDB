@@ -61,6 +61,7 @@ import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.GlobalTagResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
+import conddb.web.resources.generic.GenericPojoResource;
 
 /**
  * @author aformic
@@ -175,10 +176,9 @@ public class CalibrationRestController extends BaseController {
 			// This update will change the modification time 
 			tagstored = globalTagService.insertTag(tagstored);
 			
-			resp = Response.ok(iov).build();
-            log.debug("Providing response "+resp+" with code "+resp.getStatus());
-			return resp;
-
+			Iov iovstored = iovService.getIov(iov.getId());
+			GenericPojoResource<Iov> resource = (GenericPojoResource<Iov>) springResourceFactory.getGenericResource(info, iovstored, 1, null);
+			return ok(resource);
 		} catch (ConddbServiceException e) {
 			String msg = "Cannot commit files for path " + path;
 			throw buildException(msg, msg, Response.Status.INTERNAL_SERVER_ERROR);
@@ -227,8 +227,8 @@ public class CalibrationRestController extends BaseController {
 				maplist.add(globaltagmap);
 			}
 			globaltag.setGlobalTagMaps(maplist);
-			resp = Response.ok(globaltag).build();
-			return resp;
+			GenericPojoResource<GlobalTag> resource = (GenericPojoResource<GlobalTag>) springResourceFactory.getGenericResource(info, globaltag, 2, null);
+			return ok(resource);
 
 		} catch (ConddbServiceException e) {
 			String msg = "Cannot create tag mappings for " + globaltagname;
@@ -242,6 +242,7 @@ public class CalibrationRestController extends BaseController {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Path("/tar/{id}")
 	public Response getTarFromGlobalTag(
+			@Context UriInfo info,
 			@PathParam("id") final String globaltagname,
 			@DefaultValue("none")@QueryParam("package") final String packagename
 			) throws ConddbWebException {
@@ -294,9 +295,9 @@ public class CalibrationRestController extends BaseController {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Path("/dump/{id}")
 	public Response dumpContent(
+			@Context UriInfo info,
 			@PathParam("id") final String globaltagname,
 			@DefaultValue("none") @QueryParam("package") final String packagename) throws ConddbWebException {
-		Response resp = null;
 		try {
 			// The dump on local disk could then be propagated to afs directory
 			GlobalTag globaltag = globalTagService.getGlobalTag(globaltagname);
@@ -306,8 +307,9 @@ public class CalibrationRestController extends BaseController {
 				packagedir = sd.getSchemaName();
 			}
 			directoryMapperService.dumpGlobalTagOnDisk(globaltag,packagedir);
-			resp = Response.ok(globaltag).build();
-			return resp;
+			GenericPojoResource<GlobalTag> resource = (GenericPojoResource<GlobalTag>) springResourceFactory.getGenericResource(info, globaltag, 1, null);
+			return ok(resource);
+			
 		} catch (ConddbServiceException e) {
 			String msg = "Error dumping tree structure for global tag " + globaltagname;
 			throw buildException(msg, msg + ": " + e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
@@ -319,6 +321,7 @@ public class CalibrationRestController extends BaseController {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Path("/collect")
 	public Response collect(
+			@Context UriInfo info,
 			@QueryParam("destgtag") final String globaltagname,
 			@QueryParam("packagetag") final String globaltagpackagename) throws ConddbWebException {
 		Response resp;
@@ -350,8 +353,8 @@ public class CalibrationRestController extends BaseController {
 				String newlabel = packagegtag.getName();
 				globalTagService.mapAddTagToGlobalTag(tag, existing, globalTagMap.getRecord(), newlabel);
 			}
-			resp = Response.ok(packagegtag, MediaType.APPLICATION_JSON).build();
-			return resp;
+			GenericPojoResource<GlobalTag> resource = (GenericPojoResource<GlobalTag>) springResourceFactory.getGenericResource(info, packagegtag, 1, null);
+			return ok(resource);
 
 		} catch (ConddbServiceException e) {
 			log.debug("Generate exception using an ConddbService exception..."+e.getMessage());
@@ -361,6 +364,8 @@ public class CalibrationRestController extends BaseController {
 	}
 
 	/**
+	 * Verify that a given tagnameroot exists, using the input package name.
+	 * If not ite generates one using the file name as well
 	 * @param nodefullpath
 	 * @param pkgname
 	 * @param filename
@@ -369,7 +374,6 @@ public class CalibrationRestController extends BaseController {
 	 * @throws ConddbWebException
 	 */
 	protected String getUniqueTagNameRoot(String nodefullpath, String pkgname, String filename, int i) throws ConddbWebException {
-		// Verify if tagnameroot exists, if not try to generate a unique name
 		try {
 			String tagnameroot = pkgname.concat("-" + filename);
 			log.debug("Search for system having tagname like "+tagnameroot);

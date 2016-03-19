@@ -37,6 +37,12 @@ public abstract class BaseController {
 		return Response.created(uri).status(Response.Status.CREATED).entity(resource).build();
 	}
 
+	protected Response updated(Link resource) {
+		String href = (String) resource.get("href");
+		URI uri = URI.create(href);
+		return Response.created(uri).status(Response.Status.ACCEPTED).entity(resource).build();
+	}
+
 	protected Response ok(Link resource) {
 		String href = (String) resource.get("href");
 		URI uri = URI.create(href);

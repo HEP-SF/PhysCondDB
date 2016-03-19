@@ -149,7 +149,6 @@ public class GlobalTagRestController extends BaseController {
 		for (GlobalTag globaltag : globaltags) {
 			globaltag.setResId(globaltag.getName());
 			if (expand) {
-			/////				springResourceFactory.getResource("generic-gt", info, globaltag)
 				GenericPojoResource<GlobalTag> resource = (GenericPojoResource<GlobalTag>) springResourceFactory.getGenericResource(info, globaltag, 1, null);
 				items.add(resource);
 			} else {

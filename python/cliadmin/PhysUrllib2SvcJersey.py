@@ -141,7 +141,8 @@ class PhysRestConnection:
 
             jsondata = json.loads(data)
             if self.__debug:
-                print 'JSON data: ', jsondata, ' Code: ',response.getcode()
+                print 'JSON data: ', jsondata, ' and return Code: ',response.getcode()
+#            jsondata['code'] = response.getcode()
             return jsondata, response.getcode()            
         
     def deleteData(self):
@@ -199,7 +200,8 @@ class PhysRestConnection:
             print 'Details: ',details
             jsondata = json.loads(details)
             print 'Extracted message: ',jsondata['internalMessage']
-
+            return jsondata
+			
         except URLError as e:
             print 'We failed to reach a server.'
             print 'Reason: ', e.reason
@@ -535,7 +537,7 @@ class PhysCurl(object):
             print id
         url = (self.baseurl + servicebase + "/" + id)
         self.__curl.setUrl(url)
-#        self.__curl.setHeader(['Content-Type:application/json', 'Accept:application/json'])
+##        self.__curl.setHeader(['Content-Type:application/json', 'Accept:application/json'])
         return self.__curl.deleteData()
 
 
@@ -653,8 +655,11 @@ class PhysCurl(object):
         url = (self.userbaseurl + servicebase )
         urlquoted = urllib.quote_plus(url,safe=':/')
         pairs = urllib.urlencode(params)
-        escurl = urllib.quote_plus(urlquoted+'?'+pairs,safe='=&?:/')
-        self.__curl.setUrl(escurl)
+        self.__curl.setUrl(urlquoted+'?'+pairs)
+##        escurl = urllib.quote_plus(urlquoted+'?'+pairs,safe='=&?:/')
+        if self.__debug:
+            print 'Search systems using url ',urlquoted        
+##        self.__curl.setUrl(escurl)
         return self.__curl.getData()
 
     def getlink(self,params,servicebase=None):
@@ -674,11 +679,12 @@ class PhysCurl(object):
         urllength = len(modurl)
         modurl.insert(urllength-2,'expert')
         url = ('/'.join(modurl))
-#        self.__curl.setUrl(url)
+        print 'Apply delete request to url ',url
+        self.__curl.setUrl(url)
 #        self.__curl.setHeader(['Content-Type:application/json', 'Accept:application/json'])
-        print 'Not implemented '
-#        return self.__curl.deleteData()
-        return
+#        print 'Not implemented '
+        return self.__curl.deleteData()
+#        return
 
     def setUserPassword(self,user,passwd):
 #        self.__curl.setUserPassword(user, passwd)
@@ -726,7 +732,7 @@ class PhysUtils(object):
             print 'Function utils for command lines'
         self.__restserver = restserver
        
-    def loadItems(self, data):
+    def printItems(self, data):
     # Assume that data is a list of items
         for anobj in data:
             print anobj
@@ -736,6 +742,31 @@ class PhysUtils(object):
             print 'Use url link ',url
             obj = self.__restserver.getlink(url)
             print obj
+
+# load items from link
+    def loadItems(self, data):
+        # Check if data is a single object
+        if 'href' in data:
+            href = data['href']
+            url = {}
+            url['href'] = href
+            if self.__debug:
+                print 'Use url link ',url
+            obj = self.__restserver.getlink(url)
+            return obj
+            
+        # Assume that data is a list of items
+        # NOT SURE THIS WORKS...
+#        for anobj in data:
+#            #print anobj
+#            href = anobj['href']
+#            url = {}
+#            url['href'] = href
+#            if self.debug:
+#                print 'Use url link from object ',anobj,' -> ',url
+#            obj = self.restserver.getlink(url)
+#            return obj
+
 
     def createObj(self, type, data):
         if type == 'globaltags':
@@ -753,22 +784,101 @@ class PhysUtils(object):
         return None
 
 
-    def lockit(self, params):
-        globaltagname=params[0]
-        lockstatus=params[1]
+    def lockit(self, globaltagname,lockstatus):
         data={}
         # Search globaltagname in global tags
         print 'Search for global tag name ',globaltagname
         data['lockstatus']=lockstatus
         gtag = self.__restserver.addJsonEntity(data,'/globaltags/'+globaltagname)
         print 'Updated status of global tag ', gtag
+        return gtag
 
+    def link(self, globaltagname,tagname,params):
+        print 'Link global tag ',globaltagname,' to tag ',tagname,' using params ',params
+        params['globaltagname'] = globaltagname
+        params['tagname'] = tagname
+        maps = self.__restserver.addJsonEntity(params,'/maps')
+        print 'Linked global tag to tag : ', maps
+        return maps
 
-    def gettagiovs(self, data):
+    def calibtagandlink(self, systemsglobaltag,systemname):
+        print 'Create global tag ',globaltagname,' and link it to all tags in package ',pkgname
+        params = {}
+        params['globaltag'] = systemsglobaltag
+        params['package'] = systemname
+        response = self.__restserver.addPairs(params,'/calibration/tag')
+        return response
+
+# download calibration files for a given package and global tag
+    def dumpgtag(self, globaltagname, package):
+        print 'Dump is using parameter ',globaltagname, package
+        data={}
+        data['name']=globaltagname
+        data['package']=package
+        data['trace']='off'
+        data['expand']='false'
+        # Search globaltagname in global tags
+        msg = ('>>> Dump all files in GlobalTag %s') % (globaltagname)
+#        print colored.cyan(msg)
+        print msg
+        self.__restserver.get(data,'/expert/calibration/dump')
+        msg = ('    + Tree structure for GlobalTag %s was dump on file system') % (globaltagname)
+#        print colored.green(msg)
+        print msg
+        
+# collect a global tag
+    def collect(self, globaltagname, asgglobaltagname):
+        data={}
+        data['packagetag']=globaltagname
+        data['destgtag']=asgglobaltagname
+        data['trace']='off'
+        data['expand']='false'
+        # Search globaltagname in global tags
+        msg = ('>>> Merge all files in GlobalTag %s into ASG global tag %s') % (globaltagname,asgglobaltagname)
+#        print colored.cyan(msg)
+        print msg
+        self.__restserver.addPairs(data,'/calibration/collect')
+        msg = ('    + Tree structure for GlobalTag %s was dump on file system == FIX THIS MESSAGE') % (globaltagname)
+#        print colored.green(msg)
+        print msg
+
+    def linkall(self, tagname, action, globaltagname, record, label):
+        print 'Link global tag ',globaltagname,' to tag ',tagname,' using action ',action
+        data = {}
+        params = {}
+        data['name'] = tagobject
+        data['record'] = mapparams['record']
+        data['label'] = mapparams['label']
+        params['action'] = action             
+        self.__restserver.addWithPairs(data,params,'/globaltags/'+object+'/'+gtagobject)
+        return
+
+    def unlink(self, globaltagname,tagname):
+        print 'Remove link for global tag ',globaltagname,' to tag ',tagname
+        data = {}
+        data['globaltag']=globaltagname
+        data['tag']=tagname
+        data['expand'] = 'true'        
+        (entity, response) = self.__restserver.getmaps(data)
+        url = entity['href']
+        self.__restserver.deletelink(url)        
+##maps = self.__restserver.deleteEntity(id,'/maps')
+        print 'Removed link from global tag to tag'
+
+    def gettagiovs(self, tag, globaltag, trace, expand, t0, tMax):
         objList = []
-        print 'Select iovs using arguments ',data
-        objList = self.__restserver.getiovs(data,'/iovs/find')
-        return objList
+        data = {}
+        data['trace']=trace
+        data['expand']=expand
+        data['tag']=tag
+        data['globaltag']=globaltag
+        data['since']=t0
+        data['until']=tMax
+##        print 'Select iovs using arguments ',data
+        (objList, code) = self.__restserver.getiovs(data,'/iovs/find')
+##        json_string = json.dumps(objList,sort_keys=True,indent=4, separators=(',', ': '))
+##        print json_string
+        return (objList,code)
 
     def storePayload(self, data):
         objList = []
@@ -776,20 +886,63 @@ class PhysUtils(object):
         objList = self.__restserver.addPayload(data,'/iovs/payload')
         return objList
 
-    def getgtagtags(self, data):
+    def getPayload(self, hash, trace, expand):
+        data = {}
+        data['trace']=trace
+        data['expand']=expand
+        data['name']=hash
+        print 'Get payload using arguments ',data
+        (obj, response) = self.__restserver.get(data,'/payload')
+        return (obj, response)
+
+    def getTag(self, tag, trace, expand):
+        data = {}
+        data['trace']=trace
+        data['expand']=expand
+        data['name']=tag
+        print 'Get tag using arguments ',data
+        (obj, response) = self.__restserver.get(data,'/tags')
+        return (obj, response)
+
+    def addObject(self, type, data):
+        print 'Add object of type ', type, ' using arguments ',data
+        response = self.__restserver.addJsonEntity(data,'/'+type)
+        return (response)
+
+    def deleteObject(self, type, data):
+        print 'Delete object of type ', type, ' using arguments ',data
+        self.__restserver.deleteEntity(data,'/'+type)
+        print 'Object removed'
+        return
+        
+#### calibration methods
+    def commit(self,filename,pkgname,destpath,since,sincedesc):
+        params = {}
+        params['file'] = filename
+        params['package'] = pkgname
+        params['path'] = destpath
+        params['since'] = since
+        params['description'] = sincedesc 
+        print 'commit using parameters ',params       
+        response = self.__restserver.commitCalibration(params,'/calibration/commit')
+        return response
+    
+    def getgtagtags(self, globaltagname, trace, expand):
+        data = {}
+        data['trace']=trace
+        data['expand']=expand
+        data['name']=globaltagname
         obj = {}
         print 'Select mappings using arguments ',data
-        obj = self.__restserver.get(data,'/globaltags')
-        print 'Retrieved object ',obj
-        mpobj = self.createObj('globaltags',obj)
-        print 'Retrieved global tag object ',mpobj
-        
-        maplist=[]
-        if mpobj.getValues()['globalTagMaps'] is not None:
-            maplist = mpobj.getValues()['globalTagMaps']
-            for amap in maplist:
-                atag = Tag(amap['systemTag'])
-                gtag = GlobalTag(amap['globalTag'])
-                print atag.toJson()
-        return maplist
+        (obj, response) = self.__restserver.get(data,'/globaltags')
+        ##print 'Retrieved object ',obj
+        return (obj, response)
 
+    def getsystems(self, bytype, fieldname):
+        systemdata = {}
+        systemdata['by']=bytype
+        systemdata['name']=fieldname
+        systemdata['expand']='true'
+        (systemobj, code) = self.__restserver.getsystems(systemdata,'/systems/find')
+        return (systemobj, code)
+        

@@ -241,6 +241,7 @@ public class IovExpRestController extends BaseController {
 
 
 	@Path(Link.IOVS+"/{id}")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@DELETE
 	@ApiOperation(value = "Delete an IOV.",
     notes = "It should be used one IOV at the time. This method is meant for administration purposes. The payload associated is not removed.",

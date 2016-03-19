@@ -130,9 +130,8 @@ public class IovRestController extends BaseController {
 	protected CollectionResource listToCollection(Collection<Iov> iovs, boolean expand, UriInfo info) {
 		Collection items = new ArrayList(iovs.size());
 		for (Iov iov : iovs) {
-			iov.setResId(iov.getId().toString());
 			if (expand) {
-				log.debug("Creating a generic resource out of the iov "+iov);
+				log.debug("Creating a generic resource from iov "+iov);
 				GenericPojoResource<Iov> resource = (GenericPojoResource<Iov>) springResourceFactory.getGenericResource(info, iov, 0, null);
 				items.add(resource);
 			} else {
@@ -142,7 +141,6 @@ public class IovRestController extends BaseController {
 		}
 		return (CollectionResource) springResourceFactory.getCollectionResource(info, Link.IOVS, items);
 	}
-
 
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })

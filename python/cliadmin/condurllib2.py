@@ -26,13 +26,14 @@ from xml.dom import minidom
 #from clint.textui import colored
 from datetime import datetime
 
-from PhysUrllib2SvcJersey import PhysCurl,GlobalTag,Tag,Iov,GtagMap,SystemDesc,Payload,PayloadData
+from PhysUrllib2SvcJersey import PhysCurl,PhysUtils,GlobalTag,Tag,Iov,GtagMap,SystemDesc,Payload,PayloadData
 
 class PhysDBDriver():
     def __init__(self):
     # process command line options
         try:
             self.restserver = {}
+            self.resttools = {}
             self.taxextension = '_HEAD_00'
             self._command = sys.argv[0]
             self.useSocks = False
@@ -171,31 +172,7 @@ class PhysDBDriver():
 
 ######## Utility functions
 
-# load items from link
-    def loadItems(self, data):
-        # Check if data is a single object
-        if 'href' in data:
-            href = data['href']
-            url = {}
-            url['href'] = href
-            if self.debug:
-                print 'Use url link ',url
-            obj = self.restserver.getlink(url)
-            return obj
-        # Assume that data is a list of items
-        # NOT SURE THIS WORKS...
-        for anobj in data:
-            #print anobj
-            href = anobj['href']
-            url = {}
-            url['href'] = href
-            if self.debug:
-                print 'Use url link from object ',anobj,' -> ',url
-            obj = self.restserver.getlink(url)
-            return obj
-
- 
-    
+     
 # Lock a global tag
     def lockit(self, params):
         globaltagname=params[0]
@@ -208,59 +185,17 @@ class PhysDBDriver():
         msg = ('>>> Set lock for GlobalTag %s to %s using package name %s') % (globaltagname,lockstatus,package)
         #print colored.cyan(msg)
         print msg
-
-        data['lockstatus']=lockstatus
-        gtag = self.restserver.addJsonEntity(data,'/globaltags/'+globaltagname)
+        gtag = self.resttools.lockit(globaltagname,lockstatus)
         print gtag, ' status ',gtag['lockstatus']
         msg = ('    + Lock status has been set to %s for GlobalTag %s : snapshot time is %s') % (gtag['lockstatus'],gtag['href'],gtag['snapshotTime'])
         print msg
         if 'LOCKED' == lockstatus:
             print 'Lock status is LOCKED, then you can dump the global tag...',globaltagname
-            dumpparams = []
-            dumpparams.append(gtag['name'])
-            dumpparams.append(package)
-            print 'Calling dump method using parameters ',dumpparams
-            self.dumpgtag(dumpparams)
+            print 'Calling dump method using parameters ',gtag['name'],package
+            self.resttools.dumpgtag(gtag['name'],package)
         else:
             print 'No dumping on directory is performed when unlocking....'
 #        print colored.green(msg)
-
-# collect a global tag
-    def dumpgtag(self, params):
-        globaltagname=params[0]
-        package = params[1]
-        print 'Dump is using parameter ',globaltagname, package
-        data={}
-        data['name']=globaltagname
-        data['package']=package
-        data['trace']='off'
-        data['expand']='false'
-        # Search globaltagname in global tags
-        msg = ('>>> Dump all files in GlobalTag %s') % (globaltagname)
-#        print colored.cyan(msg)
-        print msg
-        self.restserver.get(data,'/expert/calibration/dump')
-        msg = ('    + Tree structure for GlobalTag %s was dump on file system') % (globaltagname)
-#        print colored.green(msg)
-        print msg
-
-# collect a global tag
-    def collect(self, params):
-        globaltagname=params[0]
-        asgglobaltagname=params[1]
-        data={}
-        data['packagetag']=globaltagname
-        data['destgtag']=asgglobaltagname
-        data['trace']='off'
-        data['expand']='false'
-        # Search globaltagname in global tags
-        msg = ('>>> Merge all files in GlobalTag %s into ASG global tag %s') % (globaltagname,asgglobaltagname)
-#        print colored.cyan(msg)
-        print msg
-        self.restserver.addPairs(data,'/calibration/collect')
-        msg = ('    + Tree structure for GlobalTag %s was dump on file system == FIX THIS MESSAGE') % (globaltagname)
-#        print colored.green(msg)
-        print msg
 
 # collect a global tag
     def gettar(self, params):
@@ -287,11 +222,8 @@ class PhysDBDriver():
         msg = ('>>> Search files in GlobalTag %s using pattern %s') % (globaltagname,filenamepattern)
         #print colored.cyan(msg)
         print msg
-        data = {}
-        data['expand']='true'
-        data['trace']='on'
-        data['name']=globaltagname
-        maplist = self.getgtagtags(data)
+        (maplist, response) = self.resttools.getgtagtags(globaltagname,'on','true')
+        print 'Response is ',response
         if self.debug:
             print 'Dump the retrieved map list'
             print maplist
@@ -299,8 +231,10 @@ class PhysDBDriver():
             msg = (' ===> GlobalTag %s has empty list of associated tags....') % (globaltagname)
             #print colored.cyan(msg)
             print msg
-        
-        for amap in maplist:
+            
+        globaltagmaps = maplist['globalTagMaps']
+###        print 'Use list of mappings ',globaltagmaps
+        for amap in globaltagmaps:
             #print 'Map in loop is ',amap
             atag = Tag(amap['systemTag'])
             #print 'Tag in loop is ', atag
@@ -311,23 +245,12 @@ class PhysDBDriver():
                 #print colored.cyan(msg)
                 print msg
                 continue
-            data = {}
-            data['tag']=atag.getParameter('name')
-            data['globaltag']=globaltagname
-            data['since']=0
-            data['until']='INF'
-            data['page']=0
-            data['size']=1000
-            data['expand']=self.expand
-            (objList, code) = self.gettagiovs(data)
-            systemdata = {}
-            systemdata['by']='tag'
-            tagnameroot = data['tag'].split(self.taxextension)[0]
-            systemdata['name']=tagnameroot
+            (objList, code) = self.resttools.gettagiovs(atag.getParameter('name'), globaltagname, self.trace, self.expand, self.t0, self.tMax)
+            tagnameroot = atagname.split(self.taxextension)[0]
             msg = ' ==> Search for system by tag name root %s ' % tagnameroot
             #print colored.cyan(msg)
             print msg
-            (systemobj, code) = self.restserver.getsystems(systemdata,'/systems/find')
+            (systemobj, code) = self.resttools.getsystems('tag',tagnameroot)
             nodepath = systemobj['nodeFullpath']
             #print 'Node path for system is ',nodepath
             filename = atag.getParameter('objectType')
@@ -340,9 +263,9 @@ class PhysDBDriver():
             print coloredmsg1
             for aniov in objList['items']:
                 counter = counter+1
-                #print ' The object link is ', aniov
-                (iovobjlink, code) = self.loadItems(aniov)
-                #print 'IOV db link is  ',iovobjlink
+##                print ' The object link is ', aniov
+                (iovobjlink, code) = self.resttools.loadItems(aniov)
+##                print 'IOV db link is  ',iovobjlink
                 since = iovobjlink['since']
                 sincestr = iovobjlink['sinceString']
                 instime = iovobjlink['insertionTime']
@@ -352,11 +275,8 @@ class PhysDBDriver():
                 msg = '        (%d) [size] %s [since] %s [%s] @ %s' % (counter,pyldsize,since,sincestr,instime)
                 #coloredmsg2 = colored.green(msg)
                 coloredmsg2 = msg
-                datapyldget = {}
-                datapyldget['name'] = pyldhash
-                datapyldget['expand'] = 'false'
-                datapyldget['trace'] = 'off'
-                (datapyld, code) = self.restserver.get(datapyldget,'/payload')
+
+                (datapyld, code) = self.resttools.getPayload(pyldhash,'false','off')
                 datapyldhref = datapyld['href']
                 
                 msg = ': [url] %s' % (datapyldhref)
@@ -370,71 +290,13 @@ class PhysDBDriver():
 #        print colored.green(msg)
 
 
-    def gettagiovs(self, data):
-        objList = []
-        #print 'Select iovs using arguments ',data
-        objList = self.restserver.getiovs(data,'/iovs/find')
-        json_string = json.dumps(objList,sort_keys=True,indent=4, separators=(',', ': '))
-        return objList
-    #print json_string
-
-    def parseMapItems(self,mapitems):
-        #Retrieve systemTags from map list of items
-        outputlist=[]
-        for amap in mapitems:
-    #print 'Analyse content of ',amap
-            atag = amap['systemTag']
-            gtag = amap['globalTag']
-            if 'name' not in atag:
-                href = atag['href']
-                #print 'Load linked item using ',href
-                (tagdata, code) = self.loadItems(atag)
-                amap['systemTag']=tagdata
-                if self.debug:
-                    print 'Modified map to use ',amap['systemTag']
-                outputlist.append(amap)
-            else:
-                if self.debug:
-                    print 'Use the object found ',amap
-                outputlist.append(amap)
-        return outputlist
-
-    def getgtagtags(self, data):
-        obj = {}
-        #print 'Select mappings using arguments ',data
-        (obj, code) = self.restserver.get(data,'/globaltags')
-        mpobj = self.createObj('globaltags',obj)
-        #print 'created object ',mpobj
-        #print 'from json ',obj
-        maplist=[]
-        # Now load associations
-        globaltagmapsobj = obj['globalTagMaps']
-        href = globaltagmapsobj['href']
-        #print 'Retrieve a list of associated tags using url ',href
-        (maplist, code) = self.loadItems(globaltagmapsobj)
-        #print 'Retrieved list of associated tags: ',maplist
-        outputlist=[]
-        if mpobj.getValues()['globalTagMaps'] is not None and len(maplist)==0:
-            if self.debug:
-                print 'global tag object contains globalTagMaps in ',mpobj
-            maplist = mpobj.getValues()['globalTagMaps']
-            if 'items' in maplist:
-                maplist = maplist['items']
-            outputlist = self.parseMapItems(maplist)
-        #print atag.toJson()
-        elif 'items' in maplist:
-            if self.debug:
-                print 'items key has been found in ',maplist
-            outputlist = self.parseMapItems(maplist['items'])
-        #print 'getgtagtags has retrieved ',outputlist
-
-        return outputlist
-
     def execute(self):
         #print colored.blue(('Execute the command for action %s and arguments : %s ' ) % (self.action, str(self.args)))
         print ('Execute the command for action %s and arguments : %s ' ) % (self.action, str(self.args))
         start = datetime.now()
         self.restserver = PhysCurl(self.urlsvc, self.useSocks)
+        self.resttools = PhysUtils(self.restserver)
+        
         if self.debug:
             self.restserver.setdebug(True)
         
@@ -461,15 +323,9 @@ class PhysDBDriver():
                     since = calibargs[3]
                 if (len(calibargs) > 4):
                     sinceDescription = calibargs[4]
-                    
-                params = {}
-                params['file'] = filename
-                params['package'] = pkgname
-                params['path'] = destpath
-                params['since'] = since
-                params['description'] = sinceDescription
-                
-                response = self.restserver.commitCalibration(params,'/calibration/commit')
+                print 'calling commit: ',filename,' ',pkgname,' ',destpath,' ',since,' ',sinceDescription
+                response = self.resttools.commit(filename,pkgname,destpath,since,sinceDescription)    
+                print 'Response: ',response                
                 msg = 'Response Code: %s ' % (response['code'])
                 #print colored.cyan(msg)
                 print msg
@@ -497,10 +353,7 @@ class PhysDBDriver():
                 print msg
                 systemname=calibargs[0]
                 systemsglobaltag=calibargs[1]
-                params = {}
-                params['globaltag'] = systemsglobaltag
-                params['package'] = systemname
-                response = self.restserver.addPairs(params,'/calibration/tag')
+                response = self.resttools.calibtagandlink(systemsglobaltag,systemname)
                 msg = 'Response Code: %s ' % (response['code'])
                 #print colored.cyan(msg)
                 print msg
@@ -561,20 +414,18 @@ class PhysDBDriver():
                 if len(calibargs) < 1:
                     print 'Not enough arguments, type -h for help'
                 nodefullpath = calibargs[0]
-                systemdata = {}
-                systemdata['by']='node'
-                systemdata['name']=nodefullpath
                 msg = ' ==> Search for system by nodefullpath %s ' % nodefullpath
                 #print colored.cyan(msg)
                 print msg
-                (systemobjlist, code) = self.restserver.getsystems(systemdata,'/systems/find')
+                (systemobjlist, code) = self.resttools.getsystems('node',nodefullpath)
+                print 'Retrieved ',systemobjlist,' with code ',code
                 if code != 200:
                     msg = 'Error in show while retrieving systems: %s ' % (code)
                     #print colored.red(msg)
                     print msg
                     return -1
       
-                for systemobj in systemobjlist:
+                for systemobj in systemobjlist['items']:
                     #print 'Retrieved system ',systemobj
                     tagnameroot = systemobj['tagNameRoot']
                     tagname = tagnameroot+self.taxextension
@@ -593,7 +444,8 @@ class PhysDBDriver():
                         #print 'Retrieved iov list ',iovlist
                         iovitems = iovlist['items']
                         for iov in iovitems:
-                            payload=iov['payload']
+                            hash = iov['hash']
+                            (payload,code)=self.resttools.getPayload(hash,'false','true')
                             msg = '>>> Found entry for file %s with size %s inserted %s @ since %s [%s] ' % (payload['objectType'],payload['datasize'],payload['insertionTime'],iov['since'],payload['href'])
                             #print colored.green(msg)
                             print msg

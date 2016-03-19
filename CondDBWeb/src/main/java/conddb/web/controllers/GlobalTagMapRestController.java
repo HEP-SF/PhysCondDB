@@ -133,8 +133,6 @@ public class GlobalTagMapRestController  extends BaseController {
 			}
 			log.debug("Controller has retrieved one map object "+entity);
 			
-//			entity.setResId(entity.getId().toString());
-//			GlobalTagMapResource gtagres = (GlobalTagMapResource) springResourceFactory.getResource("globaltagmap", info, entity);
 			GenericPojoResource<GlobalTagMap> resource = (GenericPojoResource) springResourceFactory.getResource("generic-gtmap", info,
 					entity);
 			return ok(resource);
@@ -160,17 +158,15 @@ public class GlobalTagMapRestController  extends BaseController {
 
 		try {
 			GlobalTagMap entity = null;
-			entity = this.globalTagService.getGlobalTagMap(id);
+			entity = this.globalTagService.getGlobalTagMapFetchChildren(id);
 			if (entity == null) {
 				String msg = "Associations not found for id "+id;
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
-			//entity.setResId(entity.getId().toString());
 			log.debug("Creating resource from retrieved entity "+entity);
 			GenericPojoResource<GlobalTagMap> resource = (GenericPojoResource) springResourceFactory.getResource("generic-gtmap", info,
 					entity);
 
-			//GlobalTagMapResource gtagres = (GlobalTagMapResource) springResourceFactory.getResource("globaltagmap", info, entity);
 			return ok(resource);
 		} catch (ConddbServiceException e) {
 			String msg = "Error retrieving association resource for id "+id;
@@ -210,15 +206,11 @@ public class GlobalTagMapRestController  extends BaseController {
 		CollectionResource resource = listToCollection(globaltagmaps, expand, info, ipage, size);
 		return ok(resource);
 
-		//return listToCollection(globaltagmaps, expand, info, ipage, size);
 	}
 
 	protected CollectionResource listToCollection(Collection<GlobalTagMap> globaltagmaps, boolean expand, UriInfo info, Integer ipage, Integer size) {
         Collection items = new ArrayList(globaltagmaps.size());
         for( GlobalTagMap globaltagmap : globaltagmaps) {
- //       	globaltagmap.setResId(globaltagmap.getId().toString());
- //       	globaltagmap.getGlobalTag().setResId(globaltagmap.getGlobalTagName());
- //       	globaltagmap.getSystemTag().setResId(globaltagmap.getTagName());
             if (expand) {
                 items.add(springResourceFactory.getResource("generic-gtmap", info, globaltagmap));
             } else {

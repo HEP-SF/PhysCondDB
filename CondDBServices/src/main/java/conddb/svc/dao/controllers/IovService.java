@@ -86,7 +86,7 @@ public class IovService {
 	public Iov getIov(Long id) throws ConddbServiceException {
 		try {
 //			return iovRepository.findOne(id);
-			return iovRepository.findByIdFetchPayload(id);
+			return iovRepository.findByIdFetchPayloadAndTag(id);
 		} catch (Exception e) {
 			throw new ConddbServiceException("Cannot find iov " + id + ": " + e.getMessage());
 		}
