@@ -305,13 +305,20 @@ class PhysDBDriver():
                         if globaltagmaps is not None:
                             try:
                                 maplist = globaltagmaps
-###                                maplist = globaltagmaps['items']
+###maplist = globaltagmaps['items']
                                 if hasattr(maplist, '__iter__'):
                                     for amap in maplist:
-                                        traceList.append(('GlobalTag %s => Tag %s') % (mpobj.getValues()['name'],amap['systemTag']['name']))
+                                        if object == 'globaltags':
+                                        	globaltagname = mpobj.getValues()['name']
+                                        	tagname = amap['systemTag']['name']
+                                        else:
+                                        	tagname = mpobj.getValues()['name']
+                                        	globaltagname = amap['globalTag']['name']
+                                            
+                                        traceList.append(('GlobalTag %s => Tag %s') % (globaltagname,tagname))
                             except Exception, e:
-                                sys.exit("failed on looping over items: %s" % (str(e)))
-                                raise
+                                sys.exit("failed looping over items: %s" % (str(e)))
+                                raise e
                                 
 # Now dump the retrieved content
                 if response != 200 and response != 201:
