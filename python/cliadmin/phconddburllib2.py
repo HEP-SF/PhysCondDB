@@ -249,8 +249,7 @@ class PhysDBDriver():
                 else:
                     msg = ('FIND: cannot apply command to object %s ') % (object)
                     self.printmsg(msg,'red')
-
-                
+                    return -1        
                 
                 # load arguments and prepare the data structure for the GET request
                 # optional parameters like trace and expand are added
@@ -276,10 +275,10 @@ class PhysDBDriver():
 
                 if self.trace == 'off':   
                     if objList is None or len(objList) == 0:
-                        (objList,response) = self.resttools.getgtagtags(name,self.trace,self.expand)
+                        (objList,response) = self.resttools.getobject(name,self.trace,self.expand,object)
 
                 else:
-                    (obj,response) = self.resttools.getgtagtags(name,self.trace,self.expand)
+                    (obj,response) = self.resttools.getobject(name,self.trace,self.expand,object)
 
                     if self.debug:
                         msg = ('FIND: retrieved object from database %s ') % (obj)

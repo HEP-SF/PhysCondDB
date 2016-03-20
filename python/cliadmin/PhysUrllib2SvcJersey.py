@@ -1037,15 +1037,15 @@ class PhysUtils(object):
         response = self.__restserver.commitCalibration(params,'/calibration/commit')
         return response
     
-    def getgtagtags(self, globaltagname, trace, expand):
+    def getobject(self, name, trace, expand, object):
         data = {}
         data['trace']=trace
         data['expand']=expand
-        data['name']=globaltagname
+        data['name']=name
         obj = {}
         if self.__debug:
            print 'Select mappings using arguments ',data
-        (obj, response) = self.__restserver.get(data,'/globaltags')
+        (obj, response) = self.__restserver.get(data,'/'+object)
         return (obj, response)
 
     def getsystems(self, bytype, fieldname):

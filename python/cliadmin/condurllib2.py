@@ -229,7 +229,7 @@ class PhysDBDriver():
         msg = ('>>> Search files in GlobalTag %s using pattern %s') % (globaltagname,filenamepattern)
         self.printmsg(msg,'cyan')
         
-        (maplist, response) = self.resttools.getgtagtags(globaltagname,'on','true')
+        (maplist, response) = self.resttools.getobject(globaltagname,'on','true','globaltags')
         print 'Response is ',response
         if self.debug:
             print 'Dump the retrieved map list'
