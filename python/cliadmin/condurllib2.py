@@ -331,7 +331,7 @@ class PhysDBDriver():
                     since = calibargs[3]
                 if (len(calibargs) > 4):
                     sinceDescription = calibargs[4]
-                msg = ('INFO: calling commit with args: %s %s %s %s %s') (filename,pkgname,destpath,since,sinceDescription)
+                msg = ('INFO: calling commit with args: %s %s %s %s %s') % (filename,pkgname,destpath,since,sinceDescription)
                 self.printmsg(msg,'cyan')                
                 response = self.resttools.commit(filename,pkgname,destpath,since,sinceDescription)    
 ##                print 'Response: ',response                
