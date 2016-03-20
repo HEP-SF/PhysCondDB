@@ -23,7 +23,7 @@ import cStringIO
 import os.path
 
 from xml.dom import minidom
-#from clint.textui import colored
+##from clint.textui import colored
 from datetime import datetime
 
 from PhysUrllib2SvcJersey import PhysCurl,PhysUtils,GlobalTag,Tag,Iov,GtagMap,SystemDesc,Payload,PayloadData
@@ -90,6 +90,10 @@ class PhysDBDriver():
         print " - SHOW  <folder path> <tag-name> [tag-name defaults to _HEAD_00]"
         print "        ex: /MY/FOLDER/PATH : retrieve list of files in the folder showing their insertion time and datasize."
         print "    List files under a given folder (and tag)."
+        print " "
+        print " - DUMP  hash [hash of a file can be retrieved using LS and SHOW commands]"
+        print "        ex: anaash : dump the file in local directory."
+        print "    Dump the file in the local directory."
         print " "
         print " - COLLECT  <global tag name> <ASG global tag>"
         print "        ex: MyNewPkg-00-01 ASG-00-01: Dump the full directory structure for global tag in server file system."
@@ -170,6 +174,24 @@ class PhysDBDriver():
         self.args=args[1:]
 
 
+    def printmsg(self,msg,color):
+        try:
+          from clint.textui import colored
+          if color == 'cyan':
+          	print colored.cyan(msg)
+          elif color == 'blue':
+            print colored.blue(msg)
+          elif color == 'red':
+            print colored.red(msg)
+          elif color == 'green':
+            print colored.green(msg)
+          elif color == 'yellow':
+            print colored.yellow(msg)
+          else:
+          	print colored.cyan(msg)
+        except:
+          print msg
+
 ######## Utility functions
 
      
@@ -183,18 +205,19 @@ class PhysDBDriver():
         data={}
         # Search globaltagname in global tags
         msg = ('>>> Set lock for GlobalTag %s to %s using package name %s') % (globaltagname,lockstatus,package)
-        #print colored.cyan(msg)
-        print msg
+        self.printmsg(msg,'cyan')
         gtag = self.resttools.lockit(globaltagname,lockstatus)
-        print gtag, ' status ',gtag['lockstatus']
+##        print gtag, ' status ',gtag['lockstatus']
         msg = ('    + Lock status has been set to %s for GlobalTag %s : snapshot time is %s') % (gtag['lockstatus'],gtag['href'],gtag['snapshotTime'])
-        print msg
+        self.printmsg(msg,'green')
         if 'LOCKED' == lockstatus:
             print 'Lock status is LOCKED, then you can dump the global tag...',globaltagname
-            print 'Calling dump method using parameters ',gtag['name'],package
+##            print 'Calling dump method using parameters ',gtag['name'],package
             self.resttools.dumpgtag(gtag['name'],package)
         else:
-            print 'No dumping on directory is performed when unlocking....'
+            msg = 'INFO: No dumping on directory is performed when unlocking....'
+            self.printmsg(msg,'green')
+            
 #        print colored.green(msg)    
 
 # List files under global tag
@@ -204,8 +227,8 @@ class PhysDBDriver():
         data={}
         # Search for all files associated to global tag
         msg = ('>>> Search files in GlobalTag %s using pattern %s') % (globaltagname,filenamepattern)
-        #print colored.cyan(msg)
-        print msg
+        self.printmsg(msg,'cyan')
+        
         (maplist, response) = self.resttools.getgtagtags(globaltagname,'on','true')
         print 'Response is ',response
         if self.debug:
@@ -213,8 +236,8 @@ class PhysDBDriver():
             print maplist
         if len(maplist) == 0:
             msg = (' ===> GlobalTag %s has empty list of associated tags....') % (globaltagname)
-            #print colored.cyan(msg)
-            print msg
+            self.printmsg(msg,'cyan')
+
             
         globaltagmaps = maplist['globalTagMaps']
 ###        print 'Use list of mappings ',globaltagmaps
@@ -226,14 +249,14 @@ class PhysDBDriver():
             atagname = atag.getParameter('name')
             if filenamepattern not in atagname and filenamepattern != '*' :
                 msg = (' --- skip file for tag %s ') % (atagname)
-                #print colored.cyan(msg)
-                print msg
+                self.printmsg(msg,'cyan')
                 continue
+
             (objList, code) = self.resttools.gettagiovs(atag.getParameter('name'), globaltagname, self.trace, self.expand, self.t0, self.tMax)
             tagnameroot = atagname.split(self.taxextension)[0]
             msg = ' ==> Search for system by tag name root %s ' % tagnameroot
-            #print colored.cyan(msg)
-            print msg
+            self.printmsg(msg,'cyan')
+
             (systemobj, code) = self.resttools.getsystems('tag',tagnameroot)
             nodepath = systemobj['nodeFullpath']
             #print 'Node path for system is ',nodepath
@@ -263,10 +286,11 @@ class PhysDBDriver():
                 (datapyld, code) = self.resttools.getPayload(pyldhash,'false','off')
                 datapyldhref = datapyld['href']
                 
-                msg = ': [url] %s' % (datapyldhref)
+                msg = '   ---> [url] %s' % (datapyldhref)
                 ymsg = msg
 #                print coloredmsg2, colored.yellow(msg)
-                print coloredmsg2, msg
+                self.printmsg(coloredmsg2,'green')
+                self.printmsg(msg,'yellow')
 
 
     #print ' The object retrieved is ', iovobjlink
@@ -276,7 +300,8 @@ class PhysDBDriver():
 
     def execute(self):
         #print colored.blue(('Execute the command for action %s and arguments : %s ' ) % (self.action, str(self.args)))
-        print ('Execute the command for action %s and arguments : %s ' ) % (self.action, str(self.args))
+        msg = ('Execute the command for action %s and arguments : %s ' ) % (self.action, str(self.args))
+        self.printmsg(msg,'blue')
         start = datetime.now()
         self.restserver = PhysCurl(self.urlsvc, self.useSocks)
         self.resttools = PhysUtils(self.restserver)
@@ -296,8 +321,7 @@ class PhysDBDriver():
             try:
                 calibargs=self.args
                 msg = '>>> Call method %s using arguments %s ' % (self.action,calibargs)
-                #print colored.cyan(msg)
-                print msg
+                self.printmsg(msg,'cyan')
                 pkgname=calibargs[0]
                 filename=calibargs[1]
                 destpath=calibargs[2]
@@ -307,47 +331,42 @@ class PhysDBDriver():
                     since = calibargs[3]
                 if (len(calibargs) > 4):
                     sinceDescription = calibargs[4]
-                print 'calling commit: ',filename,' ',pkgname,' ',destpath,' ',since,' ',sinceDescription
+                msg = ('INFO: calling commit with args: %s %s %s %s %s') (filename,pkgname,destpath,since,sinceDescription)
+                self.printmsg(msg,'cyan')                
                 response = self.resttools.commit(filename,pkgname,destpath,since,sinceDescription)    
 ##                print 'Response: ',response                
                 msg = 'Response Code: %s ' % (response['code'])
-                #print colored.cyan(msg)
-                print msg
+                self.printmsg(msg,'cyan')                
                 if response['code'] != 200:
                     msg = 'Error in commit: %s ' % (response['code'])
-                    #print colored.red(msg)
-                    print msg
+                    self.printmsg(msg,'red')                
                     return -1
                 payload = response['payload']
                 tag = response['tag']
-                msg = 'Stored file %s of size %s in path %s -> tag %s @ time %s ' % (tag['objectType'],payload['datasize'],destpath,tag['name'],response['since'])
-                #print colored.green(msg)
-                print msg
+                msg = 'INFO: stored file %s of size %s in path %s -> tag %s @ time %s ' % (tag['objectType'],payload['datasize'],destpath,tag['name'],response['since'])
+                self.printmsg(msg,'green')                
                 return 0
                     
             except Exception, e:
-                sys.exit("failed: %s" % (str(e)))
-                raise
+                sys.exit("ERROR: failed %s" % (str(e)))
+                raise e
         
         elif (self.action=='TAG'):
             try:
                 calibargs=self.args
                 msg = '>>> Call method %s using arguments %s ' % (self.action,calibargs)
-                #print colored.cyan(msg)
-                print msg
+                self.printmsg(msg,'cyan')                
                 systemname=calibargs[0]
                 systemsglobaltag=calibargs[1]
                 response = self.resttools.calibtagandlink(systemsglobaltag,systemname)
                 msg = 'Response Code: %s ' % (response['code'])
-                #print colored.cyan(msg)
-                print msg
+                self.printmsg(msg,'cyan')                
                 if response['code'] != 200:
                     msg = 'Error in commit: %s ' % (response['code'])
-                    #print colored.red(msg)
-                    print msg
+                    self.printmsg(msg,'red')                
                     return -1
                 if self.debug:
-                    print 'Received response ',response
+                    print 'DEBUG: Received response ',response
                 maplist = response['globalTagMaps']
                 for amap in maplist:
                     tag = amap['systemTag']
@@ -357,56 +376,56 @@ class PhysDBDriver():
                 return 0
             
             except Exception, e:
-                sys.exit("failed: %s" % (str(e)))
-                raise
+                sys.exit("ERROR: failed %s" % (str(e)))
+                raise e
             
         elif (self.action=='LOCK'):
             try:
                 calibargs=self.args
                 msg = '>>> Call method %s using arguments %s ' % (self.action,calibargs)
-                #print colored.cyan(msg)
-                print msg
+                self.printmsg(msg,'cyan')                
                 if len(calibargs) < 2:
                     print 'Set default option for lockstatus to LOCKED (type -h for help)'
                     calibargs.append('LOCKED')
                 self.lockit(calibargs)
                     
             except Exception, e:
-                sys.exit("failed: %s" % (str(e)))
-                raise
+                sys.exit("ERROR: failed %s" % (str(e)))
+                raise e
+                
         elif (self.action=='LS'):
             try:
                 calibargs=self.args
                 msg = '>>> Call method %s using arguments %s ' % (self.action,calibargs)
-                #print colored.cyan(msg)
-                print msg
+                self.printmsg(msg,'cyan')                
                 if len(calibargs) < 2:
                     print 'Set default option for filename pattern (type -h for help)'
                     calibargs.append('*')
                 self.listcalib(calibargs)
             
             except Exception, e:
-                sys.exit("failed: %s" % (str(e)))
+                sys.exit("ERROR: failed %s" % (str(e)))
                 raise
 
         elif (self.action=='SHOW'):
             try:
                 calibargs=self.args
                 msg = '>>> Call method %s using arguments %s ' % (self.action,calibargs)
-                #print colored.cyan(msg)
-                print msg
+                self.printmsg(msg,'cyan')                
                 if len(calibargs) < 1:
-                    print 'Not enough arguments, type -h for help'
+                    msg = 'ERROR: Not enough arguments, type -h for help'
+                    self.printmsg(msg,'red')    
+                    return -1            
+                    
                 nodefullpath = calibargs[0]
                 msg = ' ==> Search for system by nodefullpath %s ' % nodefullpath
-                #print colored.cyan(msg)
-                print msg
+                self.printmsg(msg,'cyan')                
                 (systemobjlist, code) = self.resttools.getsystems('node',nodefullpath)
-                print 'Retrieved ',systemobjlist,' with code ',code
+                if self.debug:
+                    print 'DEBUG: Retrieved ',systemobjlist,' with code ',code
                 if code != 200:
-                    msg = 'Error in show while retrieving systems: %s ' % (code)
-                    #print colored.red(msg)
-                    print msg
+                    msg = 'ERROR: retrieving systems gave code %s ' % (code)
+                    self.printmsg(msg,'red')    
                     return -1
       
                 for systemobj in systemobjlist['items']:
@@ -414,51 +433,65 @@ class PhysDBDriver():
                     tagnameroot = systemobj['tagNameRoot']
                     tagname = tagnameroot+self.taxextension
                     msg = '>>> Check content for system %s using tag name root %s ' % (systemobj['nodeFullpath'],tagnameroot)
-                    #print colored.cyan(msg)
-                    print msg
+                    self.printmsg(msg,'cyan')                
+
                     params = {}
                     params['tag']=tagname
                     params['expand']=True
                     (iovlist, code) = self.restserver.getiovs(params, '/iovs/find')
                     if code != 200:
-                        msg = 'Error in show while retrieving iovs for %s : %s ' % (tagname,code)
-                        #print colored.red(msg)
-                        print msg
+                        msg = 'ERROR: retrieving iovs for %s gave code %s ' % (tagname,code)
+                        self.printmsg(msg,'red')  
+                        return -1  
                     else:
                         #print 'Retrieved iov list ',iovlist
                         iovitems = iovlist['items']
+                        msg = '>>> Entries :    file    |     size     |   insertionTime  |  since  : url' 
+                        self.printmsg(msg,'cyan')                
                         for iov in iovitems:
                             hash = iov['hash']
                             (payload,code)=self.resttools.getPayload(hash,'false','true')
-                            msg = '>>> Found entry for file %s with size %s inserted %s @ since %s [%s] ' % (payload['objectType'],payload['datasize'],payload['insertionTime'],iov['since'],payload['href'])
-                            #print colored.green(msg)
-                            print msg
+                            msg = '>>>  %s | %s | %s | %s : [%s] ' % (payload['objectType'],payload['datasize'],payload['insertionTime'],iov['since'],payload['href'])
+                            self.printmsg(msg,'green')                
+                        msg = '---------------------------------------------------' 
+                        self.printmsg(msg,'cyan')                
                             
-                
             except Exception, e:
-                sys.exit("failed: %s" % (str(e)))
+                sys.exit("ERROR: failed %s" % (str(e)))
                 raise
     
+        elif (self.action=='DUMP'):
+            try:
+                calibargs=self.args
+                msg = '>>> Call method %s using arguments %s ' % (self.action,calibargs)
+                self.printmsg(msg,'cyan')                
+                hash = calibargs[0]
+                (obj, response) = self.resttools.dump(hash)
+                msg = '>>> Payload information retrieved and stored in %s ' % (obj)
+                self.printmsg(msg,'cyan')                
+            	
+            except Exception, e:
+                sys.exit("ERROR: failed %s" % (str(e)))
+                raise e
+
         elif (self.action=='COLLECT'):
             try:
                 calibargs=self.args
                 msg = '>>> Call method %s using arguments %s ' % (self.action,calibargs)
-                #print colored.cyan(msg)
-                print msg
+                self.printmsg(msg,'cyan')                
                 globaltagname = calibargs[0]
                 asgglobaltagname = calibargs[1]
                 self.resttools.collect(globaltagname, asgglobaltagname)
             
             except Exception, e:
-                sys.exit("failed: %s" % (str(e)))
-                raise
+                sys.exit("ERROR: failed %s" % (str(e)))
+                raise e
 
         elif (self.action=='TAR'):
             try:
                 calibargs=self.args
                 msg = '>>> Call method %s using arguments %s ' % (self.action,calibargs)
-                #print colored.cyan(msg)
-                print msg
+                self.printmsg(msg,'cyan')                
                 globaltagname = calibargs[0]
                 package="none"
                 if len(calibargs)>1:
@@ -466,13 +499,12 @@ class PhysDBDriver():
                 self.resttools.gettar(globaltagname,package)
             
             except Exception, e:
-                sys.exit("failed: %s" % (str(e)))
+                sys.exit("ERROR: failed %s" % (str(e)))
                 raise
 
         else:
-            msg = ('Command %s not recognized, type -h for help') % self.action
-            #print colored.red(msg)
-            print msg
+            msg = ('ERROR: Command %s not recognized, type -h for help') % self.action
+            self.printmsg(msg,'red')                
             return -1
 
     def createObj(self, type, data):
@@ -501,7 +533,8 @@ class PhysDBDriver():
             val = anarg.split('=')[1]
             obj[key]=val
         
-        print 'Created python dictionary ',obj
+        if self.debug:
+           print 'DEBUG: Created python dictionary ',obj
         objinst = self.createObj(type,{})
         keys = objinst.getKeys()
         for akey in keys:
@@ -510,7 +543,8 @@ class PhysDBDriver():
                 outdata[akey] = obj[akey]
             else:
                 outdata[akey]=None
-        #print 'No value is defined for ',akey
+        if self.debug:
+           print 'DEBUG: No value is defined for ',akey
         return outdata
 
 

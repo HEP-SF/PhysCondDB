@@ -221,13 +221,6 @@ class PhysDBDriver():
         except:
           print msg
 
-        
-    def gettagiovs(self, data):
-        objList = []
-        print 'Select iovs using arguments ',data
-        objList = self.restserver.getiovs(data,'/iovs/find')
-        return objList
-
     def execute(self):
         msg = ('Execute the command for action %s and arguments : %s ' ) % (self.action, str(self.args))
         self.printmsg(msg,'cyan')
