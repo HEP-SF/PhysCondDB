@@ -336,12 +336,7 @@ class PhysDBDriver():
                     self.printmsg(msg,'cyan')
 
                     for amsg in traceList:
-                        try:
-                            from clint.textui import colored
-                            print colored.green(amsg)
-                        except:
-                            print 'Cannot use colored messages'
-                            print amsg   
+                        self.printmsg(msg,'green') 
             
             except Exception, e:
                 sys.exit("failed on action FIND: %s" % (str(e)))
@@ -368,7 +363,6 @@ class PhysDBDriver():
                 except:
                     print 'Cannot use colored messages'
                 print colorful_json
-#                print json.dumps(data)
                 
             except Exception, e:
                 sys.exit("LS failed: %s" % (str(e)))
@@ -471,7 +465,7 @@ class PhysDBDriver():
                 iovdata = self.createObjParsingArgs("iovs",iovobjparams)
                 pylddata = {}
                 pylddata = self.createObjParsingArgs("payload",pyldobjparams)
-                print 'created payload data ',pylddata
+##                print 'created payload data ',pylddata
                 params = {}
                 params['file'] = filename
                 params['tag'] = tag
@@ -496,20 +490,11 @@ class PhysDBDriver():
                 if object in [ 'globaltags', 'tags', 'systems', 'iovs', 'payload' ]:
                     print colored.cyan(msg)
                     msg = self.helpAdd(object);
-                    try:
-                        from clint.textui import colored
-                        print colored.green(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg   
+                    self.printmsg(msg,'green')
+                    
                 else:
                     msg = ('DESCRIBE: cannot apply command to object %s ') % (object)
-                    try:
-                        from clint.textui import colored
-                        print colored.red(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg   
+                    self.printmsg(msg,'red')
                     return                
             
             except Exception, e:
@@ -522,31 +507,15 @@ class PhysDBDriver():
                 object=self.args[0]
                 msg = ('DELETE: selected object is %s ') % (object)
                 if object in [ 'globaltags', 'tags', 'systems' ]:
-                    try:
-                        from clint.textui import colored
-                        print colored.green(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg   
+                    self.printmsg(msg,'green')
                 else:
                     msg = ('DELETE: cannot apply command to object %s ') % (object)
-                    try:
-                        from clint.textui import colored
-                        print colored.red(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg   
+                    self.printmsg(msg,'red')
                     return                
                 
                 id = self.args[1]
                 msg = ('DELETE: selected object id is %s ') % (id)
-                try:
-                    from clint.textui import colored
-                    print colored.cyan(msg)
-                except:
-                    print 'Cannot use colored messages'
-                    print msg   
-                
+                self.printmsg(msg,'cyan')
                 self.resttools.deleteObject(object,id)
             
             except Exception, e:
@@ -559,12 +528,7 @@ class PhysDBDriver():
                 gtagobject=self.args[0]
                 tagobject=self.args[1]
                 msg = ('LINK: perform association between %s and %s ') % (gtagobject,tagobject)
-                try:
-                    from clint.textui import colored
-                    print colored.cyan(msg)
-                except:
-                    print 'Cannot use colored messages'
-                    print msg   
+                self.printmsg(msg,'cyan')
                 data = {}
                 object = 'maps'
                 objparams = None
@@ -573,49 +537,24 @@ class PhysDBDriver():
                     objparams=self.args[2]
                 else:
                     msg = ('LINK: object parameters are missing %s ') % ("record=xxx;label=yyyy")
-                    try:
-                        from clint.textui import colored
-                        print colored.red(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg   
+                    self.printmsg(msg,'red')
                     return
+
                 msg = ('LINK: object parameters %s ') % (objparams)
-                try:
-                    from clint.textui import colored
-                    print colored.cyan(msg)
-                except:
-                    print 'Cannot use colored messages'
-                    print msg   
+                self.printmsg(msg,'cyan')
 
                 data = self.createObjParsingArgs(object,objparams)
-
                 (response) = self.resttools.link(gtagobject,tagobject,data)
                 
                 if response is None:
                     msg = ('Failed in linking the objects: unknown response, server not reached?')
-                    try:
-                        from clint.textui import colored
-                        print colored.red(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg   
+                    self.printmsg(msg,'red')
                 elif response['code']>220:
                     msg = ('Failed in linking the objects (HTTP code %d): %s ') % (response['code'],response['internalMessage'])
-                    try:
-                        from clint.textui import colored
-                        print colored.red(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg   
+                    self.printmsg(msg,'red')
                 else:
                     msg = ('LINK: performed association between %s and %s ') % (gtagobject,tagobject)
-                    try:
-                        from clint.textui import colored
-                        print colored.green(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg   
+                    self.printmsg(msg,'green')
             
             except Exception, e:
                 sys.exit("failed: %s" % (str(e)))
@@ -627,22 +566,11 @@ class PhysDBDriver():
                 gtagobject=self.args[0]
                 tagobject=self.args[1]
                 msg = ('UNLINK: remove association between %s and %s ') % (gtagobject,tagobject)
-                try:
-                    from clint.textui import colored
-                    print colored.green(msg)
-                except:
-                    print 'Cannot use colored messages'
-                    print msg   
+                self.printmsg(msg,'green')
                     
                 self.resttools.unlink(gtagobject,tagobject)
                 msg = ('UNLINK: removed association between %s and %s ') % (gtagobject,tagobject)
-                try:
-                    from clint.textui import colored
-                    print colored.green(msg)
-                except:
-                    print 'Cannot use colored messages'
-                    print msg   
-                    
+                self.printmsg(msg,'green')
             
             except Exception, e:
                 sys.exit("failed: %s" % (str(e)))
