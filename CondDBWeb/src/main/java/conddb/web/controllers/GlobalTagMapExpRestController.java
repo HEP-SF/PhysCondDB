@@ -29,7 +29,6 @@ import conddb.svc.dao.controllers.GlobalTagService;
 import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
-import conddb.web.resources.GlobalTagMapResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
 import conddb.web.resources.generic.GenericPojoResource;

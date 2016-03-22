@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import conddb.data.GlobalTagMap;
+import conddb.data.Payload;
 import conddb.data.SystemDescription;
 import conddb.data.Tag;
 import conddb.svc.dao.controllers.GlobalTagService;
@@ -32,7 +33,7 @@ import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
-import conddb.web.resources.SystemDescriptionResource;
+import conddb.web.resources.generic.GenericPojoResource;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -68,8 +69,7 @@ public class SystemDescriptionExpRestController extends BaseController {
 			SystemDescription saved = systemNodeService.insertSystemDescription(systemdescription);
 			saved.setResId(saved.getId().toString());
 			log.debug("Controller creating resource for inserted entity "+saved);
-			SystemDescriptionResource resource = (SystemDescriptionResource) springResourceFactory.getResource("system", info,
-					saved);
+			GenericPojoResource<SystemDescription> resource = (GenericPojoResource<SystemDescription>) springResourceFactory.getGenericResource(info, saved, 1, null);
 			return created(resource);
 		} catch (ConddbServiceException e) {
 			String msg = "Error creating system description resource using "+systemdescription.toString();
@@ -86,7 +86,6 @@ public class SystemDescriptionExpRestController extends BaseController {
 			@ApiParam(value = "id: id of the system description to be updated", required = true) 
 			@PathParam("system") String id, Map map)
 			throws ConddbWebException {
-		Response resp;
 		try {
 			log.info("Request for updating system "+id+" using "+map.size());
 			SystemDescription existing = systemNodeService.getSystemNodesByTagname(id);
@@ -103,8 +102,8 @@ public class SystemDescriptionExpRestController extends BaseController {
 			}
 			
 			existing = systemNodeService.insertSystemDescription(existing);
-			resp = Response.ok(new SystemDescriptionResource(info, existing), MediaType.APPLICATION_JSON).build();
-			return resp;
+			GenericPojoResource<SystemDescription> resource = (GenericPojoResource<SystemDescription>) springResourceFactory.getGenericResource(info, existing, 1, null);
+			return created(resource);
 		} catch (ConddbServiceException e) {
 			log.debug("Generate exception using an ConddbService exception..."+e.getMessage());
 			String msg = "Error updating system description resource: internal server exception !";

@@ -19,9 +19,6 @@ import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.Tag;
 import conddb.data.Iov;
-import conddb.data.Payload;
-import conddb.data.PayloadData;
-import conddb.data.SystemDescription;
 import conddb.utils.json.serializers.TimestampFormat;
 import conddb.web.resources.generic.GenericPojoResource;
 
@@ -44,39 +41,7 @@ public class SpringResourceFactory {
 
 	@ProfileExecution
 	public Link getResource(String resourceName, UriInfo info, Entity entity) {
-		if (resourceName.equals("globaltag")) {
-			entity.setResId(((GlobalTag)entity).getName());
-			GlobalTagResource resource = new GlobalTagResource(info,(GlobalTag)entity);
-			log.info("Create global tag resource ");
-			return resource;
-		} else if (resourceName.equals("globaltagmap")) {
-			entity.setResId(((GlobalTagMap)entity).getId().toString());
-			GlobalTagMapResource resource = new GlobalTagMapResource(info,(GlobalTagMap)entity);
-			log.info("Create global tag map resource");
-			return resource;			
-		} else if (resourceName.equals("tag")) {
-			entity.setResId(((Tag)entity).getName());
-			TagResource resource = new TagResource(info,(Tag)entity);
-			log.info("Create tag resource");
-			return resource;			
-		} else if (resourceName.equals("iov")) {
-			entity.setResId(((Iov)entity).getId().toString());
-			IovResource resource = new IovResource(info,(Iov)entity);
-			log.info("Create iov resource");
-			return resource;			
-		} else if (resourceName.equals("payload")) {
-			PayloadResource resource = new PayloadResource(info,(Payload)entity);
-			log.info("Create payload resource");
-			return resource;			
-		} else if (resourceName.equals("payloaddata")) {
-			PayloadDataResource resource = new PayloadDataResource(info,(PayloadData)entity);
-			log.info("Create payload data resource");
-			return resource;			
-		} else if (resourceName.equals("system")) {
-			SystemDescriptionResource resource = new SystemDescriptionResource(info,(SystemDescription)entity);
-			log.info("Create system resource");
-			return resource;			
-		} else if (resourceName.equals("generic-gt")) {
+		if (resourceName.equals("generic-gt")) {
 			GenericPojoResource<GlobalTag> resource = new GenericPojoResource<GlobalTag>(info,
 					entity,2,null);
 			log.info("Create generic globaltag resource");

@@ -32,7 +32,6 @@ import conddb.utils.collections.CollectionUtils;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
-import conddb.web.resources.GlobalTagMapResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
 import conddb.web.resources.generic.GenericPojoResource;
@@ -148,7 +147,7 @@ public class GlobalTagMapRestController  extends BaseController {
 	@Path("/{id}")
 	@ApiOperation(value = "Finds Tags to GlobalTag's mappings by id (integer)",
     notes = "This is ment essentially for internal usage when finding dependencies",
-    response = GlobalTagMapResource.class)
+    response = GlobalTagMap.class)
 	public Response getGlobalTagMapById(
 			@Context UriInfo info,
 			@ApiParam(value = "id: id of the association", required = true)

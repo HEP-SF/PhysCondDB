@@ -37,7 +37,6 @@ import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.svc.dao.repositories.PayloadRepository;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
-import conddb.web.resources.IovResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
 import conddb.web.resources.generic.GenericPojoResource;
@@ -76,8 +75,7 @@ public class IovExpRestController extends BaseController {
 			log.debug("Inserting iov "+iov);
 			Iov saved = iovService.insertIov(iov);
 			saved.setResId(saved.getId().toString());
-			IovResource resource = (IovResource) springResourceFactory.getResource("iov", info,
-					saved);
+			GenericPojoResource<Iov> resource = (GenericPojoResource<Iov>) springResourceFactory.getGenericResource(info, saved, 1, null);
 			return created(resource);
 		} catch (ConddbServiceException e) {
 			String msg = "Error creating IOV resource using "+iov.toString();
@@ -197,8 +195,7 @@ public class IovExpRestController extends BaseController {
 					iov.setSince(since);
 					iov.setSinceString(sincestr);
 					Iov saved = storePayload(storable, iov, tagname);
-					IovResource resource = (IovResource) springResourceFactory.getResource("iov", info,
-							saved);
+					GenericPojoResource<Iov> resource = (GenericPojoResource<Iov>) springResourceFactory.getGenericResource(info, saved, 1, null);
 					result =  created(resource);
 
 				} catch (ConddbServiceException e) {

@@ -24,10 +24,9 @@ import conddb.svc.dao.controllers.GlobalTagService;
 import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
-import conddb.web.resources.GlobalTagResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
-import conddb.web.resources.TagResource;
+import conddb.web.resources.generic.GenericPojoResource;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -65,8 +64,7 @@ public class CondAdminWebController extends BaseController {
 			this.log.info("CondAdminWebController processing request for cloning " + sourcegtag + " into " + destgtag);
 			this.globalTagExpertService.cloneGlobalTag(sourcegtag, destgtag);
 			GlobalTag cloned = this.globalTagService.getGlobalTag(destgtag);
-			GlobalTagResource resource = (GlobalTagResource) springResourceFactory.getResource("globaltag", info,
-					cloned);
+			GenericPojoResource<GlobalTag> resource = (GenericPojoResource) springResourceFactory.getGenericResource(info, cloned, 1, null);
 			return created(resource);			
 		} catch (ConddbServiceException e) {
 			String msg = "Error cloning globaltag resource "+sourcegtag;
@@ -96,8 +94,7 @@ public class CondAdminWebController extends BaseController {
 			this.log.info("CondAdminWebController processing request for cloning " + sourcetag + " into " + desttag);
 			this.globalTagExpertService.cloneTag(sourcetag, desttag,from,to,timetype);
 			Tag cloned = this.globalTagService.getTag(desttag);
-			TagResource resource = (TagResource) springResourceFactory.getResource("tag", info,
-					cloned);
+			GenericPojoResource<Tag> resource = (GenericPojoResource<Tag>) springResourceFactory.getGenericResource(info, cloned, 1, null);
 			return created(resource);			
 		} catch (ConddbServiceException e) {
 			String msg = "Error cloning tag resource "+sourcetag;

@@ -36,7 +36,6 @@ import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
-import conddb.web.resources.TagResource;
 import conddb.web.resources.generic.GenericPojoResource;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

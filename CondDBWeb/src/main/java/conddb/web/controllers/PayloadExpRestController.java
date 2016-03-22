@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
+import conddb.data.Iov;
 import conddb.data.Payload;
 import conddb.svc.dao.baserepository.PayloadDataBaseCustom;
 import conddb.svc.dao.controllers.IovService;
@@ -32,8 +33,8 @@ import conddb.utils.bytes.PayloadBytesHandler;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.Link;
-import conddb.web.resources.PayloadResource;
 import conddb.web.resources.SpringResourceFactory;
+import conddb.web.resources.generic.GenericPojoResource;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
@@ -119,7 +120,7 @@ public class PayloadExpRestController extends BaseController {
 			// We do not care too much since in that case the payload is simply already there
 			Payload stored = iovService.insertPayload(storable, storable.getData());
 
-			PayloadResource resource = (PayloadResource) springResourceFactory.getResource("payload", info, stored);
+			GenericPojoResource<Payload> resource = (GenericPojoResource<Payload>) springResourceFactory.getGenericResource(info, stored, 1, null);
 			return created(resource);
 		} catch (ConddbServiceException e) {
 			String msg = "Error creating payload resource using input file " + name;
