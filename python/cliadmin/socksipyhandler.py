@@ -14,6 +14,7 @@ import socks
 class SocksiPyConnection(httplib.HTTPConnection):
     def __init__(self, proxytype, proxyaddr, proxyport = None, rdns = True, username = None, password = None, *args, **kwargs):
         self.proxyargs = (proxytype, proxyaddr, proxyport, rdns, username, password)
+        #        print 'Init socks proxy connection class using ',self.proxyargs
         httplib.HTTPConnection.__init__(self, *args, **kwargs)
 
     def connect(self):
@@ -21,6 +22,9 @@ class SocksiPyConnection(httplib.HTTPConnection):
         self.sock.setproxy(*self.proxyargs)
         if isinstance(self.timeout, float):
             self.sock.settimeout(self.timeout)
+        #        print 'Try to connect using ',self.host, self.port
+        self.host = str(self.host)
+        #        print '<<< Try to connect using ',self.host, self.port
         self.sock.connect((self.host, self.port))
             
 class SocksiPyHandler(urllib2.HTTPHandler):

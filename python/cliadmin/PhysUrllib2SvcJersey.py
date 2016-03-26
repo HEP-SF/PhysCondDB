@@ -74,8 +74,10 @@ class PhysRestConnection:
         if self.__debug:
             print "DEBUG: Setting url ", url
         if 'http://' in str(url):
-            self.__url = url
+            #            print "DEBUG: Setting url overriding base URL: ", url
+            self.__url = str(url)
         else:
+            #            print "DEBUG: Setting url using baseurl ", self.__baseurl
             self.__url = self.__baseurl + url
         if self.__debug:
             print "DEBUG: URL after checking for http string: ", url
@@ -123,7 +125,9 @@ class PhysRestConnection:
         req = Request(self.__url)
         req.add_header("Accept",'application/json')
         try:
+            #            print 'Sending request ',req
             response = self.__opener.open(req)
+        #            print 'Received response '
         except HTTPError as e:
             print '====== HTTPError occurred     ======='
             print 'The server couldn\'t fulfill the request.'
@@ -143,7 +147,9 @@ class PhysRestConnection:
             raise e
         else:
         # everything is fine
+        #            print '...read response...'
             data = response.read()
+            #            print '...data...',data
             if self.__debug:
                 print 'DEBUG: Received data', data
             if data is '':
@@ -717,7 +723,9 @@ class PhysCurl(object):
             print 'DEBUG: follow href link ',params['href']
             print params
         url = (params['href'])
+        #        urlquoted = urllib.quote_plus(url,safe=':/')
         urlquoted = urllib.quote_plus(url,safe='=&?:/')
+        #print 'Using url ',url
         self.__curl.setUrl(urlquoted)
         return self.__curl.getData()
 
@@ -818,6 +826,9 @@ class PhysUtils(object):
             if self.__debug:
                 print 'DEBUG: Use url link ',url
             obj = self.__restserver.getlink(url)
+            if self.__debug:
+                print 'DEBUG: Retrieved object from link  ',obj
+            
             return obj
             
         # Assume that data is a list of items

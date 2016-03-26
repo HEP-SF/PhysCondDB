@@ -358,8 +358,15 @@ class socksocket(socket.socket):
         To select the proxy server use setproxy().
         """
         # Do a minimal input check first
+        #        print 'DEBUG from SOCKS: connect is called using ',destpair
+        #        print '  -- check one : ',(type(destpair) in (list,tuple)==False)
+        #print '  -- check two : ',(len(destpair)<2)
+        #print '  -- check thr : ',(type(destpair[0])!=str)
+        #print '  -- check fou : ',(type(destpair[1])!=int)
         if (type(destpair) in (list,tuple)==False) or (len(destpair)<2) or (type(destpair[0])!=str) or (type(destpair[1])!=int):
+            print 'ERROR from SOCKS: ',destpair
             raise GeneralProxyError((5,_generalerrors[5]))
+        
         if self.__proxy[0] == PROXY_TYPE_SOCKS5:
             if self.__proxy[2] != None:
                 portnum = self.__proxy[2]

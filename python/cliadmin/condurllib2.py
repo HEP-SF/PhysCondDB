@@ -270,9 +270,9 @@ class PhysDBDriver():
             print coloredmsg1
             for aniov in objList['items']:
                 counter = counter+1
-##                print ' The object link is ', aniov
+                #                print ' The object iov link is ', aniov
                 (iovobjlink, code) = self.resttools.loadItems(aniov)
-##                print 'IOV db link is  ',iovobjlink
+                #                print 'IOV db link is  ',iovobjlink
                 since = iovobjlink['since']
                 sincestr = iovobjlink['sinceString']
                 instime = iovobjlink['insertionTime']
@@ -405,7 +405,7 @@ class PhysDBDriver():
             
             except Exception, e:
                 sys.exit("ERROR: failed %s" % (str(e)))
-                raise
+                raise e
 
         elif (self.action=='SHOW'):
             try:
