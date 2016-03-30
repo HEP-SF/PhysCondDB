@@ -69,6 +69,7 @@ public class IovRestController extends BaseController {
 	public Response getIovsInTag(@Context UriInfo info,
 			@ApiParam(value = "tag: the tagname", required = true) @QueryParam("tag") final String id,
 			@ApiParam(value = "globaltag: the globaltag name", required = false) @DefaultValue("none") @QueryParam("globaltag") final String globaltagid,
+			@ApiParam(value = "snapshot: the snapshot time", required = false) @DefaultValue("-1") @QueryParam("snapshot") final Long snapt,
 			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false) @DefaultValue("false") @QueryParam("expand") boolean expand,
 			@ApiParam(value = "last: {niovs} loads only the last N iovs", required = false) @DefaultValue("-1") @QueryParam("last") final Integer niovs,
 			@ApiParam(value = "since: the string representing since time", required = false) @DefaultValue("0") @QueryParam("since") final String since,
@@ -90,6 +91,9 @@ public class IovRestController extends BaseController {
 				snapshotTime = gtag.getSnapshotTime();
 				log.debug("Setting snapshot time to " + snapshotTime + " for further queries based on globaltag id "
 						+ globaltagid);
+			} else if (snapt > -1) {
+				snapshotTime = new Timestamp(snapt);
+				log.debug("Setting snapshot time to " + snapshotTime + " from user input "+snapt);
 			}
 			if (until.equalsIgnoreCase("INF")) {
 				sincetime = new BigDecimal(since);

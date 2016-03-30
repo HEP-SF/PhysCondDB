@@ -60,6 +60,7 @@
         )
 )" />
 
+<!-- 
 	<Resource name="java/OraInt8r" 
 		auth="Container" 
 		type="javax.sql.DataSource"
@@ -94,7 +95,7 @@
                 (INSTANCE_NAME=INT8R1)
         )
 )" />
-
+ -->
 	<Resource name="java/HSQLDB" auth="Container" type="javax.sql.DataSource"
 		maxActive="100" maxIdle="30" maxWait="10000" username="SA" password=""
 		driverClassName="org.hsqldb.jdbcDriver" url="jdbc:hsqldb:mem:spring-playground" />
