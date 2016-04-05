@@ -22,7 +22,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 /**
@@ -30,10 +29,6 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
  */
 @Entity
 @Table(name = "PHCOND_PAYLOAD")
-//@NamedEntityGraph(name = "graph.detailed.payload", attributeNodes = { 
-//		  @NamedAttributeNode("data")
-//		  })
-
 @JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="hash", scope = Payload.class)
 public class Payload extends conddb.data.Entity implements java.io.Serializable {
 

@@ -19,6 +19,7 @@ package conddb.svc.dao.controllers;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.net.URI;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
@@ -33,11 +34,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import conddb.annotations.ProfileExecution;
 import conddb.data.GlobalTagStatus;
 import conddb.data.Iov;
 import conddb.data.Payload;
 import conddb.data.PayloadData;
 import conddb.data.Tag;
+import conddb.data.view.IovGroups;
+import conddb.svc.dao.baserepository.JdbcRepository;
 import conddb.svc.dao.baserepository.PayloadDataBaseCustom;
 import conddb.svc.dao.exceptions.ConddbServiceDataIntegrityException;
 import conddb.svc.dao.exceptions.ConddbServiceException;
@@ -67,6 +71,9 @@ public class IovService {
 	@Autowired
 	private PayloadBytesHandler payloadBytesHandler;
 
+	@Autowired
+	private JdbcRepository jdbcRepository;
+	
 	@Value( "${physconddb.upload.dir:/tmp}" )
 	private String SERVER_UPLOAD_LOCATION_FOLDER;
 
@@ -78,7 +85,8 @@ public class IovService {
 	 */
 	public Iov getIov(Long id) throws ConddbServiceException {
 		try {
-			return iovRepository.findOne(id);
+//			return iovRepository.findOne(id);
+			return iovRepository.findByIdFetchPayloadAndTag(id);
 		} catch (Exception e) {
 			throw new ConddbServiceException("Cannot find iov " + id + ": " + e.getMessage());
 		}
@@ -191,6 +199,11 @@ public class IovService {
 	public Payload createStorablePayload(String filename, InputStream uploadedInputStream, Payload apayload) throws ConddbServiceException {
 		try {
 			String outfname = filename + "-uploaded";
+			String fname[] = filename.split("/");
+			if (fname.length>0) {
+				outfname = fname[fname.length-1] + "-uploaded";
+			}
+			
 			String uploadedFileLocation = SERVER_UPLOAD_LOCATION_FOLDER+ "/" + outfname;
 			log.debug("Upload file location is "+SERVER_UPLOAD_LOCATION_FOLDER);
 //			payloadBytesHandler.saveToFile(uploadedInputStream, uploadedFileLocation);
@@ -331,6 +344,7 @@ public class IovService {
 	}
 
 	@Transactional(rollbackFor= ConddbServiceException.class)
+	@ProfileExecution
 	public Payload insertPayload(Payload entity, PayloadData pylddata) throws ConddbServiceException {
 		try {
 			// Assume that hash key is already filled
@@ -349,6 +363,16 @@ public class IovService {
 			ConddbServiceException ex = new ConddbServiceException(e.getMessage());
 			ex.initCause(e);
 			throw ex;
+		}
+	}
+	
+	public List<IovGroups> getIovGroupsForTag(String tagname) throws ConddbServiceException {
+		try {
+			List<IovGroups> entitylist = jdbcRepository.selectGroups2(tagname);
+			log.debug("Retrieved group list of size "+entitylist.size());
+			return entitylist;
+		} catch (Exception e) {
+			throw new ConddbServiceException(e.getMessage());
 		}
 	}
 	

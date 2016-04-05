@@ -29,9 +29,9 @@ import conddb.utils.collections.CollectionUtils;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
-import conddb.web.resources.GlobalTagResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
+import conddb.web.resources.generic.GenericPojoResource;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -73,15 +73,16 @@ public class GlobalTagRestController extends BaseController {
 	public Response listGlobalTags(@Context UriInfo info,
 			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false) @DefaultValue("false") @QueryParam("expand") boolean expand)
 					throws ConddbWebException {
+
 		this.log.info("GlobalTagRestController processing request for global tag list (expansion = " + expand + ")");
+
 		Collection<GlobalTag> globaltags = getGlobalTagList(null);
 		if (globaltags == null || globaltags.size() == 0) {
 			String msg = "Empty globaltags collection";
 			throw buildException(msg, msg, Response.Status.NOT_FOUND);
 		}
 		CollectionResource resource = listToCollection(globaltags, expand, info);
-		Response result = Response.status(Response.Status.OK).entity(resource).build();
-		return result;
+		return ok(resource);
 	}
 
 	protected Response doTask(String globaltagname, boolean expand, String trace, UriInfo info) throws ConddbWebException {
@@ -93,16 +94,16 @@ public class GlobalTagRestController extends BaseController {
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
 			CollectionResource collres = listToCollection(gtaglist, expand, info);
-			result = created(collres);
+			result = ok(collres);
 		} else {
 			GlobalTag entity = getGlobalTag(globaltagname, trace);
 			if (entity == null) {
 				String msg = "Global Tag "+globaltagname+" not found.";
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
-			GlobalTagResource gtagres = (GlobalTagResource) springResourceFactory.getResource("globaltag", info,
+			GenericPojoResource<GlobalTag> resource = (GenericPojoResource) springResourceFactory.getResource("generic-gt", info,
 					entity);
-			result = created(gtagres);
+			result = ok(resource);
 		}
 		return result;
 	}
@@ -116,7 +117,7 @@ public class GlobalTagRestController extends BaseController {
 				gtaglist = CollectionUtils.iterableToCollection(globalTagService.getGlobalTagByNameLike(globaltagname));
 			}
 		} catch (ConddbServiceException e) {
-			log.error("Cannot retrieve global tag list for patter " + globaltagname);
+			log.error("Cannot retrieve global tag list for pattern " + globaltagname);
 		}
 		return gtaglist;
 	}
@@ -148,7 +149,8 @@ public class GlobalTagRestController extends BaseController {
 		for (GlobalTag globaltag : globaltags) {
 			globaltag.setResId(globaltag.getName());
 			if (expand) {
-				items.add(springResourceFactory.getResource("globaltag", info, globaltag));
+				GenericPojoResource<GlobalTag> resource = (GenericPojoResource<GlobalTag>) springResourceFactory.getGenericResource(info, globaltag, 1, null);
+				items.add(resource);
 			} else {
 				items.add(springResourceFactory.getResource("link", info, globaltag));
 			}

@@ -12,6 +12,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -26,13 +27,12 @@ import conddb.data.GlobalTagMap;
 import conddb.data.Tag;
 import conddb.svc.dao.controllers.GlobalTagAdminService;
 import conddb.svc.dao.controllers.GlobalTagService;
-import conddb.svc.dao.exceptions.ConddbServiceDataIntegrityException;
 import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
-import conddb.web.resources.TagResource;
+import conddb.web.resources.generic.GenericPojoResource;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -51,13 +51,12 @@ public class TagExpRestController extends BaseController {
 	@Autowired
 	private GlobalTagService globalTagService;
 	@Autowired
-	private GlobalTagAdminService globalTagAdminService;
-	@Autowired
 	private SpringResourceFactory springResourceFactory;
 	
 	
 	@POST
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path(Link.TAGS)
 	@ApiOperation(value = "Create a new Tag.",
     notes = "Creation requires the full needed information in json.",
@@ -65,9 +64,7 @@ public class TagExpRestController extends BaseController {
 	public Response create(@Context UriInfo info, Tag tag) throws ConddbWebException {
 		try {
 			Tag saved = globalTagService.insertTag(tag);
-			saved.setResId(saved.getName());
-			TagResource resource = (TagResource) springResourceFactory.getResource("tag", info,
-					saved);
+			GenericPojoResource<Tag> resource = (GenericPojoResource) springResourceFactory.getGenericResource(info, saved, 0, null);
 			return created(resource);
 		} catch (ConddbServiceException e) {
 			String msg = "Error creating tag resource using "+tag.toString();
@@ -80,6 +77,7 @@ public class TagExpRestController extends BaseController {
 	@Path(Link.TAGS+"/{id}")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@ApiOperation(value = "Update an existing Tag.",
     notes = "Requires in the input json the needed fields to be updated. Cannot update a locked tag.",
     response = Tag.class)
@@ -87,8 +85,7 @@ public class TagExpRestController extends BaseController {
 			@ApiParam(value = "id: the name of the tag to be updated", required = true)
 			@PathParam("id") String id, Map map)
 			throws ConddbWebException {
-		Response resp;
-		ConddbWebException ex = new ConddbWebException();
+		new ConddbWebException();
 		try {
 			log.info("Request for updating tag "+id+" using "+map.size());
 			Tag existing = globalTagService.getTag(id);
@@ -125,34 +122,40 @@ public class TagExpRestController extends BaseController {
 				existing.setEndOfValidity(value);
 			}
 			existing = globalTagService.insertTag(existing);
-			resp = Response.ok(new TagResource(info, existing), MediaType.APPLICATION_JSON).build();
+			GenericPojoResource<Tag> resource = (GenericPojoResource) springResourceFactory.getGenericResource(info, existing, 0, null);
+			return ok(resource);
 		} catch (ConddbServiceException e) {
 			log.debug("Generate exception using an ConddbService exception..."+e.getMessage());
 			String msg = "Error updating tag resource: internal server exception !";
 			throw buildException(msg+" \n "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
-		return resp;
 	}
 
 	@Path(Link.TAGS+"/{id}")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@DELETE
 	@ApiOperation(value = "Delete a tag.",
     notes = "It should be used on one tag at the time. This method is meant for administration purposes.",
     response=Tag.class)
-	public Response deleteTag(
+	public Response deleteTag(@Context UriInfo info, 
 			@ApiParam(value = "id: the name of the tag to be updated", required = true)
-			@PathParam("id") Long id) throws ConddbWebException {
-		Response resp;
-		Tag existing = null;
+			@PathParam("id") String id) throws ConddbWebException {
 		try {
 			Tag entity = globalTagService.getTag(id);
 			if (entity == null) {
 				String msg = "Error in removing a tag resource: resource not found with id "+id;
-				throw buildException(msg, msg, Response.Status.NOT_MODIFIED);
+				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
-			existing = globalTagService.deleteTag(entity);
-			resp = Response.ok(existing).build();
-			return resp;
+			Tag entitywithmaps = globalTagService.getTagFetchGlobalTagsWithLock(entity.getName());
+			if (entitywithmaps.getGlobalTagMaps() != null && entitywithmaps.getGlobalTagMaps().size()>0) {
+				String msg = "Error in removing a tag resource: there is a global tag locked associated to it "+id;
+				throw buildException(msg, msg, Response.Status.PRECONDITION_FAILED);				
+			}
+			Tag removed = null;
+			removed = globalTagService.deleteTag(entity);
+			GenericPojoResource<Tag> resource = (GenericPojoResource) springResourceFactory.getGenericResource(info, removed, 0, null);
+			return ok(resource);
+			
 		} catch (ConddbServiceException e) {
 			log.debug("Generate exception using an ConddbService exception..."+e.getMessage());
 			String msg = "Error removing a tag resource: internal server exception !";
@@ -160,5 +163,4 @@ public class TagExpRestController extends BaseController {
 		}
 
 	}
-
 }

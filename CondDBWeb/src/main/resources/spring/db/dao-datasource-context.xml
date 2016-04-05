@@ -95,6 +95,4 @@
 			class="conddb.utils.PropertyConfigurator" scope="singleton" factory-method="getInstance">
 		</bean>
 	</beans>
-	
-
 </beans>

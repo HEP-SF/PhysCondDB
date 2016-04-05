@@ -16,28 +16,67 @@
 package conddb.web.config;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
 
+import conddb.data.Entity;
 import conddb.data.ErrorMessage;
 import conddb.web.exceptions.ConddbWebException;
+import conddb.web.resources.CollectionResource;
 import conddb.web.resources.Link;
+import conddb.web.resources.generic.GenericPojoResource;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
 
 public abstract class BaseController {
 
-    protected Response created(Link resource) {
-        String href = (String)resource.get("href");
-        URI uri = URI.create(href);
-        return Response.created(uri).status(Response.Status.OK).entity(resource).build();
-    }
+	protected Response created(Link resource) {
+		String href = (String) resource.get("href");
+		URI uri = URI.create(href);
+		return Response.created(uri).status(Response.Status.CREATED).entity(resource).build();
+	}
 
-    protected ConddbWebException buildException(String msg, String internalmsg, Response.Status status) {
-    	ConddbWebException ex = new ConddbWebException(msg);
+	protected Response updated(Link resource) {
+		String href = (String) resource.get("href");
+		URI uri = URI.create(href);
+		return Response.created(uri).status(Response.Status.ACCEPTED).entity(resource).build();
+	}
+
+	protected Response ok(Link resource) {
+		String href = (String) resource.get("href");
+		URI uri = URI.create(href);
+		return Response.created(uri).status(Response.Status.OK).entity(resource).build();
+	}
+	
+	protected Response response(Link resource, Response.StatusType status) {
+		String href = (String) resource.get("href");
+		URI uri = URI.create(href);
+		return Response.created(uri).status(status).entity(resource).build();
+	}
+
+	protected ConddbWebException buildException(String msg, String internalmsg, Response.Status status) {
+		ConddbWebException ex = new ConddbWebException(msg);
 		ErrorMessage error = new ErrorMessage(msg);
 		error.setCode(status.getStatusCode());
 		error.setInternalMessage(internalmsg);
 		ex.setStatus(status);
 		ex.setErrMessage(error);
-		return ex;    	
-    }
+		return ex;
+	}
+
+	protected <T extends Entity> CollectionResource listToCollection(Collection<T> coll, boolean expand,
+			UriInfo info, String subPath) {
+		Collection<Link> items = new ArrayList<Link>(coll.size());
+		for (T entity : coll) {
+			if (expand) {
+				GenericPojoResource<Entity> resource = new GenericPojoResource<Entity>(info, entity);
+				items.add(resource);
+			} else {
+				Link link = new Link(info, entity);
+				items.add(link);
+			}
+		}
+		return new CollectionResource(info,subPath,items);
+	}
 }

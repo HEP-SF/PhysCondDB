@@ -25,6 +25,16 @@ import conddb.data.Tag;
 public interface IovBaseRepository extends CondDBPageAndSortingRepository<Iov, Long> {
 
 	/**
+	 * 
+	 * @param iovid
+	 *            The ID of the payload.
+	 * 
+	 * @return The corresponding IOV with the associated payload and tag objects.
+	 */
+	@Query("select iv from Iov iv join fetch iv.payload join fetch iv.tag where iv.id = :id")
+	Iov findByIdFetchPayloadAndTag(@Param("id") Long iovid);
+
+	/**
 	 * TODO: May be hide this method to clients.
 	 * 
 	 * @param tagname

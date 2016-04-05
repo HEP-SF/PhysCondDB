@@ -36,9 +36,12 @@ public interface TagBaseRepository extends CondDBPageAndSortingRepository<Tag, L
 //			+ " and (iovs.since > :from and iovs.since <= :to ")
 //    public Tag findByNameAndFetchIovsEagerlyBetweenRange(@Param("name") String name, @Param("from") BigDecimal from, @Param("to") BigDecimal to);
 	
-	@Query("SELECT distinct p FROM Tag p JOIN FETCH p.globalTagMaps maps WHERE p.name = (:name)")
+	@Query("SELECT distinct p FROM Tag p JOIN FETCH p.globalTagMaps maps JOIN FETCH maps.globalTag WHERE p.name = (:name)")
 	public Tag findByNameAndFetchGlobalTagsEagerly(@Param("name") String name);
 
+	@Query("SELECT distinct p FROM Tag p JOIN p.globalTagMaps maps WHERE maps.globalTag.name = (:name)")
+	public List<Tag> findByGlobalTagName(@Param("name") String name);
+	
 	@Query("SELECT distinct p FROM Tag p JOIN FETCH p.globalTagMaps maps WHERE p.name = (:name) "+
 	" AND maps.globalTag.lockstatus=(:lock)")
 	public Tag findByNameAndFetchGlobalTagsWithLock(@Param("name") String name, @Param("lock") String status);

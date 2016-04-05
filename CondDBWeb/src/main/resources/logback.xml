@@ -1,42 +1,65 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- configuration file for LogBack (slf4J implementation)
-See here for more details: http://gordondickens.com/wordpress/2013/03/27/sawing-through-the-java-loggers/ -->
+<!-- configuration file for LogBack (slf4J implementation) See here for more 
+	details: http://gordondickens.com/wordpress/2013/03/27/sawing-through-the-java-loggers/ -->
 <configuration scan="true" scanPeriod="30 seconds">
 
-    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
-        <resetJUL>true</resetJUL>
-    </contextListener>
+	<contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+		<resetJUL>true</resetJUL>
+	</contextListener>
 
-    <!-- To enable JMX Management -->
-    <jmxConfigurator/>
+	<!-- To enable JMX Management -->
+	<jmxConfigurator />
+	<appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<Pattern>.%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg %n
+			</Pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>TRACE</level>
+		</filter>
+	</appender>
 
-        <appender name="consoleAppender" class="ch.qos.logback.core.ConsoleAppender">
-                <encoder>
-                        <Pattern>.%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg %n
-                        </Pattern>
-                </encoder>
-                <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-                        <level>INFO</level>
-                </filter>
-        </appender>
+	<appender name="fileAppender"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${catalina.base}/logs/phcond-rest-api.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<FileNamePattern>phcond-rest-api.%d{yyyy-MM-dd}.log</FileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<encoder>
+			<Pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{35} - %msg %n
+			</Pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>TRACE</level>
+		</filter>
+	</appender>
 
-<!--     <appender name="console" class="ch.qos.logback.core.ConsoleAppender"> -->
-<!--         <encoder> -->
-<!--             <pattern>%-5level %logger{0} - %msg%n</pattern> -->
-<!--         </encoder> -->
-<!--     </appender> -->
+	<!-- <appender name="console" class="ch.qos.logback.core.ConsoleAppender"> -->
+	<!-- <encoder> -->
+	<!-- <pattern>%-5level %logger{0} - %msg%n</pattern> -->
+	<!-- </encoder> -->
+	<!-- </appender> -->
 
 	<!--<logger name="org.hibernate" level="debug"/> -->
-   <!-- Uncomment and add your logger here:
-    <logger name="org.springframework.samples.service.service" level="debug"/> -->
-    <logger name="org.hibernate" level="warn"/> 
+	<!-- Uncomment and add your logger here: <logger name="org.springframework.samples.service.service" 
+		level="debug"/> -->
+	<logger name="org.hibernate" level="warn" />
+	<logger name="org.springframework" level="warn" />
 
-        <logger name="conddb" additivity="false">
-            <level value="DEBUG" />
-                <appender-ref ref="consoleAppender" />
-        </logger>
+	<logger name="conddb.web.resources.generic" additivity="false">
+		<level value="DEBUG" />
+		<appender-ref ref="fileAppender" />
+		<appender-ref ref="consoleAppender" />
+	</logger>
+	<logger name="conddb" additivity="false">
+		<level value="DEBUG" />
+		<appender-ref ref="fileAppender" />
+		<appender-ref ref="consoleAppender" />
+	</logger>
 
-    <root level="INFO">
-        <appender-ref ref="consoleAppender"/>
-    </root>
+	<root level="DEBUG">
+		<appender-ref ref="consoleAppender" />
+		<appender-ref ref="fileAppender" />
+	</root>
 </configuration>

@@ -27,13 +27,14 @@ from xml.dom import minidom
 #from clint.textui import colored
 from datetime import datetime
 
-from PhysUrllib2SvcJersey import PhysCurl,GlobalTag,Tag,Iov,GtagMap,SystemDesc,Payload,PayloadData
+from PhysUrllib2SvcJersey import PhysCurl,PhysUtils,GlobalTag,Tag,Iov,GtagMap,SystemDesc,Payload,PayloadData
 
 class PhysDBDriver():
     def __init__(self):
     # process command line options
         try:
             self.restserver = {}
+            self.resttools = {}
             self._command = sys.argv[0]
             self.useSocks = False
             self.t0 = 0
@@ -207,60 +208,27 @@ class PhysDBDriver():
         self.action=args[0].upper()
         self.args=args[1:]
         
-    
-    def loadItems(self, data):
-    # Assume that data is a list of items
-        for anobj in data:
-            print anobj
-            href = anobj['href']
-            url = {}
-            url['href'] = href
-            print 'Use url link ',url
-            obj = self.restserver.getlink(url)
-            print obj
-
-    def lockit(self, params):
-        globaltagname=params[0]
-        lockstatus=params[1]
-        data={}
-        # Search globaltagname in global tags
-        print 'Search for global tag name ',globaltagname
-        data['lockstatus']=lockstatus
-        gtag = self.restserver.addJsonEntity(data,'/globaltags/'+globaltagname)
-        print 'Updated status of global tag ', gtag
-
-
-    def gettagiovs(self, data):
-        objList = []
-        print 'Select iovs using arguments ',data
-        objList = self.restserver.getiovs(data,'/iovs/find')
-        return objList
-
-    def getgtagtags(self, data):
-        obj = {}
-        print 'Select mappings using arguments ',data
-        obj = self.restserver.get(data,'/globaltags')
-        mpobj = self.createObj('globaltags',obj)
-        maplist=[]
-        if mpobj.getValues()['globalTagMaps'] is not None:
-            maplist = mpobj.getValues()['globalTagMaps']
-            for amap in maplist:
-                atag = Tag(amap['systemTag'])
-                gtag = GlobalTag(amap['globalTag'])
-                print atag.toJson()
-        return maplist
+    def printmsg(self,msg,color):
+        try:
+          from clint.textui import colored
+          if color == 'cyan':
+          	print colored.cyan(msg)
+          elif color == 'blue':
+            print colored.blue(msg)
+          elif color == 'red':
+            print colored.red(msg)
+            
+        except:
+          print msg
 
     def execute(self):
         msg = ('Execute the command for action %s and arguments : %s ' ) % (self.action, str(self.args))
-        try:
-            from clint.textui import colored
-            print colored.blue(msg)
-        except:
-            print 'Cannot use colored messages'
-            print msg
+        self.printmsg(msg,'cyan')
             
         start = datetime.now()
         self.restserver = PhysCurl(self.urlsvc, self.useSocks)
+        self.resttools = PhysUtils(self.restserver)
+        
         if self.debug:
             self.restserver.setdebug(True)
         
@@ -277,22 +245,11 @@ class PhysDBDriver():
                 object=self.args[0]
                 msg = ('FIND: selected object is %s ') % (object)
                 if object in [ 'globaltags', 'tags', 'systems' ]:
-                    try:
-                        from clint.textui import colored
-                        print colored.cyan(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg
+                    self.printmsg(msg,'cyan')
                 else:
                     msg = ('FIND: cannot apply command to object %s ') % (object)
-                    try:
-                        from clint.textui import colored
-                        print colored.red(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg
-                    return
-                
+                    self.printmsg(msg,'red')
+                    return -1        
                 
                 # load arguments and prepare the data structure for the GET request
                 # optional parameters like trace and expand are added
@@ -300,12 +257,7 @@ class PhysDBDriver():
                 if len(self.args) > 1:
                     name=self.args[1]
                     msg = ('FIND: selected id is %s ') % (name)
-                    try:
-                        from clint.textui import colored
-                        print colored.cyan(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg
+                    self.printmsg(msg,'cyan')
                         
                     if '%' in name:
                         self.trace='off'
@@ -315,70 +267,64 @@ class PhysDBDriver():
                     self.trace='off'
                     print 'Set trace=off because it cannot trace on generic global tag list, only on single object'
                     
-                    
-                data = {}
-                data['trace']=self.trace
-                data['expand']=self.expand
-                data['name']=name
                 objList = []
                 traceList = []
                 msg = ('FIND: load data using trace %s ') % (self.trace)
-                try:
-                    from clint.textui import colored
-                    print colored.cyan(msg)
-                except:
-                    print 'Cannot use colored messages'
-                    print msg
+                self.printmsg(msg,'cyan')
+
 
                 if self.trace == 'off':   
                     if objList is None or len(objList) == 0:
-                        (objList,response) = self.restserver.get(data,'/'+object)
+                        (objList,response) = self.resttools.getobject(name,self.trace,self.expand,object)
 
                 else:
-                    (obj,response) = self.restserver.get(data,'/'+object)
+                    (obj,response) = self.resttools.getobject(name,self.trace,self.expand,object)
+
                     if self.debug:
                         msg = ('FIND: retrieved object from database %s ') % (obj)
-                        try:
-                            from clint.textui import colored
-                            print colored.cyan(msg)
-                        except:
-                            print 'Cannot use colored messages'
-                            print msg
-                        raise
+                        self.printmsg(msg,'cyan')
+                        
                     if obj is None:
                         msg = ('FIND: error, cannot find any object in database for type %s ') % (object)
-                        try:
-                            from clint.textui import colored
-                            print colored.red(msg)
-                        except:
-                            print 'Cannot use colored messages'
-                            print msg
-                        raise
+                        self.printmsg(msg,'red')
+
                     
                     objList.append(obj)
                     # If trace is active, perform a special dump for the trace
                     if object in [ 'globaltags', 'tags' ]:
+                        if self.debug:
+                            msg = ('FIND: create object of type %s from %s ') % (object,obj)
+                            self.printmsg(msg,'cyan')
+
                         mpobj = self.createObj(object,obj)
+                        if self.debug:
+                            msg = ('FIND: created object %s ') % (mpobj)
+                            self.printmsg(msg,'cyan')
+                            
                         globaltagmaps = mpobj.getValues()['globalTagMaps']
                         if globaltagmaps is not None:
                             try:
-                                maplist = globaltagmaps['items']
+                                maplist = globaltagmaps
+###maplist = globaltagmaps['items']
                                 if hasattr(maplist, '__iter__'):
                                     for amap in maplist:
-                                        traceList.append(('GlobalTag %s => Tag %s') % (amap['globalTagName'],amap['tagName']))
+                                        if object == 'globaltags':
+                                        	globaltagname = mpobj.getValues()['name']
+                                        	tagname = amap['systemTag']['name']
+                                        else:
+                                        	tagname = mpobj.getValues()['name']
+                                        	globaltagname = amap['globalTag']['name']
+                                            
+                                        traceList.append(('GlobalTag %s => Tag %s') % (globaltagname,tagname))
                             except Exception, e:
-                                sys.exit("failed on looping over items: %s" % (str(e)))
-                                raise
+                                sys.exit("failed looping over items: %s" % (str(e)))
+                                raise e
                                 
 # Now dump the retrieved content
                 if response != 200 and response != 201:
                     msg = ('FIND: error in data retrieval %s ') % (response)
-                    try:
-                        from clint.textui import colored
-                        print colored.red(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg
+                    self.printmsg(msg,'red')
+
                     return
                 json_string = json.dumps(objList,sort_keys=True,indent=4, separators=(',', ': '))
                 colorful_json = json_string
@@ -393,19 +339,10 @@ class PhysDBDriver():
                 
                 if len(traceList) > 0:
                     msg = ('FIND: found list of globaltags to tags associations')
-                    try:
-                        from clint.textui import colored
-                        print colored.cyan(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg
+                    self.printmsg(msg,'cyan')
+
                     for amsg in traceList:
-                        try:
-                            from clint.textui import colored
-                            print colored.green(amsg)
-                        except:
-                            print 'Cannot use colored messages'
-                            print amsg   
+                        self.printmsg(msg,'green') 
             
             except Exception, e:
                 sys.exit("failed on action FIND: %s" % (str(e)))
@@ -419,22 +356,11 @@ class PhysDBDriver():
                 if len(self.args) == 2:
                     globaltag=self.args[1]
                 msg = ('LS: use tag %s and global tag  %s !') % (tag,globaltag)
-                try:
-                    from clint.textui import colored
-                    print colored.cyan(msg)
-                except:
-                    print 'Cannot use colored messages'
-                    print msg   
-                    
-                data = {}
-                data['trace']=self.trace
-                data['expand']=self.expand
-                data['tag']=tag
-                data['globaltag']=globaltag
-                data['since']=self.t0
-                data['until']=self.tMax
-
-                objList=self.gettagiovs(data)
+                self.printmsg(msg,'cyan')
+      
+                (objList, code)=self.resttools.gettagiovs(tag,globaltag,self.trace,self.expand,self.t0,self.tMax)
+                if code > 220:
+                	raise Exception('Wrong return code from server ',code)
                 json_string = json.dumps(objList,sort_keys=True,indent=4, separators=(',', ': '))
                 colorful_json = json_string
                 try:
@@ -443,26 +369,21 @@ class PhysDBDriver():
                 except:
                     print 'Cannot use colored messages'
                 print colorful_json
-#                print json.dumps(data)
                 
             except Exception, e:
                 sys.exit("LS failed: %s" % (str(e)))
-                raise
+                raise e
             
         elif self.action == 'LOCK':
             try:
                 calibargs=self.args
                 msg = '>>> Call method %s using arguments %s ' % (self.action,calibargs)
-                try:
-                    from clint.textui import colored
-                    print colored.cyan(msg)
-                except:
-                    print 'Cannot use colored messages'
-                    print msg   
+                self.printmsg(msg,'cyan')
+  
                 if len(calibargs) < 2:
                     print 'Set default option for lockstatus to LOCKED (type -h for help)'
                     calibargs.append('LOCKED')
-                self.lockit(calibargs)
+                self.resttools.lockit(calibargs[0],calibargs[1])
                     
             except Exception, e:
                 sys.exit("failed: %s" % (str(e)))
@@ -474,24 +395,14 @@ class PhysDBDriver():
                 object=self.args[0]
                 msg = ('ADD: selected object is %s ') % (object)
                 if object in [ 'globaltags', 'tags', 'systems' ]:
-                    try:
-                        from clint.textui import colored
-                        print colored.cyan(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg   
+                    self.printmsg(msg,'cyan')
+  
                 else:
                     msg = ('ADD: cannot apply command to object %s ') % (object)
-                    try:
-                        from clint.textui import colored
-                        print colored.red(msg)
-                        msg = ('ADD: to insert an IOV + Payload use STORE, see --help')
-                        print colored.cyan(msg) 
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg   
-                        msg = ('ADD: to insert an IOV + Payload use STORE, see --help')
-                        print msg
+                    self.printmsg(msg,'red')
+                    msg = ('ADD: to insert an IOV + Payload use STORE, see --help')
+                    self.printmsg(msg,'cyan')
+                    
                     return
 
                 objparams = None
@@ -499,28 +410,20 @@ class PhysDBDriver():
                     objparams=self.args[1]
                     
                 msg = ('ADD: object parameters %s ') % (objparams)
-                try:
-                    from clint.textui import colored
-                    print colored.cyan(msg)
-                except:
-                    print 'Cannot use colored messages'
-                    print msg   
+                self.printmsg(msg,'cyan')
+                  
                 data = {}
                 if objparams is None:
                     msg = self.helpAdd(object)
-                    try:
-                        from clint.textui import colored
-                        print colored.cyan(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg   
+                    self.printmsg(msg,'cyan') 
                     return
                 # Parameters have been provided in command line, try to create the json entity
                 data = self.createObjParsingArgs(object,objparams)
                 print json.dumps(data)
         
-                self.restserver.addJsonEntity(data,'/'+object)
-        
+                response = self.resttools.addObject(object,data)
+                print 'Object ',object,' added to db and response is ',response
+        		
             except Exception, e:
                 sys.exit("ADD failed: %s" % (str(e)))
                 raise
@@ -528,41 +431,27 @@ class PhysDBDriver():
         elif self.action == 'STORE':
             try:
                 print 'Action STORE is used to insert an iov object + its payload associated to a tag into the DB'
+                print ' - <dest tag name>  : destination tag name; the tag should already exists in the DB.'
+                print ' - <local file name>: local file name'
+                print ' - <iov params>  : column separated list of parameters for iov [since=xxx;sinceString=yyy]'
+                print ' - <payload params>  : column separated list of parameters for payload [version=zzz;objectType=aaa;streamerInfo=bbb.;backendInfo=ccc]'
+
                 tag=self.args[0]
                 msg = ('STORE: selected object is %s ') % (tag)
-                data = {}
-                data['trace']="off"
-                data['expand']="true"
-                data['name']=tag
-                (obj,response) = self.restserver.get(data,'/tags')
+                (obj,response) = self.resttools.getTag(tag,"off","true")
+                
                 if self.debug:
                     msg = ('STORE: retrieved object from database %s ') % (obj)
-                    try:
-                        from clint.textui import colored
-                        print colored.cyan(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg   
+                    self.printmsg(msg,'cyan') 
+                      
                 if obj is None:
                     msg = ('STORE: error, cannot find any tag in database for name %s ') % (tag)
-                    try:
-                        from clint.textui import colored
-                        print colored.red(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg   
-                    raise
+                    self.printmsg(msg,'red')         
                 
                 objparams = None
                 if len(self.args) != 4:
                     msg = ('STORE: error, cannot find enough parameters for completing the request')
-                    try:
-                        from clint.textui import colored
-                        print colored.red(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg   
-                    raise
+                    self.printmsg(msg,'red')          
                     
                 filename=self.args[1]
                 iovobjparams=self.args[2]
@@ -570,28 +459,19 @@ class PhysDBDriver():
 
                     
                 msg = ('STORE: iov parameters %s and filename %s (%s)') % (iovobjparams, filename,pyldobjparams)
-                try:
-                    from clint.textui import colored
-                    print colored.cyan(msg)
-                except:
-                    print 'Cannot use colored messages'
-                    print msg   
+                self.printmsg(msg,'cyan')          
+            
                 data = {}
                 if iovobjparams is None:
                     msg = self.helpAdd("iovs")
-                    try:
-                        from clint.textui import colored
-                        print colored.cyan(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg   
+                    self.printmsg(msg,'cyan')            
                     return
                 
                 iovdata = {}
                 iovdata = self.createObjParsingArgs("iovs",iovobjparams)
                 pylddata = {}
                 pylddata = self.createObjParsingArgs("payload",pyldobjparams)
-                print 'created payload data ',pylddata
+##                print 'created payload data ',pylddata
                 params = {}
                 params['file'] = filename
                 params['tag'] = tag
@@ -602,8 +482,8 @@ class PhysDBDriver():
                 params['streamerInfo'] = pylddata['streamerInfo']
                 params['version'] = pylddata['version']
 
-                self.restserver.addPayload(params,'/iovs/async/payload')
-        
+                self.resttools.storePayload(params)
+        		
             except Exception, e:
                 sys.exit("STORE failed: %s" % (str(e)))
                 raise
@@ -616,20 +496,11 @@ class PhysDBDriver():
                 if object in [ 'globaltags', 'tags', 'systems', 'iovs', 'payload' ]:
                     print colored.cyan(msg)
                     msg = self.helpAdd(object);
-                    try:
-                        from clint.textui import colored
-                        print colored.green(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg   
+                    self.printmsg(msg,'green')
+                    
                 else:
                     msg = ('DESCRIBE: cannot apply command to object %s ') % (object)
-                    try:
-                        from clint.textui import colored
-                        print colored.red(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg   
+                    self.printmsg(msg,'red')
                     return                
             
             except Exception, e:
@@ -642,91 +513,20 @@ class PhysDBDriver():
                 object=self.args[0]
                 msg = ('DELETE: selected object is %s ') % (object)
                 if object in [ 'globaltags', 'tags', 'systems' ]:
-                    try:
-                        from clint.textui import colored
-                        print colored.green(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg   
+                    self.printmsg(msg,'green')
                 else:
                     msg = ('DELETE: cannot apply command to object %s ') % (object)
-                    try:
-                        from clint.textui import colored
-                        print colored.red(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg   
+                    self.printmsg(msg,'red')
                     return                
                 
                 id = self.args[1]
                 msg = ('DELETE: selected object id is %s ') % (id)
-                try:
-                    from clint.textui import colored
-                    print colored.cyan(msg)
-                except:
-                    print 'Cannot use colored messages'
-                    print msg   
-                
-                self.restserver.deleteEntity(id,'/'+object)
+                self.printmsg(msg,'cyan')
+                self.resttools.deleteObject(object,id)
             
             except Exception, e:
                 sys.exit("DELETE failed: %s" % (str(e)))
                 raise
-
-        elif self.action == 'STORE':
-            try:
-                print 'Action STORE is used to insert a data object [iov+payload] into the DB. '
-                print ' - <local file name>: first argument is the local file name'
-                print ' - <dest tag name>  : second argument is the destination tag name; the tag should already exists in the DB.'
-                print ' - <since>  : third argument is the time of the iov from which the payload is valid.'
-                print ' - <sincestr> : forth arg is a stringified version of the since'
-                print ' - <column separated meta-data list>  : fifth argument is a list of parameters: version=zzz;objectType=aaa;streamerInfo=bbb.;backendInfo=ccc'
-                ifile=self.args[0]
-                print 'Selecting local file ', ifile
-                tagid = self.args[1]
-                print '   use tag id : ', tagid
-                since = self.args[2]
-                print '   use since : ', since
-                sincestr = self.args[3]
-                print '   use sincestr : ', sincestr
-                params = {}
-                if len(self.args) > 4:
-                    params = self.args[4]
-                argsarr = params.split(';')
-                iovdata = {}
-                iovdata['since']=since
-                iovdata['sinceString']=sincestr
-                pylddata = {}
-                for anarg in argsarr:
-                    key = anarg.split('=')[0]
-                    val = anarg.split('=')[1]
-                    pylddata[key]=val
-                pylddata['since'] = since
-                pylddata['sinceString'] = sincestr
-                pylddata['file'] = ifile
-                pylddata['tag'] = tagid
-                self.restserver.addPayload(pylddata,'/iovs/payload')
-            
-            except Exception, e:
-                sys.exit("failed: %s" % (str(e)))
-                raise
-
-        elif self.action == 'LOCK':
-            try:
-                print 'Action LOCK is used to lock a global tag (a locked global tag cannot be unlocked by users)'
-                gtagobject=self.args[0]
-                print 'Locking global tag',gtagobject
-                data = {}
-                object = 'globaltags'
-                data['lockstatus']='locked'
-    
-                self.restserver.addJsonEntity(data,'/'+object+'/'+gtagobject)
-            
-            except Exception, e:
-                sys.exit("failed: %s" % (str(e)))
-                raise
-
-
 
         elif self.action == 'LINK':
             try:
@@ -734,12 +534,7 @@ class PhysDBDriver():
                 gtagobject=self.args[0]
                 tagobject=self.args[1]
                 msg = ('LINK: perform association between %s and %s ') % (gtagobject,tagobject)
-                try:
-                    from clint.textui import colored
-                    print colored.cyan(msg)
-                except:
-                    print 'Cannot use colored messages'
-                    print msg   
+                self.printmsg(msg,'cyan')
                 data = {}
                 object = 'maps'
                 objparams = None
@@ -748,42 +543,24 @@ class PhysDBDriver():
                     objparams=self.args[2]
                 else:
                     msg = ('LINK: object parameters are missing %s ') % ("record=xxx;label=yyyy")
-                    try:
-                        from clint.textui import colored
-                        print colored.red(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg   
+                    self.printmsg(msg,'red')
                     return
+
                 msg = ('LINK: object parameters %s ') % (objparams)
-                try:
-                    from clint.textui import colored
-                    print colored.cyan(msg)
-                except:
-                    print 'Cannot use colored messages'
-                    print msg   
+                self.printmsg(msg,'cyan')
 
                 data = self.createObjParsingArgs(object,objparams)
-                data['globaltagname']=gtagobject
-                data['tagname']=tagobject
-
-                (response) = self.restserver.addJsonEntity(data,'/'+object)
+                (response) = self.resttools.link(gtagobject,tagobject,data)
+                
                 if response is None:
-                    msg = ('Failed in linking the objects: may be link already exists ?')
-                    try:
-                        from clint.textui import colored
-                        print colored.red(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg   
+                    msg = ('Failed in linking the objects: unknown response, server not reached?')
+                    self.printmsg(msg,'red')
+                elif response['code']>220:
+                    msg = ('Failed in linking the objects (HTTP code %d): %s ') % (response['code'],response['internalMessage'])
+                    self.printmsg(msg,'red')
                 else:
                     msg = ('LINK: performed association between %s and %s ') % (gtagobject,tagobject)
-                    try:
-                        from clint.textui import colored
-                        print colored.green(msg)
-                    except:
-                        print 'Cannot use colored messages'
-                        print msg   
+                    self.printmsg(msg,'green')
             
             except Exception, e:
                 sys.exit("failed: %s" % (str(e)))
@@ -791,34 +568,15 @@ class PhysDBDriver():
 
         elif self.action == 'UNLINK':
             try:
-                print 'Action UNLINK is used to remove maping from a tag to a global tag'
+                print 'Action UNLINK is used to remove mapping from a tag to a global tag'
                 gtagobject=self.args[0]
                 tagobject=self.args[1]
                 msg = ('UNLINK: remove association between %s and %s ') % (gtagobject,tagobject)
-                try:
-                    from clint.textui import colored
-                    print colored.green(msg)
-                except:
-                    print 'Cannot use colored messages'
-                    print msg   
+                self.printmsg(msg,'green')
                     
-                data = {}
-                object = 'maps'
-
-                data['globaltag']=gtagobject
-                data['tag']=tagobject
-                data['expand'] = 'true'
-                (entity, response) = self.restserver.getmaps(data)
-                mappingidlink = entity['href'] 
-                self.restserver.deletelink(mappingidlink)
+                self.resttools.unlink(gtagobject,tagobject)
                 msg = ('UNLINK: removed association between %s and %s ') % (gtagobject,tagobject)
-                try:
-                    from clint.textui import colored
-                    print colored.green(msg)
-                except:
-                    print 'Cannot use colored messages'
-                    print msg   
-                    
+                self.printmsg(msg,'green')
             
             except Exception, e:
                 sys.exit("failed: %s" % (str(e)))
@@ -845,13 +603,7 @@ class PhysDBDriver():
                     print '   missing arguments: "record=xxx;label=yyyy"'
                     return
                 mapparams = self.createObjParsingArgs(object,objparams)
-
-                data['name'] = tagobject
-                data['record'] = mapparams['record']
-                data['label'] = mapparams['label']
-                params['action'] = action
-                
-                self.restserver.addWithPairs(data,params,'/globaltags/'+object+'/'+gtagobject)
+                self.resttools.linkall(tagobject, action, gtagobject, mapparams['record'],mapparams['label'])
             
             except Exception, e:
                 sys.exit("failed: %s" % (str(e)))

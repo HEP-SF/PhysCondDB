@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 
+import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.svc.dao.controllers.GlobalTagService;
 import conddb.svc.dao.exceptions.ConddbServiceException;
@@ -31,9 +32,9 @@ import conddb.utils.collections.CollectionUtils;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
-import conddb.web.resources.GlobalTagMapResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
+import conddb.web.resources.generic.GenericPojoResource;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -113,6 +114,7 @@ public class GlobalTagMapRestController  extends BaseController {
 			@DefaultValue("none") @QueryParam("tag") final String tagname,
 			@DefaultValue("true") @QueryParam("expand") final boolean expand
 			) throws ConddbWebException {
+
 		this.log.info("GlobalTagMapRestController processing request for global tag "
 				+ globaltagname + " and tag "+tagname);
 		try {
@@ -130,9 +132,9 @@ public class GlobalTagMapRestController  extends BaseController {
 			}
 			log.debug("Controller has retrieved one map object "+entity);
 			
-			entity.setResId(entity.getId().toString());
-			GlobalTagMapResource gtagres = (GlobalTagMapResource) springResourceFactory.getResource("globaltagmap", info, entity);
-			return created(gtagres);
+			GenericPojoResource<GlobalTagMap> resource = (GenericPojoResource) springResourceFactory.getResource("generic-gtmap", info,
+					entity);
+			return ok(resource);
 			
 		} catch (ConddbServiceException e) {
 			String msg = "Error retrieving association resource ";
@@ -145,24 +147,26 @@ public class GlobalTagMapRestController  extends BaseController {
 	@Path("/{id}")
 	@ApiOperation(value = "Finds Tags to GlobalTag's mappings by id (integer)",
     notes = "This is ment essentially for internal usage when finding dependencies",
-    response = GlobalTagMapResource.class)
+    response = GlobalTagMap.class)
 	public Response getGlobalTagMapById(
 			@Context UriInfo info,
 			@ApiParam(value = "id: id of the association", required = true)
 			@PathParam("id") Long id) throws ConddbWebException {
-		this.log.info("GlobalTagMapRestController processing request for "+ id);
+		
+		this.log.info("GlobalTagMapRestController processing request to retrieve map with id "+ id);
 
-		ConddbWebException ex = new ConddbWebException();
 		try {
 			GlobalTagMap entity = null;
-			entity = this.globalTagService.getGlobalTagMap(id);
+			entity = this.globalTagService.getGlobalTagMapFetchChildren(id);
 			if (entity == null) {
 				String msg = "Associations not found for id "+id;
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
-			entity.setResId(entity.getId().toString());
-			GlobalTagMapResource gtagres = (GlobalTagMapResource) springResourceFactory.getResource("globaltagmap", info, entity);
-			return created(gtagres);
+			log.debug("Creating resource from retrieved entity "+entity);
+			GenericPojoResource<GlobalTagMap> resource = (GenericPojoResource) springResourceFactory.getResource("generic-gtmap", info,
+					entity);
+
+			return ok(resource);
 		} catch (ConddbServiceException e) {
 			String msg = "Error retrieving association resource for id "+id;
 			throw buildException(msg+" "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
@@ -175,7 +179,7 @@ public class GlobalTagMapRestController  extends BaseController {
     notes = "Usage of pagination and parameter expand to get full output of the association or link only",
     response = CollectionResource.class,
     responseContainer = "List")
-	public CollectionResource listGlobalTagMaps(
+	public Response listGlobalTagMaps(
 			@Context UriInfo info,
 			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false)
             @DefaultValue("false") @QueryParam("expand") boolean expand,
@@ -183,7 +187,7 @@ public class GlobalTagMapRestController  extends BaseController {
             @DefaultValue("0") @QueryParam("page") Integer ipage, 
 			@ApiParam(value = "size: size of the page, defaults to 25", required = false)
             @DefaultValue("25") @QueryParam("size") Integer size) throws ConddbWebException {
-		this.log.info("GlobalTagRestController processing request for global tag list (expansion = "
+		this.log.info("GlobalTagMapRestController processing request for global tag 2 tag mapping list (expansion = "
 				+ expand+")");
 		Collection<GlobalTagMap> globaltagmaps;
 		try {
@@ -191,23 +195,23 @@ public class GlobalTagMapRestController  extends BaseController {
 			PageRequest preq = new PageRequest(ipage,size);
 			globaltagmaps = CollectionUtils.iterableToCollection(globalTagService.findAllGlobalTagMaps(preq));
 		} catch (ConddbServiceException e) {
-			throw new ConddbWebException(e.getMessage());
+			String msg = "Associations not found, internal error";
+			throw buildException(msg, e.getMessage(), Response.Status.NOT_FOUND);
 		}
 		if (globaltagmaps == null || globaltagmaps.size() == 0) {
 			String msg = "Associations not found";
 			throw buildException(msg, msg, Response.Status.NOT_FOUND);
         }
-		return listToCollection(globaltagmaps, expand, info, ipage, size);
+		CollectionResource resource = listToCollection(globaltagmaps, expand, info, ipage, size);
+		return ok(resource);
+
 	}
 
 	protected CollectionResource listToCollection(Collection<GlobalTagMap> globaltagmaps, boolean expand, UriInfo info, Integer ipage, Integer size) {
         Collection items = new ArrayList(globaltagmaps.size());
         for( GlobalTagMap globaltagmap : globaltagmaps) {
-        	globaltagmap.setResId(globaltagmap.getId().toString());
-        	globaltagmap.getGlobalTag().setResId(globaltagmap.getGlobalTagName());
-        	globaltagmap.getSystemTag().setResId(globaltagmap.getTagName());
             if (expand) {
-                items.add(springResourceFactory.getResource("globaltagmap", info, globaltagmap));
+                items.add(springResourceFactory.getResource("generic-gtmap", info, globaltagmap));
             } else {
                 items.add(springResourceFactory.getResource("link",info,globaltagmap));
             }

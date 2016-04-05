@@ -108,14 +108,14 @@ public class JaxRsApplication extends ResourceConfig {
 //		register(new JacksonJsonProvider(om));
 
 		// register filters
-//		register(RequestContextFilter.class);
-//		register(CustomLoggingFilter.class);
-//		register(CustomSecurityFilter.class);
+		register(RequestContextFilter.class);
+		register(CustomLoggingFilter.class);
+		register(CustomSecurityFilter.class);
 //		register(RolesAllowedDynamicFeature.class);
 //		register(GZipEncoder.class);
 
 		// register exception mappers
-        register(ObjectMapperContextResolver.class);
+//        register(ObjectMapperContextResolver.class);
         register(CondDBExceptionMapper.class);
         register(GlobalControllerExceptionMapper.class);
         

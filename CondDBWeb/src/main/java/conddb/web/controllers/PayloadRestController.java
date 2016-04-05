@@ -48,8 +48,8 @@ import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.GenericMessageResource;
 import conddb.web.resources.Link;
-import conddb.web.resources.PayloadResource;
 import conddb.web.resources.SpringResourceFactory;
+import conddb.web.resources.generic.GenericPojoResource;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -78,7 +78,7 @@ public class PayloadRestController extends BaseController {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/{hash}")
-	@ApiOperation(value = "Finds payload by hash; the payload object contains only metadata on the payload itself.", notes = "Select one payload at the time, no regexp searches allowed here", response = PayloadResource.class)
+	@ApiOperation(value = "Finds payload by hash; the payload object contains only metadata on the payload itself.", notes = "Select one payload at the time, no regexp searches allowed here", response = Payload.class)
 	public Response getPayload(@Context UriInfo info,
 			@ApiParam(value = "hash of the payload", required = true) @PathParam("hash") final String hash,
 			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false) @DefaultValue("false") @QueryParam("expand") final boolean expand)
@@ -104,7 +104,7 @@ public class PayloadRestController extends BaseController {
 				log.debug("Payload contains " + entity.toString());
 				log.debug("  - data :" + entitydata);
 			}
-			PayloadResource resource = (PayloadResource) springResourceFactory.getResource("payload", info, entity);
+			GenericPojoResource<Payload> resource = (GenericPojoResource<Payload>) springResourceFactory.getGenericResource(info, entity, 1, null);
 			return created(resource);
 		} catch (ConddbServiceException e) {
 			resp = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
@@ -275,7 +275,7 @@ public class PayloadRestController extends BaseController {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/filter")
 	@ApiOperation(value = "Select a payload filtering on metadata...Not well implemented.", notes = "Select one payload at the time, no regexp searches allowed here. "
-			+ " This method is for the moment not well implemented.", response = PayloadResource.class)
+			+ " This method is for the moment not well implemented.", response = Payload.class)
 	public CollectionResource getPayloadFilteredList(@Context UriInfo info,
 			@ApiParam(value = "Parameter name: {datasize|objectType|version}", required = true) @DefaultValue("none") @QueryParam("param") final String param,
 			@ApiParam(value = "condition: {eq|gt|..}", required = true) @DefaultValue("eq") @QueryParam("if") final String condition,

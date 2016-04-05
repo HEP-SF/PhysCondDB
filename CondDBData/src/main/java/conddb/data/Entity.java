@@ -22,16 +22,26 @@ import javax.persistence.Transient;
  */
 public abstract class Entity {
 
-    private String resid;
+    private String resid = "none";
 
     public Entity(){}
 
     @Transient
+    @Deprecated
     public String getResId() {
         return resid;
     }
 
     public void setResId(String id) {
+        this.resid = id;
+    }
+    
+    @Transient
+    public String getHref() {
+        return resid;
+    }
+
+    public void setHref(String id) {
         this.resid = id;
     }
 }

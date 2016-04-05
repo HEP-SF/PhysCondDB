@@ -63,7 +63,7 @@ public class GlobalTagExpertService {
 		Set<GlobalTagMap> sgtagmap = sgtag.getGlobalTagMaps();
 		
 		this.globalTagRepository.save(newgtag);
-		GlobalTag stored = this.globalTagRepository.findOne(destgtag);
+		GlobalTag stored = this.globalTagRepository.findByName(destgtag);
 		
 		Set<GlobalTagMap> newmaps = new HashSet<GlobalTagMap>();
 		for (GlobalTagMap globalTagMap : sgtagmap) {
@@ -146,7 +146,7 @@ public class GlobalTagExpertService {
 	public void updateGlobalTagLocking(String sourcegtag, String locking)
 			throws ConddbServiceException {
 
-		GlobalTag gtag = globalTagRepository.findOne(sourcegtag);
+		GlobalTag gtag = globalTagRepository.findByName(sourcegtag);
 		gtag.setLockstatus(locking);
 		this.globalTagRepository.save(gtag);
 	}

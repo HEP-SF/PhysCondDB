@@ -58,7 +58,7 @@ class PhysRestConnection:
     
     def setBaseUrl(self,baseurl):
         if self.__debug:
-            print 'Setting base url ',baseurl
+            print 'DEBUG: Setting base url ',baseurl
         self.__baseurl=baseurl
     
     def setUserPassword(self,user,password):
@@ -72,24 +72,27 @@ class PhysRestConnection:
         
     def setUrl(self, url):
         if self.__debug:
-            print "Setting url ", url
+            print "DEBUG: Setting url ", url
         if 'http://' in str(url):
-            self.__url = url
+            #            print "DEBUG: Setting url overriding base URL: ", url
+            self.__url = str(url)
         else:
+            #            print "DEBUG: Setting url using baseurl ", self.__baseurl
             self.__url = self.__baseurl + url
         if self.__debug:
-            print "URL after checking for http string: ", url
+            print "DEBUG: URL after checking for http string: ", url
         
 #        self.__curl.setopt(pycurl.URL, self.__url)
         
     def downloadData(self, filename):
         if self.__debug:
-            print "Download data using url ", self.__url
+            print "DEBUG: Download data using url ", self.__url
         fp = open(filename, "wb")
         req = Request(self.__url)
         try:
             response = self.__opener.open(req)
         except HTTPError as e:
+            print '====== HTTPError occurred     ======='
             print 'The server couldn\'t fulfill the request.'
             print 'Error code: ', e.code
             print 'Reason ',e.reason
@@ -97,28 +100,36 @@ class PhysRestConnection:
             print 'Details: ',details
             jsondata = json.loads(details)
             print 'Extracted message: ',jsondata['internalMessage']
+            print '====== End of HTTPError report ======='
+            raise e
         except URLError as e:
+            print '====== URLError occurred      ======='
             print 'We failed to reach a server.'
             print 'Reason: ', e.reason
+            print '====== End of URLError report ======='
+            raise e
         else:
         # everything is fine
             fp.write(response.read())
             fp.close()
             if self.__debug:
-                print 'Received data into output file ',filename
+                print 'DEBUG: Received data into output file ',filename
 
             return      
 
 
     def getData(self):
         if self.__debug:
-            print "Get data using url ", self.__url
+            print "DEBUG: Get data using url ", self.__url
             
         req = Request(self.__url)
         req.add_header("Accept",'application/json')
         try:
+            #            print 'Sending request ',req
             response = self.__opener.open(req)
+        #            print 'Received response '
         except HTTPError as e:
+            print '====== HTTPError occurred     ======='
             print 'The server couldn\'t fulfill the request.'
             print 'Error code: ', e.code
             print 'Reason ',e.reason
@@ -126,14 +137,21 @@ class PhysRestConnection:
             print 'Details: ',details
             jsondata = json.loads(details)
             print 'Extracted message: ',jsondata['internalMessage']
+            print '====== End of HTTPError report ======='
+            raise e
         except URLError as e:
+            print '====== URLError occurred      ======='
             print 'We failed to reach a server.'
             print 'Reason: ', e.reason
+            print '====== End of URLError report ======='
+            raise e
         else:
         # everything is fine
+        #            print '...read response...'
             data = response.read()
+            #            print '...data...',data
             if self.__debug:
-                print 'Received data', data
+                print 'DEBUG: Received data', data
             if data is '':
                 jsondata = {}
                 jsondata['code'] = response.getcode()
@@ -141,12 +159,13 @@ class PhysRestConnection:
 
             jsondata = json.loads(data)
             if self.__debug:
-                print 'JSON data: ', jsondata, ' Code: ',response.getcode()
+                print 'DEBUG: JSON data ', jsondata, ' and return Code: ',response.getcode()
+#            jsondata['code'] = response.getcode()
             return jsondata, response.getcode()            
         
     def deleteData(self):
         if self.__debug:
-            print "Delete data using url ", self.__url
+            print "DEBUG: Delete data using url ", self.__url
 
         req = Request(self.__url)
         #####req = RequestWithMethod('DELETE',self.__url)
@@ -155,6 +174,7 @@ class PhysRestConnection:
         try:
             response = self.__opener.open(req)
         except HTTPError as e:
+            print '====== HTTPError occurred     ======='
             print 'The server couldn\'t fulfill the request.'
             print 'Error code: ', e.code
             print 'Reason ',e.reason
@@ -162,13 +182,18 @@ class PhysRestConnection:
             print 'Details: ',details
             jsondata = json.loads(details)
             print 'Extracted message: ',jsondata['internalMessage']
+            print '====== End of HTTPError report ======='
+            raise e
         except URLError as e:
+            print '====== URLError occurred      ======='
             print 'We failed to reach a server.'
             print 'Reason: ', e.reason
+            print '====== End of URLError report ======='
+            raise e
         else:
             # everything is fine        
             if self.__debug:
-                print 'Retrieved data from DELETE:' , response, ' Code: ',response.getcode()
+                print 'DEBUG: Retrieved data from DELETE:' , response, ' Code: ',response.getcode()
         
     def setTimeout(self,to):
         self.__timeout=to
@@ -177,12 +202,12 @@ class PhysRestConnection:
 
     def setHeader(self,header):
         self.__header = header
-        print('Not implemented')
+        print('WARNING: Not implemented')
 
 # This function should set appropriate values for POST type
     def postData(self, jsonobj):
         if self.__debug:
-            print "post data using url ", self.__url
+            print "DEBUG: post data using url ", self.__url
         post_data = jsonobj
         
         req = Request(self.__url,post_data)
@@ -192,6 +217,7 @@ class PhysRestConnection:
             response = self.__opener.open(req)
             ### was response = urlopen(req)
         except HTTPError as e:
+            print '====== HTTPError occurred     ======='
             print 'The server couldn\'t fulfill the request.'
             print 'Error code: ', e.code
             print 'Reason ',e.reason
@@ -199,27 +225,32 @@ class PhysRestConnection:
             print 'Details: ',details
             jsondata = json.loads(details)
             print 'Extracted message: ',jsondata['internalMessage']
-
+            print '====== End of HTTPError report ======='
+            raise e
+			
         except URLError as e:
+            print '====== URLError occurred      ======='
             print 'We failed to reach a server.'
             print 'Reason: ', e.reason
+            print '====== End of URLError report ======='
+            raise e
         else:
         # everything is fine
             data = response.read()
             if self.__debug:
-                print 'Received data', data
+                print 'DEBUG: Received data', data
             if data is '':
                 return None
             jsondata = json.loads(data)
             if self.__debug:
-                print 'JSON data: ', jsondata
+                print 'DEBUG: JSON data ', jsondata
             jsondata['code'] = response.getcode()
             return jsondata    
              
 # This function should set appropriate values for POST type
     def postAction(self, actionparams):
         if self.__debug:
-            print "post data action using url ", self.__url
+            print "DEBUG: post data action using url ", self.__url
             #print actionparams
 
         req = Request(self.__url,actionparams)
@@ -228,6 +259,7 @@ class PhysRestConnection:
         try:
             response = urlopen(req)
         except HTTPError as e:
+            print '====== HTTPError occurred     ======='
             print 'The server couldn\'t fulfill the request.'
             print 'Error code: ', e.code
             print 'Reason ',e.reason
@@ -235,26 +267,31 @@ class PhysRestConnection:
             print 'Details: ',details
             jsondata = json.loads(details)
             print 'Extracted message: ',jsondata['internalMessage']
+            print '====== End of HTTPError report ======='
+            raise e
         except URLError as e:
+            print '====== URLError occurred      ======='
             print 'We failed to reach a server.'
             print 'Reason: ', e.reason
+            print '====== End of URLError report ======='
+            raise e
         else:
         # everything is fine
             data = response.read()
             if self.__debug:
-                print 'Received data', data
+                print 'DEBUG: Received data', data
             if data is '':
                 return None
             jsondata = json.loads(data)
             if self.__debug:
-                print 'JSON data: ', jsondata
+                print 'DEBUG: JSON data ', jsondata
             jsondata['code'] = response.getcode()
             return jsondata    
 
 # This function should set appropriate values for POST type
     def postForm(self, post_data):
         if self.__debug:
-            print "Post form using url ", self.__url
+            print "DEBUG: Post form using url ", self.__url
         if self.__debug:
             print post_data
             
@@ -278,13 +315,14 @@ class PhysRestConnection:
         req = Request(self.__url, datagen, headers)
         req.add_header("Accept",'application/json')
         if self.__debug:
-            print 'OUTGOING DATA:'
+            print 'DEBUG: OUTGOING DATA ...'
             print req.get_data()
 
         try:
             response = urlopen(req)
 #            print response
         except HTTPError as e:
+            print '====== HTTPError occurred     ======='
             print 'The server couldn\'t fulfill the request.'
             print 'Error code: ', e.code
             print 'Reason ',e.reason
@@ -292,19 +330,24 @@ class PhysRestConnection:
             print 'Details: ',details
             jsondata = json.loads(details)
             print 'Extracted message: ',jsondata['internalMessage']
+            print '====== End of HTTPError report ======='
+            raise e
         except URLError as e:
+            print '====== URLError occurred      ======='
             print 'We failed to reach a server.'
             print 'Reason: ', e.reason
+            print '====== End of URLError report ======='
+            raise e
         else:
         # everything is fine
             data = response.read()
             if self.__debug:
-                print 'Received data', data
+                print 'DEBUG: Received data', data
             if data is '':
                 return None
             jsondata = json.loads(data)
             if self.__debug:
-                print 'JSON data: ', jsondata
+                print 'DEBUG: JSON data ', jsondata
             jsondata['code'] = response.getcode()
             return jsondata    
     
@@ -455,7 +498,7 @@ class PhysCurl(object):
     ### TO BE DONE AT SERVER LEVEL
     def addPayload(self,params,servicebase="/payload"):
         if self.__debug:
-            print 'Add payload using input '
+            print 'DEBUG: Add payload using input '
             print params
         url = (self.baseurl + servicebase)
         self.__curl.setUrl(url)
@@ -473,7 +516,7 @@ class PhysCurl(object):
 
     def commitCalibration(self,params,servicebase="/calibration"):
         if self.__debug:
-            print 'Add calibration file using input '
+            print 'DEBUG: Add calibration file using input '
             print params
         url = (self.baseurl + servicebase)
         self.__curl.setUrl(url)
@@ -488,7 +531,7 @@ class PhysCurl(object):
 
     def addWithPairs(self,data,params,servicebase="/globaltags"):
         if self.__debug:
-            print 'Add object using parameter '
+            print 'DEBUG: Post method using pair parameters '
             print params
         url = (self.baseurl + servicebase )
         self.__curl.setUrl(url)
@@ -497,13 +540,13 @@ class PhysCurl(object):
         pairs = urllib.urlencode(params)
         self.__curl.setUrl(urlquoted+'?'+pairs)
         if self.__debug:
-            print 'Try to serialize in json '
+            print 'DEBUG: Try to serialize in json '
         jsonobj = json.dumps(data)
         return self.__curl.postData(jsonobj)
 
     def addPairs(self,params,servicebase="/globaltags"):
         if self.__debug:
-            print 'Add object using parameter '
+            print 'DEBUG: Post action using pair parameters '
             print params
         url = (self.baseurl + servicebase )
         self.__curl.setUrl(url)
@@ -519,23 +562,23 @@ class PhysCurl(object):
 
     def addJsonEntity(self,params,servicebase="/globaltags"):
         if self.__debug:
-            print 'Add object using parameter '
+            print 'DEBUG: Add json object using parameter '
             print params
         url = (self.baseurl + servicebase )
         self.__curl.setUrl(url)
 #        self.__curl.setHeader(['Content-Type:application/json', 'Accept:application/json'])
         if self.__debug:
-            print 'Try to serialize in json '
+            print 'DEBUG: Try to serialize in json '
         jsonobj = json.dumps(params)
         return self.__curl.postData(jsonobj)
 
     def deleteEntity(self,id,servicebase="/globaltags"):
         if self.__debug:
-            print 'Update object using parameter '
-            print id
+            print 'DEBUG: Update object using parameter ',id
+
         url = (self.baseurl + servicebase + "/" + id)
         self.__curl.setUrl(url)
-#        self.__curl.setHeader(['Content-Type:application/json', 'Accept:application/json'])
+##        self.__curl.setHeader(['Content-Type:application/json', 'Accept:application/json'])
         return self.__curl.deleteData()
 
 
@@ -549,14 +592,14 @@ class PhysCurl(object):
 
     def update(self,params,id,servicebase="/globaltags"):
         if self.__debug:
-            print 'Update object using parameter '
+            print 'DEBUG: Update object using parameters '
             print params
             print id
         url = (self.baseurl + servicebase + "/" + id)
         self.__curl.setUrl(url)
         self.__curl.setHeader(['Content-Type:application/json', 'Accept:application/json'])
         if self.__debug:
-            print 'Try to serialize in json '
+            print 'DEBUG: Try to serialize in json '
         jsonobj = json.dumps(params)
         return self.__curl.postData(jsonobj)
 
@@ -565,7 +608,7 @@ class PhysCurl(object):
 ###   - /tags       : <name> [optional: trace=on/off]
     def get(self,params,servicebase="/globaltags"):
         if self.__debug:
-            print 'get: search object using parameter '
+            print 'DEBUG: Get object using parameters '
             print params
         id = params['name']
 
@@ -604,9 +647,24 @@ class PhysCurl(object):
         
         return self.__curl.getData()
 
-    def getfile(self,params,servicebase="/globaltags"):
+    def getpayload(self,params,servicebase="/payload/data"):
         if self.__debug:
-            print 'getfile: search object using parameter '
+            print 'DEBUG: Get payload object using parameters '
+            print params
+        id = params['name']            
+        url = (self.userbaseurl + servicebase )
+        if id is not None:
+            url = (self.userbaseurl + servicebase + '/' + id)
+            print 'Contact server using url ',url
+            urlquoted = urllib.quote_plus(url,safe=':/')
+            print 'Transform url in ',urlquoted
+            self.__curl.setUrl(urlquoted)
+        outf = params['filename']            
+        return self.__curl.downloadData(outf)
+
+    def getfile(self,params,servicebase="/expert/calibration/tar"):
+        if self.__debug:
+            print 'DEBUG: Get file using parameter '
             print params
         id = params['name']
         url = (self.userbaseurl + servicebase )
@@ -625,7 +683,7 @@ class PhysCurl(object):
 
     def getiovs(self,params,servicebase="/iovs/find"):
         if self.__debug:
-            print 'Search IOV object using parameter '
+            print 'DEBUG: Search IOV object using parameter '
             print params
         id = params['tag']
         url = (self.userbaseurl + servicebase )
@@ -636,7 +694,7 @@ class PhysCurl(object):
 
     def getmaps(self,params,servicebase="/maps/find"):
         if self.__debug:
-            print 'Search Map object using parameter '
+            print 'DEBUG: Search Map object using parameter '
             print params
         gtag = params['globaltag']
         tag = params['tag']
@@ -649,43 +707,46 @@ class PhysCurl(object):
 
     def getsystems(self,params,servicebase="/systems/find"):
         if self.__debug:
-            print 'Search systems using parameters ',params
+            print 'DEBUG: Search systems using parameters ',params
         url = (self.userbaseurl + servicebase )
         urlquoted = urllib.quote_plus(url,safe=':/')
         pairs = urllib.urlencode(params)
-        escurl = urllib.quote_plus(urlquoted+'?'+pairs,safe='=&?:/')
-        self.__curl.setUrl(escurl)
+        self.__curl.setUrl(urlquoted+'?'+pairs)
+##        escurl = urllib.quote_plus(urlquoted+'?'+pairs,safe='=&?:/')
+        if self.__debug:
+            print 'DEBUG: Search systems using url ',urlquoted        
+##        self.__curl.setUrl(escurl)
         return self.__curl.getData()
 
     def getlink(self,params,servicebase=None):
         if self.__debug:
-            print 'follow href link ',params['href']
+            print 'DEBUG: follow href link ',params['href']
             print params
         url = (params['href'])
+        #        urlquoted = urllib.quote_plus(url,safe=':/')
         urlquoted = urllib.quote_plus(url,safe='=&?:/')
+        #print 'Using url ',url
         self.__curl.setUrl(urlquoted)
         return self.__curl.getData()
 
     def deletelink(self,link,servicebase=None):
         if self.__debug:
-            print 'follow href link ',link
-            print link
+            print 'DEBUG: delete resource referred by href link ',link
+
         modurl = link.split("/")
         urllength = len(modurl)
         modurl.insert(urllength-2,'expert')
         url = ('/'.join(modurl))
-#        self.__curl.setUrl(url)
+        self.__curl.setUrl(url)
 #        self.__curl.setHeader(['Content-Type:application/json', 'Accept:application/json'])
-        print 'Not implemented '
-#        return self.__curl.deleteData()
-        return
+        return self.__curl.deleteData()
 
     def setUserPassword(self,user,passwd):
 #        self.__curl.setUserPassword(user, passwd)
-        print 'Not implemented'
+        print 'WARNING: Not implemented'
            
     def close(self):
-        print 'Not implemented ??'
+        print 'WARNING: Not implemented ??'
 #        self.__curl.close()
 
     def setdebug(self,value):
@@ -693,7 +754,7 @@ class PhysCurl(object):
         self.__curl.setdebug(value)
 
     def getFormFile(self):
-        print 'Not implemented'
+        print 'WARNING: Not implemented'
         return self.__curl.getFormFile()
     
     def __init__(self, servicepath, usesocks=False):
@@ -701,10 +762,308 @@ class PhysCurl(object):
         Constructor
         '''
         if self.__debug:
-            print 'Access to PhysCondDB via REST services'
+            print 'DEBUG: Access to PhysCondDB via REST services'
         self.__servicepath = servicepath
         self.__curl = PhysRestConnection()
         self.__curl.setBaseUrl('http://'+self.__servicepath)
         if usesocks == True:
             self.__curl.setSocks('localhost', 3129)
-#print 'Init Business Delegate with servicepath ', self.__servicepath
+
+
+class PhysUtils(object):
+    '''
+    classdocs
+    '''
+    __debug = False
+    __restserver = {}
+    
+    def __init__(self, restserver):
+        '''
+        Constructor
+        '''
+        if self.__debug:
+            print 'DEBUG: Function utils for command lines'
+        self.__restserver = restserver
+ 
+    def printmsg(self,msg,color):
+        try:
+          from clint.textui import colored
+          if color == 'cyan':
+          	print colored.cyan(msg)
+          elif color == 'blue':
+            print colored.blue(msg)
+          elif color == 'red':
+            print colored.red(msg)
+          elif color == 'green':
+            print colored.green(msg)
+          elif color == 'yellow':
+            print colored.yellow(msg)
+          else:
+          	print colored.cyan(msg)
+        except:
+          print msg
+
+       
+    def printItems(self, data):
+    # Assume that data is a list of items
+        for anobj in data:
+            print anobj
+            href = anobj['href']
+            url = {}
+            url['href'] = href
+            if self.__debug:
+               print 'DEBUG: Use url link ',url
+            obj = self.__restserver.getlink(url)
+            print obj
+
+# load items from link
+    def loadItems(self, data):
+        # Check if data is a single object
+        if 'href' in data:
+            href = data['href']
+            url = {}
+            url['href'] = href
+            if self.__debug:
+                print 'DEBUG: Use url link ',url
+            obj = self.__restserver.getlink(url)
+            if self.__debug:
+                print 'DEBUG: Retrieved object from link  ',obj
+            
+            return obj
+            
+        # Assume that data is a list of items
+        # NOT SURE THIS WORKS...
+#        for anobj in data:
+#            #print anobj
+#            href = anobj['href']
+#            url = {}
+#            url['href'] = href
+#            if self.debug:
+#                print 'Use url link from object ',anobj,' -> ',url
+#            obj = self.restserver.getlink(url)
+#            return obj
+
+
+    def createObj(self, type, data):
+        if type == 'globaltags':
+            return GlobalTag(data)
+        elif type == 'tags':
+            return Tag(data)
+        elif type == 'iovs':
+            return Iov(data)
+        elif type == 'maps':
+            return GtagMap(data)
+        elif type == 'systems':
+            return SystemDesc(data)
+        elif type == 'payload':
+            return Payload(data)
+        return None
+
+
+    def lockit(self, globaltagname,lockstatus):
+        data={}
+        # Search globaltagname in global tags
+        if self.__debug:
+           print 'Search for global tag name ',globaltagname
+        data['lockstatus']=lockstatus
+        gtag = self.__restserver.addJsonEntity(data,'/globaltags/'+globaltagname)
+        print 'INFO: Updated status of global tag ', gtag
+        return gtag
+
+    def link(self, globaltagname,tagname,params):
+        if self.__debug:
+           print 'Link global tag ',globaltagname,' to tag ',tagname,' using params ',params
+        params['globaltagname'] = globaltagname
+        params['tagname'] = tagname
+        maps = self.__restserver.addJsonEntity(params,'/maps')
+        print 'INFO: Linked global tag to tag : ', maps
+        return maps
+
+    def calibtagandlink(self, systemsglobaltag,systemname):
+        if self.__debug:
+           print 'Create global tag ',systemsglobaltag,' and link it to all tags in package ',systemname
+        params = {}
+        params['globaltag'] = systemsglobaltag
+        params['package'] = systemname
+        response = self.__restserver.addPairs(params,'/calibration/tag')
+        return response
+
+# download calibration files for a given package and global tag
+    def dumpgtag(self, globaltagname, package):
+        if self.__debug:
+           print 'Dump is using parameter ',globaltagname, package
+        data={}
+        data['name']=globaltagname
+        data['package']=package
+        data['trace']='off'
+        data['expand']='false'
+        # Search globaltagname in global tags
+        msg = ('>>> Dump all files in GlobalTag %s') % (globaltagname)
+#        print colored.cyan(msg)
+        print msg
+        self.__restserver.get(data,'/expert/calibration/dump')
+        msg = ('    + Tree structure for GlobalTag %s was dump on file system') % (globaltagname)
+#        print colored.green(msg)
+        print msg
+        
+# collect a global tag
+    def collect(self, globaltagname, asgglobaltagname):
+        data={}
+        data['packagetag']=globaltagname
+        data['destgtag']=asgglobaltagname
+        data['trace']='off'
+        data['expand']='false'
+        # Search globaltagname in global tags
+        msg = ('>>> Merge all files in GlobalTag %s into ASG global tag %s') % (globaltagname,asgglobaltagname)
+        self.printmsg(msg,'cyan')
+        self.__restserver.addPairs(data,'/calibration/collect')
+        msg = ('    + Tree structure for GlobalTag %s was dump on file system == FIX THIS MESSAGE') % (globaltagname)
+        self.printmsg(msg,'green')
+        
+# get tar from a global tag
+    def gettar(self, globaltagname, package):
+        data={}
+        data['name']=globaltagname
+        data['package']=package
+        # Search globaltagname in global tags
+        msg = ('>>> Collect all files in GlobalTag %s and download tar file ') % (globaltagname)
+        self.printmsg(msg,'cyan')
+        self.__restserver.getfile(data,'/expert/calibration/tar')
+
+    def linkall(self, tagname, action, globaltagname, record, label):
+        if self.__debug:
+           print 'Link global tag ',globaltagname,' to tag ',tagname,' using action ',action
+        data = {}
+        params = {}
+        data['name'] = tagobject
+        data['record'] = mapparams['record']
+        data['label'] = mapparams['label']
+        params['action'] = action             
+        self.__restserver.addWithPairs(data,params,'/globaltags/'+object+'/'+gtagobject)
+        return
+
+    def unlink(self, globaltagname,tagname):
+        if self.__debug:
+           print 'Remove link for global tag ',globaltagname,' to tag ',tagname
+        data = {}
+        data['globaltag']=globaltagname
+        data['tag']=tagname
+        data['expand'] = 'true'        
+        (entity, response) = self.__restserver.getmaps(data)
+        url = entity['href']
+        self.__restserver.deletelink(url)        
+##maps = self.__restserver.deleteEntity(id,'/maps')
+        print 'INFO: Removed link from global tag to tag'
+
+    def gettagiovs(self, tag, globaltag, trace, expand, t0, tMax):
+        objList = []
+        data = {}
+        data['trace']=trace
+        data['expand']=expand
+        data['tag']=tag
+        data['globaltag']=globaltag
+        data['since']=t0
+        data['until']=tMax
+##        print 'Select iovs using arguments ',data
+        (objList, code) = self.__restserver.getiovs(data,'/iovs/find')
+##        json_string = json.dumps(objList,sort_keys=True,indent=4, separators=(',', ': '))
+##        print json_string
+        return (objList,code)
+
+    def storePayload(self, data):
+        objList = []
+        if self.__debug:
+           print 'Store iov+payload using arguments ',data
+        objList = self.__restserver.addPayload(data,'/iovs/payload')
+        return objList
+
+    def getPayload(self, hash, trace, expand):
+        data = {}
+        data['trace']=trace
+        data['expand']=expand
+        data['name']=hash
+        if self.__debug:
+           print 'Get payload using arguments ',data
+        (obj, response) = self.__restserver.get(data,'/payload')
+        return (obj, response)
+
+    def getPayloadData(self, hash, outfile):
+        data = {}
+        data['name']=hash
+        data['filename']=outfile
+        if self.__debug:
+           print 'Get payload data using arguments ',data
+        self.__restserver.getpayload(data,'/payload/data')
+        return
+
+    def dump(self, hash):
+        if self.__debug:
+           print 'Dump payload using arguments ',hash
+        data = {}
+        data['name']=hash
+        data['trace'] = 'off'
+        data['expand'] = 'true'
+        (obj, response) = self.__restserver.get(data,'/payload')
+        if response > 220:
+           print 'ERROR: get payload information has given error code ',response
+           raise Exception('Request for getting payload failed')
+        print 'Payload information retrieved: ',obj
+        payloaddataname = obj['objectType']
+        self.getPayloadData(hash,payloaddataname)
+        return (payloaddataname, response)
+
+    def getTag(self, tag, trace, expand):
+        data = {}
+        data['trace']=trace
+        data['expand']=expand
+        data['name']=tag
+        if self.__debug:
+           print 'Get tag using arguments ',data
+        (obj, response) = self.__restserver.get(data,'/tags')
+        return (obj, response)
+
+    def addObject(self, type, data):
+        if self.__debug:
+           print 'Add object of type ', type, ' using arguments ',data
+        response = self.__restserver.addJsonEntity(data,'/'+type)
+        return (response)
+
+    def deleteObject(self, type, data):
+        if self.__debug:
+           print 'Delete object of type ', type, ' using arguments ',data
+        self.__restserver.deleteEntity(data,'/'+type)
+        print 'INFO: Object removed'
+        return
+        
+#### calibration methods
+    def commit(self,filename,pkgname,destpath,since,sincedesc):
+        params = {}
+        params['file'] = filename
+        params['package'] = pkgname
+        params['path'] = destpath
+        params['since'] = since
+        params['description'] = sincedesc 
+        if self.__debug:
+           print 'commit using parameters ',params       
+        response = self.__restserver.commitCalibration(params,'/calibration/commit')
+        return response
+    
+    def getobject(self, name, trace, expand, object):
+        data = {}
+        data['trace']=trace
+        data['expand']=expand
+        data['name']=name
+        obj = {}
+        if self.__debug:
+           print 'Select mappings using arguments ',data
+        (obj, response) = self.__restserver.get(data,'/'+object)
+        return (obj, response)
+
+    def getsystems(self, bytype, fieldname):
+        systemdata = {}
+        systemdata['by']=bytype
+        systemdata['name']=fieldname
+        systemdata['expand']='true'
+        (systemobj, code) = self.__restserver.getsystems(systemdata,'/systems/find')
+        return (systemobj, code)
+        

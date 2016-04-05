@@ -16,6 +16,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import conddb.annotations.Href;
+
 /**
  * @author formica
  *
@@ -25,6 +27,10 @@ import javax.persistence.UniqueConstraint;
 		"NODE_FULLPATH"}) })
 public class SystemDescription extends conddb.data.Entity implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2590694477609404759L;
 	private Long id;
 	private String nodeFullpath;
 	private String schemaName;
@@ -128,6 +134,7 @@ public class SystemDescription extends conddb.data.Entity implements Serializabl
 	 * @return
 	 * 	The tag name root for this system.
 	 */
+	@Href
 	@Column(name = "TAG_NAME_ROOT", unique = true, updatable = false, nullable = false, length = 1000)
 	public String getTagNameRoot() {
 		return tagNameRoot;

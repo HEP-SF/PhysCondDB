@@ -1,7 +1,6 @@
 package conddb.data;
 
 import java.sql.Blob;
-import java.util.Arrays;
 
 // Generated Aug 25, 2014 4:52:00 PM by Hibernate Tools 3.4.0.CR1
 
@@ -37,11 +36,6 @@ public class PayloadData extends conddb.data.Entity implements java.io.Serializa
 	public PayloadData() {
 //		this.data = "EMPTY".getBytes();
 	}
-
-//	public PayloadData(String hash, byte[] data) {
-//		this.hash = hash;
-//		this.data = data;
-//	}
 
 	public PayloadData(String hash) {
 		super();

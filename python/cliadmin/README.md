@@ -23,64 +23,63 @@ This project contains utility libraries for the interaction with the server of c
 
 ## Calibration client:
 
-The python client `CalibAdmin.py` is conceived for the calibration files use case. It is a prototype created after discussions with Will Buttinger.
-Use `condurllib2.py` instead.
+The python client `condurllib2.py` is conceived for the calibration files use case. It is a prototype created after discussions with Will Buttinger.
 
 Short list of commands as examples:
 
 * COMMIT a file: insert a new file in a given package to the corresponding destination path
 ```   
-python CalibAdmin.py  COMMIT  <packagename> <localfilenameandpath> <destpath>
+python condurllib2.py  COMMIT  <packagename> <localfilenameandpath> <destpath>
 ```   
 Example:
 ```   
-python CalibAdmin.py --url=aiatlas137.cern.ch:8080/physconddb COMMIT JavaDocPkg primefaces_users_guide_3_4.pdf   /JavaDocPkg/Computing/Generics
+python condurllib2.py --url=aiatlas137.cern.ch:8080/physconddb COMMIT JavaDocPkg primefaces_users_guide_3_4.pdf   /JavaDocPkg/Computing/Generics
 ```
 ```
-python CalibAdmin.py --url=aiatlas137.cern.ch:8080/physconddb COMMIT JavaDocPkg jquery-getting-started.pdf   /JavaDocPkg/Computing/Generics
+python condurllib2.py --url=aiatlas137.cern.ch:8080/physconddb COMMIT JavaDocPkg jquery-getting-started.pdf   /JavaDocPkg/Computing/Generics
 ```
 
 * TAG a package : associate the last versions of the files to a (new) global tag
 ``` 
- python CalibAdmin.py TAG <package-name> <globaltagname>
+ python condurllib2.py TAG <package-name> <globaltagname>
 ```
 Example:
 ```
-python CalibAdmin.py --url=aiatlas137.cern.ch:8080/physconddb TAG JavaDocPkg JavaDocPkg-00-03
+python condurllib2.py --url=aiatlas137.cern.ch:8080/physconddb TAG JavaDocPkg JavaDocPkg-00-03
 ```
 * LS list the files under a global tag
 ``` 
- python CalibAdmin.py LS <globaltagname>
+ python condurllib2.py --url=aiatlas137.cern.ch:8080/physconddb LS <globaltagname>
 ```
 Example:
 ```
-python CalibAdmin.py --url=aiatlas137.cern.ch:8080/physconddb LS JavaDocPkg-00-03
+python condurllib2.py --url=aiatlas137.cern.ch:8080/physconddb LS JavaDocPkg-00-03
 ```
 * LOCK a global tag
 ``` 
- python CalibAdmin.py LOCK <globaltagname> <lockstatus> (Default: LOCKED)
+ python condurllib2.py LOCK <globaltagname> <lockstatus> (Default: LOCKED)
 ```
 Using condurllib2 command one can add the package name as last argument. In this case it will dump
 the correct directory structure. Otherwise the directory structure will start from the global tag name.
 Example:
 ```
-python CalibAdmin.py --url=aiatlas137.cern.ch:8080/physconddb LOCK JavaDocPkg-00-03
+python condurllib2.py --url=aiatlas137.cern.ch:8080/physconddb LOCK JavaDocPkg-00-03
 ```
 
 * COLLECT a global tag (dump in the server /tmp/ area the full global tag directory structure)
 ``` 
- python CalibAdmin.py COLLECT <globaltagname> <asg global tag> 
+ python condurllib2.py COLLECT <globaltagname> <asg global tag> 
 ```
 Example:
 ```
-python CalibAdmin.py --url=aiatlas137.cern.ch:8080/physconddb  COLLECT JavaDocPkg-00-03 ASG-00-01
+python condurllib2.py --url=aiatlas137.cern.ch:8080/physconddb  COLLECT JavaDocPkg-00-03 ASG-00-01
 ```
 
 * TAR a global tag (download a previously dumped global tag from the server into a local TAR file named globaltag-temp.tar)
 ``` 
- python CalibAdmin.py TAR <globaltagname> 
+ python condurllib2.py TAR <globaltagname> 
 ```
 Example:
 ```
-python CalibAdmin.py --url=aiatlas137.cern.ch:8080/physconddb  TAR JavaDocPkg-00-03
+python condurllib2.py --url=aiatlas137.cern.ch:8080/physconddb  TAR JavaDocPkg-00-03
 ```

@@ -37,8 +37,8 @@ public class JdbcRepository {
 			String sqlquery = "select   "
 					+ " (FLOOR(iov.since/node.iovgroup_size) * node.iovgroup_size) as since, "
 					+ " count(iov.since) as niovs, "
-					+ " min(iov.sinceString) as sinceString "
-					+ " from IOV iov, TAG tag, SYSTEM_NODE node where "
+					+ " min(iov.since_string) as sinceString "
+					+ " from PHCOND_IOV iov, PHCOND_TAG tag, PHCOND_SYSTEM_NODE node where "
 					+ " tag.name=(:tagname) and "
 					+ " iov.tag_id=tag.tag_id and "
 					+ " node.tag_name_root=:tagrootname and "
@@ -53,5 +53,29 @@ public class JdbcRepository {
 			throw e;
 		}
 	}
+	
+	public List<IovGroups> selectGroups2(String tagname) throws Exception {
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(localDs);
+		try {
+			String tagrootname=tagname.split("-")[0];
+			String sqlquery = "select   "
+					+ " (FLOOR(iov.since/node.iovgroup_size) * node.iovgroup_size) as since, "
+					+ " count(iov.since) as niovs, "
+					+ " min(iov.since_string) as sinceString "
+					+ " from PHCOND_IOV iov, PHCOND_TAG tag, PHCOND_SYSTEM_NODE node where "
+					+ " tag.name=(:tagname) and "
+					+ " iov.tag_id=tag.tag_id and "
+					+ " node.tag_name_root=:tagrootname "
+					+ " group by (FLOOR(since/node.iovgroup_size) * node.iovgroup_size) ";
+			return jdbcTemplate.query(sqlquery, 
+					new Object[] { tagname, tagrootname }, 
+					new IovGroupsMapper());
+		} catch (EmptyResultDataAccessException emptyResultDataAccessException) {
+			throw emptyResultDataAccessException;
+		} catch (Exception e) {
+			throw e;
+		}
+	}
+
 
 }

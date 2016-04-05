@@ -39,9 +39,9 @@ import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.utils.json.serializers.TimestampDeserializer;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
-import conddb.web.resources.GlobalTagResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
+import conddb.web.resources.generic.GenericPojoResource;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -76,11 +76,8 @@ public class GlobalTagExpRestController extends BaseController {
 	public Response createGlobalTag(@Context UriInfo info,
 			GlobalTag globaltag) throws ConddbWebException {
 		try {
-//			GlobalTag globaltag = new GlobalTag();
 			GlobalTag saved = globalTagService.insertGlobalTag(globaltag);
-			saved.setResId(saved.getName());
-			GlobalTagResource resource = (GlobalTagResource) springResourceFactory.getResource("globaltag", info,
-					saved);
+			GenericPojoResource<GlobalTag> resource = (GenericPojoResource) springResourceFactory.getGenericResource(info, saved, 0, null);
 			return created(resource);
 		} catch (ConddbServiceException e) {
 			String msg = "Error creating globaltag resource using "+globaltag.toString();
@@ -99,7 +96,7 @@ public class GlobalTagExpRestController extends BaseController {
 			@PathParam("id") String id, 
 			Map map)
 			throws ConddbWebException {
-		Response resp;
+
 		try {
 			log.info("Request for updating global tag "+id+" using "+map.size());
 			GlobalTag existing = globalTagService.getGlobalTag(id);
@@ -151,11 +148,10 @@ public class GlobalTagExpRestController extends BaseController {
 				existing.setSnapshotTime(snapshottime);
 			}
 			existing = globalTagService.insertGlobalTag(existing);
-			existing.setResId(existing.getName());
-			GlobalTagResource resource = (GlobalTagResource) springResourceFactory.getResource("globaltag", info,
-					existing);
-			resp = Response.ok(resource, MediaType.APPLICATION_JSON).build();
-			return resp;
+			GenericPojoResource<GlobalTag> resource = (GenericPojoResource) springResourceFactory.getGenericResource(info, existing, 0, null);
+
+			return ok(resource);
+			
 		} catch (ConddbServiceException e) {
 			log.debug("Generate exception using an ConddbService exception..."+e.getMessage());
 			String msg = "Error updating locked globaltag resource: internal server exception !";
@@ -181,7 +177,7 @@ public class GlobalTagExpRestController extends BaseController {
 			@DefaultValue("addtags") @QueryParam("action") final String action,
 			Map map)
 			throws ConddbWebException {
-		Response resp;
+
 		try {
 			String record = (map.containsKey("record")) ? (String) map.get("record") : "none" ;
 			String label = (map.containsKey("label")) ? (String) map.get("label") : "none" ;
@@ -221,10 +217,10 @@ public class GlobalTagExpRestController extends BaseController {
 					globalTagService.mapAddTagToGlobalTag(tag, existing,record, newlabel);
 				}
 			}
-			GlobalTagResource resource = (GlobalTagResource) springResourceFactory.getResource("globaltag", info,
-					existing);
-			resp = Response.ok(resource, MediaType.APPLICATION_JSON).build();
-			return resp;
+			
+			GenericPojoResource<GlobalTag> resource = (GenericPojoResource) springResourceFactory.getGenericResource(info, existing, 0, null);
+
+			return ok(resource);
 
 		} catch (ConddbServiceException e) {
 			log.debug("Generate exception using an ConddbService exception..."+e.getMessage());
@@ -234,23 +230,30 @@ public class GlobalTagExpRestController extends BaseController {
 	}
 
 	@Path(Link.GLOBALTAGS+"/{id}")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@DELETE
 	@ApiOperation(value = "Delete a globaltag.",
     notes = "It should be used one global tag at the time. This method is meant for administration purposes.",
     response=GlobalTag.class)
 	public Response deleteGlobalTag(
+			@Context UriInfo info, 
 			@ApiParam(value = "id: id of the globaltag to be deleted", required = true) 
 			@PathParam("id") String id) throws ConddbWebException {
-		Response resp;
 		try {
 			GlobalTag existing = globalTagService.getGlobalTag(id);
+			if (existing == null) {
+				String msg = "Error in removing a globaltag with id "+id+": resource does not exists";
+				throw buildException(msg, msg, Response.Status.NOT_FOUND);
+			}
 			if (existing.islocked()) {
 				String msg = "Error in removing a locked globaltag resource: "+existing.toString();
 				throw buildException(msg, msg, Response.Status.NOT_MODIFIED);
 			}
-			existing = globalTagAdminService.deleteGlobalTag(id);
-			resp = Response.ok(existing).build();
-			return resp;
+			GlobalTag removed = globalTagAdminService.deleteGlobalTag(id);
+			GenericPojoResource<GlobalTag> resource = (GenericPojoResource) springResourceFactory.getGenericResource(info, removed, 0, null);
+
+			return ok(resource);
+			
 		} catch (ConddbServiceException e) {
 			log.debug("Generate exception using an ConddbService exception..."+e.getMessage());
 			String msg = "Error removing a globaltag resource: internal server exception !";

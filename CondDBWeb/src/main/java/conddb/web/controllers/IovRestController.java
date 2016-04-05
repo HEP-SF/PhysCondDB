@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import javax.ws.rs.DefaultValue;
@@ -30,6 +29,7 @@ import org.springframework.stereotype.Controller;
 import conddb.data.GlobalTag;
 import conddb.data.Iov;
 import conddb.data.Tag;
+import conddb.data.view.IovGroups;
 import conddb.svc.dao.controllers.GlobalTagService;
 import conddb.svc.dao.controllers.IovService;
 import conddb.svc.dao.exceptions.ConddbServiceException;
@@ -37,9 +37,9 @@ import conddb.utils.collections.CollectionUtils;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
-import conddb.web.resources.IovResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.SpringResourceFactory;
+import conddb.web.resources.generic.GenericPojoResource;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -66,9 +66,10 @@ public class IovRestController extends BaseController {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/find")
 	@ApiOperation(value = "Finds Iovs for a given tag using a specific globaltag for snapshotTime", notes = "This function takes parameters in input like the time range and pagination", response = Iov.class)
-	public CollectionResource getIovsInTag(@Context UriInfo info,
+	public Response getIovsInTag(@Context UriInfo info,
 			@ApiParam(value = "tag: the tagname", required = true) @QueryParam("tag") final String id,
 			@ApiParam(value = "globaltag: the globaltag name", required = false) @DefaultValue("none") @QueryParam("globaltag") final String globaltagid,
+			@ApiParam(value = "snapshot: the snapshot time", required = false) @DefaultValue("-1") @QueryParam("snapshot") final Long snapt,
 			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false) @DefaultValue("false") @QueryParam("expand") boolean expand,
 			@ApiParam(value = "last: {niovs} loads only the last N iovs", required = false) @DefaultValue("-1") @QueryParam("last") final Integer niovs,
 			@ApiParam(value = "since: the string representing since time", required = false) @DefaultValue("0") @QueryParam("since") final String since,
@@ -90,6 +91,9 @@ public class IovRestController extends BaseController {
 				snapshotTime = gtag.getSnapshotTime();
 				log.debug("Setting snapshot time to " + snapshotTime + " for further queries based on globaltag id "
 						+ globaltagid);
+			} else if (snapt > -1) {
+				snapshotTime = new Timestamp(snapt);
+				log.debug("Setting snapshot time to " + snapshotTime + " from user input "+snapt);
 			}
 			if (until.equalsIgnoreCase("INF")) {
 				sincetime = new BigDecimal(since);
@@ -118,23 +122,28 @@ public class IovRestController extends BaseController {
 				String msg = "Iov list is empty";
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
-			Collection items = new ArrayList(entitylist.size());
-			for (Iov iov : entitylist) {
-				iov.setResId(iov.getId().toString());
-				iov.getPayload().setResId(iov.getPayload().getHash());
-				iov.getTag().setResId(iov.getTag().getName());
-				if (expand) {
-					items.add(springResourceFactory.getResource("iov", info, iov));
-				} else {
-					items.add(springResourceFactory.getResource("link", info, iov));
-				}
-			}
-			return (CollectionResource) springResourceFactory.getCollectionResource(info, Link.IOVS, items);
-
+			CollectionResource collres = listToCollection(entitylist, expand, info);
+			return ok(collres);
+			
 		} catch (ConddbServiceException e) {
 			String msg = "Error retrieving iov list resource ";
 			throw buildException(msg + " " + e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
+	}
+	
+	protected CollectionResource listToCollection(Collection<Iov> iovs, boolean expand, UriInfo info) {
+		Collection items = new ArrayList(iovs.size());
+		for (Iov iov : iovs) {
+			if (expand) {
+				log.debug("Creating a generic resource from iov "+iov);
+				GenericPojoResource<Iov> resource = (GenericPojoResource<Iov>) springResourceFactory.getGenericResource(info, iov, 0, null);
+				items.add(resource);
+			} else {
+				log.debug("Creating a generic link out of the iov "+iov);
+				items.add(springResourceFactory.getResource("link", info, iov));
+			}
+		}
+		return (CollectionResource) springResourceFactory.getCollectionResource(info, Link.IOVS, items);
 	}
 
 	@GET
@@ -147,9 +156,8 @@ public class IovRestController extends BaseController {
 		this.log.info("IovRestController processing request for iov id " + id);
 		try {
 			Iov entity = this.iovService.getIov(id);
-			entity.setResId(entity.getId().toString());
-			IovResource iovres = (IovResource) springResourceFactory.getResource("iov", info, entity);
-			return created(iovres);
+			GenericPojoResource<Iov> resource = (GenericPojoResource<Iov>) springResourceFactory.getGenericResource(info, entity, 1, null);
+			return ok(resource);
 		} catch (Exception e) {
 			String msg = "Error retrieving iov by id " + id;
 			throw buildException(msg + " " + e.getMessage(), msg, Response.Status.NOT_FOUND);
@@ -160,7 +168,7 @@ public class IovRestController extends BaseController {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@ApiOperation(value = "Finds all Iovs", notes = "Usage of this method is essentially for test purposes.", response = Iov.class, responseContainer = "List")
-	public CollectionResource listIovs(@Context UriInfo info,
+	public Response listIovs(@Context UriInfo info,
 			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false) @DefaultValue("false") @QueryParam("expand") boolean expand,
 			@ApiParam(value = "page: the page number", required = false) @DefaultValue("0") @QueryParam("page") Integer ipage,
 			@ApiParam(value = "size: the page size", required = false) @DefaultValue("1000") @QueryParam("size") Integer size)
@@ -175,21 +183,33 @@ public class IovRestController extends BaseController {
 			throw new ConddbWebException(e.getMessage());
 		}
 		if (entitylist == null || entitylist.size() == 0) {
-			return (CollectionResource) springResourceFactory.getCollectionResource(info, Link.IOVS,
-					Collections.emptyList());
+			String msg = "Iov list is empty";
+			throw buildException(msg, msg, Response.Status.NOT_FOUND);
 		}
-		Collection items = new ArrayList(entitylist.size());
-		for (Iov iov : entitylist) {
-			iov.setResId(iov.getId().toString());
-			iov.getPayload().setResId(iov.getPayload().getHash());
-			iov.getTag().setResId(iov.getTag().getName());
-			if (expand) {
-				items.add(springResourceFactory.getResource("iov", info, iov));
-			} else {
-				items.add(springResourceFactory.getResource("link", info, iov));
-			}
+		CollectionResource collres = listToCollection(entitylist, expand, info);
+		return ok(collres);
+	}
+
+	@SuppressWarnings("unchecked")
+	@GET
+	@Path("/groups/{tagname}")
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@ApiOperation(value = "Finds all Iovs", notes = "Usage of this method is essentially for test purposes.", response = IovGroups.class, responseContainer = "List")
+	public Response listIovGroups(@Context UriInfo info,
+			@ApiParam(value = "tagname: the tag name", required = true) @DefaultValue("none") @PathParam("tagname") String tagname)
+					throws ConddbWebException {
+		this.log.info("IovRestController processing request for iov group list for tag "+tagname);
+		Collection<IovGroups> entitylist;
+		try {
+			entitylist = CollectionUtils.iterableToCollection(iovService.getIovGroupsForTag(tagname));
+		} catch (ConddbServiceException e) {
+			throw new ConddbWebException(e.getMessage());
 		}
-		return (CollectionResource) springResourceFactory.getCollectionResource(info, Link.IOVS, items);
+		if (entitylist == null || entitylist.size() == 0) {
+			String msg = "Iov Group list is empty";
+			throw buildException(msg, msg, Response.Status.NOT_FOUND);
+		}
+		return Response.status(Response.Status.OK).entity(entitylist).build();
 	}
 
 }

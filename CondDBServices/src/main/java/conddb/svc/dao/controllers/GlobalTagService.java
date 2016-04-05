@@ -3,19 +3,15 @@
  */
 package conddb.svc.dao.controllers;
 
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
-import org.hibernate.JDBCException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -82,6 +78,18 @@ public class GlobalTagService {
 			throw new ConddbServiceException("Cannot find global tag map element " + e.getMessage());
 		}
 	}
+	
+	/**
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public GlobalTagMap getGlobalTagMapFetchChildren(Long id) throws ConddbServiceException {
+		try {
+			return globalTagMapRepository.findByIdFetchTagAndGlobalTag(id);
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot find global tag map element " + e.getMessage());
+		}
+	}
 
 	/**
 	 * @return
@@ -125,7 +133,10 @@ public class GlobalTagService {
 	@ProfileExecution
 	public GlobalTag getGlobalTagFetchTags(String globaltagname) throws ConddbServiceException {
 		try {
-			GlobalTag gtag = this.globalTagRepository.findByNameAndFetchTagsEagerly(globaltagname);
+			GlobalTag gtag = null;
+			/////gtag = this.globalTagRepository.findOne(globaltagname);
+			// I have modified the sql query to try to load maps+systemTag in one select
+			gtag = this.globalTagRepository.findByNameAndFetchTagsEagerly(globaltagname);
 			return gtag;
 		} catch (Exception e) {
 			throw new ConddbServiceException("Cannot find global tag by name and fetch tags: " + e.getMessage());
@@ -135,7 +146,7 @@ public class GlobalTagService {
 	@ProfileExecution
 	public GlobalTag getGlobalTag(String globaltagname) throws ConddbServiceException {
 		try {
-			GlobalTag gtag = this.globalTagRepository.findOne(globaltagname);
+			GlobalTag gtag = this.globalTagRepository.findByName(globaltagname);
 			return gtag;
 		} catch (Exception e) {
 			throw new ConddbServiceException("Cannot find global tag by name: " + e.getMessage());
@@ -145,7 +156,8 @@ public class GlobalTagService {
 	@ProfileExecution
 	public List<GlobalTag> getGlobalTagByNameLikeFetchTags(String globaltagnamepattern) throws ConddbServiceException {
 		try {
-			List<GlobalTag> gtaglist = this.globalTagRepository.findByNameLikeAndFetchTagsEagerly(globaltagnamepattern);
+			List<GlobalTag> gtaglist =  null;
+			gtaglist = this.globalTagRepository.findByNameLikeAndFetchTagsEagerly(globaltagnamepattern);
 			return gtaglist;
 		} catch (Exception e) {
 			throw new ConddbServiceException("Cannot find global tag by name like " + globaltagnamepattern
@@ -324,7 +336,7 @@ public class GlobalTagService {
 	public GlobalTagMap insertGlobalTagMap(GlobalTagMap entity) throws ConddbServiceException {
 
 		try {
-			GlobalTag gtag = globalTagRepository.findOne(entity.getGlobalTagName());
+			GlobalTag gtag = globalTagRepository.findByName(entity.getGlobalTagName());
 			Tag atag = tagRepository.findByName(entity.getTagName());
 			if (gtag == null || atag == null) {
 				log.debug("Cannot find elements for association");

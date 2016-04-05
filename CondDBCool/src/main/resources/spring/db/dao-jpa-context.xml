@@ -15,7 +15,7 @@
 	<!-- auditing <jpa:auditing auditor-aware-ref="auditorAware" /> <bean id="auditorAware" 
 		class="org.springbyexample.contact.orm.entity.AuditorAwareImpl" /> -->
 <context:annotation-config />
-	<jpa:repositories base-package="conddb.dao,conddb.cool" />
+	<jpa:repositories base-package="conddb.svc.dao,conddb.cool" />
 
 	<!-- auditing <jpa:auditing auditor-aware-ref="auditorAware" /> <bean id="auditorAware" 
 		class="org.springbyexample.contact.orm.entity.AuditorAwareImpl" /> -->

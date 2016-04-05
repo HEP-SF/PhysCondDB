@@ -11,6 +11,8 @@ import java.util.Set;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
@@ -23,9 +25,9 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import conddb.annotations.Href;
 import conddb.utils.json.serializers.TimestampDeserializer;
 import conddb.utils.json.serializers.TimestampSerializer;
-import io.swagger.annotations.ApiModel;
 
 
 /**
@@ -40,6 +42,7 @@ public class GlobalTag extends conddb.data.Entity implements java.io.Serializabl
 	 *
 	 */
 	private static final long serialVersionUID = 996548260134268579L;
+	private Long id;
 	private String name;
 	private BigDecimal validity;
 	private String description;
@@ -52,7 +55,7 @@ public class GlobalTag extends conddb.data.Entity implements java.io.Serializabl
 	private Timestamp insertionTime;
 	private Timestamp snapshotTime;
 	private Set<GlobalTagMap> globalTagMaps = new HashSet<GlobalTagMap>(0);
-
+	
 	public GlobalTag() {
 	}
 
@@ -97,6 +100,17 @@ public class GlobalTag extends conddb.data.Entity implements java.io.Serializabl
 	}
 
 	@Id
+	@GeneratedValue(strategy=GenerationType.AUTO)
+	@Column(name = "G_ID", unique = true, nullable = false)
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	@Href
 	@Column(name = "NAME", unique = true, nullable = false, length = 100)
 	@Pattern(regexp="^([A-Z]+[A-Za-z0-9]+)-([A-Z0-9]+)-([0-9])++$",
 	         message="{invalid.name}")
@@ -199,6 +213,5 @@ public class GlobalTag extends conddb.data.Entity implements java.io.Serializabl
     public void prePersist() {
         Timestamp now = new Timestamp(new Date().getTime());
         this.insertionTime = now;
-    }
- 
+    } 	
 }

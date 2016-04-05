@@ -3,9 +3,6 @@
  */
 package conddb.web.exceptions;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -52,12 +49,17 @@ public class GlobalControllerExceptionMapper implements ExceptionMapper<Throwabl
 		} else if (ex instanceof DataIntegrityViolationException) {
 			errorMessage.setCode(Response.Status.CONFLICT.getStatusCode()); //defaults to data integrity server error 409
 			errorMessage.setUserMessage("Data integrity violation");
+		} else if (ex instanceof ConddbWebException) {
+			errorMessage.setCode(((ConddbWebException) ex).getStatus().getStatusCode()); //defaults to data integrity server error 409
+			errorMessage.setUserMessage(((ConddbWebException) ex).getErrMessage().getUserMessage());
 		} else {
 			errorMessage.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()); //defaults to internal server error 500
 //			StringWriter errorStackTrace = new StringWriter();
 //			ex.printStackTrace(new PrintWriter(errorStackTrace));
 //			errorMessage.setUserMessage(errorStackTrace.toString());
 			errorMessage.setUserMessage("Internal server exception");
+			log.debug("Dump stack trace ");
+			ex.printStackTrace();
 		}
 	}
 }

@@ -137,13 +137,16 @@ public class DirectoryMapperService {
 				log.debug("Found system " + system.getSchemaName());
 				// Check if this is a link to a global tag
 				String labelisgtag = globalTagMap.getLabel();
+				log.debug("Check label in mapping..."+labelisgtag);
 				Resource subresource = new FileSystemResource(
 						localrootdir + PATH_SEPARATOR + system.getSchemaName() + PATH_SEPARATOR + labelisgtag);
+				log.debug("Verify subresource in path "+subresource.toString());
 				if (subresource.exists()) {
 					log.info("Creating link to " + subresource.getFile().getPath());
 					Path newLink = Paths.get(resource.getFile().getPath() + PATH_SEPARATOR + labelisgtag);
 					Path target = Paths.get(subresource.getFile().getPath());
 					try {
+						log.debug("Create symbolic link to "+target.toString());
 						Files.createSymbolicLink(newLink, target);
 					} catch (IOException x) {
 						log.error(x.getMessage());
@@ -251,6 +254,7 @@ public class DirectoryMapperService {
 		OutputStream tarOutput = new FileOutputStream(new File(tarName));
 
 		ArchiveOutputStream tarArchive = new TarArchiveOutputStream(tarOutput);
+		((TarArchiveOutputStream) tarArchive).setLongFileMode( TarArchiveOutputStream.LONGFILE_GNU );
 		List<File> files = new ArrayList<File>();
 		for (File file : pathEntries) {
 			files.addAll(this.recurseDirectory(file));
