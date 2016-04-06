@@ -24,7 +24,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 @Table(name = "PHCOND_GLOBAL_TAG_MAP",
 	uniqueConstraints=@UniqueConstraint(columnNames={"TAG_ID", "G_ID"}))
 @JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="id", scope = GlobalTagMap.class)
-public class GlobalTagMap extends conddb.data.Entity implements java.io.Serializable {
+public class GlobalTagMap extends conddb.data.AfEntity implements java.io.Serializable {
 
 	/**
 	 * 
@@ -175,4 +175,43 @@ public class GlobalTagMap extends conddb.data.Entity implements java.io.Serializ
 		return "GlobalTagMap [id=" + id + ", record=" + record + ", label=" + label + ", getTagName()=" + getTagName()
 				+ ", getGlobalTagName()=" + getGlobalTagName() + "]";
 	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((label == null) ? 0 : label.hashCode());
+		result = prime * result + ((record == null) ? 0 : record.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		GlobalTagMap other = (GlobalTagMap) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (label == null) {
+			if (other.label != null)
+				return false;
+		} else if (!label.equals(other.label))
+			return false;
+		if (record == null) {
+			if (other.record != null)
+				return false;
+		} else if (!record.equals(other.record))
+			return false;
+		return true;
+	}
+	
+	
 }

@@ -53,7 +53,7 @@ public class PojoMapFactory {
 		return pm;
 	}
 	
-	public Map<String, Method> getEntityMap(conddb.data.Entity entity,String type) throws ConddbWebException {
+	public Map<String, Method> getEntityMap(conddb.data.AfEntity entity,String type) throws ConddbWebException {
 		String clname = entity.getClass().getName();
 		log.debug("Try to find entity map for "+clname+" using type "+type);
 		if (type.equals("column") && entitymap.containsKey(entity.getClass().getName())) {
@@ -79,7 +79,7 @@ public class PojoMapFactory {
 		}
 	}
 	
-	private void fetchKeysFromEntity(conddb.data.Entity entity, 
+	private void fetchKeysFromEntity(conddb.data.AfEntity entity, 
 			Map<String, Method> nswentitymap, 
 			Map<String, Method> nswsetmap,
 			Map<String, Method> entitymap) {

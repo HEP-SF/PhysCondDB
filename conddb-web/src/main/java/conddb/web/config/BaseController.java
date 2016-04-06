@@ -18,7 +18,7 @@ package conddb.web.config;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import conddb.data.Entity;
+import conddb.data.AfEntity;
 import conddb.data.ErrorMessage;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
@@ -65,12 +65,12 @@ public abstract class BaseController {
 		return ex;
 	}
 
-	protected <T extends Entity> CollectionResource listToCollection(Collection<T> coll, boolean expand,
+	protected <T extends AfEntity> CollectionResource listToCollection(Collection<T> coll, boolean expand,
 			UriInfo info, String subPath) {
 		Collection<Link> items = new ArrayList<Link>(coll.size());
 		for (T entity : coll) {
 			if (expand) {
-				GenericPojoResource<Entity> resource = new GenericPojoResource<Entity>(info, entity);
+				GenericPojoResource<AfEntity> resource = new GenericPojoResource<AfEntity>(info, entity);
 				items.add(resource);
 			} else {
 				Link link = new Link(info, entity);

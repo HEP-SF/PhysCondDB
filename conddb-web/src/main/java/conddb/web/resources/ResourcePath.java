@@ -22,7 +22,7 @@ import conddb.data.Iov;
 import conddb.data.Payload;
 import conddb.data.PayloadData;
 import conddb.data.SystemDescription;
-import conddb.data.Entity;
+import conddb.data.AfEntity;
 
 public enum ResourcePath {
 
@@ -36,14 +36,14 @@ public enum ResourcePath {
     ;
 
     final String path;
-    final Class<? extends Entity> associatedClass;
+    final Class<? extends AfEntity> associatedClass;
 
-    private ResourcePath(String elt, Class<? extends Entity> clazz) {
+    private ResourcePath(String elt, Class<? extends AfEntity> clazz) {
         path = elt;
         associatedClass = clazz;
     }
 
-    public static ResourcePath forClass(Class<? extends Entity> clazz) {
+    public static ResourcePath forClass(Class<? extends AfEntity> clazz) {
         for (ResourcePath rp : values()) {
             //Cannot use equals because of hibernate proxied object
             //Cannot use instanceof because type not fixed at compile time
@@ -58,7 +58,7 @@ public enum ResourcePath {
         return path;
     }
 
-    public Class<? extends Entity> getAssociatedClass() {
+    public Class<? extends AfEntity> getAssociatedClass() {
         return associatedClass;
     }
 }

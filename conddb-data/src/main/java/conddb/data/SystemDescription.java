@@ -25,7 +25,7 @@ import conddb.data.annotations.Href;
 @Entity
 @Table(name = "PHCOND_SYSTEM_NODE", uniqueConstraints = { @UniqueConstraint(columnNames = {
 		"NODE_FULLPATH"}) })
-public class SystemDescription extends conddb.data.Entity implements Serializable {
+public class SystemDescription extends conddb.data.AfEntity implements Serializable {
 
 	/**
 	 * 
@@ -180,5 +180,36 @@ public class SystemDescription extends conddb.data.Entity implements Serializabl
 				+ ", tagNameRoot=" + tagNameRoot + ", nodeDescription=" + nodeDescription + ", groupSize=" + groupSize
 				+ "]";
 	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((tagNameRoot == null) ? 0 : tagNameRoot.hashCode());
+		return result;
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		SystemDescription other = (SystemDescription) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (tagNameRoot == null) {
+			if (other.tagNameRoot != null)
+				return false;
+		} else if (!tagNameRoot.equals(other.tagNameRoot))
+			return false;
+		return true;
+	}
+
 	
 }

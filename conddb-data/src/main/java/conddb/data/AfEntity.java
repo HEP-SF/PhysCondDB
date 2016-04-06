@@ -20,11 +20,11 @@ import javax.persistence.Transient;
 /**
  * Base class for all persistent entities in the application.
  */
-public abstract class Entity {
+public abstract class AfEntity {
 
     private String resid = "none";
 
-    public Entity(){}
+    public AfEntity(){}
 
     @Transient
     @Deprecated
@@ -44,4 +44,9 @@ public abstract class Entity {
     public void setHref(String id) {
         this.resid = id;
     }
+    
+	public abstract boolean equals(Object obj);
+	
+	public abstract int hashCode();
+
 }

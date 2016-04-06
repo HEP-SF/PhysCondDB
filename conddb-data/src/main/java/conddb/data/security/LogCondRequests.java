@@ -34,7 +34,7 @@ import conddb.data.utils.json.serializers.TimestampSerializer;
 @Entity
 @Table(name = "PHCOND_SECURITY_LOGREQUESTS")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = LogCondRequests.class)
-public class LogCondRequests  extends conddb.data.Entity implements java.io.Serializable {
+public class LogCondRequests  extends conddb.data.AfEntity implements java.io.Serializable {
 
 	/**
 	 * 
@@ -240,5 +240,45 @@ public class LogCondRequests  extends conddb.data.Entity implements java.io.Seri
 				+ remoteHost + ", requestUrl=" + requestUrl + ", requestHeader=" + requestHeader + ", httpMethod="
 				+ httpMethod + ", start=" + start + ", end=" + end + "]";
 	}
+
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((remoteHost == null) ? 0 : remoteHost.hashCode());
+		result = prime * result + ((serverHost == null) ? 0 : serverHost.hashCode());
+		return result;
+	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		LogCondRequests other = (LogCondRequests) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (remoteHost == null) {
+			if (other.remoteHost != null)
+				return false;
+		} else if (!remoteHost.equals(other.remoteHost))
+			return false;
+		if (serverHost == null) {
+			if (other.serverHost != null)
+				return false;
+		} else if (!serverHost.equals(other.serverHost))
+			return false;
+		return true;
+	}
+
 	
 }

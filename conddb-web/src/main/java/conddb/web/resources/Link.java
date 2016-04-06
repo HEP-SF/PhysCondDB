@@ -33,7 +33,7 @@ import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import conddb.data.Entity;
+import conddb.data.AfEntity;
 import conddb.data.annotations.Href;
 import conddb.web.utils.PropertyConfigurator;
 
@@ -60,20 +60,20 @@ public class Link extends LinkedHashMap {
     public static final String MONITOR = PATH_SEPARATOR + "monitor";
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
-	protected Entity parent = null;
+	protected AfEntity parent = null;
 
-    public Link(UriInfo info, Entity entity) {
+    public Link(UriInfo info, AfEntity entity) {
         this(getFullyQualifiedContextPath(info), entity);
         this.serializeTimestamps();
     }
     
-    public Link(UriInfo info, Entity entity, Entity parent) {
+    public Link(UriInfo info, AfEntity entity, AfEntity parent) {
         this(getFullyQualifiedContextPath(info), entity);
         this.parent = parent;
         this.serializeTimestamps();
     }
 
-    public Link(String fqBasePath, Entity entity) {
+    public Link(String fqBasePath, AfEntity entity) {
         String href = createHref(fqBasePath, entity);
         put("href", href);
     }
@@ -103,7 +103,7 @@ public class Link extends LinkedHashMap {
 //        return sb.toString();
 //    }
     
-    protected String createHref(String fqBasePath, Entity entity) {
+    protected String createHref(String fqBasePath, AfEntity entity) {
     	log.debug("Create href link from "+fqBasePath+" for entity "+entity);
         StringBuilder sb = new StringBuilder(fqBasePath);
         ResourcePath path = ResourcePath.forClass(entity.getClass());
@@ -147,7 +147,7 @@ public class Link extends LinkedHashMap {
      * @throws NoSuchMethodException
      * @throws SecurityException
      */
-    protected Method getHref(Entity entity) throws NoSuchMethodException, SecurityException {
+    protected Method getHref(AfEntity entity) throws NoSuchMethodException, SecurityException {
     	Field[] fields = entity.getClass().getDeclaredFields();
     	Method getiddefault = null;
     	for (int i=0 ; i<fields.length ; i++) {

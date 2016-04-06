@@ -1,7 +1,7 @@
 var condJSServices = angular.module('condJSServices', [ 'ngResource' ]);
 
 condJSServices.constant('baseurl', {
-	'url' : 'http://localhost:8080/physconddb/conddbweb/'
+	'url' : 'http://localhost:8080/physconddb/api/'
 }).constant('userurl', {
 	'user' : 'rest/'
 }).constant('experturl', {

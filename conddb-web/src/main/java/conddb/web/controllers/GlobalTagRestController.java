@@ -101,8 +101,7 @@ public class GlobalTagRestController extends BaseController {
 				String msg = "Global Tag "+globaltagname+" not found.";
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
-			GenericPojoResource<GlobalTag> resource = (GenericPojoResource) springResourceFactory.getResource("generic-gt", info,
-					entity);
+			GenericPojoResource<GlobalTag> resource = (GenericPojoResource) springResourceFactory.getGenericResource(info, entity, 2, null);
 			result = ok(resource);
 		}
 		return result;

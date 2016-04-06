@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
-import conddb.data.Entity;
+import conddb.data.AfEntity;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.Tag;
@@ -40,7 +40,7 @@ public class SpringResourceFactory {
 	}
 
 	@ProfileExecution
-	public Link getResource(String resourceName, UriInfo info, Entity entity) {
+	public Link getResource(String resourceName, UriInfo info, AfEntity entity) {
 		if (resourceName.equals("generic-gt")) {
 			GenericPojoResource<GlobalTag> resource = new GenericPojoResource<GlobalTag>(info,
 					entity,2,null);
@@ -68,7 +68,7 @@ public class SpringResourceFactory {
 	}
 	
 	@ProfileExecution
-	public <T extends Entity> Link getGenericResource(UriInfo info, T entity, int level, T parent) {
+	public <T extends AfEntity> Link getGenericResource(UriInfo info, T entity, int level, T parent) {
 		GenericPojoResource<T> resource = new GenericPojoResource<T>(info,entity,level,parent);
 		log.info("Created generic resource for type "+entity.getClass().getName());
 		return resource;			

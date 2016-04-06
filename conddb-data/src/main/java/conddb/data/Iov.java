@@ -34,7 +34,7 @@ import conddb.data.utils.json.serializers.TimestampSerializer;
 		"SINCE", "INSERTION_TIME", "TAG_ID" }) })
 //@//JsonIdentityInfo(generator = ObjectIdGenerators.IntSequenceGenerator.class, property = "@id")
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = Iov.class)
-public class Iov extends conddb.data.Entity implements java.io.Serializable {
+public class Iov extends conddb.data.AfEntity implements java.io.Serializable {
 
 	/**
 	 * 
@@ -143,6 +143,43 @@ public class Iov extends conddb.data.Entity implements java.io.Serializable {
 	public String toString() {
 		return "Iov [id=" + id + ", since=" + since + ", sinceString=" + sinceString + ", insertionTime="
 				+ insertionTime + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((insertionTime == null) ? 0 : insertionTime.hashCode());
+		result = prime * result + ((since == null) ? 0 : since.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Iov other = (Iov) obj;
+		if (id == null) {
+			if (other.id != null)
+				return false;
+		} else if (!id.equals(other.id))
+			return false;
+		if (insertionTime == null) {
+			if (other.insertionTime != null)
+				return false;
+		} else if (!insertionTime.equals(other.insertionTime))
+			return false;
+		if (since == null) {
+			if (other.since != null)
+				return false;
+		} else if (!since.equals(other.since))
+			return false;
+		return true;
 	}
 
 }

@@ -30,7 +30,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 @Entity
 @Table(name = "PHCOND_PAYLOAD")
 @JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property="hash", scope = Payload.class)
-public class Payload extends conddb.data.Entity implements java.io.Serializable {
+public class Payload extends conddb.data.AfEntity implements java.io.Serializable {
 
 	/**
 	 * 
@@ -167,6 +167,67 @@ public class Payload extends conddb.data.Entity implements java.io.Serializable 
 		return "Payload [hash=" + hash + ", version=" + version + ", objectType=" + objectType + ", datasize="
 				+ datasize + ", streamerInfo=" + streamerInfo + ", backendInfo=" + backendInfo + ", insertionTime="
 				+ insertionTime + "]";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((backendInfo == null) ? 0 : backendInfo.hashCode());
+		result = prime * result + ((datasize == null) ? 0 : datasize.hashCode());
+		result = prime * result + ((hash == null) ? 0 : hash.hashCode());
+		result = prime * result + ((insertionTime == null) ? 0 : insertionTime.hashCode());
+		result = prime * result + ((objectType == null) ? 0 : objectType.hashCode());
+		result = prime * result + ((streamerInfo == null) ? 0 : streamerInfo.hashCode());
+		result = prime * result + ((version == null) ? 0 : version.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Payload other = (Payload) obj;
+		if (backendInfo == null) {
+			if (other.backendInfo != null)
+				return false;
+		} else if (!backendInfo.equals(other.backendInfo))
+			return false;
+		if (datasize == null) {
+			if (other.datasize != null)
+				return false;
+		} else if (!datasize.equals(other.datasize))
+			return false;
+		if (hash == null) {
+			if (other.hash != null)
+				return false;
+		} else if (!hash.equals(other.hash))
+			return false;
+		if (insertionTime == null) {
+			if (other.insertionTime != null)
+				return false;
+		} else if (!insertionTime.equals(other.insertionTime))
+			return false;
+		if (objectType == null) {
+			if (other.objectType != null)
+				return false;
+		} else if (!objectType.equals(other.objectType))
+			return false;
+		if (streamerInfo == null) {
+			if (other.streamerInfo != null)
+				return false;
+		} else if (!streamerInfo.equals(other.streamerInfo))
+			return false;
+		if (version == null) {
+			if (other.version != null)
+				return false;
+		} else if (!version.equals(other.version))
+			return false;
+		return true;
 	}
 
 }
