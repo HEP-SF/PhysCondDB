@@ -34,23 +34,9 @@
 	</mvc:interceptors>
 
 	<!-- Services -->
-	<bean id="calibrationService" class="conddb.svc.calibration.tools.CalibrationService" />
-	<bean id="globalTagAdminService" class="conddb.svc.dao.controllers.GlobalTagAdminService" />
-	<bean id="globalTagExpertService" class="conddb.svc.dao.controllers.GlobalTagExpertService" />
-	<bean id="globalTagService" class="conddb.svc.dao.controllers.GlobalTagService" />
-	<bean id="iovService" class="conddb.svc.dao.controllers.IovService" />
-	<bean id="systemNodeService" class="conddb.svc.dao.controllers.SystemNodeService" />
-<!-- 	<bean id="conddbClientService" class="conddb.dao.svc.ConddbClientService" /> -->
 	<bean id="profilingAdvisor" class="conddb.web.utils.aop.ProfilingAdvisor"></bean>
 	<bean id="profilingMethodInterceptor" class="conddb.web.utils.aop.ProfilingMethodInterceptor"></bean>
 	<bean id="influxRepository" class="conddb.web.monitoring.influx.InfluxRepository"></bean>
-	<bean id="payloaddatajcrrepo" class="conddb.svc.dao.repositories.impl.PayloadDataJCRImpl">
-		<property name="rootpath" value="/tmp/physconddb" />
-	</bean>
-	<bean id="payloaddatadbrepo" class="conddb.svc.dao.repositories.impl.PayloadDataDBImpl"></bean>
-	<bean id="directoryMapperService" class="conddb.svc.calibration.tools.DirectoryMapperService">
-		<property name="localrootdir" value="/tmp/physconddb-dump" />
-	</bean>
 
 	<!-- Timestamp serializer and deserializer formatting methods -->
 	<bean id="timestampFormat" class="conddb.data.utils.json.serializers.TimestampFormat">
@@ -58,9 +44,6 @@
 	</bean>
 
 <!-- 	<bean id="resourceFactory" class="conddb.web.resources.SpringResourceFactory"></bean> -->
-
-	<!-- Hibernate Mapper -->
-	<bean id="hibernateAwareObjectMapper" class="conddb.data.utils.json.HibernateAwareObjectMapper"></bean>
 <!-- 	<bean id="objectMapperContextResolver" class="conddb.web.config.ObjectMapperContextResolver"></bean> -->
 
 	<!-- this is the actual advice itself -->

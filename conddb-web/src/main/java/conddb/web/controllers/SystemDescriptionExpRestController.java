@@ -12,6 +12,7 @@ import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -22,8 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import conddb.data.GlobalTagMap;
-import conddb.data.Payload;
 import conddb.data.SystemDescription;
 import conddb.data.Tag;
 import conddb.svc.dao.controllers.GlobalTagService;
@@ -58,12 +57,14 @@ public class SystemDescriptionExpRestController extends BaseController {
 
 	@POST
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path(Link.SYSTEMS)
 	@ApiOperation(value = "Create a System Description entity.",
     notes = "Input data are in json, and should match all needed fields for a new System Description.\n"
     +"System Description has to be unique for the node fullpath name. The tagNameRoot is unique as well.",
     response=SystemDescription.class)
-	public Response createSystemDescription(@Context UriInfo info, SystemDescription systemdescription) throws ConddbWebException {
+	public Response createSystemDescription(@Context UriInfo info, 
+			@ApiParam(value = "A json entry corresponding to SystemDescription", required = true) SystemDescription systemdescription) throws ConddbWebException {
 		try {
 			log.debug("Controller will create system "+systemdescription);
 			SystemDescription saved = systemNodeService.insertSystemDescription(systemdescription);
@@ -76,15 +77,16 @@ public class SystemDescriptionExpRestController extends BaseController {
 			throw buildException(msg+" "+e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);		}
 	}
 
-	@Path(Link.SYSTEMS+"/{system}")
+	@Path(Link.SYSTEMS+"/{id}")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@ApiOperation(value = "Update a System Description.",
     notes = "Input data are in json, and should match the fields that can be updated: nodeDescription and groupSize (used in pagination queries).",
-    response=GlobalTagMap.class)
+    response=SystemDescription.class)
 	public Response updateSystemDescription(@Context UriInfo info, 
-			@ApiParam(value = "id: id of the system description to be updated", required = true) 
-			@PathParam("system") String id, Map map)
+			@ApiParam(value = "system: id of the system description to be updated", required = true) 
+			@PathParam("id") String id, Map map)
 			throws ConddbWebException {
 		try {
 			log.info("Request for updating system "+id+" using "+map.size());

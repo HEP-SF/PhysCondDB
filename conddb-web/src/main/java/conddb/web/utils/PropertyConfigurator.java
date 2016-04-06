@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
  */
 public class PropertyConfigurator {
 	
-	private static PropertyConfigurator jbcoolPropertyConfigurator=null;
+	private static PropertyConfigurator webPropertyConfigurator=null;
 	
 	@Value(value="${server.port}")
 	private String serverPort;
@@ -33,10 +33,10 @@ public class PropertyConfigurator {
 	}
 	
 	public static PropertyConfigurator getInstance() {
-		if (jbcoolPropertyConfigurator==null) {
-			jbcoolPropertyConfigurator = new PropertyConfigurator();
+		if (webPropertyConfigurator==null) {
+			webPropertyConfigurator = new PropertyConfigurator();
 		}
-		return jbcoolPropertyConfigurator;
+		return webPropertyConfigurator;
 	}
 	
 	public String getServerPort() {

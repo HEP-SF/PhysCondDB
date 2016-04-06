@@ -55,7 +55,7 @@
 		<junit.version>4.11</junit.version>
 
 		<!-- AOP -->
-		<aspectj.version>1.8.2</aspectj.version>
+		<aspectj.version>1.8.7</aspectj.version>
 
 		<!-- JMETER -->
 		<performancetest.webservice.host>localhost</performancetest.webservice.host>
@@ -148,6 +148,11 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-jdbc</artifactId>
+			<version>${spring-framework.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aspects</artifactId>
 			<version>${spring-framework.version}</version>
 		</dependency>
 		<!-- <dependency> -->
@@ -263,7 +268,8 @@
 		<dependency>
 			<groupId>io.swagger</groupId>
 			<artifactId>swagger-jersey2-jaxrs</artifactId>
-			<version>1.5.0</version>
+			<version>1.5.4</version>
+<!-- 
 			<exclusions>
 				<exclusion>
 					<groupId>javax.ws.rs</groupId>
@@ -289,16 +295,16 @@
 					<groupId>com.fasterxml.jackson.datatype</groupId>
 					<artifactId>jackson-datatype-joda</artifactId>
 				</exclusion>
-			</exclusions>
+			</exclusions> -->
 		</dependency>
 
 		<!-- Database drivers -->
-<!-- 		<dependency> -->
-<!-- 			<groupId>com.oracle</groupId> -->
-<!-- 			<artifactId>ojdbc6</artifactId> -->
-<!-- 			<version>11.2.0.3</version> -->
-<!-- 			<scope>compile</scope> -->
-<!-- 		</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>com.oracle</groupId> -->
+		<!-- <artifactId>ojdbc6</artifactId> -->
+		<!-- <version>11.2.0.3</version> -->
+		<!-- <scope>compile</scope> -->
+		<!-- </dependency> -->
 		<dependency>
 			<groupId>com.oracle</groupId>
 			<artifactId>ojdbc7</artifactId>
@@ -311,25 +317,12 @@
 			<artifactId>sqlite-jdbc</artifactId>
 			<version>3.8.11.2</version>
 		</dependency>
-		<!-- hibernate sqlite dialect : does not work with hibernate 4 ... mapping problems
-		<dependency>
-			<groupId>com.applerao</groupId>
-			<artifactId>hibernatesqlite</artifactId>
-			<version>1.0</version>
-			<exclusions>
-				<exclusion>
-					<groupId>org.hibernate</groupId>
-					<artifactId>hibernate</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
-		<dependency>
-		<groupId>net.kemitix</groupId>
-		<artifactId>sqlite-dialect</artifactId>
-		<version>0.1.0</version>
-		</dependency>
- -->
+		<!-- hibernate sqlite dialect : does not work with hibernate 4 ... mapping 
+			problems <dependency> <groupId>com.applerao</groupId> <artifactId>hibernatesqlite</artifactId> 
+			<version>1.0</version> <exclusions> <exclusion> <groupId>org.hibernate</groupId> 
+			<artifactId>hibernate</artifactId> </exclusion> </exclusions> </dependency> 
+			<dependency> <groupId>net.kemitix</groupId> <artifactId>sqlite-dialect</artifactId> 
+			<version>0.1.0</version> </dependency> -->
 		<dependency>
 			<groupId>org.hsqldb</groupId>
 			<artifactId>hsqldb</artifactId>
@@ -533,6 +526,30 @@
 									<replacement />
 									<failIfNoMatch>false</failIfNoMatch>
 								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>aspectj-maven-plugin</artifactId>
+						<version>1.8</version>
+						<configuration>
+							<source>${java.version}</source>
+							<target>${java.version}</target>
+							<complianceLevel>${java.version}</complianceLevel>
+							<showWeaveInfo>true</showWeaveInfo>
+							<aspectLibraries>
+								<aspectLibrary>
+									<groupId>org.springframework</groupId>
+									<artifactId>spring-aspects</artifactId>
+								</aspectLibrary>
+							</aspectLibraries>
+						</configuration>
+						<executions>
+							<execution>
+								<goals>
+									<goal>compile</goal>
+								</goals>
 							</execution>
 						</executions>
 					</plugin>

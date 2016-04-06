@@ -91,10 +91,10 @@ During this phase tests are also executed (the code is contained in `<package>/s
 The products of the build are store in the `target` directory of every sub-module.
 
 ## Modules description
-1. CondDBCool => Web application that is used to retrieve data from ATLAS COOL DB (using PL/SQL package)
-              Go to the CondDBCool/README.txt for more informations.
-2. CondDBWeb => Web application that is used to access the PhysCondDB conditions DB core services
-              Go to the CondDBWeb/README.txt for more informations.
+1. conddb-cool => Web application that is used to retrieve data from ATLAS COOL DB (using PL/SQL package)
+              Go to the conddb-cool/README.txt for more informations.
+2. conddb-web => Web application that is used to access the PhysCondDB conditions DB core services
+              Go to the conddb-web/README.txt for more informations.
 
 
 ## Deployment instructions
@@ -122,13 +122,13 @@ Start tomcat server:
    
 Go to project ROOT directory and choose the web module to install:
 ```
-   <PhysCondDB>/$ cd CondDBCool
-   <PhysCondDB>/CondDBCool$ mvn tomcat7:redeploy
+   <PhysCondDB>/$ cd conddb-cool
+   <PhysCondDB>/conddb-cool$ mvn tomcat7:redeploy
 ```   
 or
 ```
-   <PhysCondDB>/$ cd CondDBWeb
-   <PhysCondDB>/CondDBWeb$ mvn tomcat7:redeploy
+   <PhysCondDB>/$ cd conddb-web
+   <PhysCondDB>/conddb-web$ mvn tomcat7:redeploy
 ```   
    
 This command suppose that tomcat is running under: `http://localhost:8080`
@@ -138,13 +138,13 @@ Jetty is a small server embedded within the application. Single modules can be d
 
 Go to project ROOT directory and choose the web module to install:
 ```
-   <PhysCondDB>/$ cd CondDBCool
-   <PhysCondDB>/CondDBCool$ mvn -Dspring.profiles.active=jetty,h2,basic jetty:run
+   <PhysCondDB>/$ cd conddb-cool
+   <PhysCondDB>/conddb-cool$ mvn -Dspring.profiles.active=jetty,h2,basic jetty:run
 ```   
 or
 ```
-   <PhysCondDB>/$ cd CondDBWeb
-   <PhysCondDB>/CondDBWeb$ mvn -Dspring.profiles.active=jetty,h2,basic jetty:run
+   <PhysCondDB>/$ cd conddb-web
+   <PhysCondDB>/conddb-web$ mvn -Dspring.profiles.active=jetty,h2,basic jetty:run
 ```   
 In this case, the modules cannot be started together, but only one at the time.
    

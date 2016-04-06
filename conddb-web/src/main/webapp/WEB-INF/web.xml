@@ -43,7 +43,7 @@ http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 	</servlet>
 	<servlet-mapping>
 		<servlet-name>jersey-servlet</servlet-name>
-		<url-pattern>/conddbweb/rest/*</url-pattern>
+		<url-pattern>/api/rest/*</url-pattern>
 	</servlet-mapping>	
 	
 <!-- 	<servlet> -->

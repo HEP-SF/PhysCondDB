@@ -16,12 +16,6 @@
 
 <!--  tell spring to use annotation based configurations -->
 <context:annotation-config />
-
-	<context:spring-configured/>
-<!-- ATTENTION: for the moment if load time weaver is active it will not work under jetty.... -->	
-<!-- ATTENTION: the problem is that I forgot why I was trying to use load time weaver    .... -->	
-<!-- 	<context:load-time-weaver/> -->
-
     <import resource="classpath*:/spring/*-beans.xml"/>
     <import resource="classpath*:/spring/db/**/*-context.xml"/>
     <import resource="classpath*:/spring/services/**/*-context.xml"/>

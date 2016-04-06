@@ -23,9 +23,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
-import conddb.data.Iov;
 import conddb.data.Payload;
-import conddb.data.utils.bytes.PayloadBytesHandler;
 import conddb.svc.dao.baserepository.PayloadDataBaseCustom;
 import conddb.svc.dao.controllers.IovService;
 import conddb.svc.dao.exceptions.ConddbServiceException;
@@ -37,6 +35,7 @@ import conddb.web.resources.SpringResourceFactory;
 import conddb.web.resources.generic.GenericPojoResource;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 /**
  * @author formica
@@ -57,8 +56,6 @@ public class PayloadExpRestController extends BaseController {
 	@Qualifier("payloaddatadbrepo")
 	private PayloadDataBaseCustom payloadDataBaseCustom;
 	@Autowired
-	private PayloadBytesHandler payloadBytesHandler;
-	@Autowired
 	private SpringResourceFactory springResourceFactory;
 
 	@Value("${physconddb.upload.dir:/tmp}")
@@ -69,10 +66,14 @@ public class PayloadExpRestController extends BaseController {
 	@Consumes({ MediaType.MULTIPART_FORM_DATA })
 	@Path(Link.PAYLOAD)
 	@ApiOperation(value = "Insert a Payload.", notes = "Input data are in a FORM, containing file, type, streamer and version information.", response = Payload.class)
-	public Response create(@Context UriInfo info, @FormDataParam("file") InputStream uploadedInputStream,
+	public Response createPayload(@Context UriInfo info, @ApiParam(value = "file: the input file", required = true) 
+			@FormDataParam("file") InputStream uploadedInputStream,
 			@FormDataParam("file") FormDataContentDisposition fileDetail, 
+			@ApiParam(value = "type: the object type", required = true)
 			@FormDataParam("type") String objtype,
+			@ApiParam(value = "streamer: streamer information", required = true)
 			@FormDataParam("streamer") String strinfo, 
+			@ApiParam(value = "version: the version string", required = true)
 			@FormDataParam("version") String version)
 					throws ConddbWebException {
 
@@ -82,27 +83,6 @@ public class PayloadExpRestController extends BaseController {
 		}
 		String name = fileDetail.getFileName();
 		try {
-			String outfname = name + "-uploaded";
-			String uploadedFileLocation = SERVER_UPLOAD_LOCATION_FOLDER + outfname;
-			log.debug("Uploads files location is " + SERVER_UPLOAD_LOCATION_FOLDER);
-//			payloadBytesHandler.saveToFile(uploadedInputStream, uploadedFileLocation);
-//			byte[] bytes = payloadBytesHandler.readFromFile(uploadedFileLocation);
-//
-//			Payload apayload = new Payload();
-//			apayload.setVersion(version);
-//			apayload.setObjectType(objtype);
-//			apayload.setStreamerInfo(strinfo);
-//			apayload.setDatasize(bytes.length);
-//
-//			PayloadData pylddata = new PayloadData();
-//			// pylddata.setData(bytes);
-//			pylddata.setUri(uploadedFileLocation);
-//
-//			PayloadHandler phandler = new PayloadHandler(pylddata);
-//			PayloadData storable = phandler.getPayloadWithHash();
-//			PayloadData stored = payloadDataBaseCustom.save(storable);
-//
-//			apayload.setHash(storable.getHash());
 			Payload storable = new Payload(null,objtype,"db",strinfo,version);
 			storable = iovService.createStorablePayload(fileDetail.getFileName(),uploadedInputStream, storable);
 			
@@ -113,9 +93,6 @@ public class PayloadExpRestController extends BaseController {
 				String msg = "Error in creating a payload resource: hash already exists in the DB.";
 				throw buildException(msg, msg, Response.Status.NOT_MODIFIED);
 			}
-//			apayload.setBackendInfo(stored.getUri());
-//			Payload saved = payloadRepository.save(apayload);
-
 			// Store the payload: this will then not be rolledback if something goes wrong later on
 			// We do not care too much since in that case the payload is simply already there
 			Payload stored = iovService.insertPayload(storable, storable.getData());

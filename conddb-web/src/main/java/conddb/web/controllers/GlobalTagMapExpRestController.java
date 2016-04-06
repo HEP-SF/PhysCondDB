@@ -62,7 +62,7 @@ public class GlobalTagMapExpRestController extends BaseController {
     notes = "Input data are in json, and should match all needed fields for a new global tag to tag association.\n"
     +"These key fields are: globaltagname, tagname, record and label.",
     response=GlobalTagMap.class)
-	public Response create(@Context UriInfo info, Map map) throws ConddbWebException {
+	public Response createGlobalTagMap(@Context UriInfo info, @ApiParam(value = "a json entry corresponding to mapping parameters.", required = true) Map map) throws ConddbWebException {
 
 		try {
 			log.info("Request for creating a new global tag mapping using data map of size "+map.size());

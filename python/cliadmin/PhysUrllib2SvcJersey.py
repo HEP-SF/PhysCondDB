@@ -489,9 +489,9 @@ class PhysCurl(object):
     '''
     classdocs
     '''
-    baseurl='/conddbweb/rest/expert'
-    userbaseurl='/conddbweb/rest'
-    adminbaseurl='/conddbweb/rest/admin'
+    baseurl='/api/rest/expert'
+    userbaseurl='/api/rest'
+    adminbaseurl='/api/rest/admin'
     __debug = False
 
 

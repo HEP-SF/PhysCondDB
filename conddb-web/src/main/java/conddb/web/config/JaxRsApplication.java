@@ -29,7 +29,6 @@ import org.glassfish.jersey.message.GZipEncoder;
 import org.glassfish.jersey.process.Inflector;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.filter.EncodingFilter;
-import org.glassfish.jersey.server.filter.RolesAllowedDynamicFeature;
 import org.glassfish.jersey.server.model.Resource;
 import org.glassfish.jersey.server.spring.scope.RequestContextFilter;
 import org.slf4j.Logger;
@@ -190,8 +189,8 @@ public class JaxRsApplication extends ResourceConfig {
 		beanConfig.setVersion("2.0");
 		beanConfig.setSchemes(new String[] { protocol });
 		beanConfig.setHost(url);
-		beanConfig.setBasePath("/physconddb/conddbweb/rest");
-		beanConfig.setResourcePackage("conddb.web.controllers");
+		beanConfig.setBasePath("/physconddb/api/rest");
+		beanConfig.setResourcePackage("conddb.web");
 		beanConfig.setTitle("PhysCondDB REST API setting in JAX-RS");
 		Info info = new Info();
 		info.setDescription("REST services for PhysCondDB access, initialized by JAX-RS.");

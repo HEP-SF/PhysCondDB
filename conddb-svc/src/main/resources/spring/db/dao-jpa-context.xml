@@ -9,7 +9,7 @@
                            http://www.springframework.org/schema/data/jpa
                            http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
 
-	<jpa:repositories base-package="conddb.svc.dao,conddb.web,conddb.svc.security.dao" />
+	<jpa:repositories base-package="conddb.svc.dao,conddb.svc.security.dao" />
 	<!-- auditing <jpa:auditing auditor-aware-ref="auditorAware" /> <bean id="auditorAware" 
 		class="org.springbyexample.contact.orm.entity.AuditorAwareImpl" /> -->
 	<tx:annotation-driven />

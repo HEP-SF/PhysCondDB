@@ -14,15 +14,9 @@
 <!-- WARNING: If you set the property placeholder here, then NO profile-based properties will be taken !!! -->
 <!--     <context:property-placeholder location="classpath:application*.properties" ignore-resource-not-found="false"/> -->
 
-<!--  tell spring to use annotation based configurations -->
-<context:annotation-config />
-
+<!--  tell spring to use annotation based configurations 
+	<context:annotation-config />
 	<context:spring-configured/>
-<!-- ATTENTION: for the moment if load time weaver is active it will not work under jetty.... -->	
-<!-- ATTENTION: the problem is that I forgot why I was trying to use load time weaver    .... -->	
-<!-- 	<context:load-time-weaver/> -->
-
-    <import resource="classpath*:/spring/*-beans.xml"/>
-    <import resource="classpath*:/spring/db/**/*-context.xml"/>
-    <import resource="classpath*:/spring/services/**/*-context.xml"/>
+	<context:load-time-weaver/>-->
+    <import resource="classpath*:/spring/conddbdata-beans.xml"/>
 </beans>

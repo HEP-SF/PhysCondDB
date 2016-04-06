@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
 
 import conddb.data.SystemDescription;
 import conddb.svc.dao.exceptions.ConddbServiceException;
@@ -21,6 +22,7 @@ import conddb.svc.dao.repositories.SystemNodeRepository;
  * @author formica
  *
  */
+@Service
 public class SystemNodeService {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());

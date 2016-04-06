@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+        xmlns:context="http://www.springframework.org/schema/context"
+        xmlns:aop="http://www.springframework.org/schema/aop" xmlns:mvc="http://www.springframework.org/schema/mvc"
+        xsi:schemaLocation="http://www.springframework.org/schema/mvc
+           http://www.springframework.org/schema/mvc/spring-mvc.xsd
+                   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/aop  http://www.springframework.org/schema/aop/spring-aop.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<context:component-scan base-package="conddb.svc" />
+	<!-- Services 
+	<bean id="calibrationService" class="conddb.svc.calibration.tools.CalibrationService" />
+	<bean id="globalTagAdminService" class="conddb.svc.dao.controllers.GlobalTagAdminService" />
+	<bean id="globalTagExpertService" class="conddb.svc.dao.controllers.GlobalTagExpertService" />
+	<bean id="globalTagService" class="conddb.svc.dao.controllers.GlobalTagService" />
+	<bean id="iovService" class="conddb.svc.dao.controllers.IovService" />
+	<bean id="systemNodeService" class="conddb.svc.dao.controllers.SystemNodeService" />
+	-->
+	<bean id="payloaddatajcrrepo" class="conddb.svc.dao.repositories.impl.PayloadDataJCRImpl">
+		<property name="rootpath" value="/tmp/physconddb" />
+	</bean>
+	<bean id="payloaddatadbrepo" class="conddb.svc.dao.repositories.impl.PayloadDataDBImpl"></bean>
+	<bean id="directoryMapperService" class="conddb.svc.calibration.tools.DirectoryMapperService">
+		<property name="localrootdir" value="/tmp/physconddb-dump" />
+	</bean>
+           
+</beans>

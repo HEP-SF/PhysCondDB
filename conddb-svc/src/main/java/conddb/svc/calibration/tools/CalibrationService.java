@@ -21,7 +21,6 @@ import conddb.data.Tag;
 import conddb.svc.dao.baserepository.PayloadDataBaseCustom;
 import conddb.svc.dao.controllers.GlobalTagService;
 import conddb.svc.dao.controllers.IovService;
-import conddb.svc.dao.controllers.SystemNodeService;
 import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.svc.dao.repositories.PayloadRepository;
 
