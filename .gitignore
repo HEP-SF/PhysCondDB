@@ -19,3 +19,4 @@ python/cliadmin/*.pyc
 CondDBWeb/src/main/webapp/condjs
 CondDBData/bin
 CondDBServices/bin
+conddb-web/src/main/webapp/condjs
