@@ -12,9 +12,9 @@
 	</parent>
 
 	<groupId>conddb.cool</groupId>
-	<artifactId>CondDBCool</artifactId>
+	<artifactId>conddb-cool</artifactId>
 	<version>1.0-SNAPSHOT</version>
-	<name>CondDBCool</name>
+	<name>conddb-cool</name>
 	<packaging>war</packaging>
 	<url>http://maven.apache.org</url>
 
@@ -106,7 +106,7 @@
 						</baseResource>
 					</webApp>
 					<scanIntervalSeconds>10</scanIntervalSeconds>
-					<!-- <war>${project.build.directory}/CondDBCool-1.0-SNAPSHOT</war> -->
+					<!-- <war>${project.build.directory}/conddb-cool-1.0-SNAPSHOT</war> -->
 					<path>/physconddbcool</path>
 				</configuration>
 			</plugin>
@@ -123,12 +123,12 @@
 	<dependencies>
 		<dependency>
 			<groupId>conddb.data</groupId>
-			<artifactId>CondDBData</artifactId>
+			<artifactId>conddb-data</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>conddb.svc</groupId>
-			<artifactId>CondDBServices</artifactId>
+			<artifactId>conddb-svc</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 
