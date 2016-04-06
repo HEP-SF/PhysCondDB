@@ -263,7 +263,8 @@ condJSControllers
 								var promise = CondGlobalTag.query(queryargs);
 								promise.$promise.then(function(data) {
 									$scope.selglobaltag = data;
-									globaltagMaps = data.globalTagMaps.items;
+									console.log('Loaded data '+data);
+									globaltagMaps = data.globalTagMaps;
 									var taglist = [];
 									for (i = 0; i < globaltagMaps.length; i++) {
 										atag = globaltagMaps[i].systemTag;
@@ -405,7 +406,7 @@ condJSControllers
 								promise.$promise
 										.then(function(data) {
 											$scope.selglobaltag = data;
-											globaltagMaps = data.globalTagMaps.items;
+											globaltagMaps = data.globalTagMaps;
 											var gtaglist = [];
 											for (i = 0; i < globaltagMaps.length; i++) {
 												gtag = globaltagMaps[i].globalTag;
@@ -688,7 +689,7 @@ condJSControllers
 								promise.$promise
 										.then(function(data) {
 											$scope.selglobaltag = data;
-											$scope.globaltagmappings = data.globalTagMaps.items;
+											$scope.globaltagmappings = data.globalTagMaps;
 										});
 							};
 

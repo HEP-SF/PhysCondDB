@@ -1,0 +1,500 @@
+  332  ls -al
+  333  ssh formica@pc-gbar-002.cern.ch
+  334  kinit
+  335  ssh formica@pc-gbar-002.cern.ch
+  336  history | egrep scala
+  337  vi readme.txt
+  338  scala conddb.scala.tools.FileGenerator --size 50000 --nfiles 5000 /tmp/test50kb
+  339  vi payload.csv 
+  340  cp payload.csv ../TestWebClient/
+  341  scala conddb.scala.tools.FileGenerator --size 500000 --nfiles 100 /tmp/test500kb
+  342  cp payload.csv ~/Public/workspaces/ecl-mars31/TestWebClient/
+  343  scala conddb.scala.tools.FileGenerator --size 1000000 --nfiles 100 /tmp/test1Mb
+  344  cp payload.csv ~/Public/workspaces/ecl-mars31/TestWebClient/
+  345  scala conddb.scala.tools.FileGenerator --size 10000000 --nfiles 20 /tmp/test10Mb
+  346  cp payload.csv ~/Public/workspaces/ecl-mars31/TestWebClient/
+  347  =jetty,h2 jetty:run
+  348  vi nsw-filter-values.properties 
+  349  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  350  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  351  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  352  cd ../
+  353  mvn clean install
+  354  cd nsw-web/
+  355  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  356  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  357  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  358  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  359  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  360  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  361  cd ../
+  362  mvn -Dspring.profiles.active=jetty,h2 clean install
+  363  mvn -Dspring.profiles.active=jetty,h2 clean install
+  364  cd nsw-web/
+  365  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  366  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  367  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  368  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  369  cd ../
+  370  mvn -Dspring.profiles.active=jetty,h2 clean install
+  371  cd nsw-web/
+  372  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  373  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  374  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  375  cd ../
+  376  mvn -Dspring.profiles.active=jetty,h2 clean install
+  377  cd nsw-web/
+  378  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  379  rm /tmp/nswspringdb.mv.db 
+  380  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  381  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  382  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  383  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  384  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  385  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  386  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  387  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  388  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  389  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  390  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  391  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  392  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  393  cd ../
+  394  mvn -Dspring.profiles.active=jetty,h2 clean install
+  395  mvn -Dspring.profiles.active=jetty,h2 clean install
+  396  cd nsw-web/
+  397  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  398  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  399  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  400  mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  401  cd ../;mvn -Dspring.profiles.active=jetty,h2 clean install
+  402  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  403  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  404  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  405  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  406  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  407  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  408  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  409  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  410  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  411  cd ../;mvn -Dspring.profiles.active=jetty,h2 clean install
+  412  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  413  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  414  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  415  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  416  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  417  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  418  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  419  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  420  cd ../;mvn -Dspring.profiles.active=jetty,h2 clean install
+  421  mvn -Dspring.profiles.active=jetty,h2 clean install
+  422  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  423  rm /tmp/nswspringdb.mv.db 
+  424  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  425  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  426  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  427  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  428  cd ../;mvn -Dspring.profiles.active=jetty,h2 clean install
+  429  mvn -Dspring.profiles.active=jetty,h2 clean install
+  430  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  431  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  432  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  433  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  434  cd nsw-web;mvn -Dspring.profiles.active=jetty,h2 jetty:run
+  435  cd ../../PhysCondDB/
+  436  git branch -a
+  437  vi conddb-filter-values.properties 
+  438  cat README.md 
+  439  cd CondDBWeb/
+  440  mvn -Dmaven.test.skip=true clean tomcat7:undeploy
+  441  vi conddb-filter-values.properties 
+  442  mvn -Dmaven.test.skip=true clean tomcat7:deploy
+  443  cd ../
+  444  mvn -Dmaven.test.skip=true clean install
+  445  less ~/.gitconfig 
+  446  cd ../NswSac/
+  447  ls
+  448  cd nsw-web/
+  449  ls -al
+  450  less curlexamples/curl_commands.sh 
+  451  less curlexamples/component_data.json 
+  452  mvn -Dmaven.test.skip=true -Dspring.profiles.active=jetty,h2 clean jetty:run
+  453  curl http://localhost:8080/physconddb/conddbweb/rest/globaltags/CONDBR2-BLKPA-2015-09\?trace=on
+  454  curl http://localhost:8080/physconddb/conddbweb/rest/globaltags/CONDBR2-BLKPA-2015-09\?trace=on
+  455  curl http://localhost:8080/physconddb/conddbweb/rest/globaltags/CONDBR2-BLKPA-2015-09\?trace=on
+  456  curl http://localhost:8080/physconddb/conddbweb/rest/globaltags/CONDBR2-BLKPA-2015-09\?trace=on
+  457  curl http://localhost:8080/physconddb/conddbweb/rest/globaltags/CONDBR2-BLKPA-2015-09\?trace=on
+  458  curl http://localhost:8080/physconddb/conddbweb/rest/globaltags/CONDBR2-BLKPA-2015-09\?trace=on
+  459  curl http://localhost:8080/physconddb/conddbweb/rest/globaltags/CONDBR2-BLKPA-2015-09\?trace=on
+  460  http localhost:8080/physconddb/conddbweb/rest/globaltags/CONDBR2-BLKPA-2015-09\?trace=on
+  461  http localhost:8080/physconddb/conddbweb/rest/globaltags/CONDBR2-BLKPA-2015-09\?trace=on
+  462  http localhost:8080/physconddb/conddbweb/rest/globaltags/CONDBR2-BLKPA-2015-09\?trace=on
+  463  http localhost:8080/physconddb/conddbweb/rest/globaltags/CONDBR2-BLKPA-2015-10\?trace=on
+  464  mvn -Dmaven.test.skip=true -Dspring.profiles.active=jetty,h2 clean jetty:run
+  465  cd ../
+  466  mvn -Dmaven.test.skip=true -Dspring.profiles.active=jetty,h2 clean install
+  467  cd nsw-web/
+  468  mvn -Dmaven.test.skip=true -Dspring.profiles.active=jetty,h2 clean jetty:run
+  469  cd ../../PhysCondDB/python/cliadmin/
+  470  python phconddburllib2.py FIND globaltags
+  471  history
+  472  cd ../../
+  473  git status
+  474  git status
+  475  ssh pc-gbar-002
+  476  ssh formica@pc-gbar-002
+  477  ssh formica@pc-gbar-002
+  478  ssh -v formica@pc-gbar-002
+  479  ssh -v formica@pc-gbar-002
+  480  ssh -v formica@pc-gbar-002
+  481  ssh -v formica@pc-gbar-002
+  482  ls -al
+  483  jmeter
+  484  cd python/cliadmin/
+  485  ls
+  486  python phconddburllib2.py DESCRIBE systems
+  487  python phconddburllib2.py --url=gbelog01.cern.ch:8080/physconddb FIND systems
+  488  python phconddburllib2.py --url=gbelog01.cern.ch:8080/physconddb FIND tags Test%
+  489  python phconddburllib2.py --url=gbelog01.cern.ch:8080/physconddb FIND globaltags Test%
+  490  python phconddburllib2.py --url=gbelog01.cern.ch:8080/physconddb FIND globaltags T%
+  491  python phconddburllib2.py --url=gbelog01.cern.ch:8080/physconddb FIND globaltags M%
+  492  python phconddburllib2.py DESCRIBE systems
+  493  python phconddburllib2.py --url=gbelog01.cern.ch:8080/physconddb ADD systems "nodeFullpath=Test_Gatling;schemaName=Gatling;nodeDescription=test for gatling;groupSize=1000000;tagNameRoot=Test_Gatling"
+  494  ping www.repubblica.it
+  495  python phconddburllib2.py --url=gbelog01.cern.ch:8080/physconddb ADD systems "nodeFullpath=Test_Gatling;schemaName=Gatling;nodeDescription=test for gatling;groupSize=1000000;tagNameRoot=Test_Gatling"
+  496  ping www.repubblica.it
+  497  ssh lxplus.cern.ch
+  498  ssh aformic@lxplus.cern.ch
+  499  ssh aformic@lxplus.cern.ch
+  500  plus.cern.ch
+  501  cd Public/git
+  502  ls
+  503  cd NswSac/
+  504  ls -al
+  505  cd nsw-web/
+  506  ls
+  507  cd curlexamples/
+  508  ls -al
+  509  cp component_data.json component_type.json 
+  510  vi component_type.json 
+  511  cat curl_commands.sh 
+  512  curl  -H "Content-Type: application/json" -X POST http://localhost:8080/atlasweb/nsw/rest/types --data @component_type.json
+  513  curl  -H "Content-Type: application/json" -X POST http://localhost:8080/atlasweb/nsw/rest/types --data @component_type.json
+  514  curl  -H "Content-Type: application/json" -X POST http://localhost:8080/atlasweb/nsw/rest/types --data @component_type.json
+  515  curl  -H "Content-Type: application/json" -X POST http://localhost:8080/atlasweb/nsw/rest/types --data @component_type.json
+  516  cat component_data.json 
+  517  vi component_type.json 
+  518  curl  -H "Content-Type: application/json" -X POST http://localhost:8080/atlasweb/nsw/rest/types --data @component_type.json
+  519  vi component_type.json 
+  520  curl  -H "Content-Type: application/json" -X POST http://localhost:8080/atlasweb/nsw/rest/types --data @component_type.json
+  521  curl  -H "Content-Type: application/json" http://localhost:8080/atlasweb/nsw/rest/types
+  522  http localhost:8080/atlasweb/nsw/rest/types
+  523  cat component_type.json 
+  524  http localhost:8080/atlasweb/nsw/rest/types
+  525  curl  -H "Content-Type: application/json" -X POST http://localhost:8080/atlasweb/nsw/rest/types/PANEL/child/PCB
+  526  curl  -H "Content-Type: application/json" -X POST http://localhost:8080/atlasweb/nsw/rest/types/PANEL/children
+  527  http localhost:8080/atlasweb/nsw/rest/types/PANEL/children
+  528  vi component_type.json 
+  529  curl  -H "Content-Type: application/json" -X POST http://localhost:8080/atlasweb/nsw/rest/types --data @component_type.json
+  530  curl  -H "Content-Type: application/json" -X POST http://localhost:8080/atlasweb/nsw/rest/types/PANEL/child/FRAME
+  531  http localhost:8080/atlasweb/nsw/rest/types/PANEL/children
+  532  vi component_type.json 
+  533  curl  -H "Content-Type: application/json" -X POST http://localhost:8080/atlasweb/nsw/rest/types --data @component_type.json
+  534  http localhost:8080/atlasweb/nsw/rest/types/PANEL/children
+  535  vi ~/.sqldeveloper/tnsnames.ora
+  536  cat ~/.sqldeveloper/tnsnames.ora
+  537  less ~/.sqldeveloper/tnsnames.ora
+  538  cat curl_commands.sh 
+  539  http localhost:8080/atlasweb/nsw/rest/locations
+  540  http localhost:8080/atlasweb/nsw/rest/components
+  541  http localhost:8080/atlasweb/nsw/rest/types
+  542  cat curl_commands.sh 
+  543  curl  -H "Content-Type: application/json" -X POST http://localhost:8080/atlasweb/nsw/rest/locations --data @location_datcha.json
+  544  less location_datcha.json 
+  545  http localhost:8080/atlasweb/nsw/rest/locations
+  546  less ~/.sqldeveloper/tnsnames.ora
+  547  less ~/.sqldeveloper/tnsnames.ora
+  548  vi ../nsw-filter-values.properties 
+  549  cd ../
+  550  ls -al
+  551  cd ../
+  552  history
+  553  cd nsw-web/
+  554  ls -al
+  555  http localhost:8080/atlasweb/nsw/rest/types/load/BLEMISH
+  556  curl  -H "Content-Type: application/json" -X POST http://localhost:8080/atlasweb/nsw/rest/types/BLEMISH
+  557  curl  -H "Content-Type: application/json" -X POST http://localhost:8080/atlasweb/nsw/rest/types/load/BLEMISH
+  558  curl  -H "Content-Type: application/json" -X POST http://localhost:8080/atlasweb/nsw/rest/types/load/BLEMISH
+  559  curl  -H "Content-Type: application/json" -X POST http://localhost:8080/atlasweb/nsw/rest/types/load/BLEMISH
+  560  curl  -H "Content-Type: application/json" -X POST http://localhost:8080/atlasweb/nsw/rest/types/load/DRIFTPANEL
+  561  curl  -H "Content-Type: application/json" -X POST http://localhost:8080/atlasweb/nsw/rest/types/load/DRIFTBOARD
+  562  http localhost:8080/atlasweb/nsw/rest/types
+  563  curl  -H "Content-Type: application/json" http://aiatlas062.cern.ch:8080/jbcool/api/rest/plsqlcool/ATLAS_COOL/CONDBR2/schemas
+  564  curl  -H "Accept-Type: application/json" http://aiatlas062.cern.ch:8080/jbcool/api/rest/plsqlcool/ATLAS_COOL/CONDBR2/schemas
+  565  curl  -H "Accept-Type: application/json" http://aiatlas062.cern.ch:8080/jbcool/api/rest/plsqlcool/ATLAS_COOL/CONjsonDBR2/schemas
+  566  curl  -H "Accept-Type: application/json" http://aiatlas062.cern.ch:8080/jbcool/api/rest/plsqlcool/ATLAS_COOL/CONjsonDBR2/schemas
+  567  curl  -H "Content-Type: application/json" http://aiatlas062.cern.ch:8080/jbcool/api/rest/plsqlcooljson/ATLAS_COOL/CONDBR2/schemas
+  568  curl  -H "Content-Type: application/json" http://aiatlas062.cern.ch:8080/jbcool/api/rest/plsqlcool/ATLAS_COOL/CONDBR2/schemas
+  569  curl  -H "Content-Type: aAccept: application/json" http://aiatlas062.cern.ch:8080/jbcool/api/rest/plsqlcool/ATLAS_COOL/CONDBR2/schemas
+  570  curl  -H "Accept: application/json" http://aiatlas062.cern.ch:8080/jbcool/api/rest/plsqlcool/ATLAS_COOL/CONDBR2/schemas
+  571  cd ../../
+  572  cd PhysCondDB/
+  573  cat README.md 
+  574  cd python/cliadmin/
+  575  ls -al
+  576  python phconddburllib2.py FIND globaltags
+  577  python phconddburllib2.py FIND globaltags ASG-99-01
+  578  python phconddburllib2.py --trace=on FIND globaltags ASG-99-01
+  579  python phconddburllib2.py --trace=on FIND globaltags ASG-99-01
+  580  python phconddburllib2.py --trace=on FIND globaltags ASG-99-01
+  581  python phconddburllib2.py --trace=on FIND globaltags ASG-99-01
+  582  python phconddburllib2.py --trace=on FIND globaltags ASG-99-01
+  583  python phconddburllib2.py --trace=on FIND globaltags ASG-99-01
+  584  python phconddburllib2.py --trace=on --debug FIND globaltags ASG-99-01
+  585  python phconddburllib2.py --trace=on --debug FIND globaltags ASG-99-01
+  586  python phconddburllib2.py --trace=on --debug FIND globaltags ASG-99-01
+  587  python phconddburllib2.py --trace=on --debug FIND globaltags ASG-99-01
+  588  python phconddburllib2.py --trace=on --debug FIND globaltags ASG-99-01
+  589  python phconddburllib2.py --trace=on --debug FIND globaltags ASG-99-01
+  590  python phconddburllib2.py --trace=on --debug FIND globaltags ASG-99-01
+  591  python phconddburllib2.py --trace=on --debug FIND globaltags ASG-99-01
+  592  python phconddburllib2.py --trace=on --debug FIND globaltags ASG-99-01
+  593  python phconddburllib2.py --trace=on --debug FIND tags MyScripts-INSTALL_Release_4.2.0_HEAD_00
+  594  python phconddburllib2.py --trace=on --debug FIND tags MyScripts-INSTALL_Release_4.2.0_HEAD_00
+  595  http localhost:8080/physconddb/conddbweb/rest/tags/MyScripts-INSTALL_Release_4.2.0_HEAD_00?trace=on
+  596  http localhost:8080/physconddb/conddbweb/rest/tags/MyScripts-INSTALL_Release_4.2.0_HEAD_00\?trace=on
+  597  http localhost:8080/physconddb/conddbweb/rest/globaltags/ASG-99-01?trace=on
+  598  http localhost:8080/physconddb/conddbweb/rest/tags/MyScripts-INSTALL_Release_4.2.0_HEAD_00\?trace=on
+  599  http localhost:8080/physconddb/conddbweb/rest/tags/MyScripts-INSTALL_Release_4.2.0_HEAD_00\?trace=on
+  600  http localhost:8080/physconddb/conddbweb/rest/tags/MyScripts-INSTALL_Release_4.2.0_HEAD_00\?trace=on
+  601  http localhost:8080/physconddb/conddbweb/rest/tags/MyScripts-INSTALL_Release_4.2.0_HEAD_00\?trace=on
+  602  ls -al
+  603  cat example-phcond-commands.txt 
+  604  python phconddburllib2.py ADD globaltags "name=MYGTAG-01;lockstatus=unlocked;description=a test gtag;release=1.0"
+  605  python phconddburllib2.py ADD globaltags "name=MYGTAG-01-00;lockstatus=unlocked;description=a test gtag;release=1.0"
+  606  python phconddburllib2.py ADD globaltags "name=MYGTAG-01-00;lockstatus=unlocked;description=a test gtag;release=1.0;validity=0"
+  607  history
+  608  vi example-phcondurllib2.txt
+  609  cat example-phcond-commands.txt 
+  610  python phconddburllib2.py ADD tags "name=testtag-01;timeType=time;objectType=none;synchronization=none;description=a test tag;lastValidatedTime=20000;endOfValidity=-1"
+  611  python phconddburllib2.py LINK MYGTAG-01-00 testtag-01 "record=a gtag mapping;label=none"
+  612  python phconddburllib2.py DESCRIBE globaltags
+  613  python phconddburllib2.py DESCRIBE tags
+  614  python phconddburllib2.py FIND globaltags
+  615  python phconddburllib2.py --trace=on FIND globaltags MYGTAG-01-00
+  616  history
+  617  vi example-phcondurllib2.txt 
+  618  python phconddburllib2.py STORE testtag-01 ../globalTagObj.json "since=2000;sinceString=t2000" "version=a payload version;objectType=my object;streamerInfo=a streamer;backendInfo=database"
+  619  ls ../
+  620  python phconddburllib2.py STORE testtag-01 ../iovObj.json "since=2000;sinceString=t2000" "version=a payload version;objectType=my object;streamerInfo=a streamer;backendInfo=database"
+  621  python phconddburllib2.py STORE testtag-01 ../iovObj.json "since=2000;sinceString=t2000" "version=a payload version;objectType=my object;streamerInfo=a streamer;backendInfo=database"
+  622  python phconddburllib2.py STORE testtag-01 ../iovObj.json "since=2000;sinceString=t2000" "version=a payload version;objectType=my object;streamerInfo=a streamer;backendInfo=database"
+  623  python phconddburllib2.py STORE testtag-01 ../iovObj.json "since=2000;sinceString=t2000" "version=a payload version;objectType=my object;streamerInfo=a streamer;backendInfo=database"
+  624  python phconddburllib2.py STORE testtag-01 ../iovObj.json "since=2000;sinceString=t2000" "version=a payload version;objectType=my object;streamerInfo=a streamer;backendInfo=database"
+  625  python phconddburllib2.py STORE testtag-01 ../../README.md "since=4000;sinceString=t2000" "version=a payload version;objectType=my object;streamerInfo=a streamer;backendInfo=database"
+  626  ls -al /tmp/
+  627  python phconddburllib2.py STORE testtag-01 ../../curl_commands_1.0-SNAPSHOT.txt "since=6000;sinceString=t6000" "version=a payload version;objectType=my object;streamerInfo=a streamer;backendInfo=database"
+  628  python phconddburllib2.py --debug STORE testtag-01 ../../server.xml "since=7000;sinceString=t7000" "version=a payload version;objectType=my object;streamerInfo=a streamer;backendInfo=database"
+  629  python phconddburllib2.py ADD tags "name=testtag-02;timeType=time;objectType=none;synchronization=none;description=a test tag;lastValidatedTime=20000;endOfValidity=-1"
+  630  python phconddburllib2.py ADD tags "name=testtag-02;timeType=time;objectType=none;synchronization=none;description=a test tag;lastValidatedTime=20000;endOfValidity=-1"
+  631  history | egrep globaltags
+  632  python phconddburllib2.py ADD globaltags "name=MYGTAG-01-01;lockstatus=unlocked;description=a test gtag;release=1.0;validity=0"
+  633  python phconddburllib2.py ADD globaltags "name=MYGTAG-01-01;lockstatus=unlocked;description=a test gtag;release=1.0;validity=0"
+  634  python phconddburllib2.py DELETE globaltags MYGTAG-01-01
+  635  python phconddburllib2.py DELETE globaltags MYGTAG-01-01
+  636  python phconddburllib2.py DELETE globaltags MYGTAG-01-01
+  637  python phconddburllib2.py DELETE globaltags MYGTAG-01-01
+  638  python phconddburllib2.py ADD globaltags "name=MYGTAG-01-01;lockstatus=unlocked;description=a test gtag;release=1.0;validity=0"
+  639  python phconddburllib2.py DELETE globaltags MYGTAG-01-01
+  640  python phconddburllib2.py DELETE globaltags MYGTAG-01-01
+  641  python phconddburllib2.py ADD globaltags "name=MYGTAG-01-01;lockstatus=unlocked;description=a test gtag;release=1.0;validity=0"
+  642  python phconddburllib2.py DELETE globaltags MYGTAG-01-01
+  643  python phconddburllib2.py DELETE globaltags MYGTAG-01-01
+  644  python phconddburllib2.py ADD globaltags "name=MYGTAG-01-01;lockstatus=unlocked;description=a test gtag;release=1.0;validity=0"
+  645  python phconddburllib2.py DELETE globaltags MYGTAG-01-01
+  646  python phconddburllib2.py DELETE globaltags MYGTAG-01-01
+  647  python phconddburllib2.py ADD globaltags "name=MYGTAG-01-01;lockstatus=unlocked;description=a test gtag;release=1.0;validity=0"
+  648  python phconddburllib2.py DELETE globaltags MYGTAG-01-01
+  649  python phconddburllib2.py ADD globaltags "name=MYGTAG-01-01;lockstatus=unlocked;description=a test gtag;release=1.0;validity=0"
+  650  python phconddburllib2.py DELETE globaltags MYGTAG-01-01
+  651  python phconddburllib2.py ADD globaltags "name=MYGTAG-01-01;lockstatus=unlocked;description=a test gtag;release=1.0;validity=0"
+  652  python phconddburllib2.py DELETE globaltags MYGTAG-01-01
+  653  python phconddburllib2.py FIND tags
+  654  python phconddburllib2.py DELETE tags testtag-02
+  655  python phconddburllib2.py DELETE tags testtag-02
+  656  python phconddburllib2.py DELETE tags testtag-02
+  657  python phconddburllib2.py DELETE tags testtag-02
+  658  history | egrep python
+  659  python phconddburllib2.py ADD tags "name=testtag-02;timeType=time;objectType=none;synchronization=none;description=a test tag;lastValidatedTime=20000;endOfValidity=-1"
+  660  python phconddburllib2.py DELETE tags testtag-02
+  661  python phconddburllib2.py FIND globaltags
+  662  python phconddburllib2.py FIND globaltags
+  663  python phconddburllib2.py LOCK MYGTAG-01-00
+  664  python phconddburllib2.py LOCK MYGTAG-01-00 unlocked
+  665  python phconddburllib2.py ADD globaltags "name=MYGTAG-01-01;lockstatus=unlocked;description=a test gtag;release=1.0;validity=0"
+  666  python phconddburllib2.py ADD tags "name=testtag-02;timeType=time;objectType=none;synchronization=none;description=a test tag;lastValidatedTime=20000;endOfValidity=-1"
+  667  python phconddburllib2.py ADD tags "name=testtag-03;timeType=time;objectType=none;synchronization=none;description=a test tag;lastValidatedTime=20000;endOfValidity=-1"
+  668  history
+  669  python phconddburllib2.py FIND globaltags
+  670  python phconddburllib2.py FIND globaltags
+  671  python phconddburllib2.py FIND globaltags
+  672  python phconddburllib2.py FIND tags
+  673  python phconddburllib2.py LINK MYGTAG-01-01 testtag-03 "record=a record;label=a label"
+  674  python phconddburllib2.py LINK MYGTAG-01-01 testtag-03 "record=a record;label=a label"
+  675  python phconddburllib2.py FIND maps
+  676  python phconddburllib2.py --trace=on FIND globaltags MYGTAG-01-01
+  677  python phconddburllib2.py LINK MYGTAG-01-01 testtag-02 "record=a record;label=a label"
+  678  http localhost:8080/physconddb/conddbweb/rest/maps/find\?globaltag=MYGTAG-01-01\&tag=testtag-03
+  679  http localhost:8080/physconddb/conddbweb/rest/maps/find\?globaltag=MYGTAG-01-01\&tag=testtag-03
+  680  http localhost:8080/physconddb/conddbweb/rest/maps/2
+  681  http localhost:8080/physconddb/conddbweb/rest/maps/2
+  682  http localhost:8080/physconddb/conddbweb/rest/maps/2
+  683  http localhost:8080/physconddb/conddbweb/rest/maps/2
+  684  python phconddburllib2.py UNLINK MYGTAG-01-01 testtag-02 
+  685  python phconddburllib2.py --trace=on FIND globaltags MYGTAG-01-01 
+  686  python phconddburllib2.py LINK MYGTAG-01-01 testtag-02 "record=a record;label=a label"
+  687  python phconddburllib2.py  LOCK MYGTAG-01-01 
+  688  python phconddburllib2.py UNLINK MYGTAG-01-01 testtag-02 
+  689  python phconddburllib2.py LINK MYGTAG-01-01 testtag-02 "record=a record;label=a label"
+  690  python phconddburllib2.py  LOCK MYGTAG-01-01 unlocked
+  691  python phconddburllib2.py  LOCK MYGTAG-01-01 unlocked
+  692  python phconddburllib2.py LINK MYGTAG-01-01 testtag-02 "record=a record;label=a label"
+  693  python phconddburllib2.py LINK MYGTAG-01-01 testtag-02 "record=a record;label=a label"
+  694  python phconddburllib2.py LINK MYGTAG-01-01 testtag-03 "record=a record;label=a label"
+  695  python phconddburllib2.py LINK MYGTAG-01-01 testtag-04 "record=a record;label=a label"
+  696  python phconddburllib2.py LINK MYGTAG-01-01 testtag-04 "record=a record;label=a label"
+  697  python phconddburllib2.py --debug LINK MYGTAG-01-01 testtag-04 "record=a record;label=a label"
+  698  python phconddburllib2.py --debug LINK MYGTAG-01-01 testtag-04 "record=a record;label=a label"
+  699  python phconddburllib2.py --debug LINK MYGTAG-01-01 testtag-04 "record=a record;label=a label"
+  700  python phconddburllib2.py --debug LINK MYGTAG-01-01 testtag-04 "record=a record;label=a label"
+  701  history | egrep STORE
+  702  python phconddburllib2.py --debug LS testtag-01 
+  703  python phconddburllib2.py --debug LS --expand=true testtag-01 
+  704  python phconddburllib2.py --debug --expand=true LS testtag-01 
+  705  python phconddburllib2.py --debug --expand=true LS testtag-01 
+  706  http localhost:8080/physconddb/conddbweb/rest/iovs/find\?globaltag=none\&trace=off\&since=0\&tag=testtag-01\&until=Inf\&expand=true
+  707  http localhost:8080/physconddb/conddbweb/rest/iovs/find\?globaltag=none\&trace=off\&since=0\&tag=testtag-01\&until=Inf\&expand=false
+  708  http localhost:8080/physconddb/conddbweb/rest/iovs/3
+  709  http localhost:8080/physconddb/conddbweb/rest/globaltags
+  710  python phconddburllib2.py --debug --expand=true LS testtag-01 
+  711  python phconddburllib2.py --debug --expand=true LS testtag-01 
+  712  python phconddburllib2.py --expand=true LS testtag-01 
+  713  python phconddburllib2.py --expand=true LS testtag-01 
+  714  python phconddburllib2.py --expand=true LS testtag-01 
+  715  python phconddburllib2.py --expand=true LS testtag-01 
+  716  history
+  717  python phconddburllib2.py ADD tags "name=testtag-04;timeType=time;objectType=none;synchronization=none;description=a test tag;lastValidatedTime=20000;endOfValidity=-1"
+  718  python phconddburllib2.py LINK MYGTAG-01-01 testtag-04 "record=a record;label=a label"
+  719  python phconddburllib2.py STORE testtag-04 ../../conddb-filter-values.properties "since=6000;sinceString=t6000" "version=a payload version;objectType=my object;streamerInfo=a streamer;backendInfo=database"
+  720  python phconddburllib2.py --expand=true LS testtag-04
+  721  python phconddburllib2.py  LOCK MYGTAG-01-01
+  722  python condurllib2.py COMMIT MyTestPkg ../../pom.xml /MyTestPkg/maven
+  723  python condurllib2.py COMMIT MyTestPkg ../../pom.xml /MyTestPkg/maven
+  724  python condurllib2.py COMMIT MyTestPkg ../../pom.xml /MyTestPkg/maven
+  725  python condurllib2.py --debug COMMIT MyTestPkg ../../pom.xml /MyTestPkg/maven
+  726  python condurllib2.py --debug COMMIT MyTestPkg ../../pom.xml /MyTestPkg/maven
+  727  python condurllib2.py --debug COMMIT MyTestPkg ../../pom.xml /MyTestPkg/maven
+  728  python condurllib2.py --debug COMMIT MyTestPkg ../../pom.xml /MyTestPkg/maven
+  729  python condurllib2.py --debug COMMIT MyTestPkg ../../pom.xml /MyTestPkg/maven
+  730  python condurllib2.py --debug COMMIT MyTestPkg ../../pom.xml /MyTestPkg/maven
+  731  python condurllib2.py --debug COMMIT MyTestPkg ../../pom.xml /MyTestPkg/maven
+  732  python phconddburllib2.py --expand=true LS testtag-04
+  733  python phconddburllib2.py --expand=true FIND tags
+  734  python phconddburllib2.py --expand=true LS MyTestPkg-pom_HEAD_00
+  735  python condurllib2.py --debug COMMIT MyTestPkg ../../server.xml /MyTestPkg/maven
+  736  python condurllib2.py --debug COMMIT MyTestPkg ../../setup.sh /MyTestPkg/maven
+  737  python phconddburllib2.py --expand=true LS MyTestPkg-pom_HEAD_00
+  738  python phconddburllib2.py --expand=true LS MyTestPkg-pom_HEAD_00
+  739  python condurllib2.py -h
+  740  python condurllib2.py --debug TAG MyTestPkg MyTestPkg-00-01
+  741  python condurllib2.py --debug TAG MyTestPkg MyTestPkg-00-01
+  742  python phconddburllib2.py --expand=true LS MyTestPkg-pom_HEAD_00
+  743  python condurllib2.py --debug TAG MyTestPkg MyTestPkg-00-01
+  744  python condurllib2.py --debug TAG MyTestPkg MyTestPkg-00-02
+  745  python condurllib2.py --debug TAG MyTestPkg MyTestPkg-00-03
+  746  python condurllib2.py LS MyTestPkg-00-03
+  747  python condurllib2.py --debug COMMIT MyTestPkg ../../README.md /MyTestPkg/maven
+  748  python phconddburllib2.py --expand=true )h
+  749  python phconddburllib2.py --expand=true -h
+  750  python condurllib2.py LS MyTestPkg-00-03
+  751* python condurllib2.py LS 
+  752  python phconddburllib2.py --expand=true DELETE globaltags MyTestPkg-00-01
+  753  python phconddburllib2.py --trace=on FIND globaltags MyTestPkg-00-01
+  754  python phconddburllib2.py --expand=true UNLINK MyTestPkg-00-01 MyTestPkg-server_HEAD_00
+  755  python phconddburllib2.py --expand=true UNLINK MyTestPkg-00-01 MyTestPkg-setup_HEAD_00
+  756  python phconddburllib2.py --expand=true UNLINK MyTestPkg-00-01 MyTestPkg-pom_HEAD_00
+  757  python phconddburllib2.py --trace=on FIND globaltags MyTestPkg-00-01
+  758  python phconddburllib2.py --trace=on FIND globaltags MyTestPkg%
+  759  python phconddburllib2.py --trace=on FIND globaltags MyTestPkg-00-01
+  760  python phconddburllib2.py FIND globaltags MyTestPkg-00-01
+  761  python phconddburllib2.py DELETE globaltags MyTestPkg-00-01
+  762* python phconddburllib2.py FIND globaltags MyTestPkg-
+  763  python phconddburllib2.py --trace=on FIND globaltags MyTestPkg-00-02
+  764  python condurllib2.py LOCK MyTestPkg-00-02
+  765  python condurllib2.py LOCK MyTestPkg-00-02
+  766  python condurllib2.py LOCK MyTestPkg-00-02 unlocked
+  767  python condurllib2.py LOCK MyTestPkg-00-02
+  768  ls
+  769  ls test/
+  770  ls -al /tmp/
+  771  ls -al /tmp/physconddb-dump/
+  772  ls -al /tmp/physconddb-dump/MyTestPkg-00-02/
+  773  ls -al /tmp/physconddb-dump/MyTestPkg-00-02/MyTestPkg/
+  774  ls -al /tmp/physconddb-dump/MyTestPkg-00-02/MyTestPkg/maven/
+  775  ls -al /tmp/physconddb-dump/MyTestPkg-00-02/MyTestPkg/maven/pom/
+  776  ls -al /tmp/physconddb-dump/MyTestPkg-00-02/MyTestPkg/maven/pom/pom/
+  777  ls -al /tmp/physconddb-dump/MyTestPkg-00-02/MyTestPkg/maven/pom/pom/t0.xml 
+  778  python phconddburllib2.py --trace=on FIND globaltags MyTestPkg-00-02
+  779  python phconddburllib2.py --trace=on FIND globaltags MyTestPkg-00-02
+  780  python phconddburllib2.py --trace=on FIND globaltags MyTestPkg-00-02
+  781  python phconddburllib2.py --trace=on FIND globaltags MyTestPkg-00-02
+  782  python phconddburllib2.py --trace=on FIND globaltags MyTestPkg-00-02
+  783  python phconddburllib2.py --trace=on FIND globaltags MyTestPkg-00-02
+  784  python phconddburllib2.py --trace=on FIND globaltags MyTestPkg-00-02
+  785  python condurllib2.py LS MyTestPkg-00-02
+  786  python condurllib2.py --debug LS MyTestPkg-00-02
+  787  python condurllib2.py --debug LS MyTestPkg-00-02
+  788  python condurllib2.py --debug LS MyTestPkg-00-02
+  789  python condurllib2.py --debug LS MyTestPkg-00-02
+  790  python condurllib2.py --debug LS MyTestPkg-00-02
+  791  python condurllib2.py --debug LS MyTestPkg-00-02
+  792  python condurllib2.py --debug LS MyTestPkg-00-02
+  793  python condurllib2.py LS MyTestPkg-00-02
+  794  python condurllib2.py LS MyTestPkg-00-02
+  795  python condurllib2.py LS MyTestPkg-00-02
+  796  python condurllib2.py LS MyTestPkg-00-02
+  797  python condurllib2.py LS MyTestPkg-00-02
+  798  python condurllib2.py -h LS MyTestPkg-00-02
+  799  python condurllib2.py SHOW /MyTestPkg/maven
+  800  python condurllib2.py SHOW /MyTestPkg/maven MyTestPkg-pom
+  801  python condurllib2.py SHOW /MyTestPkg/maven MyTestPkg-pom
+  802  python condurllib2.py SHOW /MyTestPkg/maven
+  803  python condurllib2.py SHOW /MyTestPkg/maven
+  804  python condurllib2.py --debug SHOW /MyTestPkg/maven
+  805  python condurllib2.py --debug SHOW /MyTestPkg/maven%
+  806  python condurllib2.py --debug SHOW /MyTestPkg/maven/pom
+  807  python condurllib2.py --debug SHOW /MyTestPkg/maven/pom
+  808  python condurllib2.py --debug SHOW /MyTestPkg/maven
+  809  http localhost:8080/physconddb/conddbweb/rest/systems
+  810  http localhost:8080/physconddb/conddbweb/rest/systems\?expand=true
+  811  python condurllib2.py --debug SHOW /MyTestPkg/maven%
+  812  http localhost:8080/physconddb/conddbweb/rest/systems/find?by=node&name=%252FMyTestPkg%252Fmaven%2525
+  813  http localhost:8080/physconddb/conddbweb/rest/systems/find\?by=node\&name=%252FMyTestPkg%252Fmaven%2525
+  814  http localhost:8080/physconddb/conddbweb/rest/systems/find\?by=node\&name=%25MyTestPkg%25
+  815  python condurllib2.py --debug SHOW %MyTestPkg/maven%
+  816  python condurllib2.py --debug SHOW %MyTestPkg%
+  817  python condurllib2.py --debug SHOW MyTestPkg
+  818  python condurllib2.py --debug SHOW %MyTestPkg%
+  819  python condurllib2.py --debug SHOW %MyTestPkg%
+  820  python condurllib2.py --debug SHOW /MyTestPkg%
+  821  python
+  822  python condurllib2.py --debug SHOW /MyTestPkg%
+  823  python condurllib2.py --debug SHOW /MyTestPkg%
+  824  python condurllib2.py --debug SHOW /MyTestPkg%
+  825  python condurllib2.py --debug SHOW /MyTestPkg%
+  826  python condurllib2.py --debug SHOW /MyTestPkg%
+  827  python condurllib2.py --debug SHOW /MyTestPkg%
+  828  python condurllib2.py --debug SHOW /MyTestPkg%
+  829  python condurllib2.py SHOW /MyTestPkg%
+  830  history
+  831  history > condurllib2-examples.txt
