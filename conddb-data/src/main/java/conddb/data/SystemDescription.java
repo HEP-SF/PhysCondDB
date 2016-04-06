@@ -16,7 +16,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
-import conddb.annotations.Href;
+import conddb.data.annotations.Href;
 
 /**
  * @author formica

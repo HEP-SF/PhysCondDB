@@ -21,13 +21,13 @@ import conddb.data.exceptions.ConversionException;
 import conddb.data.handler.GlobalTagHandler;
 import conddb.data.handler.IovHandler;
 import conddb.data.handler.TagHandler;
+import conddb.data.utils.converters.CondTimeTypes;
+import conddb.data.utils.converters.IovConversionHandler;
 import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.svc.dao.repositories.GlobalTagMapRepository;
 import conddb.svc.dao.repositories.GlobalTagRepository;
 import conddb.svc.dao.repositories.IovRepository;
 import conddb.svc.dao.repositories.TagRepository;
-import conddb.utils.converters.CondTimeTypes;
-import conddb.utils.converters.IovConversionHandler;
 
 @Service
 public class GlobalTagExpertService {

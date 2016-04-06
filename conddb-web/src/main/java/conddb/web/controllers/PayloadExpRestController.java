@@ -25,11 +25,11 @@ import org.springframework.stereotype.Controller;
 
 import conddb.data.Iov;
 import conddb.data.Payload;
+import conddb.data.utils.bytes.PayloadBytesHandler;
 import conddb.svc.dao.baserepository.PayloadDataBaseCustom;
 import conddb.svc.dao.controllers.IovService;
 import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.svc.dao.repositories.PayloadRepository;
-import conddb.utils.bytes.PayloadBytesHandler;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.Link;

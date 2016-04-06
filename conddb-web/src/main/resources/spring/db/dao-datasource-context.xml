@@ -76,7 +76,7 @@
 		<context:property-placeholder location="classpath:application.properties" order="2" ignore-unresolvable="true"  />
 		
 		<bean id="jbcoolPropertyConfigurator"
-			class="conddb.utils.PropertyConfigurator" scope="singleton" factory-method="getInstance">
+			class="conddb.web.utils.PropertyConfigurator" scope="singleton" factory-method="getInstance">
 		</bean>
 	</beans>
 	<beans profile="oracle">
@@ -84,7 +84,7 @@
 		<context:property-placeholder location="classpath:application.properties" order="2" ignore-unresolvable="true"  />
 		
 		<bean id="jbcoolPropertyConfigurator"
-			class="conddb.utils.PropertyConfigurator" scope="singleton" factory-method="getInstance">
+			class="conddb.web.utils.PropertyConfigurator" scope="singleton" factory-method="getInstance">
 		</bean>
 	</beans>
 	<beans profile="sqlite">
@@ -92,7 +92,7 @@
 		<context:property-placeholder location="classpath:application.properties" order="2" ignore-unresolvable="true"  />
 		
 		<bean id="jbcoolPropertyConfigurator"
-			class="conddb.utils.PropertyConfigurator" scope="singleton" factory-method="getInstance">
+			class="conddb.web.utils.PropertyConfigurator" scope="singleton" factory-method="getInstance">
 		</bean>
 	</beans>
 </beans>

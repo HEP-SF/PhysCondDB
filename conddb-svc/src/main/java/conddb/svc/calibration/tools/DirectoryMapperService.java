@@ -36,11 +36,11 @@ import conddb.data.Payload;
 import conddb.data.PayloadData;
 import conddb.data.SystemDescription;
 import conddb.data.Tag;
+import conddb.data.utils.bytes.PayloadBytesHandler;
 import conddb.svc.dao.controllers.GlobalTagService;
 import conddb.svc.dao.controllers.IovService;
 import conddb.svc.dao.controllers.SystemNodeService;
 import conddb.svc.dao.exceptions.ConddbServiceException;
-import conddb.utils.bytes.PayloadBytesHandler;
 
 /**
  * @author aformic

@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import conddb.data.PayloadData;
 import conddb.data.exceptions.PayloadEncodingException;
-import conddb.utils.data.IStreamHash;
-import conddb.utils.hash.HashGenerator;
+import conddb.data.utils.IStreamHash;
+import conddb.data.utils.hash.HashGenerator;
 
 public class PayloadHandler {
 

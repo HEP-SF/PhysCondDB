@@ -41,11 +41,11 @@ import org.springframework.core.io.Resource;
 import conddb.data.Payload;
 import conddb.data.PayloadData;
 import conddb.data.exceptions.PayloadEncodingException;
+import conddb.data.utils.PayloadGenerator;
+import conddb.data.utils.bytes.PayloadBytesHandler;
 import conddb.svc.dao.baserepository.PayloadDataBaseCustom;
 import conddb.svc.dao.repositories.IovRepository;
 import conddb.svc.dao.repositories.PayloadRepository;
-import conddb.utils.bytes.PayloadBytesHandler;
-import conddb.utils.data.PayloadGenerator;
 
 /**
  * @author formica

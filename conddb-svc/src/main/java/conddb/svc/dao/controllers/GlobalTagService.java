@@ -15,11 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
-import conddb.annotations.ProfileExecution;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.GlobalTagStatus;
 import conddb.data.Tag;
+import conddb.svc.annotations.ProfileExecution;
 import conddb.svc.dao.exceptions.ConddbServiceDataIntegrityException;
 import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.svc.dao.repositories.GlobalTagMapRepository;

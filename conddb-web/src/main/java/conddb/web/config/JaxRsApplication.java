@@ -37,10 +37,6 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
-import conddb.security.web.controllers.LogCondRequestsRestController;
-import conddb.utils.PropertyConfigurator;
-import conddb.utils.filters.CustomLoggingFilter;
-import conddb.utils.filters.CustomSecurityFilter;
 import conddb.web.admin.controllers.CondAdminWebController;
 import conddb.web.calib.controllers.CalibrationRestController;
 import conddb.web.controllers.GlobalTagExpRestController;
@@ -57,6 +53,10 @@ import conddb.web.controllers.TagExpRestController;
 import conddb.web.controllers.TagRestController;
 import conddb.web.exceptions.CondDBExceptionMapper;
 import conddb.web.exceptions.GlobalControllerExceptionMapper;
+import conddb.web.security.controllers.LogCondRequestsRestController;
+import conddb.web.utils.PropertyConfigurator;
+import conddb.web.utils.filters.CustomLoggingFilter;
+import conddb.web.utils.filters.CustomSecurityFilter;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.models.Info;
 

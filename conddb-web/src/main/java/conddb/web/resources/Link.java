@@ -33,9 +33,9 @@ import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import conddb.annotations.Href;
 import conddb.data.Entity;
-import conddb.utils.PropertyConfigurator;
+import conddb.data.annotations.Href;
+import conddb.web.utils.PropertyConfigurator;
 
 @SuppressWarnings("unchecked")
 public class Link extends LinkedHashMap {

@@ -25,9 +25,9 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import conddb.annotations.Href;
-import conddb.utils.json.serializers.TimestampDeserializer;
-import conddb.utils.json.serializers.TimestampSerializer;
+import conddb.data.annotations.Href;
+import conddb.data.utils.json.serializers.TimestampDeserializer;
+import conddb.data.utils.json.serializers.TimestampSerializer;
 
 
 /**

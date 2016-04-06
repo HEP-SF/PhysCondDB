@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import conddb.utils.json.HibernateAwareObjectMapper;
+import conddb.data.utils.json.HibernateAwareObjectMapper;
 
 /**
  * @author formica

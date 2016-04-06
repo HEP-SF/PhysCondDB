@@ -13,13 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
-import conddb.annotations.ProfileExecution;
 import conddb.data.Entity;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.Tag;
+import conddb.data.utils.json.serializers.TimestampFormat;
+import conddb.svc.annotations.ProfileExecution;
 import conddb.data.Iov;
-import conddb.utils.json.serializers.TimestampFormat;
 import conddb.web.resources.generic.GenericPojoResource;
 
 /**

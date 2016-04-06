@@ -35,6 +35,7 @@ import conddb.data.Payload;
 import conddb.data.PayloadData;
 import conddb.data.SystemDescription;
 import conddb.data.Tag;
+import conddb.data.utils.PayloadGenerator;
 import conddb.svc.dao.baserepository.PayloadDataBaseCustom;
 import conddb.svc.dao.repositories.GlobalTagMapRepository;
 import conddb.svc.dao.repositories.GlobalTagRepository;
@@ -42,7 +43,6 @@ import conddb.svc.dao.repositories.IovRepository;
 import conddb.svc.dao.repositories.PayloadRepository;
 import conddb.svc.dao.repositories.SystemNodeRepository;
 import conddb.svc.dao.repositories.TagRepository;
-import conddb.utils.data.PayloadGenerator;
 
 /**
  * @author formica

@@ -34,13 +34,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import conddb.annotations.ProfileExecution;
 import conddb.data.GlobalTagStatus;
 import conddb.data.Iov;
 import conddb.data.Payload;
 import conddb.data.PayloadData;
 import conddb.data.Tag;
+import conddb.data.utils.bytes.PayloadBytesHandler;
 import conddb.data.view.IovGroups;
+import conddb.svc.annotations.ProfileExecution;
 import conddb.svc.dao.baserepository.JdbcRepository;
 import conddb.svc.dao.baserepository.PayloadDataBaseCustom;
 import conddb.svc.dao.exceptions.ConddbServiceDataIntegrityException;
@@ -48,7 +49,6 @@ import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.svc.dao.repositories.IovRepository;
 import conddb.svc.dao.repositories.PayloadRepository;
 import conddb.svc.dao.repositories.TagRepository;
-import conddb.utils.bytes.PayloadBytesHandler;
 
 /**
  * @author formica
