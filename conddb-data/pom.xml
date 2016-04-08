@@ -8,12 +8,11 @@
 	<name>conddb-data</name>
 	<url>http://maven.apache.org</url>
 
-	<parent>
-		<groupId>conddb</groupId>
-		<artifactId>PhysCondDBWeb</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
-		<relativePath>../../PhysCondDB</relativePath>
-	</parent>
+  <parent>
+    <groupId>conddb</groupId>
+    <artifactId>PhysCondDBWeb</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
 
 	<build>
 		<resources>

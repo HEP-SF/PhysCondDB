@@ -5,12 +5,11 @@
 	<artifactId>conddb-web</artifactId>
 	<packaging>war</packaging>
 
-	<parent>
-		<groupId>conddb</groupId>
-		<artifactId>PhysCondDBWeb</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
-		<relativePath>../../PhysCondDB</relativePath>
-	</parent>
+  <parent>
+    <groupId>conddb</groupId>
+    <artifactId>PhysCondDBWeb</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+  </parent>
 
 	<properties>
 		<!-- Apache dependencies versions -->
