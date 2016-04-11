@@ -437,12 +437,14 @@ condJSControllers
 						'$rootScope',
 						'$scope',
 						'$routeParams',
+						'baseurl',
 						'CondRest',
-						function($rootScope, $scope, $routeParams, CondRest) {
+						function($rootScope, $scope, $routeParams, baseurl, CondRest) {
 
-							console.log('Route is ' + $routeParams.tagname);
+							console.log('Route in IovListCtrl is ' + $routeParams.tagname);
 							$scope.selectedtagname = $routeParams.tagname;
 							$scope.selectediovs = [];
+							$scope.payloadurl = baseurl.url + 'rest/payload/data';
 							$scope.itemsByPage = 10;
 							$scope.displayedPages = 10;
 							$scope.displayedCollection = [];
@@ -453,7 +455,8 @@ condJSControllers
 							});
 							
 							function loadiovs(qry) {
-								var url = 'iovs/find?tag=' + qry.tag + '&expand=true';
+								var url = 'iovs/find?tag=' + qry.tag + '&payload=true&expand=true';
+								console.log('Creating href for payload : '+$scope.payloadurl);
 								var httpmethod = 'GET';
 								var headers = 'Accept: */*';
 								CondRest.request(url, httpmethod, 'user',headers,null).then(

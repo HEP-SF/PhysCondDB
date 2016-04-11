@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import conddb.data.AfEntity;
+import conddb.data.annotations.Linkit;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.Link;
 
@@ -122,8 +123,24 @@ public class GenericPojoResource<T extends AfEntity> extends Link {
 			log.debug("Keys for " + entity.getClass().getName() + " have been fetched....");
 			log.debug("Loop over simple column fields..." + entitymap.size());
 			for (String akey : entitymap.keySet()) {
-				log.debug("1) Filling map with " + akey + " using method " + entitymap.get(akey).getName());
-				put(akey, entitymap.get(akey).invoke(entity));
+				Method mth = entitymap.get(akey);
+				if (mth.isAnnotationPresent(Linkit.class)) {
+					Class<?> subentityclass = mth.getReturnType(); 
+					if (AfEntity.class.isAssignableFrom(subentityclass)) {
+						AfEntity linkedentity = (AfEntity) subentityclass.newInstance();
+						Linkit linkit = mth.getAnnotation(Linkit.class);
+						Method getter = entity.getClass().getMethod(linkit.getter(), null);
+						String parenthref = (String) getter.invoke(entity, null);
+						linkedentity.setHref(parenthref);
+						GenericPojoResource<AfEntity> gpr = new GenericPojoResource<AfEntity>(info, linkedentity, 0,
+								entity);
+						log.debug("1) Link resource not loaded " + akey + " using method " + mth.getName());
+						put(akey, gpr);
+						continue;
+					}
+				}
+				log.debug("1) Filling map with " + akey + " using method " + mth.getName());
+				put(akey, mth.invoke(entity));
 			}
 			log.debug("Loop over OneToMany annotated fields..." + nswentitymap.size());
 			for (String akey : nswentitymap.keySet()) {
@@ -154,28 +171,6 @@ public class GenericPojoResource<T extends AfEntity> extends Link {
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-	}
-
-	private void fetchKeysFromEntity(AfEntity entity) {
-		// Field fields[] = entity.getClass().getDeclaredFields();
-		Method methods[] = entity.getClass().getDeclaredMethods();
-		for (int i = 0; i < methods.length; i++) {
-			String akey = methods[i].getName();
-
-			if (methods[i].getAnnotation(ManyToOne.class) != null && akey.startsWith("get")) {
-				String keyname = akey.substring(3);
-				String attname = keyname.substring(0, 1).toLowerCase() + keyname.substring(1);
-				nswentitymap.put(attname, methods[i]);
-			} else if (methods[i].getAnnotation(OneToMany.class) != null && akey.startsWith("get")) {
-				String keyname = akey.substring(3);
-				String attname = keyname.substring(0, 1).toLowerCase() + keyname.substring(1);
-				nswsetmap.put(attname, methods[i]);
-			} else if (methods[i].getAnnotation(Column.class) != null && akey.startsWith("get")) {
-				String keyname = akey.substring(3);
-				String attname = keyname.substring(0, 1).toLowerCase() + keyname.substring(1);
-				entitymap.put(attname, methods[i]);
-			}
 		}
 	}
 

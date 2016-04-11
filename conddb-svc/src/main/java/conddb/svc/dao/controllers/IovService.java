@@ -114,6 +114,46 @@ public class IovService {
 			throw new ConddbServiceException("Cannot look for iovs in tag " + tag.getName() + ": " + e.getMessage());
 		}
 	}
+	
+	/**
+	 * @param tag
+	 * @param preq
+	 * @param snapshot
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public List<Iov> getIovsByTagFetchPayload(Tag tag, PageRequest preq, Timestamp snapshot) throws ConddbServiceException {
+		try {
+			// FIXME: we are not using page request for the moment....
+			log.debug("Get iovs for tag "+tag.getName());
+			Long tagid = tag.getId();
+			if (snapshot == null) {
+				// Retrieve only the last inserted iov for every since
+				return iovRepository.findByTagAndInsertionTimeMaxFetchPayload(tagid);
+			} else {
+				log.debug("Call by range is using "+tagid+" snapshot "+snapshot);
+				return iovRepository.findByTagAndInsertionTimeSnapshotFetchPayload(tagid, snapshot);
+			}
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot look for iovs in tag " + tag.getName() + ": " + e.getMessage());
+		}
+		
+	}
+	/**
+	 * @param tag
+	 * @param preq
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	public Page<Iov> getIovsByTag(String tagname, PageRequest preq) throws ConddbServiceException {
+		try {
+			log.debug("Get iovs for tag "+tagname);
+			return iovRepository.findAllByTagName(tagname, preq);
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot look for iovs in tag " + tagname + ": " + e.getMessage());
+		}
+	}
+
 
 	/**
 	 * @param tag

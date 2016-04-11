@@ -119,6 +119,15 @@ public interface IovBaseRepository extends CondDBPageAndSortingRepository<Iov, L
 	/**
 	 * @param tagname
 	 *            The name of the tag.
+	 * @return list of IOVs.
+	 */
+	@Query("SELECT distinct p FROM Iov p JOIN FETCH p.payload pylds WHERE " + "p.tag.id = (:tag) " + "AND p.insertionTime >= ALL("
+			+ "SELECT p2.insertionTime FROM Iov p2 WHERE " + "p2.tag.id = p.tag.id AND (p2.since = p.since))")
+	List<Iov> findByTagAndInsertionTimeMaxFetchPayload(@Param("tag") Long id);
+
+	/**
+	 * @param tagname
+	 *            The name of the tag.
 	 * @param since
 	 *            The since time of the interval.
 	 * @param until
@@ -130,6 +139,21 @@ public interface IovBaseRepository extends CondDBPageAndSortingRepository<Iov, L
 			+ "p2.tag.id = p.tag.id AND (p2.since = p.since) AND p2.insertionTime <= (:snapshot) "
 			+ " group by p2.since)")
 	List<Iov> findByTagAndInsertionTimeSnapshot(@Param("tag") Long id, @Param("snapshot") Timestamp snapshot);
+
+	/**
+	 * @param tagname
+	 *            The name of the tag.
+	 * @param since
+	 *            The since time of the interval.
+	 * @param until
+	 *            The until time of the selected interva.
+	 * @return list of IOVs.
+	 */
+	@Query("SELECT distinct p FROM Iov p JOIN FETCH p.payload pylds WHERE " + "p.tag.id = (:tag) " + "AND p.insertionTime = ANY("
+			+ "SELECT max(p2.insertionTime) FROM Iov p2 WHERE "
+			+ "p2.tag.id = p.tag.id AND (p2.since = p.since) AND p2.insertionTime <= (:snapshot) "
+			+ " group by p2.since)")
+	List<Iov> findByTagAndInsertionTimeSnapshotFetchPayload(@Param("tag") Long id, @Param("snapshot") Timestamp snapshot);
 
 	/**
 	 * @param tagname

@@ -23,6 +23,7 @@ import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 
@@ -71,6 +72,7 @@ public class IovRestController extends BaseController {
 			@ApiParam(value = "globaltag: the globaltag name", required = false) @DefaultValue("none") @QueryParam("globaltag") final String globaltagid,
 			@ApiParam(value = "snapshot: the snapshot time", required = false) @DefaultValue("-1") @QueryParam("snapshot") final Long snapt,
 			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false) @DefaultValue("false") @QueryParam("expand") boolean expand,
+			@ApiParam(value = "payload {true|false} is for payload fetching", required = false) @DefaultValue("false") @QueryParam("payload") boolean payload,
 			@ApiParam(value = "last: {niovs} loads only the last N iovs", required = false) @DefaultValue("-1") @QueryParam("last") final Integer niovs,
 			@ApiParam(value = "since: the string representing since time", required = false) @DefaultValue("0") @QueryParam("since") final String since,
 			@ApiParam(value = "until: the string representing until time", required = false) @DefaultValue("Inf") @QueryParam("until") final String until,
@@ -79,6 +81,7 @@ public class IovRestController extends BaseController {
 					throws ConddbWebException {
 		this.log.info("IovRestController processing request for iovs in tag " + id);
 		Collection<Iov> entitylist;
+		int level = 0;
 		try {
 			BigDecimal sincetime = null;
 			BigDecimal untiltime = null;
@@ -100,7 +103,12 @@ public class IovRestController extends BaseController {
 				untiltime = new BigDecimal(Iov.MAX_TIME);
 
 				if (since.equals("0") && niovs<0) {
-					iovlist = this.iovService.getIovsByTag(atag, preq, snapshotTime);
+					if (!payload) {
+						iovlist = this.iovService.getIovsByTag(atag, preq, snapshotTime);						
+					} else {
+						level=1;
+						iovlist = this.iovService.getIovsByTagFetchPayload(atag, preq, snapshotTime);
+					}
 				} 
 			} else {
 				sincetime = new BigDecimal(since);
@@ -122,7 +130,7 @@ public class IovRestController extends BaseController {
 				String msg = "Iov list is empty";
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
-			CollectionResource collres = listToCollection(entitylist, expand, info);
+			CollectionResource collres = listToCollection(entitylist, expand, level, info);
 			return ok(collres);
 			
 		} catch (ConddbServiceException e) {
@@ -131,12 +139,12 @@ public class IovRestController extends BaseController {
 		}
 	}
 	
-	protected CollectionResource listToCollection(Collection<Iov> iovs, boolean expand, UriInfo info) {
+	protected CollectionResource listToCollection(Collection<Iov> iovs, boolean expand, int level, UriInfo info) {
 		Collection items = new ArrayList(iovs.size());
 		for (Iov iov : iovs) {
 			if (expand) {
 				log.debug("Creating a generic resource from iov "+iov);
-				GenericPojoResource<Iov> resource = (GenericPojoResource<Iov>) springResourceFactory.getGenericResource(info, iov, 0, null);
+				GenericPojoResource<Iov> resource = (GenericPojoResource<Iov>) springResourceFactory.getGenericResource(info, iov, level, null);
 				items.add(resource);
 			} else {
 				log.debug("Creating a generic link out of the iov "+iov);
@@ -163,6 +171,29 @@ public class IovRestController extends BaseController {
 			throw buildException(msg + " " + e.getMessage(), msg, Response.Status.NOT_FOUND);
 		}
 	}
+	
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Path("/list/{tagname}")
+	@ApiOperation(value = "Finds all Iovs inside a tag", notes = "Usage of this method is essentially for href links.", response = Iov.class)
+	public Response getIovsByTag(@Context UriInfo info,
+			@ApiParam(value = "tagname: the tag name", required = true) @DefaultValue("none") @PathParam("tagname") String tagname,
+			@ApiParam(value = "page: the page number", required = false) @DefaultValue("0") @QueryParam("page") Integer ipage,
+			@ApiParam(value = "size: the page size", required = false) @DefaultValue("1000") @QueryParam("size") Integer size)
+					throws ConddbWebException {
+		this.log.info("IovRestController processing request for iovs in tag " + tagname);
+		try {
+			PageRequest preq = new PageRequest(ipage, size);
+			Page<Iov> entitypage = this.iovService.getIovsByTag(tagname, preq);
+			Collection<Iov> entitylist = CollectionUtils.iterableToCollection(entitypage.getContent());
+			CollectionResource collres = listToCollection(entitylist, true, 0, info);
+			return ok(collres);
+		} catch (Exception e) {
+			String msg = "Error retrieving iov by tagname " + tagname;
+			throw buildException(msg + " " + e.getMessage(), msg, Response.Status.NOT_FOUND);
+		}
+	}
+
 
 	@SuppressWarnings("unchecked")
 	@GET
@@ -175,6 +206,7 @@ public class IovRestController extends BaseController {
 					throws ConddbWebException {
 		this.log.info("IovRestController processing request for iov list (expansion = " + expand + ")");
 		Collection<Iov> entitylist;
+		int level=0;
 		try {
 			// Here we could implement pagination
 			PageRequest preq = new PageRequest(ipage, size);
@@ -186,7 +218,7 @@ public class IovRestController extends BaseController {
 			String msg = "Iov list is empty";
 			throw buildException(msg, msg, Response.Status.NOT_FOUND);
 		}
-		CollectionResource collres = listToCollection(entitylist, expand, info);
+		CollectionResource collres = listToCollection(entitylist, expand, level, info);
 		return ok(collres);
 	}
 
