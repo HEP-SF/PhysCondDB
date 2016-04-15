@@ -610,7 +610,14 @@ class PhysCurl(object):
         if self.__debug:
             print 'DEBUG: Get object using parameters '
             print params
-        id = params['name']
+        
+        id=None
+        if 'name' in params:
+            id = params['name']
+        #Ignore by when usind ID
+            params['by'] = 'none'
+            params['page'] = 'none'
+            params['size'] = 'none'
 
         if 'package' not in params:
             params['package'] = 'none'
@@ -620,31 +627,45 @@ class PhysCurl(object):
             
         if 'expand' not in params:
             params['expand'] = 'false'
-            
+        
         url = (self.userbaseurl + servicebase )
         if id is not None:
             url = (self.userbaseurl + servicebase + '/' + id)
+        else:
+            # If name is not defined, this is a global search: use by=field:something to create specifications
+            url = (self.userbaseurl + servicebase)
+       
+        print 'Use url: ',url,' and params ',params
+
+        args = {}
         urlquoted = urllib.quote_plus(url,safe=':/')
-        if params['trace'] is not None and params['trace'] == 'on':
-            args = { 'trace' : 'on' }
-            if '%' in id:
+        
+        if 'trace' in params and params['trace'] is not None:
+            args['trace'] = params['trace']
+            if id is not None and '%' in id:
                 msg = ('You are using pattern to select with trace=on: expect a failure from server !')
                 #print colored.cyan(msg)
                 print msg
+        if params['expand'] is not None:
+            args['expand'] = params['expand']
 
-            pairs = urllib.urlencode(args)
-            self.__curl.setUrl(urlquoted+'?'+pairs)
-        elif params['expand'] is not None and params['expand'] == 'true':
-            args = { 'expand' : 'true' }
-            pairs = urllib.urlencode(args)
-            self.__curl.setUrl(urlquoted+'?'+pairs)
-        elif params['package'] is not None and params['package'] != 'none':
-            args = { 'package' : params['package'] }
-            pairs = urllib.urlencode(args)
-            self.__curl.setUrl(urlquoted+'?'+pairs)
-        else:
+        if 'package' in params and params['package'] is not None and params['package'] != 'none':
+            args['package'] = params['package']
+
+        if params['by'] is not None and params['by'] != 'none':
+            args['by'] = params['by']
+        if params['page'] is not None and params['page'] != 'none':
+            args['page'] = params['page']
+        if params['size'] is not None and params['size'] != 'none':
+            args['size'] = params['size']
+
+        print 'Arguments for query parameters: ',args
+        if len(args) == 0 :
             self.__curl.setUrl(urlquoted)
-        
+        else:
+            pairs = urllib.urlencode(args)
+            self.__curl.setUrl(urlquoted+'?'+pairs)
+
         return self.__curl.getData()
 
     def getpayload(self,params,servicebase="/payload/data"):
@@ -1056,6 +1077,18 @@ class PhysUtils(object):
         obj = {}
         if self.__debug:
            print 'Select mappings using arguments ',data
+        (obj, response) = self.__restserver.get(data,'/'+object)
+        return (obj, response)
+
+    def getobjectlist(self, by, expand, page, pagesize, object):
+        data = {}
+        data['by']=by
+        data['expand']=expand
+        data['page']=page
+        data['size']=pagesize
+        obj = {}
+        if self.__debug:
+            print 'Select mappings using arguments ',data
         (obj, response) = self.__restserver.get(data,'/'+object)
         return (obj, response)
 

@@ -25,13 +25,11 @@ import org.springframework.stereotype.Controller;
 
 import conddb.data.GlobalTagMap;
 import conddb.data.Tag;
-import conddb.svc.dao.controllers.GlobalTagAdminService;
 import conddb.svc.dao.controllers.GlobalTagService;
 import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.Link;
-import conddb.web.resources.SpringResourceFactory;
 import conddb.web.resources.generic.GenericPojoResource;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -50,8 +48,6 @@ public class TagExpRestController extends BaseController {
 
 	@Autowired
 	private GlobalTagService globalTagService;
-	@Autowired
-	private SpringResourceFactory springResourceFactory;
 	
 	
 	@POST
@@ -64,7 +60,7 @@ public class TagExpRestController extends BaseController {
 	public Response create(@Context UriInfo info, Tag tag) throws ConddbWebException {
 		try {
 			Tag saved = globalTagService.insertTag(tag);
-			GenericPojoResource<Tag> resource = (GenericPojoResource) springResourceFactory.getGenericResource(info, saved, 0, null);
+			GenericPojoResource<Tag> resource = new GenericPojoResource<>(info, saved, 0, null);
 			return created(resource);
 		} catch (ConddbServiceException e) {
 			String msg = "Error creating tag resource using "+tag.toString();
@@ -83,7 +79,7 @@ public class TagExpRestController extends BaseController {
     response = Tag.class)
 	public Response updateTag(@Context UriInfo info, 
 			@ApiParam(value = "id: the name of the tag to be updated", required = true)
-			@PathParam("id") String id, Map map)
+			@PathParam("id") String id, Map<?, ?> map)
 			throws ConddbWebException {
 		new ConddbWebException();
 		try {
@@ -122,7 +118,7 @@ public class TagExpRestController extends BaseController {
 				existing.setEndOfValidity(value);
 			}
 			existing = globalTagService.insertTag(existing);
-			GenericPojoResource<Tag> resource = (GenericPojoResource) springResourceFactory.getGenericResource(info, existing, 0, null);
+			GenericPojoResource<Tag> resource = new GenericPojoResource<>(info, existing, 0, null);
 			return ok(resource);
 		} catch (ConddbServiceException e) {
 			log.debug("Generate exception using an ConddbService exception..."+e.getMessage());
@@ -153,7 +149,7 @@ public class TagExpRestController extends BaseController {
 			}
 			Tag removed = null;
 			removed = globalTagService.deleteTag(entity);
-			GenericPojoResource<Tag> resource = (GenericPojoResource) springResourceFactory.getGenericResource(info, removed, 0, null);
+			GenericPojoResource<Tag> resource = new GenericPojoResource<>(info, removed, 0, null);
 			return ok(resource);
 			
 		} catch (ConddbServiceException e) {

@@ -37,8 +37,7 @@ import conddb.data.AfEntity;
 import conddb.data.annotations.Href;
 import conddb.web.utils.PropertyConfigurator;
 
-@SuppressWarnings("unchecked")
-public class Link extends LinkedHashMap {
+public class Link extends LinkedHashMap<Object, Object> {
 
     /**
 	 * 
@@ -95,14 +94,6 @@ public class Link extends LinkedHashMap {
         return fq;
     }
 
-//    protected String createHref(String fqBasePath, Entity entity) {
-//    	log.debug("Create href link from "+fqBasePath+" for entity "+entity);
-//        StringBuilder sb = new StringBuilder(fqBasePath);
-//        ResourcePath path = ResourcePath.forClass(entity.getClass());
-//        sb.append(path.getPath()).append(PATH_SEPARATOR).append(entity.getResId());
-//        return sb.toString();
-//    }
-    
     protected String createHref(String fqBasePath, AfEntity entity) {
     	log.debug("Create href link from "+fqBasePath+" for entity "+entity);
         StringBuilder sb = new StringBuilder(fqBasePath);
@@ -111,7 +102,7 @@ public class Link extends LinkedHashMap {
         if (href.equals("none")) {
         try {
 			Method getid = this.getHref(entity);
-			href = getid.invoke(entity, null).toString();
+			href = getid.invoke(entity, (Object[])null).toString();
 		} catch (NoSuchMethodException | SecurityException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -155,13 +146,13 @@ public class Link extends LinkedHashMap {
     		Href hrefid = afield.getAnnotation(Href.class);
     		if (hrefid != null) {
     			String methname = "get"+afield.getName().substring(0, 1).toUpperCase()+afield.getName().substring(1);
-    			Method getid = entity.getClass().getMethod(methname, null);
+    			Method getid = entity.getClass().getMethod(methname, (Class<?>)null);
     			return getid;
     		}
     		javax.persistence.Id annid = afield.getAnnotation(javax.persistence.Id.class);
     		if (annid != null) {
     			String methname = "get"+afield.getName().substring(0, 1).toUpperCase()+afield.getName().substring(1);
-    			getiddefault = entity.getClass().getMethod(methname, null);
+    			getiddefault = entity.getClass().getMethod(methname, (Class<?>)null);
     		}
 
     	}

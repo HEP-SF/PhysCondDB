@@ -1,4 +1,5 @@
-  532  python phconddb.py --help
+### list of commands for the old client version  
+532  python phconddb.py --help
   533  python phconddb.py DESCRIBE globaltags
   534  python phconddb.py DESCRIBE globaltags
   535  python phconddb.py DESCRIBE tags

@@ -10,9 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.ws.rs.core.UriInfo;
 
 import org.hibernate.LazyInitializationException;
@@ -81,12 +78,10 @@ public class GenericPojoResource<T extends AfEntity> extends Link {
 			log.debug("Loop over ManyToOne annotated fields..." + nswsetmap.size());
 			for (String akey : nswsetmap.keySet()) {
 				log.debug("Loop over map with " + akey);
-				Method mth = nswsetmap.get(akey);
-				Class<?> subentitysetclass = mth.getReturnType();
 				Set<AfEntity> subentityset;
 				try {
 					subentityset = (Set<AfEntity>) nswsetmap.get(akey).invoke(entity);
-					List<GenericPojoResource> relist = new ArrayList<GenericPojoResource>();
+					List<GenericPojoResource<? extends AfEntity>> relist = new ArrayList<GenericPojoResource<? extends AfEntity>>();
 					for (AfEntity nswEntity : subentityset) {
 						log.debug("Mapping subset entry: " + nswEntity);
 						GenericPojoResource<AfEntity> gpr = new GenericPojoResource<AfEntity>(info, nswEntity,
@@ -129,8 +124,8 @@ public class GenericPojoResource<T extends AfEntity> extends Link {
 					if (AfEntity.class.isAssignableFrom(subentityclass)) {
 						AfEntity linkedentity = (AfEntity) subentityclass.newInstance();
 						Linkit linkit = mth.getAnnotation(Linkit.class);
-						Method getter = entity.getClass().getMethod(linkit.getter(), null);
-						String parenthref = (String) getter.invoke(entity, null);
+						Method getter = entity.getClass().getMethod(linkit.getter(), (Class<?>)null);
+						String parenthref = (String) getter.invoke(entity, (Object[])null);
 						linkedentity.setHref(parenthref);
 						GenericPojoResource<AfEntity> gpr = new GenericPojoResource<AfEntity>(info, linkedentity, 0,
 								entity);

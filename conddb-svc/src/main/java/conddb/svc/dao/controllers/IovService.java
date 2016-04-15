@@ -77,6 +77,13 @@ public class IovService {
 	private String SERVER_UPLOAD_LOCATION_FOLDER;
 
 	/**
+	 * @return the iovRepository
+	 */
+	public IovRepository getIovRepository() {
+		return iovRepository;
+	}
+
+	/**
 	 * @param tag
 	 * @param preq
 	 * @return

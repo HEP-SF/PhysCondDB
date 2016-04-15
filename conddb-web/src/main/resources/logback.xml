@@ -46,6 +46,7 @@
 		level="debug"/> -->
 	<logger name="org.hibernate" level="warn" />
 	<logger name="org.springframework" level="warn" />
+	<logger name="io.swagger" level="warn" />
 
 	<logger name="conddb.web.resources.generic" additivity="false">
 		<level value="DEBUG" />

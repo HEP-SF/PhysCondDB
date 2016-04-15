@@ -8,6 +8,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -25,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Controller;
 
 import conddb.data.GlobalTag;
@@ -34,6 +37,7 @@ import conddb.data.view.IovGroups;
 import conddb.svc.dao.controllers.GlobalTagService;
 import conddb.svc.dao.controllers.IovService;
 import conddb.svc.dao.exceptions.ConddbServiceException;
+import conddb.svc.dao.specifications.GenericSpecBuilder;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
@@ -130,7 +134,7 @@ public class IovRestController extends BaseController {
 				String msg = "Iov list is empty";
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
-			CollectionResource collres = listToCollection(entitylist, expand, level, info);
+			CollectionResource collres = listToCollection(entitylist, expand, info, Link.IOVS,ipage,size);
 			return ok(collres);
 			
 		} catch (ConddbServiceException e) {
@@ -139,21 +143,6 @@ public class IovRestController extends BaseController {
 		}
 	}
 	
-	protected CollectionResource listToCollection(Collection<Iov> iovs, boolean expand, int level, UriInfo info) {
-		Collection items = new ArrayList(iovs.size());
-		for (Iov iov : iovs) {
-			if (expand) {
-				log.debug("Creating a generic resource from iov "+iov);
-				GenericPojoResource<Iov> resource = (GenericPojoResource<Iov>) springResourceFactory.getGenericResource(info, iov, level, null);
-				items.add(resource);
-			} else {
-				log.debug("Creating a generic link out of the iov "+iov);
-				items.add(springResourceFactory.getResource("link", info, iov));
-			}
-		}
-		return (CollectionResource) springResourceFactory.getCollectionResource(info, Link.IOVS, items);
-	}
-
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/{id}")
@@ -164,7 +153,7 @@ public class IovRestController extends BaseController {
 		this.log.info("IovRestController processing request for iov id " + id);
 		try {
 			Iov entity = this.iovService.getIov(id);
-			GenericPojoResource<Iov> resource = (GenericPojoResource<Iov>) springResourceFactory.getGenericResource(info, entity, 1, null);
+			GenericPojoResource<Iov> resource = new GenericPojoResource<>(info, entity, 1, null);
 			return ok(resource);
 		} catch (Exception e) {
 			String msg = "Error retrieving iov by id " + id;
@@ -186,7 +175,7 @@ public class IovRestController extends BaseController {
 			PageRequest preq = new PageRequest(ipage, size);
 			Page<Iov> entitypage = this.iovService.getIovsByTag(tagname, preq);
 			Collection<Iov> entitylist = CollectionUtils.iterableToCollection(entitypage.getContent());
-			CollectionResource collres = listToCollection(entitylist, true, 0, info);
+			CollectionResource collres = listToCollection(entitylist, true, info, Link.IOVS,ipage,size);
 			return ok(collres);
 		} catch (Exception e) {
 			String msg = "Error retrieving iov by tagname " + tagname;
@@ -195,31 +184,44 @@ public class IovRestController extends BaseController {
 	}
 
 
-	@SuppressWarnings("unchecked")
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@ApiOperation(value = "Finds all Iovs", notes = "Usage of this method is essentially for test purposes.", response = Iov.class, responseContainer = "List")
 	public Response listIovs(@Context UriInfo info,
+			@ApiParam(value = "page: the page number {0}", required = false) @DefaultValue("0") @QueryParam("page") Integer ipage,
+			@ApiParam(value = "size: the page size {1000}", required = false) @DefaultValue("1000") @QueryParam("size") Integer size,
 			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false) @DefaultValue("false") @QueryParam("expand") boolean expand,
-			@ApiParam(value = "page: the page number", required = false) @DefaultValue("0") @QueryParam("page") Integer ipage,
-			@ApiParam(value = "size: the page size", required = false) @DefaultValue("1000") @QueryParam("size") Integer size)
+			@ApiParam(value = "by", required = true) @DefaultValue("name:%") @QueryParam("by") final String patternsearch)
 					throws ConddbWebException {
 		this.log.info("IovRestController processing request for iov list (expansion = " + expand + ")");
-		Collection<Iov> entitylist;
-		int level=0;
 		try {
-			// Here we could implement pagination
+			Page<Iov> entitylist = null;
 			PageRequest preq = new PageRequest(ipage, size);
-			entitylist = CollectionUtils.iterableToCollection(iovService.findAll(preq));
-		} catch (ConddbServiceException e) {
-			throw new ConddbWebException(e.getMessage());
+
+			GenericSpecBuilder<Iov> builder = new GenericSpecBuilder<>();
+			String patternstr = "(\\w+?)(:|<|>)(\\w+?),";
+
+			Pattern pattern = Pattern.compile(patternstr);
+			Matcher matcher = pattern.matcher(patternsearch + ",");
+			while (matcher.find()) {
+				builder.with(matcher.group(1), matcher.group(2), matcher.group(3));
+			}
+
+			Specification<Iov> spec = builder.build();
+	    	entitylist = iovService.getIovRepository().findAll(spec,preq);
+	    	if (entitylist == null || entitylist.getContent().size() == 0) {
+				String msg = "Empty iovs collection";
+				throw buildException(msg, msg, Response.Status.NOT_FOUND);
+			}
+			Collection<Iov> entitycoll = CollectionUtils.iterableToCollection(entitylist.getContent());
+			CollectionResource collres = listToCollection(entitycoll, expand, info, Link.IOVS,ipage,size);
+			return ok(collres);
+		} catch (ConddbWebException e1) {
+			throw e1;
+		} catch (Exception e) {
+			String msg = "Error retrieving Iov resource ";
+			throw buildException(msg + ": " + e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
-		if (entitylist == null || entitylist.size() == 0) {
-			String msg = "Iov list is empty";
-			throw buildException(msg, msg, Response.Status.NOT_FOUND);
-		}
-		CollectionResource collres = listToCollection(entitylist, expand, level, info);
-		return ok(collres);
 	}
 
 	@SuppressWarnings("unchecked")

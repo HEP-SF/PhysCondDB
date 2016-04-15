@@ -45,5 +45,12 @@ public class GlobalTagMapHandler implements CondDBObjectHandler<GlobalTagMap, Gl
 		}
 		return maplist;
 	}
+	// TODO: test if this works
+	public Iterable<GlobalTagMap> cloneObjectListWithStream(
+			Iterable<GlobalTagMap> source, GlobalTag id) {
+		Set<GlobalTagMap> maplist = new HashSet<GlobalTagMap>();
+		source.forEach((p) -> {maplist.add(cloneObject(p,id));});
+		return maplist;
+	}
 
 }

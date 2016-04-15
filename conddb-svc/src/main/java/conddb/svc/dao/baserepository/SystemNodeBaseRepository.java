@@ -7,8 +7,8 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.transaction.annotation.Transactional;
 
 import conddb.data.SystemDescription;
@@ -17,9 +17,8 @@ import conddb.data.SystemDescription;
  * @author formica
  *
  */
-@RepositoryRestResource
 @Transactional(readOnly = true)
-public interface SystemNodeBaseRepository extends CondDBPageAndSortingRepository<SystemDescription, Long> {
+public interface SystemNodeBaseRepository extends CondDBPageAndSortingRepository<SystemDescription, Long>, JpaSpecificationExecutor<SystemDescription>  {
 
 	/**
 	 * @param tagNameRoot

@@ -3,8 +3,9 @@
  */
 package conddb.web.controllers;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -20,17 +21,19 @@ import javax.ws.rs.core.UriInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Controller;
 
 import conddb.data.Tag;
 import conddb.svc.dao.controllers.GlobalTagService;
 import conddb.svc.dao.exceptions.ConddbServiceException;
+import conddb.svc.dao.specifications.GenericSpecBuilder;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.Link;
-import conddb.web.resources.SpringResourceFactory;
 import conddb.web.resources.generic.GenericPojoResource;
 import conddb.web.utils.collections.CollectionUtils;
 import io.swagger.annotations.Api;
@@ -50,18 +53,15 @@ public class TagRestController extends BaseController {
 
 	@Autowired
 	private GlobalTagService globalTagService;
-	@Autowired
-	private SpringResourceFactory springResourceFactory;
 
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/{tagname}")
-	@ApiOperation(value = "Finds Tags by name",
-    notes = "Usage of % allows to select based on patterns",
-    response = Tag.class,
-    responseContainer = "List")
+	@ApiOperation(value = "Finds a Tag by name",
+    notes = "Name of the tag, % not allowed.",
+    response = Tag.class)
 	public Response getTag(@Context UriInfo info, 
-			@ApiParam(value = "name pattern for the search", required = true)
+			@ApiParam(value = "name of the tag", required = true)
 			@PathParam("tagname") final String tagname,
 			@ApiParam(value = "trace {off|on} allows to retrieve associated global tags", required = false)
 			@DefaultValue("off") @QueryParam("trace") final String trace,
@@ -69,72 +69,60 @@ public class TagRestController extends BaseController {
 			@DefaultValue("true") @QueryParam("expand") final boolean expand) throws ConddbWebException {
 
 		this.log.info("TagRestController processing request for getting tag name " + tagname);
-
-		Response result = doTask(tagname, expand, trace, info);
-		return result;	
-	}
-
-	@GET
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@ApiOperation(value = "Finds all Tags",
-    notes = "Retrieval is implemented via pagination",
-    response = Tag.class,
-    responseContainer = "List")
-	public Response listTags(@Context UriInfo info, 
-			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false)
-			@DefaultValue("false") @QueryParam("expand") boolean expand,
-			@ApiParam(value = "page: page number for the query, defaults to 0", required = false)
-			@DefaultValue("0") @QueryParam("page") Integer ipage, 
-			@ApiParam(value = "size: size of the page, defaults to 25", required = false)
-			@DefaultValue("25") @QueryParam("size") Integer size)
-					throws ConddbWebException {
-		this.log.info("TagRestController processing request for tag list (expansion = " + expand + ")");
-
-		PageRequest preq = new PageRequest(ipage, size);
-		Collection<Tag> tags = getTagList(null,preq);
-		if (tags == null || tags.size() == 0) {
-			String msg = "Empty tags collection";
-			throw buildException(msg, msg, Response.Status.NOT_FOUND);
-		}
-		CollectionResource resource = listToCollection(tags, expand, info);
-		return ok(resource);
-	}
-
-	protected Response doTask(String tagname, boolean expand, String trace, UriInfo info) throws ConddbWebException {
-		Response result = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-		if (tagname.contains("%")) {
-			Collection<Tag> taglist = getTagList(tagname, null);
-			if (taglist == null) {
-				String msg = "Empty tags collection";
-				throw buildException(msg, msg, Response.Status.NOT_FOUND);
-			}
-			CollectionResource collres = listToCollection(taglist, expand, info);
-			result = ok(collres);
-		} else {
+		try {
 			Tag entity = getTag(tagname, trace);
 			if (entity == null) {
 				String msg = "Tag "+tagname+" not found.";
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
-			GenericPojoResource<Tag> resource = (GenericPojoResource) springResourceFactory.getResource("generic-tag", info,
-					entity);
-			result = ok(resource);
+			GenericPojoResource<Tag> resource = new GenericPojoResource<Tag>(info, entity, 2, null);
+			return ok(resource);
+		} catch (ConddbWebException e1) {
+			throw e1;
+		} catch (Exception e) {
+			String msg = "Error retrieving Tag resource ";
+			throw buildException(msg + ": " + e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);			
 		}
-		return result;
 	}
 
-	protected Collection<Tag> getTagList(String tagname, PageRequest preq) {
-		Collection<Tag> taglist = null;
+	@GET
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@ApiOperation(value = "Finds all Tags", notes = "Usage of url argument expand={true|false} in order to see full resource content or href links only", response = Tag.class, responseContainer = "List")
+	public Response listTags(@Context UriInfo info,
+			@ApiParam(value = "page: the page number {0}", required = false) @DefaultValue("0") @QueryParam("page") Integer ipage,
+			@ApiParam(value = "size: the page size {1000}", required = false) @DefaultValue("1000") @QueryParam("size") Integer size,
+			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false) @DefaultValue("true") @QueryParam("expand") boolean expand,
+			@ApiParam(value = "by", required = true) @DefaultValue("name:%") @QueryParam("by") final String patternsearch)
+					throws ConddbWebException {
+		log.info("TagRestController processing request for tag list (expansion = " + expand + ") (search = "+patternsearch+" )");
 		try {
-			if (tagname == null) {
-				taglist = CollectionUtils.iterableToCollection(globalTagService.findAllTags(preq));
-			} else {
-				taglist = CollectionUtils.iterableToCollection(globalTagService.getTagByNameLike(tagname));
+			Page<Tag> entitylist = null;
+			PageRequest preq = new PageRequest(ipage, size);
+
+			GenericSpecBuilder<Tag> builder = new GenericSpecBuilder<>();
+			String patternstr = "(\\w+?)(:|<|>)(\\w+?),";
+
+			Pattern pattern = Pattern.compile(patternstr);
+			Matcher matcher = pattern.matcher(patternsearch + ",");
+			while (matcher.find()) {
+				builder.with(matcher.group(1), matcher.group(2), matcher.group(3));
 			}
-		} catch (ConddbServiceException e) {
-			log.error("Cannot retrieve global tag list for pattern " + tagname);
+
+			Specification<Tag> spec = builder.build();
+	    	entitylist = globalTagService.getTagRepository().findAll(spec,preq);
+	    	if (entitylist == null || entitylist.getContent().size() == 0) {
+				String msg = "Empty tags collection";
+				throw buildException(msg, msg, Response.Status.NOT_FOUND);
+			}
+			Collection<Tag> entitycoll = CollectionUtils.iterableToCollection(entitylist.getContent());
+			CollectionResource collres = listToCollection(entitycoll, expand, info, Link.TAGS,ipage,size);
+			return ok(collres);
+		} catch (ConddbWebException e1) {
+			throw e1;
+		} catch (Exception e) {
+			String msg = "Error retrieving Tag resource ";
+			throw buildException(msg + ": " + e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
-		return taglist;
 	}
 
 	protected Tag getTag(String tagname, String trace) {
@@ -157,21 +145,6 @@ public class TagRestController extends BaseController {
 			e.printStackTrace();
 		}
 		return entity;
-	}
-
-
-	protected CollectionResource listToCollection(Collection<Tag> tags, boolean expand, UriInfo info) {
-		Collection items = new ArrayList(tags.size());
-		for (Tag tag : tags) {
-			tag.setResId(tag.getName());
-			if (expand) {
-				GenericPojoResource<Tag> resource = (GenericPojoResource<Tag>) springResourceFactory.getGenericResource(info, tag, 1, null);
-				items.add(resource);
-			} else {
-				items.add(springResourceFactory.getResource("link", info, tag));
-			}
-		}
-		return (CollectionResource) springResourceFactory.getCollectionResource(info, Link.TAGS, items);
 	}
 
 }

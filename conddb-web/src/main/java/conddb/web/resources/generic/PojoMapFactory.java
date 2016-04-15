@@ -96,6 +96,7 @@ public class PojoMapFactory {
 	 * @param nswsetmap
 	 * @param entitymap
 	 */
+	@SuppressWarnings("unused")
 	private void fetchKeysFromEntityMethods(AfEntity entity, 
 			Map<String, Method> nswentitymap, 
 			Map<String, Method> nswsetmap,

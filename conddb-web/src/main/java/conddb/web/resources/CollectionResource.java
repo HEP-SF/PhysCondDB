@@ -19,7 +19,6 @@ import javax.ws.rs.core.UriInfo;
 import java.util.Collection;
 import java.util.Collections;
 
-@SuppressWarnings("unchecked")
 public class CollectionResource extends Link {
 
     /**
@@ -28,18 +27,18 @@ public class CollectionResource extends Link {
 	private static final long serialVersionUID = -3641836199158578100L;
 	public static final int DEFAULT_LIMIT = 25;
 
-    public CollectionResource(UriInfo info, String subPath, Collection c) {
+    public CollectionResource(UriInfo info, String subPath, Collection<?> c) {
         this(info, subPath, c, 0, getLimit(c));
     }
 
-    public CollectionResource(UriInfo info, String subPath, Collection c, int offset, int limit) {
+    public CollectionResource(UriInfo info, String subPath, Collection<?> c, int offset, int limit) {
         super(info, subPath);
         put("offset", offset);
         put("limit", getLimit(limit));
         put("items", c != null ? c : Collections.emptyList());
     }
 
-    private static int getLimit(Collection c) {
+    private static int getLimit(Collection<?> c) {
         return getLimit(c != null ? c.size() : 0);
     }
 

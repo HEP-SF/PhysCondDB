@@ -40,7 +40,6 @@ import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.Link;
-import conddb.web.resources.SpringResourceFactory;
 import conddb.web.resources.generic.GenericPojoResource;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -61,8 +60,6 @@ public class GlobalTagExpRestController extends BaseController {
 	private GlobalTagService globalTagService;
 	@Autowired
 	private GlobalTagAdminService globalTagAdminService;
-	@Autowired
-	private SpringResourceFactory springResourceFactory;
 	@Autowired 
 	private TimestampDeserializer timestampDeserializer;
 
@@ -77,7 +74,7 @@ public class GlobalTagExpRestController extends BaseController {
 			GlobalTag globaltag) throws ConddbWebException {
 		try {
 			GlobalTag saved = globalTagService.insertGlobalTag(globaltag);
-			GenericPojoResource<GlobalTag> resource = (GenericPojoResource) springResourceFactory.getGenericResource(info, saved, 0, null);
+			GenericPojoResource<GlobalTag> resource = new GenericPojoResource<>(info, saved, 0, null);
 			return created(resource);
 		} catch (ConddbServiceException e) {
 			String msg = "Error creating globaltag resource using "+globaltag.toString();
@@ -94,7 +91,7 @@ public class GlobalTagExpRestController extends BaseController {
 	public Response updateGlobalTag(@Context UriInfo info, 
 			@ApiParam(value = "id: id of the globaltag to be updated", required = true) 
 			@PathParam("id") String id, 
-			Map map)
+			Map<?,?> map)
 			throws ConddbWebException {
 
 		try {
@@ -148,8 +145,7 @@ public class GlobalTagExpRestController extends BaseController {
 				existing.setSnapshotTime(snapshottime);
 			}
 			existing = globalTagService.insertGlobalTag(existing);
-			GenericPojoResource<GlobalTag> resource = (GenericPojoResource) springResourceFactory.getGenericResource(info, existing, 0, null);
-
+			GenericPojoResource<GlobalTag> resource = new GenericPojoResource<>(info, existing, 0, null);
 			return ok(resource);
 			
 		} catch (ConddbServiceException e) {
@@ -175,7 +171,7 @@ public class GlobalTagExpRestController extends BaseController {
 			@ApiParam(value = "action: {addtags(default)|merge}. If merge is used, the input map should contain a global tag name. "
 			+"All associated tag will then be also associated to the global tag identified by {id}.", required = false) 
 			@DefaultValue("addtags") @QueryParam("action") final String action,
-			Map map)
+			Map<?,?> map)
 			throws ConddbWebException {
 
 		try {
@@ -218,8 +214,7 @@ public class GlobalTagExpRestController extends BaseController {
 				}
 			}
 			
-			GenericPojoResource<GlobalTag> resource = (GenericPojoResource) springResourceFactory.getGenericResource(info, existing, 0, null);
-
+			GenericPojoResource<GlobalTag> resource = new GenericPojoResource<>(info, existing, 0, null);
 			return ok(resource);
 
 		} catch (ConddbServiceException e) {
@@ -250,8 +245,7 @@ public class GlobalTagExpRestController extends BaseController {
 				throw buildException(msg, msg, Response.Status.NOT_MODIFIED);
 			}
 			GlobalTag removed = globalTagAdminService.deleteGlobalTag(id);
-			GenericPojoResource<GlobalTag> resource = (GenericPojoResource) springResourceFactory.getGenericResource(info, removed, 0, null);
-
+			GenericPojoResource<GlobalTag> resource = new GenericPojoResource<>(info, removed, 0, null);
 			return ok(resource);
 			
 		} catch (ConddbServiceException e) {

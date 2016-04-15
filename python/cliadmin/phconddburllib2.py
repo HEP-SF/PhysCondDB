@@ -42,6 +42,9 @@ class PhysDBDriver():
             self.debug = False
             self.trace = 'off'
             self.expand = 'false'
+            self.by = 'none'
+            self.page = 0
+            self.pagesize = 1000
             self.iovspan = 'time'
             self.jsondump=False
             self.dump=False
@@ -49,7 +52,7 @@ class PhysDBDriver():
             self.passwd='none'
             self.outfilename=''
             self.urlsvc='localhost:8080/physconddb'
-            longopts=['help','socks','out=','jsondump','t0=','tMax=','url=','debug','trace=','expand=','iovspan=','user=','pass=']
+            longopts=['help','socks','out=','jsondump','t0=','tMax=','url=','debug','trace=','expand=','by=','page=','pagesize=','iovspan=','user=','pass=']
             opts,args=getopt.getopt(sys.argv[1:],'',longopts)
             print opts, args
         except getopt.GetoptError,e:
@@ -102,6 +105,10 @@ class PhysDBDriver():
         print "  --out={filename} activate dump on filename "
         print "  --jsondump activate a dump of output lines in json format "
         print "  --trace [on|off]: trace associations (ex: globaltag ->* tags or tag ->* iovs "
+        print "  --expand [true|false]: expand result to complete obj, not only urls "
+        print "  --by : comma separated list of conditions for filtering a query (e.g.: by=name:pippo,value<10)"
+        print "  --page [0,...N]: page number to retrieve; use it in combination with page size, default is 0"
+        print "  --pagesize [1000,30,...]: page size; use it in combination with page, default is 1000"
         print "  --expand [true|false]: expand result to complete obj, not only urls "
         print "  --url [localhost:8080/physconddb]: use a specific server "
         print "  --t0={t0 for iovs} "
@@ -198,6 +205,12 @@ class PhysDBDriver():
                 self.trace=a
             if (o=='--expand'):
                 self.expand=a
+            if (o=='--by'):
+                self.by=a
+            if (o=='--page'):
+                self.page=a
+            if (o=='--pagesize'):
+                self.pagesize=a
             if (o=='--pass'):
                 self.passwd=a
             if (o=='--iovspan'):
@@ -260,24 +273,23 @@ class PhysDBDriver():
                     self.printmsg(msg,'cyan')
                         
                     if '%' in name:
-                        self.trace='off'
-                        print 'Set trace=off because it cannot trace on generic global tag list, only on single object'
-                        
-                else:
-                    self.trace='off'
-                    print 'Set trace=off because it cannot trace on generic global tag list, only on single object'
+                        print 'Cannot use pattern in this argument; if you want to filter a list, use option by=param[:<>]value,param1[:<>]value,...'
+                        return -1
+                
                     
                 objList = []
                 traceList = []
-                msg = ('FIND: load data using trace %s ') % (self.trace)
+                msg = ('FIND: load data using trace %s, expand %s, by %s ') % (self.trace,self.expand,self.by)
                 self.printmsg(msg,'cyan')
 
 
-                if self.trace == 'off':   
+                if name is None:
+                    print 'Query a list of objects....'
                     if objList is None or len(objList) == 0:
-                        (objList,response) = self.resttools.getobject(name,self.trace,self.expand,object)
+                        (objList,response) = self.resttools.getobjectlist(self.by,self.expand,self.page,self.pagesize,object)
 
                 else:
+                    print 'Query single object....'
                     (obj,response) = self.resttools.getobject(name,self.trace,self.expand,object)
 
                     if self.debug:
@@ -300,8 +312,10 @@ class PhysDBDriver():
                         if self.debug:
                             msg = ('FIND: created object %s ') % (mpobj)
                             self.printmsg(msg,'cyan')
-                            
-                        globaltagmaps = mpobj.getValues()['globalTagMaps']
+                    
+                        globaltagmaps = None
+                        if 'globalTagMaps' in mpobj.getValues():
+                            globaltagmaps = mpobj.getValues()['globalTagMaps']
                         if globaltagmaps is not None:
                             try:
                                 maplist = globaltagmaps

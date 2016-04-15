@@ -10,9 +10,10 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.transaction.annotation.Transactional;
 
 import conddb.data.Iov;
 import conddb.data.Tag;
@@ -21,8 +22,8 @@ import conddb.data.Tag;
  * @author formica
  *
  */
-@RepositoryRestResource
-public interface IovBaseRepository extends CondDBPageAndSortingRepository<Iov, Long> {
+@Transactional(readOnly = true)
+public interface IovBaseRepository extends CondDBPageAndSortingRepository<Iov, Long>, JpaSpecificationExecutor<Iov>  {
 
 	/**
 	 * 
@@ -98,16 +99,6 @@ public interface IovBaseRepository extends CondDBPageAndSortingRepository<Iov, L
 	List<Iov> findByTagNameAndFetchPayloadEagerly(@Param("name") String tagname);
 
 	/**
-	 * TODO: This is a test only method. Should be then hidden to clients.
-	 * 
-	 * @param tagname
-	 *            The name of the tag.
-	 * @return All IOVs for given tag including payloads.
-	 */
-	@Query("SELECT distinct p FROM Iov p JOIN FETCH p.payload pylds WHERE " + "p.id = (:id)")
-	Iov findByIdAndFetchPayloadEagerly(@Param("id") Long id);
-
-	/**
 	 * @param tagname
 	 *            The name of the tag.
 	 * @return list of IOVs.
@@ -154,22 +145,6 @@ public interface IovBaseRepository extends CondDBPageAndSortingRepository<Iov, L
 			+ "p2.tag.id = p.tag.id AND (p2.since = p.since) AND p2.insertionTime <= (:snapshot) "
 			+ " group by p2.since)")
 	List<Iov> findByTagAndInsertionTimeSnapshotFetchPayload(@Param("tag") Long id, @Param("snapshot") Timestamp snapshot);
-
-	/**
-	 * @param tagname
-	 *            The name of the tag.
-	 * @param since
-	 *            The since time of the interval.
-	 * @param until
-	 *            The until time of the selected interva.
-	 * @return list of IOVs.
-	 */
-	// @Query("SELECT distinct p FROM Iov p WHERE "
-	// + "p.tag.name = (:tag) AND (p.since >= (:since) AND p.since < (:until))")
-	// List<Iov> findByRangeAndTagName(
-	// @Param("tag") String tagname,
-	// @Param("since") BigDecimal since,
-	// @Param("until") BigDecimal until);
 
 	/**
 	 * @param tagname
@@ -284,16 +259,5 @@ public interface IovBaseRepository extends CondDBPageAndSortingRepository<Iov, L
 			+ " group by p2.since)")
 	List<Iov> findByRangeAndTagAndInsertionTimeLessThan(@Param("tag") Long tagid, @Param("since") BigDecimal since,
 			@Param("until") BigDecimal until, @Param("instime") Timestamp instime);
-
-	/**
-	 * @param tagname
-	 *            The name of the tag.
-	 * 
-	 * @return list of IOVs.
-	 */
-	@Query("SELECT distinct p FROM Iov p WHERE "
-			+ "p.tag.name = (:tag) AND (p.since >= (:since) AND p.since < (:until)) " + "AND p.insertionTime = ANY("
-			+ "SELECT max(p2.insertionTime) FROM Iov p2 WHERE " + "p2.insertionTime < (:instime))")
-	List<Iov> findGroupsByTag(@Param("tag") String tagname, @Param("instime") Timestamp instime);
 
 }

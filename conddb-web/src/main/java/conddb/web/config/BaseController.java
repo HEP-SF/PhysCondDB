@@ -79,4 +79,19 @@ public abstract class BaseController {
 		}
 		return new CollectionResource(info,subPath,items);
 	}
+	
+	protected <T extends AfEntity> CollectionResource listToCollection(Collection<T> coll, boolean expand,
+			UriInfo info, String subPath, int offset, int limit) {
+		Collection<Link> items = new ArrayList<Link>(coll.size());
+		for (T entity : coll) {
+			if (expand) {
+				GenericPojoResource<AfEntity> resource = new GenericPojoResource<AfEntity>(info, entity);
+				items.add(resource);
+			} else {
+				Link link = new Link(info, entity);
+				items.add(link);
+			}
+		}
+		return new CollectionResource(info,subPath,items,offset,limit);
+	}
 }

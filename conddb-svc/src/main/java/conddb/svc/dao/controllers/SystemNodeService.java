@@ -30,6 +30,13 @@ public class SystemNodeService {
 	@Autowired
 	private SystemNodeRepository systemNodeRepository;
 
+	/**
+	 * @return the systemNodeRepository
+	 */
+	public SystemNodeRepository getSystemNodeRepository() {
+		return systemNodeRepository;
+	}
+	
 	public SystemDescription getSystemDescription(Long id) throws ConddbServiceException {
 		try {
 			return systemNodeRepository.findOne(id);

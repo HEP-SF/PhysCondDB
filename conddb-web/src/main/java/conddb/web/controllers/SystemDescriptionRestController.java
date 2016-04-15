@@ -3,9 +3,10 @@
  */
 package conddb.web.controllers;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -23,18 +24,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Controller;
 
 import conddb.data.SystemDescription;
 import conddb.data.Tag;
 import conddb.svc.dao.controllers.GlobalTagService;
 import conddb.svc.dao.controllers.SystemNodeService;
-import conddb.svc.dao.exceptions.ConddbServiceException;
+import conddb.svc.dao.specifications.GenericSpecBuilder;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.Link;
-import conddb.web.resources.SpringResourceFactory;
 import conddb.web.resources.generic.GenericPojoResource;
 import conddb.web.utils.collections.CollectionUtils;
 import io.swagger.annotations.Api;
@@ -56,167 +57,80 @@ public class SystemDescriptionRestController extends BaseController {
 	private SystemNodeService systemNodeService;
 	@Autowired
 	private GlobalTagService globalTagService;
-	@Autowired
-	private SpringResourceFactory springResourceFactory;
+	
 
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/{tagname}")
 	@ApiOperation(value = "Get a system description entry.", notes = "Use the input tagNameRoot string to search for information about a given system.", response = SystemDescription.class)
 	public Response getSystemDescription(@Context UriInfo info,
-			@ApiParam(value = "tagname: root name of the tag associated to the system. Regexp % can be used.", required = true) @PathParam("tagname") final String id,
-			@ApiParam(value = "trace {off|on} allows to retrieve associated tags [not implemented]", required = false) @DefaultValue("off") @QueryParam("trace") final String trace,
+			@ApiParam(value = "tagname: root name of the tag associated to the system.", required = true) @PathParam("tagname") final String id,
+			@ApiParam(value = "trace {off|on} allows to retrieve systems.", required = false) @DefaultValue("off") @QueryParam("trace") String trace,
 			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false) @DefaultValue("true") @QueryParam("expand") final boolean expand)
 			throws ConddbWebException {
 
 		this.log.info("SystemDescriptionRestController processing request to get system using id " + id);
-
 		try {
-			if (id.contains("%")) {
-				Collection<SystemDescription> syslist = getSystemsList(id);
-				if (syslist == null) {
-					String msg = "Empty systems collection";
-					throw buildException(msg, msg, Response.Status.NOT_FOUND);
-				}
-				CollectionResource collres = listToCollection(syslist, expand, info);
-				return ok(collres);
-			} else {
-				SystemDescription entity = this.systemNodeService.getSystemNodesByTagname(id);
-				GenericPojoResource<SystemDescription> resource = (GenericPojoResource<SystemDescription>) springResourceFactory
-						.getGenericResource(info, entity, 1, null);
-				return ok(resource);
+			SystemDescription entity = systemNodeService.getSystemNodesByTagname(id);
+			if (entity == null) {
+				String msg = "System tagname "+id+" not found.";
+				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
-		} catch (ConddbServiceException e) {
-			String msg = "Error retrieving system resource ";
-			throw buildException(msg + " " + e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
+			if (trace.equals("on")) {
+				List<Tag> tags = this.globalTagService.getTagByNameLike(entity.getTagNameRoot() + "%");
+				entity.setTags(tags);
+			}
+			GenericPojoResource<SystemDescription> resource = new GenericPojoResource<SystemDescription>(info, entity, 1, null);
+			return ok(resource);
+		} catch (ConddbWebException e1) {
+			throw e1;
+		} catch (Exception e) {
+			String msg = "Error retrieving GlobalTag resource ";
+			throw buildException(msg + ": " + e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);			
 		}
 	}
 
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Path("/find")
 	@ApiOperation(value = "Find a system description entry using search on tag, node or schema name.", notes = "Use the input string to search for information about a given system.", response = SystemDescription.class)
-	public Response findSystemDescription(@Context UriInfo info,
-			@ApiParam(value = "name pattern for the search", required = true) @DefaultValue("none") @QueryParam("name") final String system,
-			@ApiParam(value = "trace {off|on} allows to retrieve systems.", required = false) @DefaultValue("off") @QueryParam("trace") String trace,
-			@ApiParam(value = "Select the search field : tag, node or schema.", required = true) @DefaultValue("tag") @QueryParam("by") String type,
+	public Response find(@Context UriInfo info,
 			@ApiParam(value = "page: the page number {0}", required = false) @DefaultValue("0") @QueryParam("page") Integer ipage,
-			@ApiParam(value = "size: the page size {1000}", required = false) @DefaultValue("1000") @QueryParam("size") Integer size)
+			@ApiParam(value = "size: the page size {1000}", required = false) @DefaultValue("1000") @QueryParam("size") Integer size,
+			@ApiParam(value = "by", required = true) @DefaultValue("name:%") @QueryParam("by") final String patternsearch)
 			throws ConddbWebException {
 
-		this.log.info("SystemDescriptionRestController processing request to get systems using name " + system
-				+ " as type " + type);
+		this.log.info("SystemDescriptionRestController processing request to get systems using " + patternsearch);
 
 		try {
-			if (system.equals("none")) {
-				String msg = "Wrong options; 'by' field is mandatory [tag|node|schema] ";
-				throw buildException(msg, msg, Response.Status.BAD_REQUEST);
-			}
-
+			Page<SystemDescription> entitylist = null;
 			PageRequest preq = new PageRequest(ipage, size);
-			if (system.contains("%")) {
-				List<SystemDescription> sdlist = null;
-				Page<SystemDescription> pagelist = null;
-				if (type.equals("tag")) {
-					pagelist = this.systemNodeService.findSystemNodesByTagnameLike(system, preq);
-				} else if (type.equals("node")) {
-					pagelist = this.systemNodeService.findSystemNodesByNodeFullpathLike(system, preq);
-				} else if (type.equals("schema")) {
-					pagelist = this.systemNodeService.findSystemNodesBySchemaNameLike(system, preq);
-				} else {
-					String msg = "Wrong options; 'by' field should be one of [tag|node|schema] ";
-					throw buildException(msg, msg, Response.Status.BAD_REQUEST);
-				}
-				if (pagelist == null) {
-					log.debug("Controller could not retrieve any entity list....");
-					String msg = "Cannot find system using by=" + type;
-					throw buildException(msg, msg, Response.Status.NOT_FOUND);
-				}
-				log.debug("Retrieved list of systems " + pagelist.getNumberOfElements());
-				sdlist = pagelist.getContent();
-				Collection<SystemDescription> syslist = CollectionUtils.iterableToCollection(sdlist);
-				CollectionResource resource = listToCollection(syslist, true, info);
-				return ok(resource);
-				
-			} else {
-				SystemDescription entity = null;
-				if (type.equals("tag")) {
-					SystemDescription sd = this.systemNodeService.getSystemNodesByTagname(system);
-					entity = sd;
-				} else if (type.equals("node")) {
-					SystemDescription sd = this.systemNodeService.getSystemNodesByNodeFullpath(system);
-					entity = sd;
-				}
-				if (entity == null) {
-					log.debug("Controller could not retrieve any entity....");
-					String msg = "Cannot find system using by=" + system;
-					throw buildException(msg, msg, Response.Status.NOT_FOUND);
-				}
-				if (trace.equals("on")) {
-					List<Tag> tags = this.globalTagService.getTagByNameLike(entity.getTagNameRoot() + "%");
-					entity.setTags(tags);
-				}
-				log.debug("Controller creating resource from entity...." + entity);
-				GenericPojoResource<SystemDescription> resource = (GenericPojoResource<SystemDescription>) springResourceFactory
-						.getGenericResource(info, entity, 1, null);
 
-				return ok(resource);
+			GenericSpecBuilder<SystemDescription> builder = new GenericSpecBuilder<>();
+			String patternstr = "(\\w+?)(:|<|>)(\\w+?),";
+
+			Pattern pattern = Pattern.compile(patternstr);
+			Matcher matcher = pattern.matcher(patternsearch + ",");
+			while (matcher.find()) {
+				builder.with(matcher.group(1), matcher.group(2), matcher.group(3));
 			}
-		} catch (ConddbServiceException e) {
-			log.debug("Generate exception using an ConddbService exception..." + e.getMessage());
-			String msg = "Error updating association resource: internal server exception !";
-			throw buildException(msg + " \n " + e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
-		}
-	}
 
-	@SuppressWarnings("unchecked")
-	@GET
-	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@ApiOperation(value = "Retrieve the full system description list.", notes = "Retrieve all systems in the DB.", response = SystemDescription.class)
-	public Response list(@Context UriInfo info,
-			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false) @DefaultValue("false") @QueryParam("expand") boolean expand)
-			throws ConddbWebException {
-		this.log.info(
-				"SystemDescriptionRestController processing request for system list (expansion = " + expand + ")");
-		Collection<SystemDescription> systems = null;
-		// Here we could implement pagination
-		systems = getSystemsList(null);
-		if (systems == null || systems.size() == 0) {
-			String msg = "Empty systems collection";
-			throw buildException(msg, msg, Response.Status.NOT_FOUND);
-		}
-		CollectionResource resource = listToCollection(systems, expand, info);
-		return ok(resource);
-	}
-
-	protected Collection<SystemDescription> getSystemsList(String tagnameroot) {
-		Collection<SystemDescription> syslist = null;
-		try {
-			if (tagnameroot == null) {
-				syslist = CollectionUtils.iterableToCollection(systemNodeService.findAllSystemNodes());
-			} else {
-				syslist = CollectionUtils
-						.iterableToCollection(systemNodeService.findSystemNodesByTagNameRootLike(tagnameroot));
+			Specification<SystemDescription> spec = builder.build();
+	    	entitylist = systemNodeService.getSystemNodeRepository().findAll(spec,preq);
+	    	if (entitylist == null || entitylist.getContent().size() == 0) {
+				String msg = "Empty systems collection";
+				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
-		} catch (ConddbServiceException e) {
-			log.error("Cannot retrieve system list for tag name root pattern " + tagnameroot);
-		}
-		return syslist;
-	}
+			log.debug("Retrieved list of systems " + entitylist.getNumberOfElements());
 
-	protected CollectionResource listToCollection(Collection<SystemDescription> systems, boolean expand, UriInfo info) {
-		Collection items = new ArrayList(systems.size());
-		for (SystemDescription system : systems) {
-			system.setResId(system.getTagNameRoot());
-			if (expand) {
-				GenericPojoResource<SystemDescription> resource = (GenericPojoResource<SystemDescription>) springResourceFactory
-						.getGenericResource(info, system, 0, null);
-				items.add(resource);
-			} else {
-				items.add(springResourceFactory.getResource("link", info, system));
-			}
+			Collection<SystemDescription> entitycoll = CollectionUtils.iterableToCollection(entitylist.getContent());
+			CollectionResource collres = listToCollection(entitycoll, true, info, Link.SYSTEMS,ipage,size);
+			return ok(collres);
+		} catch (ConddbWebException e1) {
+			throw e1;
+		} catch (Exception e) {
+			String msg = "Error retrieving systems resource ";
+			throw buildException(msg + ": " + e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
-		return (CollectionResource) springResourceFactory.getCollectionResource(info, Link.SYSTEMS, items);
 	}
 
 }

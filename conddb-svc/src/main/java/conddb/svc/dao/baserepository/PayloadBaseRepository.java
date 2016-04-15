@@ -6,7 +6,7 @@ package conddb.svc.dao.baserepository;
 import java.util.List;
 
 import org.springframework.data.repository.query.Param;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
+import org.springframework.transaction.annotation.Transactional;
 
 import conddb.data.Payload;
 
@@ -14,13 +14,12 @@ import conddb.data.Payload;
  * @author formica
  *
  */
-//@RepositoryRestResource(collectionResourceRel = "payloads", path = "payloads")
-@RepositoryRestResource
+@Transactional(readOnly = true)
 public interface PayloadBaseRepository extends CondDBPageAndSortingRepository<Payload, String> {
 
 	/**
 	 * @param otype
-	 * 	The object type (used to determina the payload data.
+	 * 	The object type (used to determine the payload data.
 	 * 
 	 * @return payload have a given object type.
 	 */

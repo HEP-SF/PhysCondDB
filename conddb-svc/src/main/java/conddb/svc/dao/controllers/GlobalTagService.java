@@ -43,6 +43,22 @@ public class GlobalTagService {
 	@Autowired
 	private TagRepository tagRepository;
 
+	
+	
+	/**
+	 * @return the globalTagRepository
+	 */
+	public GlobalTagRepository getGlobalTagRepository() {
+		return globalTagRepository;
+	}
+
+	/**
+	 * @return the tagRepository
+	 */
+	public TagRepository getTagRepository() {
+		return tagRepository;
+	}
+
 	/**
 	 * @return
 	 * @throws ConddbServiceException

@@ -31,7 +31,6 @@ import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.Link;
-import conddb.web.resources.SpringResourceFactory;
 import conddb.web.resources.generic.GenericPojoResource;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -52,8 +51,6 @@ public class SystemDescriptionExpRestController extends BaseController {
 	private SystemNodeService systemNodeService;
 	@Autowired
 	private GlobalTagService globalTagService;
-	@Autowired
-	private SpringResourceFactory springResourceFactory;
 
 	@POST
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -70,7 +67,7 @@ public class SystemDescriptionExpRestController extends BaseController {
 			SystemDescription saved = systemNodeService.insertSystemDescription(systemdescription);
 			saved.setResId(saved.getId().toString());
 			log.debug("Controller creating resource for inserted entity "+saved);
-			GenericPojoResource<SystemDescription> resource = (GenericPojoResource<SystemDescription>) springResourceFactory.getGenericResource(info, saved, 1, null);
+			GenericPojoResource<SystemDescription> resource = new GenericPojoResource<>(info, saved, 0, null);
 			return created(resource);
 		} catch (ConddbServiceException e) {
 			String msg = "Error creating system description resource using "+systemdescription.toString();
@@ -86,7 +83,7 @@ public class SystemDescriptionExpRestController extends BaseController {
     response=SystemDescription.class)
 	public Response updateSystemDescription(@Context UriInfo info, 
 			@ApiParam(value = "system: id of the system description to be updated", required = true) 
-			@PathParam("id") String id, Map map)
+			@PathParam("id") String id, Map<?,?> map)
 			throws ConddbWebException {
 		try {
 			log.info("Request for updating system "+id+" using "+map.size());
@@ -104,7 +101,7 @@ public class SystemDescriptionExpRestController extends BaseController {
 			}
 			
 			existing = systemNodeService.insertSystemDescription(existing);
-			GenericPojoResource<SystemDescription> resource = (GenericPojoResource<SystemDescription>) springResourceFactory.getGenericResource(info, existing, 1, null);
+			GenericPojoResource<SystemDescription> resource = new GenericPojoResource<>(info, existing, 0, null);
 			return created(resource);
 		} catch (ConddbServiceException e) {
 			log.debug("Generate exception using an ConddbService exception..."+e.getMessage());
@@ -118,12 +115,12 @@ public class SystemDescriptionExpRestController extends BaseController {
 	@ApiOperation(value = "Delete a system description.",
     notes = "It should be used one system at the time. This method is meant for administration purposes.",
     response=SystemDescription.class)
-	public Response deleteSystemDescription(			
+	public Response deleteSystemDescription(	
+			@Context UriInfo info,
 		@ApiParam(value = "id: id of the system description to be deleted", required = true) 
 		@PathParam("id") Long id) throws ConddbWebException {
 
 		try {
-			Response resp;
 			log.info("Request for deleting system "+id);
 			SystemDescription existing = systemNodeService.getSystemDescription(id);
 			if (existing == null) {
@@ -137,8 +134,8 @@ public class SystemDescriptionExpRestController extends BaseController {
 			}
 			
 			SystemDescription removed = systemNodeService.delete(id);
-			resp = Response.ok(removed).build();
-			return resp;
+			GenericPojoResource<SystemDescription> resource = new GenericPojoResource<>(info, removed, 0, null);
+			return ok(resource);
 			
 		} catch (ConddbServiceException e) {
 			log.debug("Generate exception using an ConddbService exception..."+e.getMessage());
