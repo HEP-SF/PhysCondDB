@@ -149,7 +149,7 @@ public class Payload extends conddb.data.AfEntity implements java.io.Serializabl
 	}
 	
 	@Transient
-	@Linkit(getter="getHash",setter="setHash")
+	@Linkit(getter="getHash")
 	public PayloadData getData() {
 		return data;
 	}

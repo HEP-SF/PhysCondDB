@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import conddb.data.annotations.Href;
+import conddb.data.annotations.Linkit;
 import conddb.data.utils.json.serializers.TimestampDeserializer;
 import conddb.data.utils.json.serializers.TimestampSerializer;
 
@@ -278,6 +279,7 @@ public class Tag extends conddb.data.AfEntity implements java.io.Serializable {
 //	@JsonManagedReference
 //	@JsonIgnore
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "tag")
+	@Linkit(getter="getName",format="/iovs/find?tag=%s&payload=true&expand=true")
 	public Set<Iov> getIovs() {
 		return this.iovs;
 	}

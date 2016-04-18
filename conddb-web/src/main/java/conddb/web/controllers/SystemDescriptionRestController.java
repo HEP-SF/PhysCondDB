@@ -37,6 +37,7 @@ import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.generic.GenericPojoResource;
+import conddb.web.utils.PropertyConfigurator;
 import conddb.web.utils.collections.CollectionUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -52,6 +53,8 @@ import io.swagger.annotations.ApiParam;
 public class SystemDescriptionRestController extends BaseController {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
+
+	private String QRY_PATTERN = PropertyConfigurator.getInstance().getQrypattern();
 
 	@Autowired
 	private SystemNodeService systemNodeService;
@@ -106,7 +109,7 @@ public class SystemDescriptionRestController extends BaseController {
 			PageRequest preq = new PageRequest(ipage, size);
 
 			GenericSpecBuilder<SystemDescription> builder = new GenericSpecBuilder<>();
-			String patternstr = "(\\w+?)(:|<|>)(\\w+?),";
+			String patternstr = QRY_PATTERN;
 
 			Pattern pattern = Pattern.compile(patternstr);
 			Matcher matcher = pattern.matcher(patternsearch + ",");
@@ -123,7 +126,7 @@ public class SystemDescriptionRestController extends BaseController {
 			log.debug("Retrieved list of systems " + entitylist.getNumberOfElements());
 
 			Collection<SystemDescription> entitycoll = CollectionUtils.iterableToCollection(entitylist.getContent());
-			CollectionResource collres = listToCollection(entitycoll, true, info, Link.SYSTEMS,ipage,size);
+			CollectionResource collres = listToCollection(entitycoll, true, info, Link.SYSTEMS,0,ipage,size);
 			return ok(collres);
 		} catch (ConddbWebException e1) {
 			throw e1;

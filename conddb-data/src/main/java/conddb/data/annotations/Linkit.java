@@ -9,5 +9,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 public @interface Linkit {
 	public String getter() default "none";
-	public String setter() default "setHref";
+	public String format() default "%s";
 }

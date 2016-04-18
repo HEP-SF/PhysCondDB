@@ -25,6 +25,8 @@ public class PropertyConfigurator {
 	public String monitorLogging;
 	@Value("${conddb.time.format}")
 	private String pattern = "yyyyMMddHHmmss:z";
+	@Value("${server.query.format}")
+	private String qrypattern = "(\\w+?)(:|<|>)(\\w+?),";
 
 	private DateTimeFormatter locFormatter;
 	
@@ -72,5 +74,11 @@ public class PropertyConfigurator {
 		return pattern;
 	}
 
+	/**
+	 * @return the qrypattern
+	 */
+	public String getQrypattern() {
+		return qrypattern;
+	}
 	
 }

@@ -129,24 +129,49 @@ condJSControllers
 								CondGlobalTag, CondRest) {
 							$scope.globaltags = [];
 							$scope.displayedCollection = [];
-							loadglobaltags({
-								id : '%',
-								expand : 'true'
-							});
+
+//							loadglobaltags({
+//								id : '%',
+//								expand : 'true'
+//							});
 							$scope.itemsByPage = 10;
 							$scope.displayedPages = 10;
 
-							function loadglobaltags(queryargs) {
-								var promise = CondGlobalTag.query(queryargs);
-								promise.$promise.then(function(data) {
-									$scope.globaltags = data.items;
-									$scope.displayedCollection = []
-											.concat($scope.globaltags);
-									console.log('Inside promise got data '
-											+ data);
-								});
-							}
-							;
+//							function loadglobaltags(queryargs) {
+//								var promise = CondGlobalTag.query(queryargs);
+//								promise.$promise.then(function(data) {
+//									$scope.globaltags = data.items;
+//									$scope.displayedCollection = []
+//											.concat($scope.globaltags);
+//									console.log('Inside promise got data '
+//											+ data);
+//								});
+//							}
+//							;
+							
+							loadglobaltags({
+								id : '',
+								expand : 'true'
+							});
+							
+							function loadglobaltags(qry) {
+								var url = 'globaltags?by=name:' + qry.id + '&expand=' + qry.expand;
+								var httpmethod = 'GET';
+								var headers = 'Accept: */*';
+								CondRest.request(url, httpmethod, 'user',headers,null).then(
+											// success
+									function(response) {
+										console.log('Received response '+ JSON.stringify(response));
+										$scope.globaltags = response.data.items;
+										$scope.displayedCollection = []
+												.concat($scope.globaltags);
+									},
+									// error
+									function(error) {
+										console.log('Error occurred in url call...');
+									});
+							};
+							
 
 							// fired when table rows are selected
 							$scope.$watch('displayedCollection', function(row) {
@@ -162,7 +187,7 @@ condJSControllers
 							}, true);
 
 							$scope.refresh = function() {
-								$scope.globaltagname = '%';
+								$scope.globaltagname = '';
 								loadglobaltags({
 									id : $scope.globaltagname,
 									expand : 'true'
@@ -170,8 +195,7 @@ condJSControllers
 							}
 
 							$scope.search = function() {
-								var gtagsearch = '%' + $scope.globaltagname
-										+ '%';
+								var gtagsearch = $scope.globaltagname;
 								loadglobaltags({
 									id : gtagsearch,
 									expand : 'true'
@@ -304,24 +328,47 @@ condJSControllers
 
 							$scope.tags = [];
 							$scope.displayedTagsCollection = [];
-							loadtags({
-								id : '%',
-								expand : 'true'
-							});
+//							loadtags({
+//								id : '%',
+//								expand : 'true'
+//							});
 							$scope.itemsByPage = 10;
 							$scope.displayedPages = 10;
 
-							function loadtags(queryargs) {
-								var promise = CondTag.query(queryargs);
-								promise.$promise.then(function(data) {
-									$scope.tags = data.items;
-									$scope.displayedTagsCollection = []
-											.concat($scope.tags);
-									console.log('Inside promise got data '
-											+ data);
-								});
-							}
-							;
+//							function loadtags(queryargs) {
+//								var promise = CondTag.query(queryargs);
+//								promise.$promise.then(function(data) {
+//									$scope.tags = data.items;
+//									$scope.displayedTagsCollection = []
+//											.concat($scope.tags);
+//									console.log('Inside promise got data '
+//											+ data);
+//								});
+//							};
+							
+							loadtags({
+								id : '',
+								expand : 'true'
+							});
+							
+							function loadtags(qry) {
+								var url = 'tags?by=name:' + qry.id + '&expand=' + qry.expand;
+								var httpmethod = 'GET';
+								var headers = 'Accept: */*';
+								CondRest.request(url, httpmethod, 'user',headers,null).then(
+											// success
+									function(response) {
+										console.log('Received response '+ JSON.stringify(response));
+										$scope.tags = response.data.items;
+										$scope.displayedTagsCollection = []
+												.concat($scope.tags);
+									},
+									// error
+									function(error) {
+										console.log('Error occurred in url call...');
+									});
+							};
+							
 
 							// fired when table rows are selected
 							$scope.$watch('displayedTagsCollection', function(
@@ -341,14 +388,14 @@ condJSControllers
 
 							$scope.refresh = function() {
 								loadtags({
-									id : '%',
+									id : '',
 									expand : 'true'
 								});
 							}
 
 							$scope.search = function() {
 								loadtags({
-									id : '%' + $scope.tagname + '%',
+									id : $scope.tagname ,
 									expand : 'true'
 								});
 							};

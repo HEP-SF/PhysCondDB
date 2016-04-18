@@ -70,7 +70,7 @@ public abstract class BaseController {
 		Collection<Link> items = new ArrayList<Link>(coll.size());
 		for (T entity : coll) {
 			if (expand) {
-				GenericPojoResource<AfEntity> resource = new GenericPojoResource<AfEntity>(info, entity);
+				GenericPojoResource<AfEntity> resource = new GenericPojoResource<>(info, entity);
 				items.add(resource);
 			} else {
 				Link link = new Link(info, entity);
@@ -81,11 +81,26 @@ public abstract class BaseController {
 	}
 	
 	protected <T extends AfEntity> CollectionResource listToCollection(Collection<T> coll, boolean expand,
-			UriInfo info, String subPath, int offset, int limit) {
+			UriInfo info, String subPath, int level) {
 		Collection<Link> items = new ArrayList<Link>(coll.size());
 		for (T entity : coll) {
 			if (expand) {
-				GenericPojoResource<AfEntity> resource = new GenericPojoResource<AfEntity>(info, entity);
+				GenericPojoResource<AfEntity> resource = new GenericPojoResource<>(info, entity, level, null);
+				items.add(resource);
+			} else {
+				Link link = new Link(info, entity);
+				items.add(link);
+			}
+		}
+		return new CollectionResource(info,subPath,items);
+	}
+	
+	protected <T extends AfEntity> CollectionResource listToCollection(Collection<T> coll, boolean expand,
+			UriInfo info, String subPath, int level, int offset, int limit) {
+		Collection<Link> items = new ArrayList<Link>(coll.size());
+		for (T entity : coll) {
+			if (expand) {
+				GenericPojoResource<AfEntity> resource = new GenericPojoResource<>(info, entity, level, null);
 				items.add(resource);
 			} else {
 				Link link = new Link(info, entity);

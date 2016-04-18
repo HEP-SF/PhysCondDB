@@ -138,18 +138,23 @@ public class PojoMapFactory {
 		
 		for (Field afield : fields) {
 			String akey = afield.getName();
+			log.debug("Analysing field "+akey);
 			Method getmeth = getMethodFromField(afield,methods);
 			if (getmeth == null) {
 				log.debug("Cannot find method get for field "+afield.getName()+"....skip it");
 				continue;
 			}
 			if (afield.getAnnotation(ManyToOne.class) != null || getmeth.getAnnotation(ManyToOne.class) != null) {
+				log.debug("Add field "+akey+" into nswentitymap");
 				nswentitymap.put(akey, getmeth);
 			} else if (afield.getAnnotation(OneToMany.class) != null || getmeth.getAnnotation(OneToMany.class) != null) {
+				log.debug("Add field "+akey+" into nswsetmap");
 				nswsetmap.put(akey, getmeth);
 			} else if (afield.getAnnotation(Column.class) != null || getmeth.getAnnotation(Column.class) != null) {
+				log.debug("Add field "+akey+" into entitymap");
 				entitymap.put(akey, getmeth);
 			} else if (afield.getAnnotation(Linkit.class) != null || getmeth.getAnnotation(Linkit.class) != null) {
+				log.debug("this one should be linked...."+akey);
 				entitymap.put(akey, getmeth);
 			}
 		}

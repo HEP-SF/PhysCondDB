@@ -35,6 +35,7 @@ import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.generic.GenericPojoResource;
+import conddb.web.utils.PropertyConfigurator;
 import conddb.web.utils.collections.CollectionUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -51,6 +52,8 @@ public class GlobalTagRestController extends BaseController {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
+	private String QRY_PATTERN = PropertyConfigurator.getInstance().getQrypattern();
+
 	@Autowired
 	private GlobalTagService globalTagService;
 	
@@ -60,7 +63,7 @@ public class GlobalTagRestController extends BaseController {
 	@ApiOperation(value = "Finds a GlobalTag by name", notes = "Name of the globaltag, % not allowed.", response = GlobalTag.class)
 	public Response findGlobalTag(@Context UriInfo info,
 			@ApiParam(value = "name of the global tag", required = true) @PathParam("gtagname") final String globaltagname,
-			@ApiParam(value = "trace {off|on} allows to retrieve associated global tags", required = false) @DefaultValue("off") @QueryParam("trace") final String trace,
+			@ApiParam(value = "trace {off|on} allows to retrieve associated global tags", required = false) @DefaultValue("on") @QueryParam("trace") final String trace,
 			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false) @DefaultValue("true") @QueryParam("expand") final boolean expand)
 					throws ConddbWebException {
 		this.log.info("GlobalTagRestController processing request for global tag name " + globaltagname);
@@ -95,7 +98,7 @@ public class GlobalTagRestController extends BaseController {
 			PageRequest preq = new PageRequest(ipage, size);
 
 			GenericSpecBuilder<GlobalTag> builder = new GenericSpecBuilder<>();
-			String patternstr = "(\\w+?)(:|<|>)(\\w+?),";
+			String patternstr = QRY_PATTERN;
 
 			Pattern pattern = Pattern.compile(patternstr);
 			Matcher matcher = pattern.matcher(patternsearch + ",");
@@ -110,7 +113,7 @@ public class GlobalTagRestController extends BaseController {
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
 			Collection<GlobalTag> entitycoll = CollectionUtils.iterableToCollection(entitylist.getContent());
-			CollectionResource collres = listToCollection(entitycoll, expand, info, Link.GLOBALTAGS,ipage,size);
+			CollectionResource collres = listToCollection(entitycoll, expand, info, Link.GLOBALTAGS,0,ipage,size);
 			return ok(collres);
 		} catch (ConddbWebException e1) {
 			throw e1;

@@ -35,6 +35,7 @@ import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.Link;
 import conddb.web.resources.generic.GenericPojoResource;
+import conddb.web.utils.PropertyConfigurator;
 import conddb.web.utils.collections.CollectionUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -51,6 +52,8 @@ public class TagRestController extends BaseController {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
+	private String QRY_PATTERN = PropertyConfigurator.getInstance().getQrypattern();
+	
 	@Autowired
 	private GlobalTagService globalTagService;
 
@@ -92,7 +95,7 @@ public class TagRestController extends BaseController {
 			@ApiParam(value = "page: the page number {0}", required = false) @DefaultValue("0") @QueryParam("page") Integer ipage,
 			@ApiParam(value = "size: the page size {1000}", required = false) @DefaultValue("1000") @QueryParam("size") Integer size,
 			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false) @DefaultValue("true") @QueryParam("expand") boolean expand,
-			@ApiParam(value = "by", required = true) @DefaultValue("name:%") @QueryParam("by") final String patternsearch)
+			@ApiParam(value = "by", required = true) @DefaultValue("name:") @QueryParam("by") final String patternsearch)
 					throws ConddbWebException {
 		log.info("TagRestController processing request for tag list (expansion = " + expand + ") (search = "+patternsearch+" )");
 		try {
@@ -100,7 +103,7 @@ public class TagRestController extends BaseController {
 			PageRequest preq = new PageRequest(ipage, size);
 
 			GenericSpecBuilder<Tag> builder = new GenericSpecBuilder<>();
-			String patternstr = "(\\w+?)(:|<|>)(\\w+?),";
+			String patternstr = QRY_PATTERN;
 
 			Pattern pattern = Pattern.compile(patternstr);
 			Matcher matcher = pattern.matcher(patternsearch + ",");
@@ -115,7 +118,7 @@ public class TagRestController extends BaseController {
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
 			Collection<Tag> entitycoll = CollectionUtils.iterableToCollection(entitylist.getContent());
-			CollectionResource collres = listToCollection(entitycoll, expand, info, Link.TAGS,ipage,size);
+			CollectionResource collres = listToCollection(entitycoll, expand, info, Link.TAGS,0,ipage,size);
 			return ok(collres);
 		} catch (ConddbWebException e1) {
 			throw e1;

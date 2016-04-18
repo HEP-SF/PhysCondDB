@@ -19,8 +19,8 @@ import org.slf4j.LoggerFactory;
 import conddb.data.AfEntity;
 import conddb.data.annotations.Linkit;
 import conddb.web.exceptions.ConddbWebException;
+import conddb.web.resources.CollectionResource;
 import conddb.web.resources.Link;
-
 
 /**
  * @author aformic
@@ -73,12 +73,13 @@ public class GenericPojoResource<T extends AfEntity> extends Link {
 
 	protected void build(UriInfo info, AfEntity entity, int level) throws Exception {
 		build(info, entity);
-		log.debug("======= Now loop on ManyToOne if level greater than 0 : " + level + " ======= ");
-		if (level > 0) {
-			log.debug("Loop over ManyToOne annotated fields..." + nswsetmap.size());
-			for (String akey : nswsetmap.keySet()) {
-				log.debug("Loop over map with " + akey);
-				Set<AfEntity> subentityset;
+		log.debug("======= Now loop on OneToMany if level greater than 0 : " + level + " ======= ");
+		log.debug("Loop over OneToMany annotated fields..." + nswsetmap.size());
+		for (String akey : nswsetmap.keySet()) {
+			log.debug("Loop over map with " + akey);
+			Set<AfEntity> subentityset;
+			Method mth = nswsetmap.get(akey);
+			if (level > 0) {
 				try {
 					subentityset = (Set<AfEntity>) nswsetmap.get(akey).invoke(entity);
 					List<GenericPojoResource<? extends AfEntity>> relist = new ArrayList<GenericPojoResource<? extends AfEntity>>();
@@ -95,8 +96,48 @@ public class GenericPojoResource<T extends AfEntity> extends Link {
 					e.printStackTrace();
 				} catch (LazyInitializationException e1) {
 					log.error("Trying to access an object which has not been initialized from hibernate...ignore it");
+					if (mth.isAnnotationPresent(Linkit.class)) {
+						log.debug("Annotation linkit is present");
+						
+						Class<?> subentityclass = mth.getReturnType();
+						log.debug("annotation linkit is present in method: " + mth.getName() + " return type "
+								+ subentityclass.getName() + " on entity " + entity);
+						log.debug("This is supposed to be a set or collection of other entities....");
+						Linkit linkit = mth.getAnnotation(Linkit.class);
+						log.debug("linkit annotation has getter: " + linkit.getter());
+						Method getter = entity.getClass().getMethod(linkit.getter(), (Class<?>[]) null);
+						String setterformat = linkit.format();
+						log.debug("getter method is :" + getter.getName());
+						String parenthref = (String) getter.invoke(entity, (Object[]) null);
+						log.debug("parent href :" + parenthref + " from entity " + entity);
+						String href = String.format(setterformat, parenthref);
+						CollectionResource coll = new CollectionResource(info, href, null);
+						log.debug("collection resource created :" + coll);
+						put(akey, coll);
+						continue;
+					}
 				}
+			} else if (mth.isAnnotationPresent(Linkit.class)) {
+				log.debug("Annotation linkit is present");
+				
+				Class<?> subentityclass = mth.getReturnType();
+				log.debug("annotation linkit is present in method: " + mth.getName() + " return type "
+						+ subentityclass.getName() + " on entity " + entity);
+				log.debug("This is supposed to be a set or collection of other entities....");
+				Linkit linkit = mth.getAnnotation(Linkit.class);
+				log.debug("linkit annotation has getter: " + linkit.getter());
+				Method getter = entity.getClass().getMethod(linkit.getter(), (Class<?>[]) null);
+				String setterformat = linkit.format();
+				log.debug("getter method is :" + getter.getName());
+				String parenthref = (String) getter.invoke(entity, (Object[]) null);
+				log.debug("parent href :" + parenthref + " from entity " + entity);
+				String href = String.format(setterformat, parenthref);
+				CollectionResource coll = new CollectionResource(info, href, null);
+				log.debug("collection resource created :" + coll);
+				put(akey, coll);
+				continue;
 			}
+
 		}
 	}
 
@@ -119,25 +160,45 @@ public class GenericPojoResource<T extends AfEntity> extends Link {
 			log.debug("Loop over simple column fields..." + entitymap.size());
 			for (String akey : entitymap.keySet()) {
 				Method mth = entitymap.get(akey);
+				log.debug("checking method " + mth.getName());
+
 				if (mth.isAnnotationPresent(Linkit.class)) {
-					Class<?> subentityclass = mth.getReturnType(); 
+					Class<?> subentityclass = mth.getReturnType();
+					log.debug("annotation linkit is present in method: " + mth.getName() + " return type "
+							+ subentityclass.getName() + " on entity " + entity);
+					log.debug("check if is assignable : " + AfEntity.class.isAssignableFrom(subentityclass));
+
 					if (AfEntity.class.isAssignableFrom(subentityclass)) {
-						AfEntity linkedentity = (AfEntity) subentityclass.newInstance();
-						Linkit linkit = mth.getAnnotation(Linkit.class);
-						Method getter = entity.getClass().getMethod(linkit.getter(), (Class<?>)null);
-						String parenthref = (String) getter.invoke(entity, (Object[])null);
-						linkedentity.setHref(parenthref);
-						GenericPojoResource<AfEntity> gpr = new GenericPojoResource<AfEntity>(info, linkedentity, 0,
-								entity);
-						log.debug("1) Link resource not loaded " + akey + " using method " + mth.getName());
-						put(akey, gpr);
-						continue;
+						try {
+							AfEntity linkedentity = (AfEntity) subentityclass.newInstance();
+							log.debug("Created new entity instance via empty constructor :" + linkedentity);
+							Linkit linkit = mth.getAnnotation(Linkit.class);
+							log.debug("linkit annotation has getter: " + linkit.getter());
+							Method getter = entity.getClass().getMethod(linkit.getter(), (Class<?>[]) null);
+							String setterformat = linkit.format();
+							log.debug("getter method is :" + getter.getName());
+							String parenthref = (String) getter.invoke(entity, (Object[]) null);
+							log.debug("parent href :" + parenthref + " from entity " + entity);
+							String href = String.format(setterformat, parenthref);
+							linkedentity.setHref(href);
+							log.debug("parent href set :" + linkedentity);
+							GenericPojoResource<AfEntity> gpr = new GenericPojoResource<>(info, linkedentity, 0,
+									entity);
+							log.debug("1) Link resource " + akey + " using method " + mth.getName());
+							put(akey, gpr);
+							continue;
+						} catch (Exception e) {
+							log.error("Exception caught during linking of sub class " + e.getMessage());
+							e.printStackTrace();
+						}
 					}
+					log.debug("WARNING: class AfEntity seems not to be assignable from " + subentityclass.getName());
+
 				}
 				log.debug("1) Filling map with " + akey + " using method " + mth.getName());
 				put(akey, mth.invoke(entity));
 			}
-			log.debug("Loop over OneToMany annotated fields..." + nswentitymap.size());
+			log.debug("Loop over ManyToOne annotated fields..." + nswentitymap.size());
 			for (String akey : nswentitymap.keySet()) {
 				log.debug("Loop over nswentitymap with " + akey);
 				Method mth = nswentitymap.get(akey);

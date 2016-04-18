@@ -5,7 +5,6 @@ package conddb.web.controllers;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -42,8 +41,8 @@ import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.Link;
-import conddb.web.resources.SpringResourceFactory;
 import conddb.web.resources.generic.GenericPojoResource;
+import conddb.web.utils.PropertyConfigurator;
 import conddb.web.utils.collections.CollectionUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -60,12 +59,12 @@ public class IovRestController extends BaseController {
 
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
+	private String QRY_PATTERN = PropertyConfigurator.getInstance().getQrypattern();
+
 	@Autowired
 	private GlobalTagService globalTagService;
 	@Autowired
 	private IovService iovService;
-	@Autowired
-	private SpringResourceFactory springResourceFactory;
 
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -134,7 +133,7 @@ public class IovRestController extends BaseController {
 				String msg = "Iov list is empty";
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
-			CollectionResource collres = listToCollection(entitylist, expand, info, Link.IOVS,ipage,size);
+			CollectionResource collres = listToCollection(entitylist, expand, info, Link.IOVS, level, ipage, size);
 			return ok(collres);
 			
 		} catch (ConddbServiceException e) {
@@ -153,7 +152,7 @@ public class IovRestController extends BaseController {
 		this.log.info("IovRestController processing request for iov id " + id);
 		try {
 			Iov entity = this.iovService.getIov(id);
-			GenericPojoResource<Iov> resource = new GenericPojoResource<>(info, entity, 1, null);
+			GenericPojoResource<Iov> resource = new GenericPojoResource<>(info, entity, 2, null);
 			return ok(resource);
 		} catch (Exception e) {
 			String msg = "Error retrieving iov by id " + id;
@@ -175,7 +174,7 @@ public class IovRestController extends BaseController {
 			PageRequest preq = new PageRequest(ipage, size);
 			Page<Iov> entitypage = this.iovService.getIovsByTag(tagname, preq);
 			Collection<Iov> entitylist = CollectionUtils.iterableToCollection(entitypage.getContent());
-			CollectionResource collres = listToCollection(entitylist, true, info, Link.IOVS,ipage,size);
+			CollectionResource collres = listToCollection(entitylist, true, info, Link.IOVS,0,ipage,size);
 			return ok(collres);
 		} catch (Exception e) {
 			String msg = "Error retrieving iov by tagname " + tagname;
@@ -199,7 +198,7 @@ public class IovRestController extends BaseController {
 			PageRequest preq = new PageRequest(ipage, size);
 
 			GenericSpecBuilder<Iov> builder = new GenericSpecBuilder<>();
-			String patternstr = "(\\w+?)(:|<|>)(\\w+?),";
+			String patternstr = QRY_PATTERN;
 
 			Pattern pattern = Pattern.compile(patternstr);
 			Matcher matcher = pattern.matcher(patternsearch + ",");
@@ -214,7 +213,7 @@ public class IovRestController extends BaseController {
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
 			Collection<Iov> entitycoll = CollectionUtils.iterableToCollection(entitylist.getContent());
-			CollectionResource collres = listToCollection(entitycoll, expand, info, Link.IOVS,ipage,size);
+			CollectionResource collres = listToCollection(entitycoll, expand, info, Link.IOVS,0,ipage,size);
 			return ok(collres);
 		} catch (ConddbWebException e1) {
 			throw e1;
@@ -224,7 +223,6 @@ public class IovRestController extends BaseController {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@GET
 	@Path("/groups/{tagname}")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
