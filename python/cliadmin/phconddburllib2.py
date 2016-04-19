@@ -87,6 +87,9 @@ class PhysDBDriver():
         print " - LS <tag> <globaltag> :"
         print "        ex: mytag01 MYGTAG-01-01 : list iovs in tag/globaltag combination; use t0 and tMax for time boundaries"
         print " "
+        print " - GET <hash> <output filename> :"
+        print "        ex: thehash ./temporaryfile.blob : download a blob for the given hash"
+        print " "
         print " - LINK <globaltagname> <tagname> 'record=xxx;label=yyy'"
         print "        ex: MYGTAG-01-01 TAG_01 record=none;label=none : link a global tag to a tag, both should exists."
         print " "
@@ -364,7 +367,7 @@ class PhysDBDriver():
 
         elif self.action == 'LS':
             try:
-                print 'Action LS is used to iovs in a tag / globaltag pair; if globaltag info is missing do not use snapshottime'
+                print 'Action LS is used to retrieve iovs in a tag / globaltag pair; if globaltag info is missing do not use snapshottime'
                 tag=self.args[0]
                 globaltag = 'none'
                 if len(self.args) == 2:
@@ -386,6 +389,25 @@ class PhysDBDriver():
                 
             except Exception, e:
                 sys.exit("LS failed: %s" % (str(e)))
+                raise e
+                
+        elif self.action == 'GET':
+            try:
+                print 'Action LS is used to retrieve iovs in a tag / globaltag pair; if globaltag info is missing do not use snapshottime'
+                hash=self.args[0]
+                outfname = hash
+                if len(self.args) == 2:
+                    outfname=self.args[1]
+                msg = ('GET: use hash %s and output file name  %s !') % (hash,outfname)
+                self.printmsg(msg,'cyan')
+                
+                self.resttools.getPayloadData(hash,outfname)
+                msg = ('GET: payload retrieved and stored in %s !') % (outfname)
+                self.printmsg(msg,'cyan')
+        
+                        
+            except Exception, e:
+                sys.exit("GET failed: %s" % (str(e)))
                 raise e
             
         elif self.action == 'LOCK':

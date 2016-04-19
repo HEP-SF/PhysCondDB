@@ -87,9 +87,9 @@ class PhysDBDriver():
         print "        ex: MyNewPkg-00-01 myfile : retrieve list of files containing 'myfile' string in global tag MyNewPkg-00-01."
         print "    List files under a given global tag, filtering by file name."
         print " "
-        print " - SHOW  <folder path> <tag-name> [tag-name defaults to _HEAD_00]"
-        print "        ex: /MY/FOLDER/PATH : retrieve list of files in the folder showing their insertion time and datasize."
-        print "    List files under a given folder (and tag)."
+        print " - SHOW  <folder path>"
+        print "        ex: MYFOLDERPATH (cannot use slashes here) : retrieve list of files in the folder showing their insertion time and datasize."
+        print "    List files under a given folder."
         print " "
         print " - DUMP  hash [hash of a file can be retrieved using LS and SHOW commands]"
         print "        ex: anaash : dump the file in local directory."
@@ -420,7 +420,7 @@ class PhysDBDriver():
                 nodefullpath = calibargs[0]
                 msg = ' ==> Search for system by nodefullpath %s ' % nodefullpath
                 self.printmsg(msg,'cyan')                
-                (systemobjlist, code) = self.resttools.getsystems('node',nodefullpath)
+                (systemobjlist, code) = self.resttools.getsystems('nodeFullpath',nodefullpath)
                 if self.debug:
                     print 'DEBUG: Retrieved ',systemobjlist,' with code ',code
                 if code != 200:

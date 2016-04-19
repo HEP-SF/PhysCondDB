@@ -713,7 +713,7 @@ class PhysCurl(object):
         self.__curl.setUrl(urlquoted+'?'+pairs)
         return self.__curl.getData()
 
-    def getmaps(self,params,servicebase="/maps/find"):
+    def getmaps(self,params,servicebase="/maps"):
         if self.__debug:
             print 'DEBUG: Search Map object using parameter '
             print params
@@ -726,17 +726,33 @@ class PhysCurl(object):
         self.__curl.setUrl(urlquoted+'?'+pairs)
         return self.__curl.getData()
 
-    def getsystems(self,params,servicebase="/systems/find"):
+    def getsystems(self,params,servicebase="/systems"):
         if self.__debug:
             print 'DEBUG: Search systems using parameters ',params
         url = (self.userbaseurl + servicebase )
+        id = None
+        if 'tag' in params:
+            id = params['tag']
+
+        if id is not None:
+            url = (self.userbaseurl + servicebase + '/' + id)
+        args = {}
         urlquoted = urllib.quote_plus(url,safe=':/')
-        pairs = urllib.urlencode(params)
-        self.__curl.setUrl(urlquoted+'?'+pairs)
+        if 'by' in params:
+            args['by'] = params['by']
+
+        #        pairs = urllib.urlencode(params)
+        #        self.__curl.setUrl(urlquoted+'?'+pairs)
 ##        escurl = urllib.quote_plus(urlquoted+'?'+pairs,safe='=&?:/')
         if self.__debug:
             print 'DEBUG: Search systems using url ',urlquoted        
-##        self.__curl.setUrl(escurl)
+        if len(args) == 0 :
+            self.__curl.setUrl(urlquoted)
+        else:
+            pairs = urllib.urlencode(args)
+            print 'Using pairs ',pairs
+            self.__curl.setUrl(urlquoted+'?'+pairs)
+
         return self.__curl.getData()
 
     def getlink(self,params,servicebase=None):
@@ -981,6 +997,7 @@ class PhysUtils(object):
         data = {}
         data['trace']=trace
         data['expand']=expand
+        data['payload']=expand
         data['tag']=tag
         data['globaltag']=globaltag
         data['since']=t0
@@ -1094,9 +1111,12 @@ class PhysUtils(object):
 
     def getsystems(self, bytype, fieldname):
         systemdata = {}
-        systemdata['by']=bytype
-        systemdata['name']=fieldname
+        if bytype == 'tag':
+            systemdata['tag']=fieldname
+        else:
+            systemdata['by']=('%s:%s') % (bytype,fieldname)
+            print 'Use string by ',systemdata['by']
         systemdata['expand']='true'
-        (systemobj, code) = self.__restserver.getsystems(systemdata,'/systems/find')
+        (systemobj, code) = self.__restserver.getsystems(systemdata,'/systems')
         return (systemobj, code)
         
