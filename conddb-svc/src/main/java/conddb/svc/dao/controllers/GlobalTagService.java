@@ -59,6 +59,14 @@ public class GlobalTagService {
 		return tagRepository;
 	}
 
+	
+	/**
+	 * @return the globalTagMapRepository
+	 */
+	public GlobalTagMapRepository getGlobalTagMapRepository() {
+		return globalTagMapRepository;
+	}
+
 	/**
 	 * @return
 	 * @throws ConddbServiceException
