@@ -4,4 +4,9 @@
   612  python phconddburllib2.py DESCRIBE globaltags
   613  python phconddburllib2.py DESCRIBE tags
   614  python phconddburllib2.py FIND globaltags
-  615  python phconddburllib2.py --trace=on FIND globaltags MYGTAG-01-00
+  615  python phconddburllib2.py --trace=on FIND globaltags MYGTAG-01-00	
+ 1115  python phconddburllib2.py DESCRIBE iovs
+ 1116  python phconddburllib2.py STORE testtag-01 ./test_100.txt 'since=1000;sinceString=t1000' 'streamerInfo=an info; objectType=the object type; version=1.0'
+ 1117  python phconddburllib2.py STORE testtag-01 ./test_100.txt 'since=2000;sinceString=t2000' 'streamerInfo=an info; objectType=the object type; version=1.0'
+
+ 1124  python phconddburllib2.py --by="name:ATAG,insertionTime>1442162332976" --expand=true --trace=on FIND tags

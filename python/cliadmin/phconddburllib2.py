@@ -174,7 +174,7 @@ class PhysDBDriver():
         elif type == 'payload':
             mobj = Payload({})
 
-        print 'Help defined for ',mobj
+        print 'Help defined for ',type,' : ',mobj.help()
         return mobj.help()
 
     def procopts(self,opts,args):
@@ -508,10 +508,8 @@ class PhysDBDriver():
                 object=self.args[0]
                 msg = ('DESCRIBE: selected object is %s ') % (object)
                 if object in [ 'globaltags', 'tags', 'systems', 'iovs', 'payload' ]:
-                    print colored.cyan(msg)
                     msg = self.helpAdd(object);
                     self.printmsg(msg,'green')
-                    
                 else:
                     msg = ('DESCRIBE: cannot apply command to object %s ') % (object)
                     self.printmsg(msg,'red')
