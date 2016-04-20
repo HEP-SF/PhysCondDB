@@ -63,12 +63,13 @@ public class GlobalTagRestController extends BaseController {
 	@ApiOperation(value = "Finds a GlobalTag by name", notes = "Name of the globaltag, % not allowed.", response = GlobalTag.class)
 	public Response findGlobalTag(@Context UriInfo info,
 			@ApiParam(value = "name of the global tag", required = true) @PathParam("gtagname") final String globaltagname,
-			@ApiParam(value = "trace {off|on} allows to retrieve associated global tags", required = false) @DefaultValue("on") @QueryParam("trace") final String trace,
+			@ApiParam(value = "trace {off|on} allows to retrieve associated tags", required = false) @DefaultValue("on") @QueryParam("trace") final String trace,
+			@ApiParam(value = "filter {tag name pattern} allows to retrieve associated tags matching pattern", required = false) @DefaultValue("none") @QueryParam("filter") final String filter,
 			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false) @DefaultValue("true") @QueryParam("expand") final boolean expand)
 					throws ConddbWebException {
 		this.log.info("GlobalTagRestController processing request for global tag name " + globaltagname);
 		try {
-			GlobalTag entity = getGlobalTag(globaltagname, trace);
+			GlobalTag entity = getGlobalTag(globaltagname, trace, filter);
 			if (entity == null) {
 				String msg = "Global Tag "+globaltagname+" not found.";
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
@@ -123,7 +124,7 @@ public class GlobalTagRestController extends BaseController {
 		}
 	}
 
-	protected GlobalTag getGlobalTag(String globaltagname, String trace) {
+	protected GlobalTag getGlobalTag(String globaltagname, String trace, String tagfilter) {
 		GlobalTag entity = null;
 		try {
 			if (trace.equals("off")) {
@@ -131,7 +132,11 @@ public class GlobalTagRestController extends BaseController {
 				entity = globalTagService.getGlobalTag(globaltagname);
 			} else {
 				log.debug("Search for a globaltag " + globaltagname + " and associated tags...");
-				entity = globalTagService.getGlobalTagFetchTags(globaltagname);
+				if (tagfilter == null || tagfilter.equals("none")) {
+					entity = globalTagService.getGlobalTagFetchTags(globaltagname);
+				} else {
+					entity = globalTagService.getGlobalTagFilterTags(globaltagname, "%"+tagfilter+"%");
+				}
 				log.debug("Retrieved globaltag entity : ");
 				log.debug("                   content : " + entity);
 			}

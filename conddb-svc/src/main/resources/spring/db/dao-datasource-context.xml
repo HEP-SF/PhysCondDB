@@ -69,14 +69,11 @@
  	
 	<beans profile="h2">
 		<context:property-placeholder location="classpath:/spring/sql/h2.properties" />
-		<context:property-placeholder location="classpath:application.properties" order="2" ignore-unresolvable="true"  />
 	</beans>
 	<beans profile="oracle">
 		<context:property-placeholder location="classpath:/spring/sql/oracle.properties" />
-		<context:property-placeholder location="classpath:application.properties" order="2" ignore-unresolvable="true"  />
 	</beans>
 	<beans profile="sqlite">
 		<context:property-placeholder location="classpath:/spring/sql/sqlite.properties" />
-		<context:property-placeholder location="classpath:application.properties" order="2" ignore-unresolvable="true"  />
 	</beans>
 </beans>

@@ -170,6 +170,17 @@ public class GlobalTagService {
 	}
 
 	@ProfileExecution
+	public GlobalTag getGlobalTagFilterTags(String globaltagname, String tagname) throws ConddbServiceException {
+		try {
+			GlobalTag gtag = null;
+			gtag = this.globalTagRepository.findByNameAndFilterTagsEagerly(globaltagname, tagname);
+			return gtag;
+		} catch (Exception e) {
+			throw new ConddbServiceException("Cannot find global tag by name and fetch tags: " + e.getMessage());
+		}
+	}
+
+	@ProfileExecution
 	public GlobalTag getGlobalTag(String globaltagname) throws ConddbServiceException {
 		try {
 			GlobalTag gtag = this.globalTagRepository.findByName(globaltagname);

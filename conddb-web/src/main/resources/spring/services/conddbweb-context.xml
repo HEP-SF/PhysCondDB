@@ -12,7 +12,8 @@
 	<!-- JPA repositories are initialized elsewhere -->
 	<context:component-scan
 		base-package="conddb.web" />
-
+		
+	<context:property-placeholder location="classpath:application.properties" order="2" ignore-unresolvable="true"  />
 
 	<!-- Use multipart for payload uploads -->
 	<bean id="multipartResolver"

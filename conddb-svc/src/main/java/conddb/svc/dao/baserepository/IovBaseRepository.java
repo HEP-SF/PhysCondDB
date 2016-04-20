@@ -122,7 +122,7 @@ public interface IovBaseRepository extends CondDBPageAndSortingRepository<Iov, L
 	 * @param since
 	 *            The since time of the interval.
 	 * @param until
-	 *            The until time of the selected interva.
+	 *            The until time of the selected interval.
 	 * @return list of IOVs.
 	 */
 	@Query("SELECT distinct p FROM Iov p WHERE " + "p.tag.id = (:tag) " + "AND p.insertionTime = ANY("
@@ -137,7 +137,7 @@ public interface IovBaseRepository extends CondDBPageAndSortingRepository<Iov, L
 	 * @param since
 	 *            The since time of the interval.
 	 * @param until
-	 *            The until time of the selected interva.
+	 *            The until time of the selected interval.
 	 * @return list of IOVs.
 	 */
 	@Query("SELECT distinct p FROM Iov p JOIN FETCH p.payload pylds WHERE " + "p.tag.id = (:tag) " + "AND p.insertionTime = ANY("

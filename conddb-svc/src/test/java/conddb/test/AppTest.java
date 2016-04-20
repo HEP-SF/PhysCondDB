@@ -1,4 +1,4 @@
-package conddb.dao;
+package conddb.test;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

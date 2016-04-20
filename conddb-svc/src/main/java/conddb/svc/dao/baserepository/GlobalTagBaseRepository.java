@@ -30,6 +30,9 @@ public interface GlobalTagBaseRepository extends CondDBPageAndSortingRepository<
 	@Query("SELECT distinct p FROM GlobalTag p JOIN FETCH p.globalTagMaps maps JOIN FETCH maps.systemTag WHERE maps.globalTag.name = (:name)")
 	public GlobalTag findByNameAndFetchTagsEagerly(@Param("name") String name);
 
+	@Query("SELECT distinct p FROM GlobalTag p JOIN FETCH p.globalTagMaps maps JOIN FETCH maps.systemTag WHERE maps.globalTag.name = (:name) and maps.systemTag.name like (:tag)")
+	public GlobalTag findByNameAndFilterTagsEagerly(@Param("name") String name, @Param("tag") String tag);
+
 	@Query("SELECT distinct p FROM GlobalTag p JOIN FETCH p.globalTagMaps maps JOIN FETCH maps.systemTag WHERE maps.globalTag.name like (:name)")
 	public List<GlobalTag> findByNameLikeAndFetchTagsEagerly(
 			@Param("name") String name);
