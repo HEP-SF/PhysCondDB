@@ -35,7 +35,9 @@ public class SystemDescription extends conddb.data.AfEntity implements Serializa
 	private String nodeFullpath;
 	private String schemaName;
 	/**
+	 * TODO:
 	 * This is very similar to the usage of record in CMS
+	 * If we keep this in this separate table we may use record and label differently ??
 	 */
 	private String tagNameRoot;
 	private String nodeDescription;
