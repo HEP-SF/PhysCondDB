@@ -34,6 +34,7 @@ import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.Link;
+import conddb.web.resources.SwaggerGlobalTagCollection;
 import conddb.web.resources.generic.GenericPojoResource;
 import conddb.web.utils.PropertyConfigurator;
 import conddb.web.utils.collections.CollectionUtils;
@@ -86,7 +87,7 @@ public class GlobalTagRestController extends BaseController {
 
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@ApiOperation(value = "Finds all GlobalTags", notes = "Usage of url argument expand={true|false} in order to see full resource content or href links only", response = GlobalTag.class, responseContainer = "List")
+	@ApiOperation(value = "Finds all GlobalTags", notes = "Usage of url argument expand={true|false} in order to see full resource content or href links only", response = SwaggerGlobalTagCollection.class)
 	public Response listGlobalTags(@Context UriInfo info,
 			@ApiParam(value = "page: the page number {0}", required = false) @DefaultValue("0") @QueryParam("page") Integer ipage,
 			@ApiParam(value = "size: the page size {1000}", required = false) @DefaultValue("1000") @QueryParam("size") Integer size,

@@ -5,6 +5,10 @@ package conddb.web.resources.generic;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +25,7 @@ import conddb.data.annotations.Linkit;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.Link;
+import conddb.web.utils.PropertyConfigurator;
 
 /**
  * @author aformic
@@ -195,8 +200,13 @@ public class GenericPojoResource<T extends AfEntity> extends Link {
 					log.debug("WARNING: class AfEntity seems not to be assignable from " + subentityclass.getName());
 
 				}
+				Object value = mth.invoke(entity);
+				if (value instanceof Timestamp) {
+					log.debug(" --- this is a timestamp, dump it in a string --- ");
+					value = format((Timestamp)value);
+				}
 				log.debug("1) Filling map with " + akey + " using method " + mth.getName());
-				put(akey, mth.invoke(entity));
+				put(akey, value);
 			}
 			log.debug("Loop over ManyToOne annotated fields..." + nswentitymap.size());
 			for (String akey : nswentitymap.keySet()) {
@@ -229,5 +239,17 @@ public class GenericPojoResource<T extends AfEntity> extends Link {
 			e.printStackTrace();
 		}
 	}
+	
+    protected String format(Timestamp ts) {
+		try {
+			Instant fromEpochMilli = Instant.ofEpochMilli(ts.getTime());
+			ZonedDateTime zdt = fromEpochMilli.atZone(ZoneId.of("Europe/Paris"));
+			return zdt.format(PropertyConfigurator.getInstance().getLocformatter());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}	
+
 
 }
