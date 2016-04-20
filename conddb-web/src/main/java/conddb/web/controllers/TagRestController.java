@@ -34,6 +34,7 @@ import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.Link;
+import conddb.web.resources.SwaggerTagCollection;
 import conddb.web.resources.generic.GenericPojoResource;
 import conddb.web.utils.PropertyConfigurator;
 import conddb.web.utils.collections.CollectionUtils;
@@ -90,7 +91,7 @@ public class TagRestController extends BaseController {
 
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@ApiOperation(value = "Finds all Tags", notes = "Usage of url argument expand={true|false} in order to see full resource content or href links only", response = Tag.class, responseContainer = "List")
+	@ApiOperation(value = "Finds all Tags", notes = "Usage of url argument expand={true|false} in order to see full resource content or href links only", response = SwaggerTagCollection.class)
 	public Response listTags(@Context UriInfo info,
 			@ApiParam(value = "page: the page number {0}", required = false) @DefaultValue("0") @QueryParam("page") Integer ipage,
 			@ApiParam(value = "size: the page size {1000}", required = false) @DefaultValue("1000") @QueryParam("size") Integer size,

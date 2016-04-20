@@ -41,6 +41,7 @@ import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.Link;
+import conddb.web.resources.SwaggerIovCollection;
 import conddb.web.resources.generic.GenericPojoResource;
 import conddb.web.utils.PropertyConfigurator;
 import conddb.web.utils.collections.CollectionUtils;
@@ -69,7 +70,7 @@ public class IovRestController extends BaseController {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/find")
-	@ApiOperation(value = "Finds Iovs for a given tag using a specific globaltag for snapshotTime", notes = "This function takes parameters in input like the time range and pagination", response = Iov.class)
+	@ApiOperation(value = "Finds Iovs for a given tag using a specific globaltag for snapshotTime", notes = "This function takes parameters in input like the time range and pagination", response = SwaggerIovCollection.class)
 	public Response getIovsInTag(@Context UriInfo info,
 			@ApiParam(value = "tag: the tagname", required = true) @QueryParam("tag") final String id,
 			@ApiParam(value = "globaltag: the globaltag name", required = false) @DefaultValue("none") @QueryParam("globaltag") final String globaltagid,
@@ -163,7 +164,7 @@ public class IovRestController extends BaseController {
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/list/{tagname}")
-	@ApiOperation(value = "Finds all Iovs inside a tag", notes = "Usage of this method is essentially for href links.", response = Iov.class)
+	@ApiOperation(value = "Finds all Iovs inside a tag", notes = "Usage of this method is essentially for href links.", response = SwaggerIovCollection.class)
 	public Response getIovsByTag(@Context UriInfo info,
 			@ApiParam(value = "tagname: the tag name", required = true) @DefaultValue("none") @PathParam("tagname") String tagname,
 			@ApiParam(value = "page: the page number", required = false) @DefaultValue("0") @QueryParam("page") Integer ipage,
@@ -185,7 +186,7 @@ public class IovRestController extends BaseController {
 
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@ApiOperation(value = "Finds all Iovs", notes = "Usage of this method is essentially for test purposes.", response = Iov.class, responseContainer = "List")
+	@ApiOperation(value = "Finds all Iovs", notes = "Usage of this method is essentially for test purposes.", response = SwaggerIovCollection.class)
 	public Response listIovs(@Context UriInfo info,
 			@ApiParam(value = "page: the page number {0}", required = false) @DefaultValue("0") @QueryParam("page") Integer ipage,
 			@ApiParam(value = "size: the page size {1000}", required = false) @DefaultValue("1000") @QueryParam("size") Integer size,
@@ -226,7 +227,7 @@ public class IovRestController extends BaseController {
 	@GET
 	@Path("/groups/{tagname}")
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@ApiOperation(value = "Finds all Iovs", notes = "Usage of this method is essentially for test purposes.", response = IovGroups.class, responseContainer = "List")
+	@ApiOperation(value = "Finds IovGroups", notes = "Usage of this method is essentially for test purposes.", response = IovGroups.class, responseContainer = "List")
 	public Response listIovGroups(@Context UriInfo info,
 			@ApiParam(value = "tagname: the tag name", required = true) @DefaultValue("none") @PathParam("tagname") String tagname)
 					throws ConddbWebException {
