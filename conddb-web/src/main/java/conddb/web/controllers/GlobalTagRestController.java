@@ -57,22 +57,24 @@ public class GlobalTagRestController extends BaseController {
 
 	@Autowired
 	private GlobalTagService globalTagService;
-	
+
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Path("/{gtagname}")
-	@ApiOperation(value = "Finds a GlobalTag by name", notes = "Name of the globaltag, % not allowed.", response = GlobalTag.class)
+	@Path("/{name}")
+	@ApiOperation(value = "Finds a GlobalTag by name", notes = "This method will search for a global tag with the given name. Only one global tag should be returned."
+			+ "Set <trace> parameter to (de)activate tracing, i.e. the retrieval of the associated tags. "
+			+ "Set <filter> parameter retrieve the associated tags matching a given patter.", response = GlobalTag.class)
 	public Response findGlobalTag(@Context UriInfo info,
-			@ApiParam(value = "name of the global tag", required = true) @PathParam("gtagname") final String globaltagname,
+			@ApiParam(value = "name of the global tag", required = true) @PathParam("name") final String globaltagname,
 			@ApiParam(value = "trace {off|on} allows to retrieve associated tags", required = false) @DefaultValue("on") @QueryParam("trace") final String trace,
 			@ApiParam(value = "filter {tag name pattern} allows to retrieve associated tags matching pattern", required = false) @DefaultValue("none") @QueryParam("filter") final String filter,
 			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false) @DefaultValue("true") @QueryParam("expand") final boolean expand)
-					throws ConddbWebException {
+			throws ConddbWebException {
 		this.log.info("GlobalTagRestController processing request for global tag name " + globaltagname);
 		try {
 			GlobalTag entity = getGlobalTag(globaltagname, trace, filter);
 			if (entity == null) {
-				String msg = "Global Tag "+globaltagname+" not found.";
+				String msg = "Global Tag " + globaltagname + " not found.";
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
 			GenericPojoResource<GlobalTag> resource = new GenericPojoResource<GlobalTag>(info, entity, 2, null);
@@ -81,20 +83,26 @@ public class GlobalTagRestController extends BaseController {
 			throw e1;
 		} catch (Exception e) {
 			String msg = "Error retrieving GlobalTag resource ";
-			throw buildException(msg + ": " + e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);			
+			throw buildException(msg + ": " + e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@ApiOperation(value = "Finds all GlobalTags", notes = "Usage of url argument expand={true|false} in order to see full resource content or href links only", response = SwaggerGlobalTagCollection.class)
+	@ApiOperation(value = "List GlobalTags", notes = "Provide the <by> parameter to filter the list using comma separated list of conditions. "
+			+ "The syntax is : by=<param-name><operation><param-value> "
+			+ "      <param-name> is the name of one of the fields returned in the output json "
+			+ "      <operation> can be [< : >] ; for string use only [:]  "
+			+ "      <param-value> depends on the chosen parameter. "
+			+ "Set the page number and page size parameters to use pagination. ", response = SwaggerGlobalTagCollection.class)
 	public Response listGlobalTags(@Context UriInfo info,
 			@ApiParam(value = "page: the page number {0}", required = false) @DefaultValue("0") @QueryParam("page") Integer ipage,
 			@ApiParam(value = "size: the page size {1000}", required = false) @DefaultValue("1000") @QueryParam("size") Integer size,
 			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false) @DefaultValue("false") @QueryParam("expand") boolean expand,
 			@ApiParam(value = "by", required = true) @DefaultValue("name:%") @QueryParam("by") final String patternsearch)
-					throws ConddbWebException {
-		log.info("GlobalTagRestController processing request for global tag list (expansion = " + expand + ") (search = "+patternsearch+" )");
+			throws ConddbWebException {
+		log.info("GlobalTagRestController processing request for global tag list (expansion = " + expand
+				+ ") (search = " + patternsearch + " )");
 		try {
 			Page<GlobalTag> entitylist = null;
 			PageRequest preq = new PageRequest(ipage, size);
@@ -109,13 +117,13 @@ public class GlobalTagRestController extends BaseController {
 			}
 
 			Specification<GlobalTag> spec = builder.build();
-	    	entitylist = globalTagService.getGlobalTagRepository().findAll(spec,preq);
-	    	if (entitylist == null || entitylist.getContent().size() == 0) {
+			entitylist = globalTagService.getGlobalTagRepository().findAll(spec, preq);
+			if (entitylist == null || entitylist.getContent().size() == 0) {
 				String msg = "Empty globaltags collection";
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
 			Collection<GlobalTag> entitycoll = CollectionUtils.iterableToCollection(entitylist.getContent());
-			CollectionResource collres = listToCollection(entitycoll, expand, info, Link.GLOBALTAGS,0,ipage,size);
+			CollectionResource collres = listToCollection(entitycoll, expand, info, Link.GLOBALTAGS, 0, ipage, size);
 			return ok(collres);
 		} catch (ConddbWebException e1) {
 			throw e1;
@@ -136,7 +144,7 @@ public class GlobalTagRestController extends BaseController {
 				if (tagfilter == null || tagfilter.equals("none")) {
 					entity = globalTagService.getGlobalTagFetchTags(globaltagname);
 				} else {
-					entity = globalTagService.getGlobalTagFilterTags(globaltagname, "%"+tagfilter+"%");
+					entity = globalTagService.getGlobalTagFilterTags(globaltagname, "%" + tagfilter + "%");
 				}
 				log.debug("Retrieved globaltag entity : ");
 				log.debug("                   content : " + entity);

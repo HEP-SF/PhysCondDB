@@ -54,29 +54,26 @@ public class TagRestController extends BaseController {
 	private Logger log = LoggerFactory.getLogger(this.getClass());
 
 	private String QRY_PATTERN = PropertyConfigurator.getInstance().getQrypattern();
-	
+
 	@Autowired
 	private GlobalTagService globalTagService;
 
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@Path("/{tagname}")
-	@ApiOperation(value = "Finds a Tag by name",
-    notes = "Name of the tag, % not allowed.",
-    response = Tag.class)
-	public Response getTag(@Context UriInfo info, 
-			@ApiParam(value = "name of the tag", required = true)
-			@PathParam("tagname") final String tagname,
-			@ApiParam(value = "trace {off|on} allows to retrieve associated global tags", required = false)
-			@DefaultValue("off") @QueryParam("trace") final String trace,
-			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false)
-			@DefaultValue("true") @QueryParam("expand") final boolean expand) throws ConddbWebException {
+	@Path("/{name}")
+	@ApiOperation(value = "Finds a Tag by name", notes = "This method will search for a tag with the given name. Only one tag should be returned."
+			+ "Set <trace> parameter to (de)activate tracing, i.e. the retrieval of the associated global tags. ", response = Tag.class)
+	public Response findTag(@Context UriInfo info,
+			@ApiParam(value = "name of the tag", required = true) @PathParam("name") final String tagname,
+			@ApiParam(value = "trace {off|on} allows to retrieve associated global tags", required = false) @DefaultValue("off") @QueryParam("trace") final String trace,
+			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false) @DefaultValue("true") @QueryParam("expand") final boolean expand)
+			throws ConddbWebException {
 
 		this.log.info("TagRestController processing request for getting tag name " + tagname);
 		try {
 			Tag entity = getTag(tagname, trace);
 			if (entity == null) {
-				String msg = "Tag "+tagname+" not found.";
+				String msg = "Tag " + tagname + " not found.";
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
 			GenericPojoResource<Tag> resource = new GenericPojoResource<Tag>(info, entity, 2, null);
@@ -85,20 +82,26 @@ public class TagRestController extends BaseController {
 			throw e1;
 		} catch (Exception e) {
 			String msg = "Error retrieving Tag resource ";
-			throw buildException(msg + ": " + e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);			
+			throw buildException(msg + ": " + e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@ApiOperation(value = "Finds all Tags", notes = "Usage of url argument expand={true|false} in order to see full resource content or href links only", response = SwaggerTagCollection.class)
+	@ApiOperation(value = "List Tags", notes = "Provide the <by> parameter to filter the list using comma separated list of conditions. "
+			+ "The syntax is : by=<param-name><operation><param-value> "
+			+ "      <param-name> is the name of one of the fields returned in the output json "
+			+ "      <operation> can be [< : >] ; for string use only [:]  "
+			+ "      <param-value> depends on the chosen parameter. "
+			+ "Set the page number and page size parameters to use pagination. ", response = SwaggerTagCollection.class)
 	public Response listTags(@Context UriInfo info,
 			@ApiParam(value = "page: the page number {0}", required = false) @DefaultValue("0") @QueryParam("page") Integer ipage,
 			@ApiParam(value = "size: the page size {1000}", required = false) @DefaultValue("1000") @QueryParam("size") Integer size,
 			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false) @DefaultValue("true") @QueryParam("expand") boolean expand,
 			@ApiParam(value = "by", required = true) @DefaultValue("name:") @QueryParam("by") final String patternsearch)
-					throws ConddbWebException {
-		log.info("TagRestController processing request for tag list (expansion = " + expand + ") (search = "+patternsearch+" )");
+			throws ConddbWebException {
+		log.info("TagRestController processing request for tag list (expansion = " + expand + ") (search = "
+				+ patternsearch + " )");
 		try {
 			Page<Tag> entitylist = null;
 			PageRequest preq = new PageRequest(ipage, size);
@@ -113,13 +116,13 @@ public class TagRestController extends BaseController {
 			}
 
 			Specification<Tag> spec = builder.build();
-	    	entitylist = globalTagService.getTagRepository().findAll(spec,preq);
-	    	if (entitylist == null || entitylist.getContent().size() == 0) {
+			entitylist = globalTagService.getTagRepository().findAll(spec, preq);
+			if (entitylist == null || entitylist.getContent().size() == 0) {
 				String msg = "Empty tags collection";
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
 			Collection<Tag> entitycoll = CollectionUtils.iterableToCollection(entitylist.getContent());
-			CollectionResource collres = listToCollection(entitycoll, expand, info, Link.TAGS,0,ipage,size);
+			CollectionResource collres = listToCollection(entitycoll, expand, info, Link.TAGS, 0, ipage, size);
 			return ok(collres);
 		} catch (ConddbWebException e1) {
 			throw e1;
