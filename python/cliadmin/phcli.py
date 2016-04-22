@@ -400,6 +400,39 @@ class PhysDBDriver():
                 sys.exit("failed: %s" % (str(e)))
                 raise
 
+        elif self.action == 'DELETE':
+            try:
+                print 'Action DELETE is used to remove an object (globaltags,tags,systems) from the DB'
+                object=self.args[0]
+                msg = ('DELETE: selected object is %s ') % (object)
+                if object in [ 'globaltags', 'tags', 'systems' ]:
+                    self.printmsg(msg,'green')
+                else:
+                    msg = ('DELETE: cannot apply command to object %s ') % (object)
+                    self.printmsg(msg,'red')
+                    return
+                
+                expapi = ExpertApi()
+                
+                id = self.args[1]
+                print 'Removing element ',id
+                if object == 'globaltags':
+                    gtagremoved = expapi.delete_global_tag(id)
+                    print 'Object ',object,' removed and response is ',gtagremoved
+                elif object == 'tags':
+                    tagremoved = expapi.delete_tag(id)
+                    print 'Object ',object,' removed and response is ',tagremoved
+                elif object == 'systems':
+                    sysremoved = expapi.delete_system_description(id)
+                    print 'Object ',object,' does not have update method implemented yet'
+                else:
+                    print 'Cannot remove object of type ',object
+                
+                    
+            except Exception, e:
+                sys.exit("DELETE failed: %s" % (str(e)))
+                raise
+
         elif (self.action=='UPD'):
             try:
                 print 'Action UPD is used to update a metadata object (globaltags,tags,systems,...) into the DB'
