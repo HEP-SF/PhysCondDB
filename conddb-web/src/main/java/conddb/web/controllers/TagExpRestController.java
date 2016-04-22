@@ -57,7 +57,7 @@ public class TagExpRestController extends BaseController {
 	@ApiOperation(value = "Create a new Tag.",
     notes = "Creation requires the full needed information in json.",
     response = Tag.class)
-	public Response create(@Context UriInfo info, Tag tag) throws ConddbWebException {
+	public Response createTag(@Context UriInfo info, Tag tag) throws ConddbWebException {
 		try {
 			Tag saved = globalTagService.insertTag(tag);
 			GenericPojoResource<Tag> resource = new GenericPojoResource<>(info, saved, 0, null);

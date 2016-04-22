@@ -27,7 +27,9 @@ from xml.dom import minidom
 #from clint.textui import colored
 from datetime import datetime
 
-from swagger_client.apis import GlobaltagsApi, TagsApi, IovsApi, SystemsApi
+from swagger_client.apis import GlobaltagsApi, TagsApi, IovsApi, SystemsApi, ExpertApi
+from swagger_client.models import GlobalTag
+from swagger_client import ApiClient
 
 class PhysDBDriver():
     def __init__(self):
@@ -158,8 +160,7 @@ class PhysDBDriver():
         coll = sysapis.list_systems(by,page=self.page,size=self.pagesize)
         print coll
         syslist = coll.items
-        for system in syslist:
-            print system.schema_name,system.node_fullpath,system.node_description,system.tag_name_root
+        self.dumpmodellist(syslist,True,['schema_name','node_fullpath','node_description','tag_name_root'])
         print 'List of retrieved systems : ',len(syslist)
 
     def fetchsystem(self,name):
@@ -171,9 +172,61 @@ class PhysDBDriver():
         gtapis = GlobaltagsApi()
         coll = gtapis.list_global_tags(by,expand=self.expand,page=self.page,size=self.pagesize)
         gtlist = coll.items
-        for gtag in gtlist:
-            print gtag.name,gtag.snapshot_time,gtag.validity,gtag.description,gtag.lockstatus
+        self.dumpmodellist(gtlist,True,['name','validity','release','snapshot_time','description','lockstatus'])
         print 'List of retrieved global tags : ',len(gtlist)
+
+    def createobject(self,objparams,objtype):
+        api_client = ApiClient()
+        params = {}
+        args = objparams.split(";")
+        for _arg in args:
+            print 'Filling argument ',_arg
+            (key, value) = _arg.split("=")
+            params[key] = value
+        print 'created parameter list: ',params
+        resp = RESTResponse()
+        resp.data = json.dumps(params)
+        instance = {}
+        instance = api_client.deserialize(resp, objtype)
+        print 'created model object : ',instance, ' for type ',objtype
+        return instance
+
+    def dumpmodellist(self,objlist,withheader=False,keylist=[]):
+        i=0
+        for obj in objlist:
+            i=(i+1)
+            if i == 1:
+                self.dumpmodelobject(obj,True,keylist)
+            self.dumpmodelobject(obj,False,keylist)
+
+    def dumpmodelobject(self,obj,withheader=False,keylist=[]):
+        objdict = obj.to_dict()
+        headermsg = ''
+        msg = ''
+        if len(keylist)>0:
+            for key in keylist:
+                if isinstance(objdict[key],list):
+                    print 'skip list...'
+                elif key in ['href','res_id']:
+                    print 'skip fields'
+                else:
+                    headermsg = ('%s | %15s') % (headermsg,key)
+                    msg = ('%s | %s') % (msg,objdict[key])
+
+        else:
+            for key in objdict:
+                if isinstance(objdict[key],list):
+                    print 'skip list...'
+                elif key in ['href','res_id']:
+                    print 'skip fields'
+                else:
+                    headermsg = ('%s | %15s') % (headermsg,key)
+                    msg = ('%s | %s') % (msg,objdict[key])
+
+        if withheader is True:
+            self.printmsg(headermsg,'blue')
+        self.printmsg(msg,'cyan')
+
 
     def fetchglobaltag(self,name):
         gtapis = GlobaltagsApi()
@@ -192,8 +245,7 @@ class PhysDBDriver():
         tapis = TagsApi()
         coll = tapis.list_tags(by,expand=self.expand,page=self.page,size=self.pagesize)
         tlist = coll.items
-        for tag in tlist:
-            print tag.name,tag.time_type,tag.object_type,tag.description,tag.last_validated_time
+        self.dumpmodellist(tlist,True,['name','time_type','object_type','description','last_validated_time'])
         print 'List of retrieved tags : ',len(tlist)
 
     def fetchtag(self,name):
@@ -249,7 +301,6 @@ class PhysDBDriver():
                         self.fetchtag(name)
                     elif object == 'systems':
                         self.fetchsystem(name)
-    
                 else:
                     if object == 'globaltags':
                         self.getglobaltags(self.by)
@@ -262,13 +313,144 @@ class PhysDBDriver():
                 sys.exit("failed on action FIND: %s" % (str(e)))
                 raise
 
+        elif (self.action=='ADD'):
+            try:
+                print 'Action ADD is used to insert a metadata object (globaltags,tags,systems,...) into the DB'
+                object=self.args[0]
+                msg = ('ADD: selected object is %s ') % (object)
+                if object in [ 'globaltags', 'tags', 'systems' ]:
+                    self.printmsg(msg,'cyan')
+                else:
+                    msg = ('ADD: cannot apply command to object %s ') % (object)
+                    self.printmsg(msg,'red')
+                    msg = ('ADD: to insert an IOV + Payload use STORE, see --help')
+                    self.printmsg(msg,'cyan')
+                    
+                    return
+                
+                objparams = None
+                if len(self.args) > 1:
+                    objparams=self.args[1]
+            
+                msg = ('ADD: object parameters %s ') % (objparams)
+                self.printmsg(msg,'cyan')
+                
+                data = {}
+                if objparams is None:
+                    msg = 'Cannot create object without a list of parameters, which should be separated by ;'
+                    self.printmsg(msg,'cyan')
+                    return
+        # Parameters have been provided in command line, try to create the json entity
+                if object == 'globaltags':
+                    expapi = ExpertApi()
+                    gtag = self.createobject(objparams,'GlobalTag')
+                    gtagcreated = expapi.create_global_tag(body=gtag)
+                    print 'Object ',object,' added to db and response is ',gtagcreated
+                elif object == 'tags':
+                    expapi = ExpertApi()
+                    tag = self.createobject(objparams,'Tag')
+                    tagcreated = expapi.create_tag(body=tag)
+                    print 'Object ',object,' added to db and response is ',tagcreated
+                elif object == 'systems':
+                    expapi = ExpertApi()
+                    system = self.createobject(objparams,'SystemDescription')
+                    syscreated = expapi.create_system_description(body=system)
+                    print 'Object ',object,' added to db and response is ',syscreated
+                else:
+                    print 'Cannot create object of type ',object
+
+            except Exception, e:
+                sys.exit("ADD failed: %s" % (str(e)))
+                raise
+
+        elif self.action == 'LOCK':
+            try:
+                print 'Action LOCK is used to lock or unlock a global tag'
+                calibargs=self.args
+                msg = '>>> Call method %s using arguments %s ' % (self.action,calibargs)
+                self.printmsg(msg,'cyan')
+                
+                if len(calibargs) < 2:
+                    print 'Set default option for lockstatus to LOCKED (type -h for help)'
+                    calibargs.append('LOCKED')
+                
+                expapi = ExpertApi()
+                objparams = ('name=%s;lockstatus=%s') % (calibargs[0],calibargs[1])
+                gtag = self.createobject(objparams,'GlobalTag')
+                gtagcreated = expapi.update_global_tag(gtag.name,body=gtag)
+                print 'GlobalTag ',calibargs[0],' lockstatus modified and response is ',gtagcreated
+                self.dumpmodelobject(gtagcreated,True,['name','lockstatus','validity','description','release'])
+            
+            except Exception, e:
+                sys.exit("failed: %s" % (str(e)))
+                raise
+
+        elif (self.action=='UPD'):
+            try:
+                print 'Action UPD is used to update a metadata object (globaltags,tags,systems,...) into the DB'
+                object=self.args[0]
+                msg = ('UPD: selected object is %s ') % (object)
+                if object in [ 'globaltags', 'tags', 'systems' ]:
+                    self.printmsg(msg,'cyan')
+                else:
+                    msg = ('UPD: cannot apply command to object %s ') % (object)
+                    self.printmsg(msg,'red')
+                    return
+                
+                objparams = None
+                if len(self.args) > 1:
+                    objparams=self.args[1]
+            
+                msg = ('UPD: object parameters %s ') % (objparams)
+                self.printmsg(msg,'cyan')
+                expapi = ExpertApi()
+
+                data = {}
+                if objparams is None:
+                    msg = 'Cannot create object without a list of parameters, which should be separated by ;'
+                    self.printmsg(msg,'cyan')
+                    return
+            # Parameters have been provided in command line, try to create the json entity
+                if object == 'globaltags':
+                    gtag = self.createobject(objparams,'GlobalTag')
+                    gtagcreated = expapi.update_global_tag(gtag.name,body=gtag)
+                    print 'Object ',object,' updated and response is ',gtagcreated
+                elif object == 'tags':
+                    tag = self.createobject(objparams,'Tag')
+                    tagcreated = expapi.update_tag(tag.name,body=tag)
+                    print 'Object ',object,' updated to db and response is ',tagcreated
+                elif object == 'systems':
+                    #system = self.createobject(objparams,'SystemDescription')
+                    #syscreated = expapi.update_system_description(body=system)
+                    print 'Object ',object,' does not have update method implemented yet'
+                else:
+                    print 'Cannot update object of type ',object
+
+            except Exception, e:
+                sys.exit("ADD failed: %s" % (str(e)))
+                raise
         else:
             print "Command not recognized: please type -h for help"
 
 
         tend=datetime.now()
         print 'Time spent (ms): ',tend-start
-        
+
+
+class RESTResponse(object):
+    def __init__(self):
+        print 'create response object'
+        self.__data = None
+
+    def data(self):
+        return self.__data
+
+    def data(self, data):
+        self.__data = data
+        print 'create data field ',self.__data
+# process command line options
+
+
 if __name__ == '__main__':
     PhysDBDriver()
 

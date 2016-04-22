@@ -85,6 +85,7 @@ public class GlobalTagExpRestController extends BaseController {
 	@Path(Link.GLOBALTAGS+"/{id}")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
 	@ApiOperation(value = "Update a GlobalTag.",
 		    notes = "Input data are in json, and should match all  fields to be updated.",
 		    response=GlobalTag.class)
@@ -162,6 +163,7 @@ public class GlobalTagExpRestController extends BaseController {
 	@Path(Link.GLOBALTAGS+"/maps/{id}")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
 	@ApiOperation(value = "Map a tag to a globaltag.",
     notes = "Can be used for one or many tags.",response=GlobalTag.class)
 	public Response mapTagsToGlobalTag(
