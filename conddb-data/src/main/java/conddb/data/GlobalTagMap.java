@@ -69,6 +69,7 @@ public class GlobalTagMap extends conddb.data.AfEntity implements java.io.Serial
 	 */
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
+	@Column(name = "ID", unique = true, nullable = false)
 	public Long getId() {
 		return this.id;
 	}

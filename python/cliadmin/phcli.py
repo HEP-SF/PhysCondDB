@@ -27,16 +27,14 @@ from xml.dom import minidom
 #from clint.textui import colored
 from datetime import datetime
 
-from swagger_client.apis import GlobaltagsApi, TagsApi, IovsApi, SystemsApi, ExpertApi
-from swagger_client.models import GlobalTag
+from swagger_client.apis import GlobaltagsApi, TagsApi, IovsApi, SystemsApi, ExpertApi, MapsApi
+from swagger_client.models import GlobalTag, Tag, GlobalTagMap, SystemDescription
 from swagger_client import ApiClient
 
 class PhysDBDriver():
     def __init__(self):
     # process command line options
         try:
-            self.restserver = {}
-            self.resttools = {}
             self._command = sys.argv[0]
             self.useSocks = False
             self.t0 = 0
@@ -53,15 +51,18 @@ class PhysDBDriver():
             self.user='none'
             self.passwd='none'
             self.outfilename=''
-            self.urlsvc='localhost:8080/physconddb'
+            self.api_client=None
+            self.urlsvc='http://localhost:8080/physconddb/api/rest'
             longopts=['help','socks','out=','jsondump','t0=','tMax=','url=','debug','trace=','expand=','by=','page=','pagesize=','iovspan=','user=','pass=']
             opts,args=getopt.getopt(sys.argv[1:],'',longopts)
             print opts, args
+            self.procopts(opts,args)
         except getopt.GetoptError,e:
             print e
             self.usage()
             sys.exit(-1)
-        self.procopts(opts,args)
+            
+        self.api_client = ApiClient(host=self.urlsvc)
         self.execute()
 
     def usage(self):
@@ -92,6 +93,11 @@ class PhysDBDriver():
         print " - LOCK <global tag name> <lock status> [LOCKED|UNLOCKED] : lock a global tag, default lock status is LOCKED."
         print "        ex: LOCK MYGTAG-01-01 LOCKED : Lock a global tag."
         print " "
+        print " "
+        print " - LINK <global tag name> <tag name> <record=xxx;label=xxx> : link a global tag to a tag."
+        print "        ex: LINK MYGTAG-01-01 TAG-01-01 'record=a record;label=a label' : Link a global tag."
+        print " "
+        print " - DESCRIBE <object> [globaltag | tag | system | map ] : describe fields in the given object type."
         print " "
         print "Options: "
         print "  --socks activate socks proxy on localhost 3129 "
@@ -171,27 +177,25 @@ class PhysDBDriver():
           print msg
 
     def getsystems(self,by):
-        sysapis = SystemsApi()
+        sysapis = SystemsApi(self.api_client)
         coll = sysapis.list_systems(by,page=self.page,size=self.pagesize)
-        print coll
         syslist = coll.items
         self.dumpmodellist(syslist,True,['schema_name','node_fullpath','node_description','tag_name_root'])
         print 'List of retrieved systems : ',len(syslist)
 
     def fetchsystem(self,name):
-        sysapis = SystemsApi()
+        sysapis = SystemsApi(self.api_client)
         system = sysapis.find_system(name,expand=self.expand,trace=self.trace)
-        print system.schema_name,system.node_fullpath,system.node_description,system.tag_name_root
+        self.dumpmodelobject(system,True,['schema_name','node_fullpath','node_description','tag_name_root'])
 
     def getglobaltags(self,by):
-        gtapis = GlobaltagsApi()
+        gtapis = GlobaltagsApi(self.api_client)
         coll = gtapis.list_global_tags(by,expand=self.expand,page=self.page,size=self.pagesize)
         gtlist = coll.items
         self.dumpmodellist(gtlist,True,['name','validity','release','snapshot_time','description','lockstatus'])
         print 'List of retrieved global tags : ',len(gtlist)
 
     def createobject(self,objparams,objtype):
-        api_client = ApiClient()
         params = {}
         args = objparams.split(";")
         for _arg in args:
@@ -202,10 +206,17 @@ class PhysDBDriver():
         resp = RESTResponse()
         resp.data = json.dumps(params)
         instance = {}
-        instance = api_client.deserialize(resp, objtype)
+        instance = self.api_client.deserialize(resp, objtype)
         print 'created model object : ',instance, ' for type ',objtype
         return instance
 
+    def helpmodel(self,obj,keylist=[]):
+        attrs = obj.attribute_map
+        msg = ''
+        for key in keylist:
+            msg = ('%s%s=...;') % (msg,attrs[key])
+        self.printmsg(msg[:-1],'cyan')
+        
     def dumpmodellist(self,objlist,withheader=False,keylist=[]):
         i=0
         for obj in objlist:
@@ -244,34 +255,36 @@ class PhysDBDriver():
 
 
     def fetchglobaltag(self,name):
-        gtapis = GlobaltagsApi()
+        gtapis = GlobaltagsApi(self.api_client)
         gtag = gtapis.find_global_tag(name,expand=self.expand,trace=self.trace)
         coll = gtag.global_tag_maps
         if coll is None:
             print 'associated tags not found: may be trace is disabled ? (--trace=on)'
             return
         for map in coll:
-            print map.system_tag.name, map.system_tag.time_type, map.record, map.label
+            msg = ('%s | %s | %s | %s ')%(map.system_tag.name, map.system_tag.time_type, map.record, map.label)
+            self.printmsg(msg,'cyan')
         print 'Selected global tag is: '
-        print gtag.name,gtag.snapshot_time,gtag.validity,gtag.description,gtag.lockstatus
+        self.dumpmodelobject(gtag,True,['name','snapshot_time','validity','description','lockstatus'])
         print 'List of associated tag : ',len(coll)
 
     def gettags(self,by):
-        tapis = TagsApi()
+        tapis = TagsApi(self.api_client)
         coll = tapis.list_tags(by,expand=self.expand,page=self.page,size=self.pagesize)
         tlist = coll.items
         self.dumpmodellist(tlist,True,['name','time_type','object_type','description','last_validated_time'])
         print 'List of retrieved tags : ',len(tlist)
 
     def fetchtag(self,name):
-        tapis = TagsApi()
+        tapis = TagsApi(self.api_client)
         tag = tapis.find_tag(name,expand=self.expand,trace=self.trace)
         print tag.name,tag.time_type,tag.object_type,tag.description,tag.last_validated_time
         coll = tag.global_tag_maps
         if coll is None:
             print 'associated global tags not found: may be trace is disabled ? (--trace=on)'
         for map in coll:
-            print map.global_tag.name, map.global_tag.description, map.record, map.label
+            msg = ('%s | %s | %s | %s ')%(map.global_tag.name, map.global_tag.description, map.record, map.label)
+            self.printmsg(msg,'cyan')
 
     def execute(self):
         msg = ('Execute the command for action %s and arguments : %s ' ) % (self.action, str(self.args))
@@ -356,21 +369,26 @@ class PhysDBDriver():
                     self.printmsg(msg,'cyan')
                     return
         # Parameters have been provided in command line, try to create the json entity
+                expapi = ExpertApi(self.api_client)
                 if object == 'globaltags':
-                    expapi = ExpertApi()
+                    objparams = ('%s;lockstatus=UNLOCKED') % (objparams)
                     gtag = self.createobject(objparams,'GlobalTag')
                     gtagcreated = expapi.create_global_tag(body=gtag)
-                    print 'Object ',object,' added to db and response is ',gtagcreated
+                    print 'Object ',object,' added to db and response is :'
+                    self.dumpmodelobject(gtagcreated,True,['name','snapshot_time','validity','description','lockstatus'])
+
                 elif object == 'tags':
-                    expapi = ExpertApi()
                     tag = self.createobject(objparams,'Tag')
                     tagcreated = expapi.create_tag(body=tag)
-                    print 'Object ',object,' added to db and response is ',tagcreated
+                    print 'Object ',object,' added to db and response is :'
+                    self.dumpmodelobject(tagcreated,True,['name','time_type','object_type','description','last_validated_time'])
+
                 elif object == 'systems':
-                    expapi = ExpertApi()
                     system = self.createobject(objparams,'SystemDescription')
                     syscreated = expapi.create_system_description(body=system)
-                    print 'Object ',object,' added to db and response is ',syscreated
+                    print 'Object ',object,' added to db and response is :'
+                    self.dumpmodelobject(syscreated,True,['schema_name','node_fullpath','node_description','tag_name_root'])
+
                 else:
                     print 'Cannot create object of type ',object
 
@@ -378,22 +396,40 @@ class PhysDBDriver():
                 sys.exit("ADD failed: %s" % (str(e)))
                 raise
 
+        elif self.action == 'LS':
+            try:
+                print 'Action LS is used to retrieve iovs in a tag: an optional argument can be added, indicating the snapshot time for the IOVs.'
+                tag=self.args[0]
+                snapt = 'none'
+                if len(self.args) == 2:
+                    snapt=self.args[1]
+                msg = ('LS: use tag %s and snapshot time %s !') % (tag,snapt)
+                self.printmsg(msg,'cyan')
+      
+                iovapi = IovsApi()
+                iovlist = iovapi.get_iovs_in_tag(tag,expand=self.expand,since=self.t0,until=self.tMax)
+                print 'Retrieved iov list: ',iovlist
+                
+            except Exception, e:
+                sys.exit("LS failed: %s" % (str(e)))
+                raise e
+                
         elif self.action == 'LOCK':
             try:
                 print 'Action LOCK is used to lock or unlock a global tag'
-                calibargs=self.args
-                msg = '>>> Call method %s using arguments %s ' % (self.action,calibargs)
+                lockargs=self.args
+                msg = '>>> Call method %s using arguments %s ' % (self.action,lockargs)
                 self.printmsg(msg,'cyan')
                 
-                if len(calibargs) < 2:
+                if len(lockargs) < 2:
                     print 'Set default option for lockstatus to LOCKED (type -h for help)'
-                    calibargs.append('LOCKED')
+                    lockargs.append('LOCKED')
                 
-                expapi = ExpertApi()
-                objparams = ('name=%s;lockstatus=%s') % (calibargs[0],calibargs[1])
+                expapi = ExpertApi(self.api_client)
+                objparams = ('name=%s;lockstatus=%s') % (lockargs[0],lockargs[1])
                 gtag = self.createobject(objparams,'GlobalTag')
                 gtagcreated = expapi.update_global_tag(gtag.name,body=gtag)
-                print 'GlobalTag ',calibargs[0],' lockstatus modified and response is ',gtagcreated
+                print 'GlobalTag ',lockargs[0],' lockstatus modified and response is ',gtagcreated
                 self.dumpmodelobject(gtagcreated,True,['name','lockstatus','validity','description','release'])
             
             except Exception, e:
@@ -412,25 +448,75 @@ class PhysDBDriver():
                     self.printmsg(msg,'red')
                     return
                 
-                expapi = ExpertApi()
+                expapi = ExpertApi(self.api_client)
                 
                 id = self.args[1]
                 print 'Removing element ',id
                 if object == 'globaltags':
                     gtagremoved = expapi.delete_global_tag(id)
-                    print 'Object ',object,' removed and response is ',gtagremoved
+                    print 'Object ',object,' removed and response is '
+                    self.dumpmodelobject(gtagremoved,True,['name','snapshot_time','validity','description','lockstatus'])
+
                 elif object == 'tags':
                     tagremoved = expapi.delete_tag(id)
-                    print 'Object ',object,' removed and response is ',tagremoved
+                    print 'Object ',object,' removed and response is '
+                    self.dumpmodelobject(tagremoved,True,['name','time_type','object_type','description','last_validated_time'])
+
                 elif object == 'systems':
                     sysremoved = expapi.delete_system_description(id)
-                    print 'Object ',object,' does not have update method implemented yet'
+                    print 'Object ',object,' removed and response is '
+                    self.dumpmodelobject(sysremoved,True,['schema_name','node_fullpath','node_description','tag_name_root'])
+
                 else:
                     print 'Cannot remove object of type ',object
                 
                     
             except Exception, e:
                 sys.exit("DELETE failed: %s" % (str(e)))
+                raise
+
+        elif self.action == 'LINK':
+            try:
+                print 'Action LINK is used to link a global tag to a tag'
+                gtagobject=self.args[0]
+                tagobject=self.args[1]
+                msg = ('LINK: perform association between %s and %s ') % (gtagobject,tagobject)
+                self.printmsg(msg,'cyan')
+                
+                objparams = '';
+                if len(self.args)>2: 
+                    objparams = ('globalTagName=%s;tagName=%s;%s') % (gtagobject,tagobject,self.args[2])
+                else:
+                    objparams = ('globalTagName=%s;tagName=%s') % (gtagobject,tagobject)
+                expapi = ExpertApi(self.api_client)
+                gtagmap = self.createobject(objparams,'GlobalTagMap')
+                gtagmapcreated = expapi.create_global_tag_map(body=gtagmap)
+                print 'Object globaltagmap created and response is ',gtagmapcreated
+                    
+            except Exception, e:
+                sys.exit("LINK failed: %s" % (str(e)))
+                raise
+
+        elif self.action == 'UNLINK':
+            try:
+                print 'Action UNLINK is used to remove link from a global tag to a tag'
+                gtagobject=self.args[0]
+                tagobject=self.args[1]
+                msg = ('UNLINK: perform association removal between %s and %s ') % (gtagobject,tagobject)
+                self.printmsg(msg,'cyan')
+                
+                objparams = ('globalTag_name:%s,systemTag_name:%s') % (gtagobject,tagobject);
+                mapapi = MapsApi(self.api_client)
+                print 'use arguments ',objparams
+                gtagmaplist = mapapi.list_global_tag_maps('record:',objparams,expand='true')
+                for item in gtagmaplist.items:
+                    expapi = ExpertApi()
+                    print 'Removing ID = ',item.id
+                    id = item.id
+                    gtagmapremoved = expapi.delete_global_tag_map(id)
+                    
+            except Exception, e:
+                sys.exit("UNLINK failed: %s" % (str(e)))
                 raise
 
         elif (self.action=='UPD'):
@@ -451,7 +537,7 @@ class PhysDBDriver():
             
                 msg = ('UPD: object parameters %s ') % (objparams)
                 self.printmsg(msg,'cyan')
-                expapi = ExpertApi()
+                expapi = ExpertApi(self.api_client)
 
                 data = {}
                 if objparams is None:
@@ -462,11 +548,13 @@ class PhysDBDriver():
                 if object == 'globaltags':
                     gtag = self.createobject(objparams,'GlobalTag')
                     gtagcreated = expapi.update_global_tag(gtag.name,body=gtag)
-                    print 'Object ',object,' updated and response is ',gtagcreated
+                    print 'Object ',object,' updated and response is '
+                    self.dumpmodelobject(gtagcreated,True,['name','snapshot_time','validity','description','lockstatus'])
                 elif object == 'tags':
                     tag = self.createobject(objparams,'Tag')
                     tagcreated = expapi.update_tag(tag.name,body=tag)
-                    print 'Object ',object,' updated to db and response is ',tagcreated
+                    print 'Object ',object,' updated to db and response is '
+                    self.dumpmodelobject(tagcreated,True,['name','time_type','object_type','description','last_validated_time'])
                 elif object == 'systems':
                     #system = self.createobject(objparams,'SystemDescription')
                     #syscreated = expapi.update_system_description(body=system)
@@ -475,7 +563,33 @@ class PhysDBDriver():
                     print 'Cannot update object of type ',object
 
             except Exception, e:
-                sys.exit("ADD failed: %s" % (str(e)))
+                sys.exit("UPD failed: %s" % (str(e)))
+                raise
+        elif self.action == 'DESCRIBE':
+            try:
+                print 'Action DESCRIBE is used to get help on fields for the given object type'
+                objecttype=self.args[0]
+                msg = ('DESCRIBE: get help on %s') % (objecttype)
+                self.printmsg(msg,'cyan')
+                
+                if objecttype == 'globaltag':
+                    gtag = GlobalTag()
+                    self.helpmodel(gtag,['name','validity','description','release'])
+                elif objecttype == 'tag':
+                    tag = Tag()
+                    self.helpmodel(tag,['name','time_type','object_type','description','last_validated_time','synchronization','end_of_validity'])
+                elif objecttype == 'system':
+                    system = SystemDescription()
+                    self.helpmodel(system,['schema_name','tag_name_root','node_fullpath','node_description'])
+                elif objecttype == 'map':
+                    maps = GlobalTagMap()
+                    self.helpmodel(maps,['record','label'])
+                else:
+                    print 'Missing help on ',objecttype
+                
+                    
+            except Exception, e:
+                sys.exit("DESCRIBE failed: %s" % (str(e)))
                 raise
         else:
             print "Command not recognized: please type -h for help"

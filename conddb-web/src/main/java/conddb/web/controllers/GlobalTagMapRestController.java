@@ -35,6 +35,7 @@ import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.Link;
+import conddb.web.resources.SwaggerGlobalTagMapCollection;
 import conddb.web.resources.generic.GenericPojoResource;
 import conddb.web.utils.PropertyConfigurator;
 import conddb.web.utils.collections.CollectionUtils;
@@ -92,7 +93,8 @@ public class GlobalTagMapRestController  extends BaseController {
 	
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
-	@ApiOperation(value = "Finds all GlobalTagMaps", notes = "Usage of url argument expand={true|false} in order to see full resource content or href links only", response = GlobalTagMap.class, responseContainer = "List")
+	@ApiOperation(value = "Finds all GlobalTagMaps", notes = "Usage of url argument expand={true|false} in order to see full resource content or href links only", 
+	response = SwaggerGlobalTagMapCollection.class)
 	public Response listGlobalTagMaps(@Context UriInfo info,
 			@ApiParam(value = "page: the page number {0}", required = false) @DefaultValue("0") @QueryParam("page") Integer ipage,
 			@ApiParam(value = "size: the page size {1000}", required = false) @DefaultValue("1000") @QueryParam("size") Integer size,
@@ -132,17 +134,12 @@ public class GlobalTagMapRestController  extends BaseController {
 			log.debug("Specifications : "+result.toString());
 			///////////////
 	        result = Specifications.where(new MappingsJoinSpecifications<GlobalTagMap>()).and(spec).and(specjoin);
-
 			
 	    	entitylist = globalTagService.getGlobalTagMapRepository().findAll(result);
 	    	if (entitylist == null || entitylist.size() == 0) {
 				String msg = "Empty globaltagmaps collection";
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
-//	    	if (entitylist == null || entitylist.getContent().size() == 0) {
-//				String msg = "Empty globaltagmaps collection";
-//				throw buildException(msg, msg, Response.Status.NOT_FOUND);
-//			}
 			Collection<GlobalTagMap> entitycoll = CollectionUtils.iterableToCollection(entitylist);
 			CollectionResource collres = listToCollection(entitycoll, expand, info, Link.GLOBALTAGMAPS,1);
 			return ok(collres);
@@ -153,22 +150,5 @@ public class GlobalTagMapRestController  extends BaseController {
 			throw buildException(msg + ": " + e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
-
-
-//	protected CollectionResource listToCollection(Collection<GlobalTagMap> globaltagmaps, boolean expand, UriInfo info, Integer ipage, Integer size) {
-//        Collection items = new ArrayList(globaltagmaps.size());
-//        for( GlobalTagMap globaltagmap : globaltagmaps) {
-//            if (expand) {
-//                items.add(springResourceFactory.getResource("generic-gtmap", info, globaltagmap));
-//            } else {
-//                items.add(springResourceFactory.getResource("link",info,globaltagmap));
-//            }
-//        }
-//        if (ipage == null || size ==null) {
-//            return (CollectionResource)springResourceFactory.getCollectionResource(info, Link.GLOBALTAGMAPS, items);
-//        }
-//        	
-//        return (CollectionResource)springResourceFactory.getCollectionResource(info, Link.GLOBALTAGMAPS, items, ipage, size);
-//	}
 
 }

@@ -30,7 +30,6 @@ import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.Link;
-import conddb.web.resources.SpringResourceFactory;
 import conddb.web.resources.generic.GenericPojoResource;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -51,8 +50,6 @@ public class GlobalTagMapExpRestController extends BaseController {
 	private GlobalTagService globalTagService;
 	@Autowired
 	private GlobalTagAdminService globalTagAdminService;
-	@Autowired
-	private SpringResourceFactory springResourceFactory;
 	
 	@POST
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -62,14 +59,16 @@ public class GlobalTagMapExpRestController extends BaseController {
     notes = "Input data are in json, and should match all needed fields for a new global tag to tag association.\n"
     +"These key fields are: globaltagname, tagname, record and label.",
     response=GlobalTagMap.class)
-	public Response createGlobalTagMap(@Context UriInfo info, @ApiParam(value = "a json entry corresponding to mapping parameters.", required = true) Map map) throws ConddbWebException {
+	public Response createGlobalTagMap(@Context UriInfo info, 
+			@ApiParam(value = "a json entry corresponding to mapping parameters.", required = true) Map<?,?> map) throws ConddbWebException {
 
 		try {
 			log.info("Request for creating a new global tag mapping using data map of size "+map.size());
 			GlobalTagMap globaltagmap = createGlobalTagMap(map);
 			
 			GlobalTagMap saved = globalTagService.insertGlobalTagMap(globaltagmap);
-			GenericPojoResource<GlobalTagMap> resource = (GenericPojoResource) springResourceFactory.getGenericResource(info, saved, 0, null);
+			GenericPojoResource<GlobalTagMap> resource = new GenericPojoResource<GlobalTagMap>(info, saved, 0, null);
+
 			return created(resource);
 		} catch (ConddbServiceException e) {
 			String msg = "Error creating association resource using "+map.toString();
@@ -86,7 +85,7 @@ public class GlobalTagMapExpRestController extends BaseController {
     response=GlobalTagMap.class)
 	public Response updateGlobalTagMap(@Context UriInfo info, 
 			@ApiParam(value = "id: id of the globaltagmap to be updated", required = true) 
-			@PathParam("id") Long id, Map map)
+			@PathParam("id") Long id, Map<?,?> map)
 			throws ConddbWebException {
 		try {
 			log.info("Request for updating global tag mapping "+id+" using "+map.size());
@@ -101,7 +100,7 @@ public class GlobalTagMapExpRestController extends BaseController {
 			if (map.containsKey("record")) {
 				existing.setRecord(String.valueOf(map.get("record")));
 			}
-			GenericPojoResource<GlobalTagMap> resource = (GenericPojoResource) springResourceFactory.getGenericResource(info, existing, 0, null);
+			GenericPojoResource<GlobalTagMap> resource = new GenericPojoResource<GlobalTagMap>(info, existing, 0, null);
 			return ok(resource);
 		} catch (ConddbServiceException e) {
 			log.debug("Generate exception using an ConddbService exception..."+e.getMessage());
@@ -132,7 +131,8 @@ public class GlobalTagMapExpRestController extends BaseController {
 				throw buildException(msg, msg, Response.Status.PRECONDITION_FAILED);				
 			}
 			existing = globalTagAdminService.deleteGlobalTagMap(id);
-			GenericPojoResource<GlobalTagMap> resource = (GenericPojoResource) springResourceFactory.getGenericResource(info, existing, 0, null);
+			
+			GenericPojoResource<GlobalTagMap> resource = new GenericPojoResource<GlobalTagMap>(info, existing, 0, null);
 
 			return ok(resource);
 		} catch (ConddbServiceException e) {
@@ -143,22 +143,22 @@ public class GlobalTagMapExpRestController extends BaseController {
 
 	}
 	
-	protected GlobalTagMap createGlobalTagMap(Map map) throws ConddbServiceException {
+	protected GlobalTagMap createGlobalTagMap(Map<?,?> map) throws ConddbServiceException {
 		GlobalTagMap globaltagmap = new GlobalTagMap();
 		if (map == null) {
 			throw new ConddbServiceException("Cannot create global tag mapping from null map");
 		}
-		if (map.containsKey("globaltagname")) {
-			GlobalTag globaltag = globalTagService.getGlobalTag((String.valueOf(map.get("globaltagname"))));
+		if (map.containsKey("globalTagName")) {
+			GlobalTag globaltag = globalTagService.getGlobalTag((String.valueOf(map.get("globalTagName"))));
 			if (globaltag == null) {
-				throw new ConddbServiceException("Global tag "+String.valueOf(map.get("globaltagname"))+" does not exists ");
+				throw new ConddbServiceException("Global tag "+String.valueOf(map.get("globalTagName"))+" does not exists ");
 			}
 			globaltagmap.setGlobalTag(globaltag);
 		}
-		if (map.containsKey("tagname")) {
-			Tag tag = globalTagService.getTag((String.valueOf(map.get("tagname"))));
+		if (map.containsKey("tagName")) {
+			Tag tag = globalTagService.getTag((String.valueOf(map.get("tagName"))));
 			if (tag == null) {
-				throw new ConddbServiceException("Tag "+String.valueOf(map.get("tagname"))+" does not exists ");
+				throw new ConddbServiceException("Tag "+String.valueOf(map.get("tagName"))+" does not exists ");
 			}
 			globaltagmap.setSystemTag(tag);
 		}
