@@ -27,7 +27,7 @@ from xml.dom import minidom
 #from clint.textui import colored
 from datetime import datetime
 
-from swagger_client.apis import GlobaltagsApi, TagsApi, IovsApi, SystemsApi, ExpertApi, MapsApi
+from swagger_client.apis import GlobaltagsApi, TagsApi, IovsApi, SystemsApi, ExpertApi, MapsApi, PayloadApi
 from swagger_client.models import GlobalTag, Tag, GlobalTagMap, SystemDescription
 from swagger_client import ApiClient
 
@@ -90,12 +90,23 @@ class PhysDBDriver():
         print "        ex: globaltags 'name=MYGTAG-01-01;description=A global tag;release=some release;validity=0' : create a global tag using the provided parameter list"
         print "        ex: tags 'name=MyTag-01-01;description=A test tag; ... ' : create a tag using the provided parameter list"
         print " "
+        print " - STORE <tag> <filename> <iov parameters string> <payload parameters string> [column separated key=val list]"
+        print "        ex: mytag01 local.file 'since=1000;sinceString=t1000; xxxx ' 'streamerInfo=an info; objectType=the object type; version=1.0': create an iov inside a tag using the provided parameter list and input file"
+        print " "
+        print " - LS <tag name> : list iovs in a tag."
+        print "        ex: MYTAG-00-01  : list the iovs"
+        print " "
+        print " - GET <hash> : download blob on disk."
+        print " "
         print " - LOCK <global tag name> <lock status> [LOCKED|UNLOCKED] : lock a global tag, default lock status is LOCKED."
         print "        ex: LOCK MYGTAG-01-01 LOCKED : Lock a global tag."
         print " "
         print " "
         print " - LINK <global tag name> <tag name> <record=xxx;label=xxx> : link a global tag to a tag."
         print "        ex: LINK MYGTAG-01-01 TAG-01-01 'record=a record;label=a label' : Link a global tag."
+        print " "
+        print " - UNLINK <global tag name> <tag name> : unlink a global tag from a tag."
+        print "        ex: UNLINK MYGTAG-01-01 TAG-01-01 : unlink a global tag."
         print " "
         print " - DESCRIBE <object> [globaltag | tag | system | map ] : describe fields in the given object type."
         print " "
@@ -210,6 +221,56 @@ class PhysDBDriver():
         print 'created model object : ',instance, ' for type ',objtype
         return instance
 
+    def printrow(self, objdict, keys=[]):
+        #print objdict
+        (head_format, row_format) = self.getformat(objdict,keys)
+        for akey in keys:
+            val = objdict[akey]
+            if '_time' in akey:
+                objdict[akey] = str(objdict[akey])
+        ##print 'using row format ',row_format
+        return row_format.format(**objdict)
+
+    def getformat(self, objdict, keys=[]):
+        ##print objdict
+        head_format = ''
+        row_format = ''
+        i=0
+        for akey in keys:
+            val = objdict[akey]
+            num = 30
+            if (akey == 'name'):
+                num=60
+            if ('_time' in akey):
+                num=35
+            if ('node_' in akey):
+                num=50
+            if ('status' in akey):
+                num=15
+            if ('_type' in akey):
+                num=30
+            if ('description' in akey):
+                num=80
+                
+            akey_format='{%s:<%d.%d} | ' % (akey,num,num)
+            if (isinstance(val,(int,float,long))):
+                num=12
+                if (akey == 'row'):
+                    num=5
+                akey_format='{%s:<%d} | ' % (akey,num)
+            
+            head_format += '{0[%d]:<%d} |' % (int(i),num)
+            row_format += akey_format
+            i+=1
+            
+        return head_format,row_format
+    
+    def printheader(self, objdict, keys=[]):
+        ##print objdict
+        (head_format, row_format) = self.getformat(objdict,keys)
+        return head_format.format(keys)
+
+
     def helpmodel(self,obj,keylist=[]):
         attrs = obj.attribute_map
         msg = ''
@@ -222,13 +283,19 @@ class PhysDBDriver():
         for obj in objlist:
             i=(i+1)
             if i == 1:
-                self.dumpmodelobject(obj,True,keylist)
-            self.dumpmodelobject(obj,False,keylist)
+                self.dumpmodelobject(obj,withheader,keylist)
+            else:
+                self.dumpmodelobject(obj,False,keylist)
 
     def dumpmodelobject(self,obj,withheader=False,keylist=[]):
-        objdict = obj.to_dict()
+        objdict = {}
+        if not isinstance(obj,dict):
+            objdict = obj.to_dict()
+        else:
+            objdict = obj
         headermsg = ''
         msg = ''
+        reducedlist=[]
         if len(keylist)>0:
             for key in keylist:
                 if isinstance(objdict[key],list):
@@ -236,8 +303,9 @@ class PhysDBDriver():
                 elif key in ['href','res_id']:
                     print 'skip fields'
                 else:
-                    headermsg = ('%s | %15s') % (headermsg,key)
-                    msg = ('%s | %s') % (msg,objdict[key])
+                    reducedlist.append(key)
+#                    headermsg = ('%s | %15s') % (headermsg,key)
+#                    msg = ('%s | %s') % (msg,objdict[key])
 
         else:
             for key in objdict:
@@ -246,13 +314,17 @@ class PhysDBDriver():
                 elif key in ['href','res_id']:
                     print 'skip fields'
                 else:
-                    headermsg = ('%s | %15s') % (headermsg,key)
-                    msg = ('%s | %s') % (msg,objdict[key])
-
+                    reducedlist.append(key)
+                    #print 'Appending key ',key
+                    
         if withheader is True:
+            headermsg = self.printheader(objdict,reducedlist)
             self.printmsg(headermsg,'blue')
+            sep_format = '{:=^%d}' % int(len(headermsg))
+            self.printmsg(sep_format.format('========='),'blue')
+        
+        msg = self.printrow(objdict,reducedlist)
         self.printmsg(msg,'cyan')
-
 
     def fetchglobaltag(self,name):
         gtapis = GlobaltagsApi(self.api_client)
@@ -261,11 +333,17 @@ class PhysDBDriver():
         if coll is None:
             print 'associated tags not found: may be trace is disabled ? (--trace=on)'
             return
+        i = 0
+        rowlist = []
         for map in coll:
-            msg = ('%s | %s | %s | %s ')%(map.system_tag.name, map.system_tag.time_type, map.record, map.label)
-            self.printmsg(msg,'cyan')
+            row = { 'name' : map.system_tag.name, 'time_type' : map.system_tag.time_type, 'record' : map.record, 'label' : map.label}
+            rowlist.append(row)
+            
+        self.dumpmodellist(rowlist,True,['name','time_type','record','label'])
         print 'Selected global tag is: '
         self.dumpmodelobject(gtag,True,['name','snapshot_time','validity','description','lockstatus'])
+        if self.debug:
+            print gtag
         print 'List of associated tag : ',len(coll)
 
     def gettags(self,by):
@@ -282,9 +360,12 @@ class PhysDBDriver():
         coll = tag.global_tag_maps
         if coll is None:
             print 'associated global tags not found: may be trace is disabled ? (--trace=on)'
+        rowlist = []
         for map in coll:
-            msg = ('%s | %s | %s | %s ')%(map.global_tag.name, map.global_tag.description, map.record, map.label)
-            self.printmsg(msg,'cyan')
+            row = { 'name' : map.global_tag.name, 'description' : map.global_tag.description, 'record' : map.record, 'label' : map.label}
+            rowlist.append(row)
+            
+        self.dumpmodellist(rowlist,True,['name','description','record','label'])
 
     def execute(self):
         msg = ('Execute the command for action %s and arguments : %s ' ) % (self.action, str(self.args))
@@ -396,6 +477,63 @@ class PhysDBDriver():
                 sys.exit("ADD failed: %s" % (str(e)))
                 raise
 
+        elif (self.action=='STORE'):
+            try:
+                print 'Action STORE is used to insert an iov object into the DB'
+                print ' - <dest tag name>  : destination tag name; the tag should already exists in the DB.'
+                print ' - <local file name>: local file name'
+                print ' - <iov params>  : column separated list of parameters for iov [since=xxx;sinceString=yyy]'
+                print ' - <payload params>  : column separated list of parameters for payload [version=zzz;objectType=aaa;streamerInfo=bbb.;backendInfo=ccc]'
+
+                tagname=self.args[0]
+                msg = ('STORE: use tag %s ') % (tagname)
+                tapis = TagsApi(self.api_client)
+                tag = tapis.find_tag(tagname,expand=self.expand,trace=self.trace)
+                if tag.name is None:
+                    msg = ('STORE: error, cannot find tag with name %s') % tagname
+                    self.printmsg(msg,'red')
+                    return -1
+                    
+                msg = ('STORE: retrieved tag from database %s ') % (tag.name)
+                self.printmsg(msg,'cyan') 
+                
+                if len(self.args) != 4:
+                    msg = ('STORE: error, cannot find enough parameters for completing the request')
+                    self.printmsg(msg,'red')          
+                    
+                filename=self.args[1]
+                iovobjparams=self.args[2]
+                pyldobjparams=self.args[3]
+
+                iov = self.createobject(iovobjparams,'Iov')
+                print 'parsed arguments for iov :',iov
+                pyld = self.createobject(pyldobjparams,'Payload')
+                print 'parsed arguments for pyld :',pyld
+                since=0
+                sinceDescription=''
+                if (iov.since is None):
+                    since = self.t0
+                else:
+                    since = iov.since
+                    
+                if (iov.since_string is None):
+                    sinceDescription = ('t%d') % int(since)
+                else:
+                    sinceDescription = iov.since_string
+                    
+                msg = ('STORE: input parameters are file=%s, streamer_info=%s, object_type=%s, backend_info=%s, version=%s, since=%s, tag=%s') % (filename,pyld.streamer_info,pyld.object_type,pyld.backend_info,pyld.version,int(since),tag.name)
+                self.printmsg(msg,'cyan')
+                
+                expapi = ExpertApi(self.api_client)
+                retiov = expapi.create_iov_with_payload(filename,pyld.streamer_info,pyld.object_type,pyld.backend_info,pyld.version,int(since),sinceDescription,tag.name)
+            
+                msg = ('STORE: new payload has been stored in tag %s, since=%d, hash=%s') % (tag.name,int(retiov.since),retiov.hash)
+                self.printmsg(msg,'blue')
+
+            except Exception, e:
+                sys.exit("STORE failed: %s" % (str(e)))
+                raise
+
         elif self.action == 'LS':
             try:
                 print 'Action LS is used to retrieve iovs in a tag: an optional argument can be added, indicating the snapshot time for the IOVs.'
@@ -406,12 +544,31 @@ class PhysDBDriver():
                 msg = ('LS: use tag %s and snapshot time %s !') % (tag,snapt)
                 self.printmsg(msg,'cyan')
       
-                iovapi = IovsApi()
+                iovapi = IovsApi(self.api_client)
                 iovlist = iovapi.get_iovs_in_tag(tag,expand=self.expand,since=self.t0,until=self.tMax)
-                print 'Retrieved iov list: ',iovlist
+                [ self.printmsg((' >>> since=%d hash=%s') % (int(aniov.since),aniov.hash),'cyan') for aniov in iovlist.items]
+                print 'Retrieved iov list of length ',len(iovlist.items)
                 
             except Exception, e:
                 sys.exit("LS failed: %s" % (str(e)))
+                raise e
+                
+        elif self.action == 'GET':
+            try:
+                print 'Action GET is used to retrieve a blob using the hash.'
+                hashstr=self.args[0]
+                msg = ('GET: use hash %s !') % (hashstr)
+                self.printmsg(msg,'cyan')
+      
+                pyldapi = PayloadApi(self.api_client)
+                resp = pyldapi.get_blob(hashstr)
+                outfname = ('%s.blob') % hashstr
+                locfile = open(outfname,'wb')
+                locfile.write(resp)
+                print 'Dump blob on disk: ',locfile
+
+            except Exception, e:
+                sys.exit("GET failed: %s" % (str(e)))
                 raise e
                 
         elif self.action == 'LOCK':

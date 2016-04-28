@@ -105,6 +105,14 @@ public class DirectoryMapperService {
 		return;
 	}
 
+	/**
+	 * This method is dumping a generic global tag into disk. This assumes that the global tag maps do contain information related to the system,
+	 * at the level of the record and label fields: label indicates in general the tagnameroot, and record the schemaName (or package name in the
+	 * case of calibration files). One can assume that if record is "none", the first part of the tag name should be used. This obviously depends
+	 * on the tag name format. So it should be carefully checked via regexp ?
+	 * @param globaltag
+	 * @param schema
+	 */
 	public void dumpGlobalTagOnDisk(GlobalTag globaltag, String schema) {
 		try {
 			String schemadir = "";
@@ -118,8 +126,108 @@ public class DirectoryMapperService {
 				log.info("Creating directory " + resource.getFile().getPath());
 				File gfile = resource.getFile();
 				gfile.mkdirs();
-				// resource = new FileSystemResource(localrootdir + "/" +
-				// globaltag.getName());
+			}
+			Timestamp snapshot = entity.getSnapshotTime();
+			Set<GlobalTagMap> tagmaplist = entity.getGlobalTagMaps();
+			for (GlobalTagMap globalTagMap : tagmaplist) {
+				log.debug("Analyse directory structure for a given TAG");
+				Tag tag = globalTagMap.getSystemTag();
+				log.info("Found tag " + tag.getName());
+				String tagNameRoot = globalTagMap.getLabel();
+				if (tagNameRoot.equals("none")) {
+					// FIXME: this works only for calibration files....we should check for a regexp ? How to guarantee the format of the tag name ?
+					tagNameRoot = tag.getName().split(Tag.DEFAULT_TAG_EXTENSION)[0];
+				}
+				// Object type should be a string identifying the BLOB. In the case of calibration files, this is a file name.
+				String filename = tag.getObjectType();
+				filename = filename.substring(0, filename.lastIndexOf("."));
+				String fileext = tag.getObjectType();
+				fileext = fileext.substring(fileext.lastIndexOf(".") + 1, fileext.length());
+				log.debug("Extracted file name and extension..." + filename+" "+fileext);
+				SystemDescription system = systemNodeService.getSystemNodesByTagname(tagNameRoot);
+				log.debug("Found system " + system.getSchemaName());
+				// Check if this is a link to a global tag
+				String labelisgtag = globalTagMap.getLabel();
+				log.debug("Check label in mapping..."+labelisgtag);
+				Resource subresource = new FileSystemResource(
+						localrootdir + PATH_SEPARATOR + system.getSchemaName() + PATH_SEPARATOR + labelisgtag);
+				log.debug("Verify subresource in path "+subresource.toString());
+				if (subresource.exists()) {
+					log.info("Creating link to " + subresource.getFile().getPath());
+					Path newLink = Paths.get(resource.getFile().getPath() + PATH_SEPARATOR + labelisgtag);
+					Path target = Paths.get(subresource.getFile().getPath());
+					try {
+						log.debug("Create symbolic link to "+target.toString());
+						Files.createSymbolicLink(newLink, target);
+					} catch (IOException x) {
+						log.error(x.getMessage());
+					} catch (UnsupportedOperationException x) {
+						// Some file systems do not support symbolic links.
+						log.error(x.getMessage());
+					}
+					continue;
+				}
+				String nodefullpath = system.getNodeFullpath();
+				Resource tagresource = new FileSystemResource(
+						resource.getFile().getPath() + nodefullpath + PATH_SEPARATOR + filename);
+				// If the tag resource exists we should create a link...???
+				if (!tagresource.exists()) {
+					log.info("Creating directory " + tagresource.getFile().getPath());
+					File tfile = tagresource.getFile();
+					tfile.mkdirs();
+				}
+				List<Iov> iovlist = iovService.getIovsByTag(tag, null, snapshot);
+				for (Iov iov : iovlist) {
+					PayloadData data = iovService.getPayloadData(iov.getPayload().getHash());
+					Payload info = iov.getPayload();
+					String generatedFileName = iov.getSinceString() + "." + fileext;
+					
+					// It was using this one, but now I am extracting the info
+					// on the filename : info.getStreamerInfo();
+					String outfilename = tagresource.getFile().getPath() + "/" + generatedFileName;
+					log.debug("Dump blob for tag " + tag.getName() + " into output file " + outfilename);
+					
+					// Check if the blob is on disk
+					java.nio.file.Path path = Paths.get(data.getUri());
+					OutputStream out = new FileOutputStream(new File(outfilename));
+					if (Files.notExists(path)) {
+						log.debug("Blob is stored in memory as string....dump it directly on output");
+						payloadBytesHandler.saveToOutStream(data.getData().getBinaryStream(), out); 
+					} else {
+						log.debug("Blob stored in " + data.getUri());
+						Files.copy(path, out);
+					}
+					log.debug("File has been copied from " + path.toString() + " into " + outfilename);
+				}
+			}
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ConddbServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void dumpAsgGlobalTagOnDisk(GlobalTag globaltag, String schema) {
+		try {
+			String schemadir = "";
+			if (schema != null) {
+				schemadir = schema + PATH_SEPARATOR;
+			}
+			GlobalTag entity = globalTagService.getGlobalTagFetchTags(globaltag.getName());
+			Resource resource = new FileSystemResource(localrootdir + PATH_SEPARATOR + schemadir + globaltag.getName());
+			log.info("create directory for global tag " + globaltag.getName());
+			if (!resource.exists()) {
+				log.info("Creating directory " + resource.getFile().getPath());
+				File gfile = resource.getFile();
+				gfile.mkdirs();
 			}
 			Timestamp snapshot = entity.getSnapshotTime();
 			Set<GlobalTagMap> tagmaplist = entity.getGlobalTagMaps();

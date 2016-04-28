@@ -95,6 +95,7 @@ public class IovExpRestController extends BaseController {
 			@Context UriInfo info, 
 			@ApiParam(value = "file: the filename of the input payload", required = true) 
 			@FormDataParam("file") InputStream uploadedInputStream,
+			@ApiParam(hidden = true) 
 			@FormDataParam("file") FormDataContentDisposition fileDetail, 
 			@ApiParam(value = "streamerInfo: the streamer information of the input payload", required = true) 
 			@FormDataParam("streamerInfo") String strinfo, 

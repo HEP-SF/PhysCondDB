@@ -1,19 +1,25 @@
 package conddb.svc.dao.controllers;
 
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
+import conddb.data.Iov;
 import conddb.data.Tag;
+import conddb.svc.dao.baserepository.PayloadDataBaseCustom;
 import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.svc.dao.repositories.GlobalTagMapRepository;
 import conddb.svc.dao.repositories.GlobalTagRepository;
+import conddb.svc.dao.repositories.IovRepository;
+import conddb.svc.dao.repositories.PayloadRepository;
 import conddb.svc.dao.repositories.TagRepository;
 
 @Service
@@ -27,8 +33,21 @@ public class GlobalTagAdminService {
 	private GlobalTagMapRepository globalTagMapRepository;
 	@Autowired
 	private TagRepository tagRepository;
+	@Autowired
+	private IovRepository iovRepository;
+	@Autowired
+	private PayloadRepository payloadRepository;
 
+	@Autowired
+	@Qualifier("payloaddatadbrepo")
+	private PayloadDataBaseCustom payloadDataBaseCustom;
 
+	/**
+	 * WARNING: this will delete the full set of data associated to a global tag
+	 * @param sourcegtag
+	 * @return
+	 * @throws ConddbServiceException
+	 */
 	@Transactional
 	public GlobalTag deleteGlobalTag(String sourcegtag)
 			throws ConddbServiceException {
@@ -113,4 +132,32 @@ public class GlobalTagAdminService {
 		}
 		return entity;
 	}
+	
+	/**
+	 * WARNING: Remove everything beneath a tag and the tag itself.
+	 * @param tag
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	@Transactional
+	public Tag deleteTagAndIovsInTag(String tag)
+			throws ConddbServiceException {
+		Tag entity = this.tagRepository
+				.findByName(tag);
+		if (entity != null) {
+			log.debug("Removing entity"+entity.getName());
+			Set<Iov> iovs = entity.getIovs();
+			for (Iov iov : iovs) {
+				payloadRepository.delete(iov.getHash());
+				payloadDataBaseCustom.delete(iov.getHash());
+				iovRepository.delete(iov.getId());
+			}
+			this.tagRepository.delete(entity);
+		} else {
+			log.info("Cannot find "+tag);
+			throw new ConddbServiceException("Null tag retrieved");
+		}
+		return entity;
+	}
+
 }

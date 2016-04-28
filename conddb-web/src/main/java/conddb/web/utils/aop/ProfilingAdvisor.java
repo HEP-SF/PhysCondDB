@@ -7,10 +7,11 @@ import org.springframework.aop.Pointcut;
 import org.springframework.aop.support.AbstractPointcutAdvisor;
 import org.springframework.aop.support.StaticMethodMatcherPointcut;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import conddb.svc.annotations.ProfileExecution;
 
-
+@Component
 public class ProfilingAdvisor extends AbstractPointcutAdvisor {
 
     private static final long serialVersionUID = 1L;

@@ -7,9 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import javax.ws.rs.Consumes;
@@ -47,7 +45,7 @@ import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.GenericMessageResource;
 import conddb.web.resources.Link;
-import conddb.web.resources.SpringResourceFactory;
+import conddb.web.resources.SwaggerPayloadCollection;
 import conddb.web.resources.generic.GenericPojoResource;
 import conddb.web.utils.collections.CollectionUtils;
 import io.swagger.annotations.Api;
@@ -68,8 +66,6 @@ public class PayloadRestController extends BaseController {
 	@Autowired
 	private IovService iovService;
 	@Autowired
-	private SpringResourceFactory springResourceFactory;
-	@Autowired
 	private PayloadBytesHandler payloadBytesHandler;
 
 	@Value("${physconddb.upload.dir:/tmp}")
@@ -82,9 +78,8 @@ public class PayloadRestController extends BaseController {
 	public Response getPayload(@Context UriInfo info,
 			@ApiParam(value = "hash of the payload", required = true) @PathParam("hash") final String hash,
 			@ApiParam(value = "expand {true|false} is for parameter expansion", required = false) @DefaultValue("false") @QueryParam("expand") final boolean expand)
-					throws ConddbWebException {
+			throws ConddbWebException {
 		this.log.info("PayloadRestController processing request for payload " + hash);
-		Response resp = null;
 		try {
 
 			Payload entity = iovService.getPayload(hash);
@@ -104,88 +99,24 @@ public class PayloadRestController extends BaseController {
 				log.debug("Payload contains " + entity.toString());
 				log.debug("  - data :" + entitydata);
 			}
-			GenericPojoResource<Payload> resource = (GenericPojoResource<Payload>) springResourceFactory.getGenericResource(info, entity, 1, null);
-			return created(resource);
+			GenericPojoResource<Payload> resource = new GenericPojoResource<>(info, entity, 1, null);
+			return ok(resource);
 		} catch (ConddbServiceException e) {
-			resp = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-			throw new ConddbWebException(e.getMessage());
+			String msg = "Error retrieving payload from hash " + hash;
+			throw buildException(msg + " " + e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 
-//	@GET
-//	@Produces({ MediaType.APPLICATION_OCTET_STREAM })
-//	@Path("/data/{hash}")
-//	@ApiOperation(value = "Finds payload data by hash; the payload object contains the real BLOB.", notes = "Select one payload at the time, no regexp searches allowed here", response = StreamingOutput.class)
-//	public Response getBlob(@Context UriInfo info,
-//			@ApiParam(value = "hash of the payload", required = true) @PathParam("hash") final String hash)
-//					throws ConddbWebException {
-//		this.log.info("PayloadRestController processing request to download payload " + hash);
-//		Response resp = null;
-//		try {
-//			StreamingOutput stream = null;
-//			// Initialization of an empty file name
-//			String filename = "/tmp/none.blob";
-//			PayloadData entitydata = iovService.getPayloadData(hash);
-//			Payload entity = iovService.getPayload(hash);
-//
-//			if (entitydata == null || entity == null) {
-//				String msg = "Cannot find payload data corresponding to hash " + hash;
-//				throw buildException(msg, msg, Response.Status.NOT_FOUND);
-//			}
-//			// filename = entitydata.getHash() + "."+entity.getStreamerInfo();
-//			filename = entitydata.getHash();
-//			File f = new File(entitydata.getUri());
-//			// payloadBytesHandler.dumpBlobIntoFile(entitydata.getData(),
-//			// filename);
-//			// Open a file and an inputstream to read it
-//			// f = new File(filename);
-//			final InputStream in = new FileInputStream(f);
-//			// Set the output stream for the response
-//			stream = new StreamingOutput() {
-//				public void write(OutputStream out) throws IOException, WebApplicationException {
-//					try {
-//						int read = 0;
-//						byte[] bytes = new byte[2048];
-//
-//						while ((read = in.read(bytes)) != -1) {
-//							out.write(bytes, 0, read);
-//							log.debug("Copying " + read + " bytes into the output...");
-//						}
-//						out.flush();
-//					} catch (Exception e) {
-//						throw new WebApplicationException(e);
-//					} finally {
-//						log.debug("closing streams...");
-//						out.close();
-//						in.close();
-//					}
-//				}
-//			};
-//
-//			resp = Response.ok(stream, MediaType.APPLICATION_OCTET_STREAM_TYPE)
-//					.header("Content-Disposition", "attachment; filename=\"" + filename + "\"")
-//					//.header("Content-Length", new Long(f.length()).toString())
-//					.build();
-//			return resp;
-//
-//		} catch (ConddbServiceException e) {
-//			resp = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-//			throw new ConddbWebException(e.getMessage());
-//		} catch (FileNotFoundException e1) {
-//			resp = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-//			throw new ConddbWebException(e1.getMessage());
-//		}
-//	}
 
 	@GET
 	@Path("/data/{hash}")
 	@Produces(MediaType.APPLICATION_OCTET_STREAM)
-	@ApiOperation(value = "Finds payload data by hash; the payload object contains the real BLOB.", notes = "Select one payload at the time, no regexp searches allowed here", response = StreamingOutput.class)
+	@ApiOperation(value = "Finds payload data by hash; the payload object contains the real BLOB.", 
+	notes = "Select one payload at the time, no regexp searches allowed here", produces="application/octet-stream", response=String.class)
 	public Response getBlob(@Context UriInfo info,
 			@ApiParam(value = "hash of the payload", required = true) @PathParam("hash") final String hash)
-					throws ConddbWebException {
+			throws ConddbWebException {
 
-		Response resp = null;
 		this.log.info("PayloadRestController processing request to download payload " + hash);
 		try {
 			PayloadData entitydata = iovService.getPayloadData(hash);
@@ -219,16 +150,17 @@ public class PayloadRestController extends BaseController {
 				}
 			};
 			log.debug("Send back the stream....");
-			return Response.ok(stream, MediaType.APPLICATION_JSON_TYPE)
-					.header("Content-Disposition", "attachment; filename=\"" + hash + "\"")
-					//.header("Content-Length", new Long(f.length()).toString())
+			return Response.ok(stream, "application/octet-stream") ///MediaType.APPLICATION_JSON_TYPE)
+					.header("Content-Disposition", "attachment; filename=\"" + hash + ".blob\"")
+					// .header("Content-Length", new
+					// Long(f.length()).toString())
 					.build();
 		} catch (ConddbServiceException e) {
-			resp = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-			throw new ConddbWebException(e.getMessage());			
+			String msg = "Error retrieving payload from hash " + hash;
+			throw buildException(msg + " " + e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		} catch (SQLException e1) {
-			resp = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-			throw new ConddbWebException(e1.getMessage());			
+			String msg = "SQL Error retrieving payload from hash " + hash;
+			throw buildException(msg + " " + e1.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -239,7 +171,6 @@ public class PayloadRestController extends BaseController {
 	@ApiOperation(value = "Take an input file and get its hash generated by the server.", notes = "Used for checking hash generation", response = GenericMessageResource.class)
 	public Response getBlobHash(@Context UriInfo info, @FormDataParam("file") InputStream uploadedInputStream,
 			@FormDataParam("file") FormDataContentDisposition fileDetail) throws ConddbWebException {
-		Response resp = null;
 		try {
 			if (fileDetail != null) {
 				String name = fileDetail.getFileName();
@@ -257,17 +188,16 @@ public class PayloadRestController extends BaseController {
 				log.info("Uploaded object has hash " + storable.getHash());
 				log.warn("This method does not perform insertions");
 				GenericMessageResource responsemessage = new GenericMessageResource("hash", thehash);
-				resp = Response.ok(responsemessage).build();
-				return resp;
+				return Response.ok(responsemessage).build();
 			}
 			String msg = "Cannot find payload file ";
 			throw buildException(msg, msg, Response.Status.NOT_FOUND);
 		} catch (IOException e) {
-			resp = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-			throw new ConddbWebException(e.getMessage());
+			String msg = "Error retrieving payload hash from file " + fileDetail.getName();
+			throw buildException(msg + " " + e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		} catch (PayloadEncodingException e) {
-			resp = Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
-			throw new ConddbWebException(e.getMessage());
+			String msg = "Error in payload encoding retrieving payload hash from file " + fileDetail.getName();
+			throw buildException(msg + " " + e.getMessage(), msg, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -275,14 +205,14 @@ public class PayloadRestController extends BaseController {
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@Path("/filter")
 	@ApiOperation(value = "Select a payload filtering on metadata...Not well implemented.", notes = "Select one payload at the time, no regexp searches allowed here. "
-			+ " This method is for the moment not well implemented.", response = Payload.class)
-	public CollectionResource getPayloadFilteredList(@Context UriInfo info,
+			+ " This method is for the moment not well implemented.", response = SwaggerPayloadCollection.class)
+	public Response getPayloadFilteredList(@Context UriInfo info,
 			@ApiParam(value = "Parameter name: {datasize|objectType|version}", required = true) @DefaultValue("none") @QueryParam("param") final String param,
 			@ApiParam(value = "condition: {eq|gt|..}", required = true) @DefaultValue("eq") @QueryParam("if") final String condition,
 			@ApiParam(value = "Parameter value: the value of the selected parameter", required = true) @DefaultValue("0") @QueryParam("value") final String value,
 			@ApiParam(value = "page: page number for the query, defaults to 0", required = false) @DefaultValue("0") @QueryParam("page") Integer ipage,
 			@ApiParam(value = "size: page size, defaults to 25", required = false) @DefaultValue("25") @QueryParam("size") Integer size)
-					throws ConddbWebException {
+			throws ConddbWebException {
 		this.log.info("PayloadRestController processing request for payload filtered list " + param + " " + condition
 				+ " " + value);
 		Collection<Payload> entitylist;
@@ -292,16 +222,8 @@ public class PayloadRestController extends BaseController {
 		} catch (Exception e) {
 			throw new ConddbWebException(e.getMessage());
 		}
-		if (entitylist == null || entitylist.size() == 0) {
-			return (CollectionResource) springResourceFactory.getCollectionResource(info, Link.PAYLOAD,
-					Collections.emptyList());
-		}
-		Collection items = new ArrayList(entitylist.size());
-		for (Payload pyld : entitylist) {
-			pyld.setResId(pyld.getHash());
-			items.add(springResourceFactory.getResource("payload", info, pyld));
-		}
-		return (CollectionResource) springResourceFactory.getCollectionResource(info, Link.PAYLOAD, items);
+		CollectionResource collres = listToCollection(entitylist, true, info, Link.PAYLOAD, 0, ipage, size);
+		return ok(collres);
 	}
 
 }

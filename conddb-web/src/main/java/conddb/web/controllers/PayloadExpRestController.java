@@ -31,7 +31,6 @@ import conddb.svc.dao.repositories.PayloadRepository;
 import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.Link;
-import conddb.web.resources.SpringResourceFactory;
 import conddb.web.resources.generic.GenericPojoResource;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -55,8 +54,6 @@ public class PayloadExpRestController extends BaseController {
 	@Autowired
 	@Qualifier("payloaddatadbrepo")
 	private PayloadDataBaseCustom payloadDataBaseCustom;
-	@Autowired
-	private SpringResourceFactory springResourceFactory;
 
 	@Value("${physconddb.upload.dir:/tmp}")
 	private String SERVER_UPLOAD_LOCATION_FOLDER;
@@ -68,6 +65,7 @@ public class PayloadExpRestController extends BaseController {
 	@ApiOperation(value = "Insert a Payload.", notes = "Input data are in a FORM, containing file, type, streamer and version information.", response = Payload.class)
 	public Response createPayload(@Context UriInfo info, @ApiParam(value = "file: the input file", required = true) 
 			@FormDataParam("file") InputStream uploadedInputStream,
+			@ApiParam(hidden = true) 
 			@FormDataParam("file") FormDataContentDisposition fileDetail, 
 			@ApiParam(value = "type: the object type", required = true)
 			@FormDataParam("type") String objtype,
@@ -96,8 +94,7 @@ public class PayloadExpRestController extends BaseController {
 			// Store the payload: this will then not be rolledback if something goes wrong later on
 			// We do not care too much since in that case the payload is simply already there
 			Payload stored = iovService.insertPayload(storable, storable.getData());
-
-			GenericPojoResource<Payload> resource = (GenericPojoResource<Payload>) springResourceFactory.getGenericResource(info, stored, 1, null);
+			GenericPojoResource<Payload> resource = new GenericPojoResource<>(info, stored, 1, null);
 			return created(resource);
 		} catch (ConddbServiceException e) {
 			String msg = "Error creating payload resource using input file " + name;
