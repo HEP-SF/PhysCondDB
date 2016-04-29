@@ -54,7 +54,7 @@
 		<appender-ref ref="consoleAppender" />
 	</logger>
 	<logger name="conddb.web.resources.generic" additivity="false">
-		<level value="WARN" />
+		<level value="INFO" />
 		<appender-ref ref="fileAppender" />
 		<appender-ref ref="consoleAppender" />
 	</logger>

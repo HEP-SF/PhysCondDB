@@ -45,6 +45,7 @@ import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.GenericMessageResource;
 import conddb.web.resources.Link;
+import conddb.web.resources.SpringResourceFactory;
 import conddb.web.resources.SwaggerPayloadCollection;
 import conddb.web.resources.generic.GenericPojoResource;
 import conddb.web.utils.collections.CollectionUtils;
@@ -67,6 +68,8 @@ public class PayloadRestController extends BaseController {
 	private IovService iovService;
 	@Autowired
 	private PayloadBytesHandler payloadBytesHandler;
+	@Autowired
+	private SpringResourceFactory springResourceFactory;
 
 	@Value("${physconddb.upload.dir:/tmp}")
 	private String SERVER_UPLOAD_LOCATION_FOLDER;
@@ -99,7 +102,7 @@ public class PayloadRestController extends BaseController {
 				log.debug("Payload contains " + entity.toString());
 				log.debug("  - data :" + entitydata);
 			}
-			GenericPojoResource<Payload> resource = new GenericPojoResource<>(info, entity, 1, null);
+			GenericPojoResource<Payload> resource = springResourceFactory.getGenericResource(info, entity, 1, null);
 			return ok(resource);
 		} catch (ConddbServiceException e) {
 			String msg = "Error retrieving payload from hash " + hash;
@@ -222,7 +225,7 @@ public class PayloadRestController extends BaseController {
 		} catch (Exception e) {
 			throw new ConddbWebException(e.getMessage());
 		}
-		CollectionResource collres = listToCollection(entitylist, true, info, Link.PAYLOAD, 0, ipage, size);
+		CollectionResource collres = springResourceFactory.listToCollection(entitylist, true, info, Link.PAYLOAD, 0, ipage, size);
 		return ok(collres);
 	}
 

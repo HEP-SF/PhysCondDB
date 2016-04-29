@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import conddb.data.AfEntity;
 import conddb.data.annotations.Linkit;
+import conddb.svc.annotations.ProfileExecution;
 import conddb.web.exceptions.ConddbWebException;
 
 /**
@@ -63,6 +64,7 @@ public class PojoMapFactory {
 		return pm;
 	}
 	
+	@ProfileExecution
 	public Map<String, Method> getEntityMap(conddb.data.AfEntity entity,String type) throws ConddbWebException {
 		String clname = entity.getClass().getName();
 		log.debug("Try to find entity map for "+clname+" using type "+type);
@@ -128,7 +130,8 @@ public class PojoMapFactory {
 	 * @param nswsetmap
 	 * @param entitymap
 	 */
-	private void fetchKeysFromEntityFields(AfEntity entity, 
+	@ProfileExecution
+	public void fetchKeysFromEntityFields(AfEntity entity, 
 			Map<String, Method> nswentitymap, 
 			Map<String, Method> nswsetmap,
 			Map<String, Method> entitymap) {

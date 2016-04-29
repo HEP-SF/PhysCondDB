@@ -35,6 +35,7 @@ import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.Link;
+import conddb.web.resources.SpringResourceFactory;
 import conddb.web.resources.SwaggerGlobalTagMapCollection;
 import conddb.web.resources.generic.GenericPojoResource;
 import conddb.web.utils.PropertyConfigurator;
@@ -56,6 +57,8 @@ public class GlobalTagMapRestController  extends BaseController {
 
 	@Autowired
 	private GlobalTagService globalTagService;
+	@Autowired
+	private SpringResourceFactory springResourceFactory;
 
 	private String QRY_PATTERN = PropertyConfigurator.getInstance().getQrypattern();
 
@@ -80,7 +83,7 @@ public class GlobalTagMapRestController  extends BaseController {
 				String msg = "Associations not found for id "+id;
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
-			GenericPojoResource<GlobalTagMap> resource = new GenericPojoResource<GlobalTagMap>(info, entity, 1, null);
+			GenericPojoResource<GlobalTagMap> resource = springResourceFactory.getGenericResource(info, entity, 1, null);
 			return ok(resource);
 		} catch (ConddbWebException e1) {
 			throw e1;
@@ -141,7 +144,7 @@ public class GlobalTagMapRestController  extends BaseController {
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
 			Collection<GlobalTagMap> entitycoll = CollectionUtils.iterableToCollection(entitylist);
-			CollectionResource collres = listToCollection(entitycoll, expand, info, Link.GLOBALTAGMAPS,1);
+			CollectionResource collres = springResourceFactory.listToCollection(entitycoll, expand, info, Link.GLOBALTAGMAPS,1);
 			return ok(collres);
 		} catch (ConddbWebException e1) {
 			throw e1;

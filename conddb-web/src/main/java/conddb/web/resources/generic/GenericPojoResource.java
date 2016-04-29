@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import conddb.data.AfEntity;
 import conddb.data.annotations.Linkit;
+import conddb.svc.annotations.ProfileExecution;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.Link;
@@ -70,7 +71,9 @@ public class GenericPojoResource<T extends AfEntity> extends Link {
 		this.parent = parent;
 		initmaps(entity);
 		try {
+			log.info("GenericPojoResource: build map");
 			build(info, entity, level);
+			log.info("GenericPojoResource: end");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -146,7 +149,8 @@ public class GenericPojoResource<T extends AfEntity> extends Link {
 		}
 	}
 
-	protected void initmaps(AfEntity entity) {
+	@ProfileExecution
+	public void initmaps(AfEntity entity) {
 		PojoMapFactory pm = PojoMapFactory.getInstance();
 		try {
 			nswentitymap = pm.getEntityMap(entity, "onetomany");
@@ -158,7 +162,8 @@ public class GenericPojoResource<T extends AfEntity> extends Link {
 		}
 	}
 
-	protected void build(UriInfo info, AfEntity entity) throws Exception {
+	@ProfileExecution
+	public void build(UriInfo info, AfEntity entity) throws Exception {
 		try {
 			// fetchKeysFromEntity(entity);
 			log.debug("Keys for " + entity.getClass().getName() + " have been fetched....");

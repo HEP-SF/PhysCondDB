@@ -34,6 +34,7 @@ import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.Link;
+import conddb.web.resources.SpringResourceFactory;
 import conddb.web.resources.SwaggerGlobalTagCollection;
 import conddb.web.resources.generic.GenericPojoResource;
 import conddb.web.utils.PropertyConfigurator;
@@ -57,6 +58,8 @@ public class GlobalTagRestController extends BaseController {
 
 	@Autowired
 	private GlobalTagService globalTagService;
+	@Autowired
+	private SpringResourceFactory springResourceFactory;
 
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -78,7 +81,8 @@ public class GlobalTagRestController extends BaseController {
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
 			this.log.info("GlobalTagRestController generates resource for " + globaltagname);
-			GenericPojoResource<GlobalTag> resource = new GenericPojoResource<GlobalTag>(info, entity, 2, null);
+			GenericPojoResource<GlobalTag> resource = (GenericPojoResource<GlobalTag>) springResourceFactory.getGenericResource(info, entity, 2, null);
+					//new GenericPojoResource<GlobalTag>(info, entity, 2, null);
 			this.log.info("GlobalTagRestController generates response for " + globaltagname);
 			return ok(resource);
 		} catch (ConddbWebException e1) {
@@ -125,7 +129,8 @@ public class GlobalTagRestController extends BaseController {
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
 			Collection<GlobalTag> entitycoll = CollectionUtils.iterableToCollection(entitylist.getContent());
-			CollectionResource collres = listToCollection(entitycoll, expand, info, Link.GLOBALTAGS, 0, ipage, size);
+			CollectionResource collres = springResourceFactory.listToCollection(entitycoll, expand, info, Link.GLOBALTAGS, 0, ipage, size);
+					//listToCollection(entitycoll, expand, info, Link.GLOBALTAGS, 0, ipage, size);
 			return ok(collres);
 		} catch (ConddbWebException e1) {
 			throw e1;

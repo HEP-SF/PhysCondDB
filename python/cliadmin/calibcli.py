@@ -245,19 +245,19 @@ class PhysDBDriver():
             val = objdict[akey]
             num = 30
             if (akey == 'name'):
-                num=60
-            elif ('_time' in akey):
-                num=35
-            elif ('node_' in akey):
                 num=50
-            elif ('status' in akey):
+            if ('_time' in akey):
+                num=19
+            if ('node_' in akey):
+                num=50
+            if ('status' in akey):
                 num=15
-            elif ('hash' in akey):
-                num=65
-            elif ('_type' in akey):
+            if ('_type' in akey):
                 num=30
-            elif ('description' in akey):
+            if ('description' in akey):
                 num=70
+            if ('hash' in akey):
+                num=65
                 
             akey_format='{%s:<%d.%d} | ' % (akey,num,num)
             if (isinstance(val,(int,float,long))):
@@ -265,8 +265,8 @@ class PhysDBDriver():
                 if (akey == 'row'):
                     num=5
                 akey_format='{%s:<%d} | ' % (akey,num)
-
-            head_format += '{0[%d]:<%d} |' % (int(i),num)
+            
+            head_format += '{0[%d]:<%d} | ' % (int(i),num)
             row_format += akey_format
             i+=1
             
@@ -285,23 +285,8 @@ class PhysDBDriver():
             msg = ('%s%s=...;') % (msg,attrs[key])
         self.printmsg(msg[:-1],'cyan')
         
-    def dumpmodellist(self,objlist,withheader=False,keylist=[]):
-        i=0
-        for obj in objlist:
-            i=(i+1)
-            if i == 1:
-                self.dumpmodelobject(obj,withheader,keylist)
-            else:
-                self.dumpmodelobject(obj,False,keylist)
-
-    def dumpmodelobject(self,obj,withheader=False,keylist=[]):
-        objdict = {}
-        if not isinstance(obj,dict):
-            objdict = obj.to_dict()
-        else:
-            objdict = obj
-        headermsg = ''
-        msg = ''
+    
+    def cleanmodellist(self,objdict,keylist):
         reducedlist=[]
         if len(keylist)>0:
             for key in keylist:
@@ -311,9 +296,6 @@ class PhysDBDriver():
                     print 'skip fields'
                 else:
                     reducedlist.append(key)
-#                    headermsg = ('%s | %15s') % (headermsg,key)
-#                    msg = ('%s | %s') % (msg,objdict[key])
-
         else:
             for key in objdict:
                 if isinstance(objdict[key],list):
@@ -322,16 +304,43 @@ class PhysDBDriver():
                     print 'skip fields'
                 else:
                     reducedlist.append(key)
-                    print 'Appending key ',key
-#                    headermsg = ('%s | %15s') % (headermsg,key)
-#                    msg = ('%s | %s') % (msg,objdict[key])
+                    #print 'Appending key ',key
+        return reducedlist
+    
+    def printtrailer(self,objdict, keylist):
+        reducedlist = self.cleanmodellist(objdict,keylist)
+        headermsg = self.printheader(objdict,reducedlist)
+        sep_format = '{:=^%d}' % int(len(headermsg))
+        self.printmsg(sep_format.format('========='),'blue')
+        
+    def dumpmodellist(self,objlist,withheader=False,keylist=[]):
+        i=0
+        savedobj = {}
+        for obj in objlist:
+            i=(i+1)
+            if i == 1:
+                savedobj = obj
+                self.dumpmodelobject(obj,withheader,keylist)
+            else:
+                self.dumpmodelobject(obj,False,keylist)
+        self.printtrailer(savedobj,keylist)
+        
+    def dumpmodelobject(self,obj,withheader=False,keylist=[]):
+        objdict = {}
+        if not isinstance(obj,dict):
+            objdict = obj.to_dict()
+        else:
+            objdict = obj
+        headermsg = ''
+        msg = ''
+        reducedlist=self.cleanmodellist(objdict,keylist)
                     
-
         if withheader is True:
             headermsg = self.printheader(objdict,reducedlist)
-            self.printmsg(headermsg,'blue')
             sep_format = '{:=^%d}' % int(len(headermsg))
-            self.printmsg(sep_format.format('='),'blue')
+            self.printmsg(sep_format.format('========='),'blue')
+            self.printmsg(headermsg,'blue')
+            self.printmsg(sep_format.format('========='),'blue')
         
         msg = self.printrow(objdict,reducedlist)
         self.printmsg(msg,'cyan')

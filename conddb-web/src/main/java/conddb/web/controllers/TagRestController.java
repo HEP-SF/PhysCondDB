@@ -34,6 +34,7 @@ import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.Link;
+import conddb.web.resources.SpringResourceFactory;
 import conddb.web.resources.SwaggerTagCollection;
 import conddb.web.resources.generic.GenericPojoResource;
 import conddb.web.utils.PropertyConfigurator;
@@ -57,6 +58,8 @@ public class TagRestController extends BaseController {
 
 	@Autowired
 	private GlobalTagService globalTagService;
+	@Autowired
+	private SpringResourceFactory springResourceFactory;
 
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -76,7 +79,7 @@ public class TagRestController extends BaseController {
 				String msg = "Tag " + tagname + " not found.";
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
-			GenericPojoResource<Tag> resource = new GenericPojoResource<Tag>(info, entity, 2, null);
+			GenericPojoResource<Tag> resource = springResourceFactory.getGenericResource(info, entity, 2, null);
 			return ok(resource);
 		} catch (ConddbWebException e1) {
 			throw e1;
@@ -122,7 +125,7 @@ public class TagRestController extends BaseController {
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
 			Collection<Tag> entitycoll = CollectionUtils.iterableToCollection(entitylist.getContent());
-			CollectionResource collres = listToCollection(entitycoll, expand, info, Link.TAGS, 0, ipage, size);
+			CollectionResource collres = springResourceFactory.listToCollection(entitycoll, expand, info, Link.TAGS, 0, ipage, size);
 			return ok(collres);
 		} catch (ConddbWebException e1) {
 			throw e1;

@@ -36,6 +36,7 @@ import conddb.web.config.BaseController;
 import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.Link;
+import conddb.web.resources.SpringResourceFactory;
 import conddb.web.resources.SwaggerSystemsCollection;
 import conddb.web.resources.generic.GenericPojoResource;
 import conddb.web.utils.PropertyConfigurator;
@@ -61,6 +62,8 @@ public class SystemDescriptionRestController extends BaseController {
 	private SystemNodeService systemNodeService;
 	@Autowired
 	private GlobalTagService globalTagService;
+	@Autowired
+	private SpringResourceFactory springResourceFactory;
 
 	@GET
 	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
@@ -133,7 +136,7 @@ public class SystemDescriptionRestController extends BaseController {
 			log.debug("Retrieved list of systems " + entitylist.getNumberOfElements());
 
 			Collection<SystemDescription> entitycoll = CollectionUtils.iterableToCollection(entitylist.getContent());
-			CollectionResource collres = listToCollection(entitycoll, true, info, Link.SYSTEMS, 0, ipage, size);
+			CollectionResource collres = springResourceFactory.listToCollection(entitycoll, true, info, Link.SYSTEMS, 0, ipage, size);
 			return ok(collres);
 		} catch (ConddbWebException e1) {
 			throw e1;

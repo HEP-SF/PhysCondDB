@@ -65,7 +65,7 @@ public abstract class BaseController {
 		return ex;
 	}
 
-	protected <T extends AfEntity> CollectionResource listToCollection(Collection<T> coll, boolean expand,
+/*	protected <T extends AfEntity> CollectionResource listToCollection(Collection<T> coll, boolean expand,
 			UriInfo info, String subPath) {
 		Collection<Link> items = new ArrayList<Link>(coll.size());
 		for (T entity : coll) {
@@ -108,5 +108,5 @@ public abstract class BaseController {
 			}
 		}
 		return new CollectionResource(info,subPath,items,offset,limit);
-	}
+	}*/
 }
