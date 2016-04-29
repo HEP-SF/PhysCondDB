@@ -48,18 +48,23 @@
 	<logger name="org.springframework" level="warn" />
 	<logger name="io.swagger" level="warn" />
 
+	<logger name="conddb.web.utils.filters" additivity="false">
+		<level value="INFO" />
+		<appender-ref ref="fileAppender" />
+		<appender-ref ref="consoleAppender" />
+	</logger>
 	<logger name="conddb.web.resources.generic" additivity="false">
-		<level value="DEBUG" />
+		<level value="WARN" />
 		<appender-ref ref="fileAppender" />
 		<appender-ref ref="consoleAppender" />
 	</logger>
 	<logger name="conddb" additivity="false">
-		<level value="DEBUG" />
+		<level value="INFO" />
 		<appender-ref ref="fileAppender" />
 		<appender-ref ref="consoleAppender" />
 	</logger>
 
-	<root level="DEBUG">
+	<root level="INFO">
 		<appender-ref ref="consoleAppender" />
 		<appender-ref ref="fileAppender" />
 	</root>

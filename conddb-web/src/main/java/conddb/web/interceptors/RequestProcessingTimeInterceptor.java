@@ -35,7 +35,7 @@ public class RequestProcessingTimeInterceptor extends HandlerInterceptorAdapter 
     public void postHandle(HttpServletRequest request,
             HttpServletResponse response, Object handler,
             ModelAndView modelAndView) throws Exception {
-        System.out.println("Request URL::" + request.getRequestURL().toString()
+    	logger.info("Request URL::" + request.getRequestURL().toString()
                 + " Sent to Handler :: Current Time=" + System.currentTimeMillis());
         //we can add attributes in the modelAndView and use that in the view page
     }

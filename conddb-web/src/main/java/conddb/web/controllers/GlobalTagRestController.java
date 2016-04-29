@@ -77,7 +77,9 @@ public class GlobalTagRestController extends BaseController {
 				String msg = "Global Tag " + globaltagname + " not found.";
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
+			this.log.info("GlobalTagRestController generates resource for " + globaltagname);
 			GenericPojoResource<GlobalTag> resource = new GenericPojoResource<GlobalTag>(info, entity, 2, null);
+			this.log.info("GlobalTagRestController generates response for " + globaltagname);
 			return ok(resource);
 		} catch (ConddbWebException e1) {
 			throw e1;

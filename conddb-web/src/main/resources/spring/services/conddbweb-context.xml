@@ -39,6 +39,7 @@
 	<bean id="profilingAdvisor" class="conddb.web.utils.aop.ProfilingAdvisor"></bean>
 	<bean id="profilingMethodInterceptor" class="conddb.web.utils.aop.ProfilingMethodInterceptor"></bean>
 	<bean id="influxRepository" class="conddb.web.monitoring.influx.InfluxRepository"></bean>
+    <aop:config></aop:config>
 
 <!--     <bean id="messageTypeFactory" class="fr.svom.vhf.data.types.JAXBMessageTypeFactory" scope="singleton"></bean> -->
 

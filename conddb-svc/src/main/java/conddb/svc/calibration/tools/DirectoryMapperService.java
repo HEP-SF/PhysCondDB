@@ -120,6 +120,7 @@ public class DirectoryMapperService {
 				schemadir = schema + PATH_SEPARATOR;
 			}
 			GlobalTag entity = globalTagService.getGlobalTagFetchTags(globaltag.getName());
+			Resource rootresource = new FileSystemResource(localrootdir);
 			Resource resource = new FileSystemResource(localrootdir + PATH_SEPARATOR + schemadir + globaltag.getName());
 			log.info("create directory for global tag " + globaltag.getName());
 			if (!resource.exists()) {
@@ -133,7 +134,8 @@ public class DirectoryMapperService {
 				log.debug("Analyse directory structure for a given TAG");
 				Tag tag = globalTagMap.getSystemTag();
 				log.info("Found tag " + tag.getName());
-				String tagNameRoot = globalTagMap.getLabel();
+//				String tagNameRoot = globalTagMap.getLabel();
+				String tagNameRoot = globalTagMap.getRecord();
 				if (tagNameRoot.equals("none")) {
 					// FIXME: this works only for calibration files....we should check for a regexp ? How to guarantee the format of the tag name ?
 					tagNameRoot = tag.getName().split(Tag.DEFAULT_TAG_EXTENSION)[0];
@@ -145,6 +147,8 @@ public class DirectoryMapperService {
 				fileext = fileext.substring(fileext.lastIndexOf(".") + 1, fileext.length());
 				log.debug("Extracted file name and extension..." + filename+" "+fileext);
 				SystemDescription system = systemNodeService.getSystemNodesByTagname(tagNameRoot);
+				log.debug("Search for system using tag name root " + tagNameRoot);
+				
 				log.debug("Found system " + system.getSchemaName());
 				// Check if this is a link to a global tag
 				String labelisgtag = globalTagMap.getLabel();
@@ -156,6 +160,11 @@ public class DirectoryMapperService {
 					log.info("Creating link to " + subresource.getFile().getPath());
 					Path newLink = Paths.get(resource.getFile().getPath() + PATH_SEPARATOR + labelisgtag);
 					Path target = Paths.get(subresource.getFile().getPath());
+					Path rootpath = Paths.get(rootresource.getFile().getPath());
+					newLink = rootpath.relativize(newLink);
+					target = rootpath.relativize(target);
+					log.info("newLink after relativize is " + newLink.toString());
+					log.info("target after relativize is " + target.toString());
 					try {
 						log.debug("Create symbolic link to "+target.toString());
 						Files.createSymbolicLink(newLink, target);
@@ -169,7 +178,8 @@ public class DirectoryMapperService {
 				}
 				String nodefullpath = system.getNodeFullpath();
 				Resource tagresource = new FileSystemResource(
-						resource.getFile().getPath() + nodefullpath + PATH_SEPARATOR + filename);
+					//	resource.getFile().getPath() + nodefullpath + PATH_SEPARATOR + filename);
+					resource.getFile().getPath() + nodefullpath);
 				// If the tag resource exists we should create a link...???
 				if (!tagresource.exists()) {
 					log.info("Creating directory " + tagresource.getFile().getPath());
