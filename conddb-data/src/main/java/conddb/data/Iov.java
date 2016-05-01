@@ -23,6 +23,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import conddb.data.annotations.Linkit;
 import conddb.data.utils.json.serializers.TimestampDeserializer;
 import conddb.data.utils.json.serializers.TimestampSerializer;
 

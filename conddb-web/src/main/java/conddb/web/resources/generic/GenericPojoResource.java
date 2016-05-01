@@ -22,8 +22,6 @@ import org.slf4j.LoggerFactory;
 
 import conddb.data.AfEntity;
 import conddb.data.annotations.Linkit;
-import conddb.svc.annotations.ProfileExecution;
-import conddb.web.exceptions.ConddbWebException;
 import conddb.web.resources.CollectionResource;
 import conddb.web.resources.Link;
 import conddb.web.utils.PropertyConfigurator;
@@ -44,14 +42,12 @@ public class GenericPojoResource<T extends AfEntity> extends Link {
 	private int level = 0;
 	private AfEntity parent = null;
 
-	// Map<String, Method> entitymap = new LinkedHashMap<String, Method>();
-	Map<String, Method> nswentitymap = null;
-	Map<String, Method> nswsetmap = null;
-	Map<String, Method> entitymap = null;
+//	Map<String, Method> nswentitymap = null;
+//	Map<String, Method> nswsetmap = null;
 
 	public GenericPojoResource(UriInfo info, AfEntity entity) {
 		super(info, entity);
-		initmaps(entity);
+//		initmaps(entity);
 		try {
 			build(info, entity);
 		} catch (Exception e) {
@@ -69,11 +65,11 @@ public class GenericPojoResource<T extends AfEntity> extends Link {
 
 		this.level = level;
 		this.parent = parent;
-		initmaps(entity);
+//		initmaps(entity);
 		try {
-			log.info("GenericPojoResource: build map");
+			log.debug("GenericPojoResource: build map");
 			build(info, entity, level);
-			log.info("GenericPojoResource: end");
+			log.debug("GenericPojoResource: end");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -82,6 +78,8 @@ public class GenericPojoResource<T extends AfEntity> extends Link {
 	protected void build(UriInfo info, AfEntity entity, int level) throws Exception {
 		build(info, entity);
 		log.debug("======= Now loop on OneToMany if level greater than 0 : " + level + " ======= ");
+		Map<String, Method> nswsetmap = PojoMapFactory.getInstance().getEntityMap(entity, "manytoone");
+
 		log.debug("Loop over OneToMany annotated fields..." + nswsetmap.size());
 		for (String akey : nswsetmap.keySet()) {
 			log.debug("Loop over map with " + akey);
@@ -106,20 +104,7 @@ public class GenericPojoResource<T extends AfEntity> extends Link {
 					log.error("Trying to access an object which has not been initialized from hibernate...ignore it");
 					if (mth.isAnnotationPresent(Linkit.class)) {
 						log.debug("Annotation linkit is present");
-						
-						Class<?> subentityclass = mth.getReturnType();
-						log.debug("annotation linkit is present in method: " + mth.getName() + " return type "
-								+ subentityclass.getName() + " on entity " + entity);
-						log.debug("This is supposed to be a set or collection of other entities....");
-						Linkit linkit = mth.getAnnotation(Linkit.class);
-						log.debug("linkit annotation has getter: " + linkit.getter());
-						Method getter = entity.getClass().getMethod(linkit.getter(), (Class<?>[]) null);
-						String setterformat = linkit.format();
-						log.debug("getter method is :" + getter.getName());
-						String parenthref = (String) getter.invoke(entity, (Object[]) null);
-						log.debug("parent href :" + parenthref + " from entity " + entity);
-						String href = String.format(setterformat, parenthref);
-						CollectionResource coll = new CollectionResource(info, href, null);
+						CollectionResource coll = createLink(info,mth,entity);
 						log.debug("collection resource created :" + coll);
 						put(akey, coll);
 						continue;
@@ -127,20 +112,7 @@ public class GenericPojoResource<T extends AfEntity> extends Link {
 				}
 			} else if (mth.isAnnotationPresent(Linkit.class)) {
 				log.debug("Annotation linkit is present");
-				
-				Class<?> subentityclass = mth.getReturnType();
-				log.debug("annotation linkit is present in method: " + mth.getName() + " return type "
-						+ subentityclass.getName() + " on entity " + entity);
-				log.debug("This is supposed to be a set or collection of other entities....");
-				Linkit linkit = mth.getAnnotation(Linkit.class);
-				log.debug("linkit annotation has getter: " + linkit.getter());
-				Method getter = entity.getClass().getMethod(linkit.getter(), (Class<?>[]) null);
-				String setterformat = linkit.format();
-				log.debug("getter method is :" + getter.getName());
-				String parenthref = (String) getter.invoke(entity, (Object[]) null);
-				log.debug("parent href :" + parenthref + " from entity " + entity);
-				String href = String.format(setterformat, parenthref);
-				CollectionResource coll = new CollectionResource(info, href, null);
+				CollectionResource coll = createLink(info,mth,entity);
 				log.debug("collection resource created :" + coll);
 				put(akey, coll);
 				continue;
@@ -149,24 +121,41 @@ public class GenericPojoResource<T extends AfEntity> extends Link {
 		}
 	}
 
-	@ProfileExecution
-	public void initmaps(AfEntity entity) {
-		PojoMapFactory pm = PojoMapFactory.getInstance();
-		try {
-			nswentitymap = pm.getEntityMap(entity, "onetomany");
-			nswsetmap = pm.getEntityMap(entity, "manytoone");
-			entitymap = pm.getEntityMap(entity, "column");
-		} catch (ConddbWebException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	protected CollectionResource createLink(UriInfo info, Method mth, AfEntity entity) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		Class<?> subentityclass = mth.getReturnType();
+		log.debug("annotation linkit is present in method: " + mth.getName() + " return type "
+				+ subentityclass.getName() + " on entity " + entity);
+		log.debug("This is supposed to be a set or collection of other entities....");
+		Linkit linkit = mth.getAnnotation(Linkit.class);
+		log.debug("linkit annotation has getter: " + linkit.getter());
+		Method getter = entity.getClass().getMethod(linkit.getter(), (Class<?>[]) null);
+		String setterformat = linkit.format();
+		log.debug("getter method is :" + getter.getName());
+		String parenthref = (String) getter.invoke(entity, (Object[]) null);
+		log.debug("parent href :" + parenthref + " from entity " + entity);
+		String href = String.format(setterformat, parenthref);
+		CollectionResource coll = new CollectionResource(info, href, null);
+		return coll;		
 	}
+	
+//	public void initmaps(AfEntity entity) {
+//		PojoMapFactory pm = PojoMapFactory.getInstance();
+////		try {
+////			nswentitymap = pm.getEntityMap(entity, "onetomany");
+////			nswsetmap = pm.getEntityMap(entity, "manytoone");
+////			entitymap = pm.getEntityMap(entity, "column");
+////		} catch (ConddbWebException e) {
+//			// TODO Auto-generated catch block
+////			e.printStackTrace();
+////		}
+//	}
 
-	@ProfileExecution
 	public void build(UriInfo info, AfEntity entity) throws Exception {
 		try {
 			// fetchKeysFromEntity(entity);
 			log.debug("Keys for " + entity.getClass().getName() + " have been fetched....");
+			Map<String, Method> entitymap = PojoMapFactory.getInstance().getEntityMap(entity, "column");;
+
 			log.debug("Loop over simple column fields..." + entitymap.size());
 			for (String akey : entitymap.keySet()) {
 				Method mth = entitymap.get(akey);
@@ -213,6 +202,7 @@ public class GenericPojoResource<T extends AfEntity> extends Link {
 				log.debug("1) Filling map with " + akey + " using method " + mth.getName());
 				put(akey, value);
 			}
+			Map<String, Method> nswentitymap = PojoMapFactory.getInstance().getEntityMap(entity, "onetomany");
 			log.debug("Loop over ManyToOne annotated fields..." + nswentitymap.size());
 			for (String akey : nswentitymap.keySet()) {
 				log.debug("Loop over nswentitymap with " + akey);

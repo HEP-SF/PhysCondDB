@@ -36,6 +36,7 @@ public class SpringResourceFactory {
 		return resource;			
 	}
 	
+	@ProfileExecution
 	public <T extends AfEntity> CollectionResource listToCollection(Collection<T> coll, boolean expand,
 			UriInfo info, String subPath) {
 		Collection<Link> items = new ArrayList<Link>(coll.size());
@@ -51,6 +52,7 @@ public class SpringResourceFactory {
 		return new CollectionResource(info,subPath,items);
 	}
 	
+	@ProfileExecution
 	public <T extends AfEntity> CollectionResource listToCollection(Collection<T> coll, boolean expand,
 			UriInfo info, String subPath, int level) {
 		Collection<Link> items = new ArrayList<Link>(coll.size());
@@ -66,6 +68,7 @@ public class SpringResourceFactory {
 		return new CollectionResource(info,subPath,items);
 	}
 	
+	@ProfileExecution
 	public <T extends AfEntity> CollectionResource listToCollection(Collection<T> coll, boolean expand,
 			UriInfo info, String subPath, int level, int offset, int limit) {
 		Collection<Link> items = new ArrayList<Link>(coll.size());
@@ -80,7 +83,7 @@ public class SpringResourceFactory {
 		}
 		return new CollectionResource(info,subPath,items,offset,limit);
 	}
-
+	
 	public Link getCollectionResource(UriInfo info, String subPath, Collection<?> c) {
 		return new CollectionResource(info,subPath,c);
 	}

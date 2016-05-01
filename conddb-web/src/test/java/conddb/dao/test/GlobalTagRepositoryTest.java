@@ -8,8 +8,12 @@ import static org.junit.Assert.assertThat;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,7 +22,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import conddb.data.GlobalTag;
+import conddb.data.GlobalTagMap;
+import conddb.data.Tag;
 import conddb.svc.dao.controllers.GlobalTagAdminService;
 import conddb.svc.dao.controllers.GlobalTagExpertService;
 import conddb.svc.dao.exceptions.ConddbServiceException;

@@ -87,6 +87,8 @@ public class Link extends LinkedHashMap<Object, Object> {
     }
 
     protected static String getFullyQualifiedContextPath(UriInfo info) {
+    	if (info == null)
+    		return "";
         String fq = info.getBaseUri().toString();
         if (fq.endsWith("/")) {
             return fq.substring(0, fq.length()-1);

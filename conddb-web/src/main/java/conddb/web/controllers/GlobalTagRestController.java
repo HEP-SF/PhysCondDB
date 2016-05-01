@@ -4,6 +4,7 @@
 package conddb.web.controllers;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -83,7 +84,6 @@ public class GlobalTagRestController extends BaseController {
 			this.log.info("GlobalTagRestController generates resource for " + globaltagname);
 			GenericPojoResource<GlobalTag> resource = (GenericPojoResource<GlobalTag>) springResourceFactory.getGenericResource(info, entity, 2, null);
 					//new GenericPojoResource<GlobalTag>(info, entity, 2, null);
-			this.log.info("GlobalTagRestController generates response for " + globaltagname);
 			return ok(resource);
 		} catch (ConddbWebException e1) {
 			throw e1;

@@ -17,6 +17,7 @@ package conddb.data;
 
 import javax.persistence.Transient;
 
+
 /**
  * Base class for all persistent entities in the application.
  */
