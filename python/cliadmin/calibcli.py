@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # encoding: utf-8
 '''
-cliadmin.phconddb -- shortdesc
-
-cliadmin.phconddb is a description
+cliadmin.calibcli -- shortdesc
+    Calibration files management CLI
+cliadmin.calibcli is a description
 
 It defines classes_and_methods
 

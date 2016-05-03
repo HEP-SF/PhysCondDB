@@ -64,7 +64,7 @@
 		<appender-ref ref="consoleAppender" />
 	</logger>
 	<logger name="conddb" additivity="false">
-		<level value="info" />
+		<level value="debug" />
 		<appender-ref ref="fileAppender" />
 		<appender-ref ref="consoleAppender" />
 	</logger>

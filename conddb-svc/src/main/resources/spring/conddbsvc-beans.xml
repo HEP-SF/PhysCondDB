@@ -23,7 +23,7 @@
 	</bean>
 	<bean id="payloaddatadbrepo" class="conddb.svc.dao.repositories.impl.PayloadDataDBImpl"></bean>
 	<bean id="directoryMapperService" class="conddb.svc.calibration.tools.DirectoryMapperService">
-		<property name="localrootdir" value="/tmp/physconddb-dump" />
+		<property name="localrootdir" value="/tmp/physconddb-dump/calib-data" />
 	</bean>
            
 </beans>

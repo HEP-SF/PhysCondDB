@@ -277,7 +277,7 @@ public class CalibrationRestController extends BaseController {
 			}
 			if (!directoryMapperService.isOnDisk(globaltag,packagedir)) {
 				log.debug("Global tag resource "+globaltag+" for package dir "+packagedir+" not yet on disk...dumping it");
-				directoryMapperService.dumpGlobalTagOnDisk(globaltag,packagedir);
+				directoryMapperService.dumpAsgGlobalTagOnDisk(globaltag,packagedir);
 			}
 			log.debug("Creating tar file...");
 			File f = directoryMapperService.createTar(globaltag,packagedir);
@@ -340,7 +340,7 @@ public class CalibrationRestController extends BaseController {
 				log.debug("Using the first part of global tag name as package dir: "+packagedir);
 			}
 
-			directoryMapperService.dumpGlobalTagOnDisk(globaltag,packagedir);
+			directoryMapperService.dumpAsgGlobalTagOnDisk(globaltag,packagedir);
 			GenericPojoResource<GlobalTag> resource = new GenericPojoResource<GlobalTag>(info, globaltag, 1, null);
 			return ok(resource);
 			

@@ -5,7 +5,6 @@ package conddb.svc.calibration.tools;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -105,219 +104,171 @@ public class DirectoryMapperService {
 		return;
 	}
 
-	/**
-	 * This method is dumping a generic global tag into disk. This assumes that the global tag maps do contain information related to the system,
-	 * at the level of the record and label fields: label indicates in general the tagnameroot, and record the schemaName (or package name in the
-	 * case of calibration files). One can assume that if record is "none", the first part of the tag name should be used. This obviously depends
-	 * on the tag name format. So it should be carefully checked via regexp ?
-	 * @param globaltag
-	 * @param schema
-	 */
-	public void dumpGlobalTagOnDisk(GlobalTag globaltag, String schema) {
+	
+	protected String getFilenameExtension(Tag tag) throws ConddbServiceException {
+		// TODO: make this code more general ? what constraints are needed on names ?
+		// Object type should be a string identifying the BLOB. 
+		// In the case of calibration files, this is a file name. Not sure this works outside the
+		// calibration files use case !!!
+		String tagNameRoot = tag.getName().split(Tag.DEFAULT_TAG_EXTENSION)[0];
+//		String filename = tag.getObjectType();
+//		filename = filename.substring(0, filename.lastIndexOf("."));
+//		log.debug("Extracted file name and extension..." + filename);
+		SystemDescription system = systemNodeService.getSystemNodesByTagname(tagNameRoot);
+		log.debug("Extracted system information..." + system.getNodeFullpath());
+		String nodefullpath = system.getNodeFullpath().substring(1);
+		return nodefullpath;
+	}
+	
+	protected void dumpIovsInTag(Tag tag, Timestamp snapshot, Path tagrealpath,Path rootdir) {
+		OutputStream out = null;
 		try {
-			String schemadir = "";
-			if (schema != null) {
-				schemadir = schema + PATH_SEPARATOR;
-			}
-			GlobalTag entity = globalTagService.getGlobalTagFetchTags(globaltag.getName());
-			Resource rootresource = new FileSystemResource(localrootdir);
-			Resource resource = new FileSystemResource(localrootdir + PATH_SEPARATOR + schemadir + globaltag.getName());
-			log.info("create directory for global tag " + globaltag.getName());
-			if (!resource.exists()) {
-				log.info("Creating directory " + resource.getFile().getPath());
-				File gfile = resource.getFile();
-				gfile.mkdirs();
-			}
-			Timestamp snapshot = entity.getSnapshotTime();
-			Set<GlobalTagMap> tagmaplist = entity.getGlobalTagMaps();
-			for (GlobalTagMap globalTagMap : tagmaplist) {
-				log.debug("Analyse directory structure for a given TAG");
-				Tag tag = globalTagMap.getSystemTag();
-				log.info("Found tag " + tag.getName());
-//				String tagNameRoot = globalTagMap.getLabel();
-				String tagNameRoot = globalTagMap.getRecord();
-				if (tagNameRoot.equals("none")) {
-					// FIXME: this works only for calibration files....we should check for a regexp ? How to guarantee the format of the tag name ?
-					tagNameRoot = tag.getName().split(Tag.DEFAULT_TAG_EXTENSION)[0];
-				}
-				// Object type should be a string identifying the BLOB. In the case of calibration files, this is a file name.
-				String filename = tag.getObjectType();
-				filename = filename.substring(0, filename.lastIndexOf("."));
-				String fileext = tag.getObjectType();
-				fileext = fileext.substring(fileext.lastIndexOf(".") + 1, fileext.length());
-				log.debug("Extracted file name and extension..." + filename+" "+fileext);
-				SystemDescription system = systemNodeService.getSystemNodesByTagname(tagNameRoot);
-				log.debug("Search for system using tag name root " + tagNameRoot);
+			List<Iov> iovlist = iovService.getIovsByTag(tag, null, snapshot);
+			log.debug("Retrieved list of iovs for tag " + tag.getName()+" of size "+iovlist.size());
+			log.debug("Use tagrealpath directory : "+tagrealpath);
+
+			String fileext = tag.getObjectType();
+			fileext = fileext.substring(fileext.lastIndexOf(".") + 1, fileext.length());
+			log.debug("Extracted filename extension...used with the iov string : "+fileext);
+			String node = getFilenameExtension(tag); // this should not have a slash at the beginning
+			Path nodepath = Paths.get(node);
+			log.debug("Use nodepath directory : "+nodepath);
+
+			log.debug("Create tag resource path as directory : "+tagrealpath.resolve(nodepath));
+			Path filepath = tagrealpath.resolve(nodepath);
+			Path tagresource = Files.createDirectories(rootdir.resolve(filepath));
+			for (Iov iov : iovlist) {
+				PayloadData data = iovService.getPayloadData(iov.getPayload().getHash());
+				Payload info = iov.getPayload();
+				String generatedFileName = iov.getSinceString() + "." + fileext;
 				
-				log.debug("Found system " + system.getSchemaName());
-				// Check if this is a link to a global tag
-				String labelisgtag = globalTagMap.getLabel();
-				log.debug("Check label in mapping..."+labelisgtag);
-				Resource subresource = new FileSystemResource(
-						localrootdir + PATH_SEPARATOR + system.getSchemaName() + PATH_SEPARATOR + labelisgtag);
-				log.debug("Verify subresource in path "+subresource.toString());
-				if (subresource.exists()) {
-					log.info("Creating link to " + subresource.getFile().getPath());
-					Path newLink = Paths.get(resource.getFile().getPath() + PATH_SEPARATOR + labelisgtag);
-					Path target = Paths.get(subresource.getFile().getPath());
-					Path rootpath = Paths.get(rootresource.getFile().getPath());
-					newLink = rootpath.relativize(newLink);
-					target = rootpath.relativize(target);
-					log.info("newLink after relativize is " + newLink.toString());
-					log.info("target after relativize is " + target.toString());
-					try {
-						log.debug("Create symbolic link to "+target.toString());
-						Files.createSymbolicLink(newLink, target);
-					} catch (IOException x) {
-						log.error(x.getMessage());
-					} catch (UnsupportedOperationException x) {
-						// Some file systems do not support symbolic links.
-						log.error(x.getMessage());
-					}
-					continue;
+				// It was using this one, but now I am extracting the info
+				// on the filename : info.getStreamerInfo();
+				
+				String outfilename = tagresource.toRealPath().toString() + PATH_SEPARATOR + generatedFileName;
+				log.debug("Dump blob for tag " + tag.getName() + " into output file " + outfilename);
+				
+				// Check if the blob is on disk
+				java.nio.file.Path path = Paths.get(data.getUri());
+				out = new FileOutputStream(new File(outfilename));
+				if (Files.notExists(path)) {
+					log.debug("Blob is stored in memory as string....dump it directly on output");
+					payloadBytesHandler.saveToOutStream(data.getData().getBinaryStream(), out); 
+				} else {
+					log.debug("Blob stored in " + data.getUri());
+					Files.copy(path, out);
 				}
-				String nodefullpath = system.getNodeFullpath();
-				Resource tagresource = new FileSystemResource(
-					//	resource.getFile().getPath() + nodefullpath + PATH_SEPARATOR + filename);
-					resource.getFile().getPath() + nodefullpath);
-				// If the tag resource exists we should create a link...???
-				if (!tagresource.exists()) {
-					log.info("Creating directory " + tagresource.getFile().getPath());
-					File tfile = tagresource.getFile();
-					tfile.mkdirs();
-				}
-				List<Iov> iovlist = iovService.getIovsByTag(tag, null, snapshot);
-				for (Iov iov : iovlist) {
-					PayloadData data = iovService.getPayloadData(iov.getPayload().getHash());
-					Payload info = iov.getPayload();
-					String generatedFileName = iov.getSinceString() + "." + fileext;
-					
-					// It was using this one, but now I am extracting the info
-					// on the filename : info.getStreamerInfo();
-					String outfilename = tagresource.getFile().getPath() + "/" + generatedFileName;
-					log.debug("Dump blob for tag " + tag.getName() + " into output file " + outfilename);
-					
-					// Check if the blob is on disk
-					java.nio.file.Path path = Paths.get(data.getUri());
-					OutputStream out = new FileOutputStream(new File(outfilename));
-					if (Files.notExists(path)) {
-						log.debug("Blob is stored in memory as string....dump it directly on output");
-						payloadBytesHandler.saveToOutStream(data.getData().getBinaryStream(), out); 
-					} else {
-						log.debug("Blob stored in " + data.getUri());
-						Files.copy(path, out);
-					}
-					log.debug("File has been copied from " + path.toString() + " into " + outfilename);
-				}
+				log.debug("File has been copied from " + path.toString() + " into " + outfilename);
 			}
-		} catch (FileNotFoundException e) {
+		} catch (ConddbServiceException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (ConddbServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+				try {
+					if (out != null)
+						out.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		}
+	
 	}
 	
 	public void dumpAsgGlobalTagOnDisk(GlobalTag globaltag, String schema) {
 		try {
 			String schemadir = "";
 			if (schema != null) {
-				schemadir = schema + PATH_SEPARATOR;
+				schemadir = schema;
 			}
 			GlobalTag entity = globalTagService.getGlobalTagFetchTags(globaltag.getName());
-			Resource resource = new FileSystemResource(localrootdir + PATH_SEPARATOR + schemadir + globaltag.getName());
-			log.info("create directory for global tag " + globaltag.getName());
-			if (!resource.exists()) {
-				log.info("Creating directory " + resource.getFile().getPath());
-				File gfile = resource.getFile();
-				gfile.mkdirs();
-			}
+
+			// Define a resource pointing to root dir only, plus schema dir if it exists
+			Resource resource = new FileSystemResource(localrootdir);
+			Path rootdir = Paths.get(resource.getFile().getPath());
+
+			// Now you should define a path for the global tag and the package name
+			String mainpkg = schemadir+PATH_SEPARATOR+globaltag.getName();
+			Path pmainpkg = Paths.get(mainpkg);
+			log.debug("Created path for main package: "+pmainpkg);
+
 			Timestamp snapshot = entity.getSnapshotTime();
 			Set<GlobalTagMap> tagmaplist = entity.getGlobalTagMaps();
 			for (GlobalTagMap globalTagMap : tagmaplist) {
 				log.debug("Analyse directory structure for a given TAG");
 				Tag tag = globalTagMap.getSystemTag();
 				log.info("Found tag " + tag.getName());
-				String tagNameRoot = tag.getName().split(Tag.DEFAULT_TAG_EXTENSION)[0];
-				String filename = tag.getObjectType();
-				filename = filename.substring(0, filename.lastIndexOf("."));
-				String fileext = tag.getObjectType();
-				fileext = fileext.substring(fileext.lastIndexOf(".") + 1, fileext.length());
-				log.debug("Extracted file name extension..." + fileext);
-				SystemDescription system = systemNodeService.getSystemNodesByTagname(tagNameRoot);
-				log.debug("Found system " + system.getSchemaName());
-				// Check if this is a link to a global tag
+				// Tag has been obtained, now try to get the package name from the record.
+				// In the method tagFile we have been using schema name for record, and tagnameroot for label.
+				// Instead in the method collect we have the original global tag name as a label.
+				String schemaname = globalTagMap.getRecord();
 				String labelisgtag = globalTagMap.getLabel();
-				log.debug("Check label in mapping..."+labelisgtag);
-				Resource subresource = new FileSystemResource(
-						localrootdir + PATH_SEPARATOR + system.getSchemaName() + PATH_SEPARATOR + labelisgtag);
-				log.debug("Verify subresource in path "+subresource.toString());
-				if (subresource.exists()) {
-					log.info("Creating link to " + subresource.getFile().getPath());
-					Path newLink = Paths.get(resource.getFile().getPath() + PATH_SEPARATOR + labelisgtag);
-					Path target = Paths.get(subresource.getFile().getPath());
-					try {
-						log.debug("Create symbolic link to "+target.toString());
-						Files.createSymbolicLink(newLink, target);
-					} catch (IOException x) {
-						log.error(x.getMessage());
-					} catch (UnsupportedOperationException x) {
-						// Some file systems do not support symbolic links.
-						log.error(x.getMessage());
+				log.debug("Check record and label in mapping..."+schemaname+" , "+labelisgtag);
+				//
+				// If labelisgtag is equal to tagnameroot it means that we are dumping a normal tag
+				// associated to the input global tag
+				String tagNameRoot = tag.getName().split(Tag.DEFAULT_TAG_EXTENSION)[0];
+				if (labelisgtag.equals(tagNameRoot) || labelisgtag.equals("none")) {
+					// dump this tag under the rootdir/schemadir/globaltag/xxx 
+					log.debug("This seems to be a normal global tag, try to dump "+tag.getName());
+					String subpkg = tag.getName();
+					Path psubpkg = pmainpkg.resolve(subpkg); //schemadir/globaltag/tagname
+					log.debug("created path "+psubpkg.toString());
+					boolean fileexists = Files.exists(rootdir.resolve(psubpkg));
+					log.debug("Check existence of "+rootdir.resolve(psubpkg).toString()+" result in "+fileexists);
+					if (!fileexists) {
+						// dump the tag content in Path psubpkg
+						log.debug("file does not exists, dump the iovs using snapshot: "+snapshot);
+						Path tagresource = Files.createDirectories(rootdir.resolve(psubpkg));
+						log.debug("created tag resource: "+tagresource);
+						this.dumpIovsInTag(tag, snapshot, psubpkg, rootdir);
 					}
-					continue;
-				}
-				String nodefullpath = system.getNodeFullpath();
-				Resource tagresource = new FileSystemResource(
-						resource.getFile().getPath() + nodefullpath + PATH_SEPARATOR + filename);
-				// If the tag resource exists we should create a link...???
-				if (!tagresource.exists()) {
-					log.info("Creating directory " + tagresource.getFile().getPath());
-					File tfile = tagresource.getFile();
-					tfile.mkdirs();
-				}
-				List<Iov> iovlist = iovService.getIovsByTag(tag, null, snapshot);
-				for (Iov iov : iovlist) {
-					PayloadData data = iovService.getPayloadData(iov.getPayload().getHash());
-					Payload info = iov.getPayload();
-					String generatedFileName = iov.getSinceString() + "." + fileext;
-					
-					// It was using this one, but now I am extracting the info
-					// on the filename : info.getStreamerInfo();
-					String outfilename = tagresource.getFile().getPath() + "/" + generatedFileName;
-					log.debug("Dump blob for tag " + tag.getName() + " into output file " + outfilename);
-					
-					// Check if the blob is on disk
-					java.nio.file.Path path = Paths.get(data.getUri());
-					OutputStream out = new FileOutputStream(new File(outfilename));
-					if (Files.notExists(path)) {
-						log.debug("Blob is stored in memory as string....dump it directly on output");
-						payloadBytesHandler.saveToOutStream(data.getData().getBinaryStream(), out); 
-					} else {
-						log.debug("Blob stored in " + data.getUri());
-						Files.copy(path, out);
+					log.debug("end of actions for tag "+tag.getName());
+				} else {
+				// If labelisgtag is the global tag original name, it means we are dumping a tag associated
+				// to an ASG global tag in input. In this case either the directory 
+				// rootdir/schemadir/globaltag is already there (then we can link it) or we have to dump it and link it
+					log.debug("This seems to be an ASG global tag, try to dump "+tag.getName()+" using link if needed");
+					if (schemaname.equals("none")) {
+						schemaname = labelisgtag.split("-")[0]; // the labelisgtag should have format: package-xx-yy
 					}
-					log.debug("File has been copied from " + path.toString() + " into " + outfilename);
+					boolean gtagexists = Files.exists(rootdir.resolve(mainpkg));
+					if (!gtagexists) {
+						Path globaltagresource = Files.createDirectories(rootdir.resolve(mainpkg));
+						log.debug("Created path for main package: "+globaltagresource);
+					}
+					String subpkg = schemaname+PATH_SEPARATOR+labelisgtag;
+					Path psubpkg = Paths.get(subpkg);
+					Path linkedgtag = pmainpkg.resolve(Paths.get(labelisgtag));
+
+					log.debug("Created path for sub package: "+psubpkg);
+					log.debug("Link to this should be: "+linkedgtag);
+
+					Path  pmainpkg_relativize_subpkg = pmainpkg.relativize(psubpkg);
+					log.debug("Created relative path for sub package: "+pmainpkg_relativize_subpkg);
+					boolean fileexists = Files.exists(rootdir.resolve(psubpkg));
+					log.debug("Check existence of "+rootdir.resolve(psubpkg)+" result in "+fileexists);
+					if (!fileexists) {
+						log.debug("file does not exists, dump the global tag and link it");
+						GlobalTag subgtag = globalTagService.getGlobalTag(labelisgtag);
+						log.debug(" >>>>> global tag to dump: "+subgtag.getName());
+						this.dumpAsgGlobalTagOnDisk(subgtag, schemaname);
+					}
+					boolean linkexists = Files.exists(rootdir.resolve(linkedgtag));
+					if (!linkexists) {
+						Path asg_subpkg_link = Files.createSymbolicLink(rootdir.resolve(linkedgtag), pmainpkg_relativize_subpkg);
+						log.debug("asg_subpkg_link is " + asg_subpkg_link.toString());
+					}
+					log.debug("ASG: end of actions for tag "+tag.getName());
 				}
 			}
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ConddbServiceException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -325,21 +276,47 @@ public class DirectoryMapperService {
 	public File createTar(GlobalTag globaltag, String schema) {
 		try {
 			String schemadir = "";
-			if (schema != null && !schema.equals("")) {
-				schemadir = schema + PATH_SEPARATOR;
+			if (schema != null) {
+				schemadir = schema;
 			}
-			Resource resource = new FileSystemResource(localrootdir + PATH_SEPARATOR + schemadir + globaltag.getName());
+			GlobalTag entity = globalTagService.getGlobalTag(globaltag.getName());
+
+			// Define a resource pointing to root dir only, plus schema dir if it exists
+			Resource resource = new FileSystemResource(localrootdir);
+			Path rootdir = Paths.get(resource.getFile().getPath());
+
+			// Now you should define a path for the global tag and the package name
+			String mainpkg = schemadir+PATH_SEPARATOR+globaltag.getName();
+			Path pmainpkg = Paths.get(mainpkg);
+			log.debug("Created path for main package: "+pmainpkg);
+
+			boolean gtagexists = Files.exists(rootdir.resolve(pmainpkg));
+			if (!gtagexists) {
+				this.dumpAsgGlobalTagOnDisk(entity, schemadir);
+			}
+			// Now you can create the tar file
+			Resource tarresource = new FileSystemResource(rootdir.resolve(mainpkg).toRealPath().toString());
 			log.info("create a tar file from global tag " + globaltag.getName());
-			if (!resource.exists()) {
+			if (!tarresource.exists()) {
 				log.error("Cannot create a tar, directory does not yet exists");
 			}
 			List<File> filelist = new ArrayList<File>();
-			filelist.add(resource.getFile());
-			String tarname = localrootdir + "/" + globaltag.getName() + ".tar";
-			this.createTar(tarname, schemadir, filelist);
+			filelist.add(tarresource.getFile());
+			String tardir = "tar-files";
+			Path ptar = Paths.get(tardir);
+			boolean tardirexists = Files.exists(rootdir.resolve(ptar));
+			if (!tardirexists) {
+				Path tardirresource = Files.createDirectories(rootdir.resolve(ptar));
+				log.debug("Created path for tar directory: "+tardirresource);				
+			}
+			String tarname = globaltag.getName() + ".tar";
+			this.createTar(tarname, rootdir, ptar, filelist);
 			File tarfile = new File(tarname);
 			return tarfile;
 		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ConddbServiceException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -368,8 +345,12 @@ public class DirectoryMapperService {
 		return files;
 	}
 
-	public void createTar(final String tarName, final String schema, final List<File> pathEntries) throws IOException {
-		OutputStream tarOutput = new FileOutputStream(new File(tarName));
+	public void createTar(final String tarName, Path rootdir, Path tardir, final List<File> pathEntries) throws IOException {
+
+		String tarfilepath = tardir.toString() + PATH_SEPARATOR + tarName;
+		Path ptar = rootdir.resolve(tarfilepath);
+		log.debug("Create tar file in "+ptar);
+		OutputStream tarOutput = new FileOutputStream(new File(ptar.toString()));
 
 		ArchiveOutputStream tarArchive = new TarArchiveOutputStream(tarOutput);
 		((TarArchiveOutputStream) tarArchive).setLongFileMode( TarArchiveOutputStream.LONGFILE_GNU );
@@ -377,22 +358,20 @@ public class DirectoryMapperService {
 		for (File file : pathEntries) {
 			files.addAll(this.recurseDirectory(file));
 		}
-		String schemadir = "";
-		if (schema != null && !schema.equals("")) {
-			schemadir = schema + PATH_SEPARATOR;
-		}
-		java.nio.file.Path rootpath = Paths.get(localrootdir + PATH_SEPARATOR + schemadir);
+		log.debug("Now loop into file list of size "+files.size());
+
 		for (File file : files) {
 			java.nio.file.Path path = Paths.get(file.getPath());
-			java.nio.file.Path relativepath = rootpath.relativize(path);
+			java.nio.file.Path relativepath = rootdir.relativize(path);
 			log.info("Created relative file path " + relativepath.toString());
 			TarArchiveEntry tarArchiveEntry = new TarArchiveEntry(file, relativepath.toString());
-			tarArchiveEntry.setSize(file.length());
 			tarArchive.putArchiveEntry(tarArchiveEntry);
 			FileInputStream fileInputStream = new FileInputStream(file);
 			IOUtils.copy(fileInputStream, tarArchive);
 			fileInputStream.close();
 			tarArchive.closeArchiveEntry();
+			//			tarArchiveEntry.setSize(file.length());
+
 		}
 		tarArchive.finish();
 		tarOutput.close();
