@@ -18,20 +18,29 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ```
+# Table of Contents
+1. [Description](#description)
+2. [Pre-compilation instructions](#pre-compilation)
+3. [Build instructions](#build)
+4. [Modules description](#modules)
+5. [Deployment description](#deployment)
+6. [Using spring profiles](#using-spring-profiles)
+6. [Maven options](#maven-useful-options)
+
 ## Description
 Test project for the implementation of a generic purpose conditions database for physics experiment.
 It uses [Spring framework](https://spring.io) and the REST services are implemented via  [Jersey](https://jersey.java.net).
 The REST services are documented via [swagger](https://swagger.io). We will describe later how to check the swagger documentation information, which is not included in the project itself.
 
 
-## Pre-compilation instructions
+## Pre compilation
 Here is a list of things to verify before installing the software.
 This project is based on **maven** (in general the command is *mvn*).
 The project has been tested using **java version 8**.
 In the following instruction we are using for project base directory the denomination : `<prj_home>`
 
 ### Pre-requisities
-To install this software you should have installed in your computer apache-maven (`https://maven.apache.org)
+To install this software you should have installed in your computer [apache-maven](https://maven.apache.org)
 and Java version 8.
 
 ### Property file
@@ -57,7 +66,7 @@ Use maven to install it (the example here uses version 11.2.0.3 of oracle driver
 
 This will create an appropriate repository for oracle inside your maven local repository (~/.m2/xxxx).
 
-## Build instructions
+## Build
 Execute the following commands from project base directory.
 - To compile the code: `<prj_home>/$ mvn clean compile `
 - To package the code: `<prj_home>/$ mvn package `
@@ -70,7 +79,7 @@ During this phase tests are also executed (the code of the tests is contained in
 
 The products of the build are stored in the `target` directory of every sub-module.
 
-## Modules description
+## Modules
 1. conddb-cool => Web application that is used to retrieve data from ATLAS COOL DB (using PL/SQL package)
               Go to the conddb-cool/README.txt for more informations.
               
@@ -85,7 +94,7 @@ The products of the build are stored in the `target` directory of every sub-modu
 
 6. python => Python client libraries (based on a swagger generated api). Includes also some command line tools.
 
-## Deployment instructions
+## Deployment
 We can deploy the application in several environments. Below we list instructions for Tomcat and Jetty.
    
 ###   Tomcat7
@@ -186,17 +195,23 @@ If you use in addition the `dev` spring profile (instead of `prod`) you may defi
 
 Some of the fields in this file are very important in case of deployment under *jetty*, *tomcat7* or *jboss*.
 
-
-     
-   
+ 
 ## Using spring profiles
-This prototype has profiles to create appropriate _datasources_ and JNDI naming for retrieving a connection depending on the server where the module has been deployed.
+To improve the flexibility during the deployment step, the prototype makes usage of *spring profiles*.
+Via the defined profiles we can create appropriate _datasources_ and JNDI naming for retrieving a connection depending on the server where the module has been deployed.
 We can then use an environment variable to set the appropriate profile:
    `spring.profiles.active`
    
 The variable can be set at command line level or using `JAVA_OPTS` or `CATALINA_OPTS` variables.
+For production, the best is to set the property in the `web.xml` file of the module `conddb-web`.
+```
+     <context-param> 
+            <param-name>spring.profiles.active</param-name>
+            <param-value>prod,oracle</param-value>
+     </context-param> 
+``` 
 
-## Skip tests for maven
+## Maven useful options
 In order to skip tests when compiling and installing libraries you can use the following option:
 ```
 mvn -Dmaven.test.skip=true     
@@ -208,6 +223,9 @@ mvn -DskipTests=true
 ```
 test are not executed
 
+
 ## Some useful commands to test services
+This should be improved.
+
 * Insert a global tag:
  - ```time curl -H "Content-Type: application/json" -H "Accept: application/json" -X POST -d '{ "name" : "BGTAG_02", "lockstatus" : "unlocked","validity" : 4, "description" : "Second test gtag", "release" : "3.0", "snapshotTime" : "2013-06-01T10:10:10+02:00"}' --proxy socks5h://localhost:3129 http://aiatlas137.cern.ch:8080/physconddb/api/rest/expert/globaltags```
