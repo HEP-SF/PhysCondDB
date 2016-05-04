@@ -83,7 +83,7 @@ The products of the build are stored in the `target` directory of every sub-modu
 1. conddb-cool => Web application that is used to retrieve data from ATLAS COOL DB (using PL/SQL package)
               Go to the conddb-cool/README.txt for more informations.
               
-2. conddb-web => Web application that is used to access the PhysCondDB conditions DB core services
+2. conddb-web => Web application that is used to access the PhysCondDB conditions DB core services.
               Go to the [README file](conddb-web/README-CONDDBWEB.md) for more informations.
 
 3. conddb-svc => Jar file containing spring repositories.
