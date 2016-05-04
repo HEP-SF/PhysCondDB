@@ -8,6 +8,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.DirectoryIteratorException;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,6 +22,7 @@ import java.util.Set;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
+import org.apache.commons.compress.archivers.tar.TarConstants;
 import org.apache.commons.compress.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -273,20 +276,25 @@ public class DirectoryMapperService {
 		}
 	}
 
-	public File createTar(GlobalTag globaltag, String schema) {
+	/**
+	 * @param globaltagname
+	 * @param schema
+	 * @return
+	 */
+	public File createOldTar(String globaltagname, String schema) {
 		try {
 			String schemadir = "";
 			if (schema != null) {
 				schemadir = schema;
 			}
-			GlobalTag entity = globalTagService.getGlobalTag(globaltag.getName());
+			GlobalTag entity = globalTagService.getGlobalTag(globaltagname);
 
 			// Define a resource pointing to root dir only, plus schema dir if it exists
 			Resource resource = new FileSystemResource(localrootdir);
 			Path rootdir = Paths.get(resource.getFile().getPath());
 
 			// Now you should define a path for the global tag and the package name
-			String mainpkg = schemadir+PATH_SEPARATOR+globaltag.getName();
+			String mainpkg = schemadir+PATH_SEPARATOR+globaltagname;
 			Path pmainpkg = Paths.get(mainpkg);
 			log.debug("Created path for main package: "+pmainpkg);
 
@@ -296,21 +304,40 @@ public class DirectoryMapperService {
 			}
 			// Now you can create the tar file
 			Resource tarresource = new FileSystemResource(rootdir.resolve(mainpkg).toRealPath().toString());
-			log.info("create a tar file from global tag " + globaltag.getName());
+			log.info("create a tar file from global tag " + globaltagname);
 			if (!tarresource.exists()) {
 				log.error("Cannot create a tar, directory does not yet exists");
 			}
 			List<File> filelist = new ArrayList<File>();
 			filelist.add(tarresource.getFile());
-			String tardir = "tar-files";
+			
+			List<Path> pathlist = new ArrayList<>();
+			DirectoryStream<Path> stream = Files.newDirectoryStream(rootdir.resolve(pmainpkg));
+			try {
+			    for (Path file: stream) {
+			        log.debug("Found file or directory: "+file.getFileName());
+			        boolean islink = Files.isSymbolicLink(file);
+			        if (islink) {
+			        	Path link = Files.readSymbolicLink(file);
+				        log.debug("this is a link: "+link);
+			        	pathlist.add(link);
+			        }
+			        pathlist.add(file);
+			    }
+			} catch (DirectoryIteratorException x) {
+			    // IOException can never be thrown by the iteration.
+			    // In this snippet, it can only be thrown by newDirectoryStream.
+			    log.error("DirectoryStream produced an error: "+x.getMessage());
+			}			
+			String tardir = "../tar-files";
 			Path ptar = Paths.get(tardir);
 			boolean tardirexists = Files.exists(rootdir.resolve(ptar));
 			if (!tardirexists) {
 				Path tardirresource = Files.createDirectories(rootdir.resolve(ptar));
 				log.debug("Created path for tar directory: "+tardirresource);				
 			}
-			String tarname = globaltag.getName() + ".tar";
-			this.createTar(tarname, rootdir, ptar, filelist);
+			String tarname = globaltagname + ".tar";
+			this.fillTar(tarname, rootdir, pmainpkg, ptar, pathlist);
 			File tarfile = new File(tarname);
 			return tarfile;
 		} catch (IOException e) {
@@ -322,6 +349,84 @@ public class DirectoryMapperService {
 		}
 		return null;
 	}
+	
+	/**
+	 * @param globaltagname
+	 * @param schema
+	 * @return
+	 */
+	public File createTar(String globaltagname, String schema) {
+		try {
+			String schemadir = "";
+			if (schema != null) {
+				schemadir = schema;
+			}
+			GlobalTag entity = globalTagService.getGlobalTag(globaltagname);
+
+			// Define a resource pointing to root dir only, plus schema dir if it exists
+			Resource resource = new FileSystemResource(localrootdir);
+			Path rootdir = Paths.get(resource.getFile().getPath());
+
+			// Now you should define a path for the global tag and the package name
+			String mainpkg = schemadir+PATH_SEPARATOR+globaltagname;
+			Path pmainpkg = Paths.get(mainpkg);
+			Path schemapath = Paths.get(schemadir);
+
+			log.debug("Created path for main package: "+pmainpkg);
+
+			boolean gtagexists = Files.exists(rootdir.resolve(pmainpkg));
+			if (!gtagexists) {
+				this.dumpAsgGlobalTagOnDisk(entity, schemadir);
+			}
+
+			
+			// Now you can create the tar file
+			Resource tarresource = new FileSystemResource(rootdir.resolve(pmainpkg).toRealPath().toString());
+			if (!tarresource.exists()) {
+				System.out.println("Cannot create a tar, directory does not yet exists");
+			}
+
+			List<Path> pathlist = new ArrayList<>();
+			DirectoryStream<Path> dstream = Files.newDirectoryStream(rootdir.resolve(pmainpkg));
+			try {
+				for (Path file : dstream) {
+					System.out.println("Found file or directory: " + file.getFileName());
+					boolean islink = Files.isSymbolicLink(file);
+					if (islink) {
+						Path link = Files.readSymbolicLink(file);
+						System.out.println("this is a link: " + link);
+						// pathlist.add(link);
+					}
+					pathlist.add(file);
+				}
+			} catch (DirectoryIteratorException x) {
+				// IOException can never be thrown by the iteration.
+				// In this snippet, it can only be thrown by newDirectoryStream.
+				System.out.println("DirectoryStream produced an error: " + x.getMessage());
+			}
+
+			String tardir = "../tar-files";
+			Path ptar = Paths.get(tardir);
+			boolean tardirexists = Files.exists(rootdir.resolve(ptar));
+			if (!tardirexists) {
+				Path tardirresource = Files.createDirectories(rootdir.resolve(ptar));
+				System.out.println("Created path for tar directory: " + tardirresource);
+			}
+			String tarname = globaltagname + ".tar";
+			String createdtarpath = fillFinalTar(tarname, globaltagname, rootdir, schemapath, ptar, pathlist);
+			Path createdtar = Paths.get(createdtarpath);
+			File tarfile = rootdir.resolve(createdtar).toFile();
+			return tarfile;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ConddbServiceException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 
 	public boolean isOnDisk(GlobalTag globaltag, String schema) {
 		Resource resource = new FileSystemResource(localrootdir + "/" + globaltag.getName());
@@ -345,7 +450,7 @@ public class DirectoryMapperService {
 		return files;
 	}
 
-	public void createTar(final String tarName, Path rootdir, Path tardir, final List<File> pathEntries) throws IOException {
+	public void fillTar(final String tarName, Path rootdir, Path pkgdir, Path tardir, final List<Path> pathEntries) throws IOException {
 
 		String tarfilepath = tardir.toString() + PATH_SEPARATOR + tarName;
 		Path ptar = rootdir.resolve(tarfilepath);
@@ -354,28 +459,168 @@ public class DirectoryMapperService {
 
 		ArchiveOutputStream tarArchive = new TarArchiveOutputStream(tarOutput);
 		((TarArchiveOutputStream) tarArchive).setLongFileMode( TarArchiveOutputStream.LONGFILE_GNU );
-		List<File> files = new ArrayList<File>();
-		for (File file : pathEntries) {
-			files.addAll(this.recurseDirectory(file));
-		}
-		log.debug("Now loop into file list of size "+files.size());
-
-		for (File file : files) {
-			java.nio.file.Path path = Paths.get(file.getPath());
-			java.nio.file.Path relativepath = rootdir.relativize(path);
-			log.info("Created relative file path " + relativepath.toString());
-			TarArchiveEntry tarArchiveEntry = new TarArchiveEntry(file, relativepath.toString());
+		log.debug("Now loop into path list of size "+pathEntries.size());
+		Path tarbasedir = rootdir.resolve(pkgdir);
+		log.debug("Base directory for tar is "+tarbasedir);
+		for (Path path : pathEntries) {
+			log.debug("Add entry to tar "+path);
+//			Path relativepath = rootdir.relativize(path);
+//			log.info("Created relative file path (not used for the moment): " + relativepath.toString());
+			File file = tarbasedir.resolve(path).toFile();
+			if (file.isDirectory()) {
+				log.debug("Entry "+file.getAbsolutePath()+" is directory...open it");
+				List<File> files = new ArrayList<File>();
+				files.addAll(this.recurseDirectory(file));
+				for (File dirfile : files) {
+					Path dirfpath = Paths.get(dirfile.getPath());
+					Path relativepath = tarbasedir.relativize(dirfpath);
+					log.debug("directory entry is "+relativepath+" from "+dirfpath);
+					TarArchiveEntry tarArchiveEntry = new TarArchiveEntry(relativepath.toString());
+					tarArchive.putArchiveEntry(tarArchiveEntry);
+					tarArchive.closeArchiveEntry();
+				}
+				TarArchiveEntry tarArchiveEntry = new TarArchiveEntry(path.toString());
+				tarArchive.putArchiveEntry(tarArchiveEntry);
+				tarArchive.closeArchiveEntry();
+				continue;
+			}
+			TarArchiveEntry tarArchiveEntry = new TarArchiveEntry(file, path.toString());
 			tarArchive.putArchiveEntry(tarArchiveEntry);
 			FileInputStream fileInputStream = new FileInputStream(file);
 			IOUtils.copy(fileInputStream, tarArchive);
 			fileInputStream.close();
 			tarArchive.closeArchiveEntry();
-			//			tarArchiveEntry.setSize(file.length());
-
 		}
+//		List<File> files = new ArrayList<File>();
+//		for (File file : pathEntries) {
+//			files.addAll(this.recurseDirectory(file));
+//		}
+//		log.debug("Now loop into file list of size "+files.size());
+
+//		for (File file : files) {
+//			Path path = Paths.get(file.getPath());
+//			log.info("Using file path " + path.toString());
+//			Path relativepath = rootdir.relativize(path);
+//			log.info("Created relative file path " + relativepath.toString());
+//			TarArchiveEntry tarArchiveEntry = new TarArchiveEntry(file, path.toString());
+//			tarArchive.putArchiveEntry(tarArchiveEntry);
+//			FileInputStream fileInputStream = new FileInputStream(file);
+//			IOUtils.copy(fileInputStream, tarArchive);
+//			fileInputStream.close();
+//			tarArchive.closeArchiveEntry();
+//			//			tarArchiveEntry.setSize(file.length());
+//		}
 		tarArchive.finish();
 		tarOutput.close();
 	}
+	
+	protected String fillFinalTar(final String tarName, final String gtag, Path rootdir, Path pkgdir, Path tardir,
+			final List<Path> pathEntries) throws IOException {
+
+		String tarfilepath = tardir.toString() + PATH_SEPARATOR + tarName;
+		Path ptar = rootdir.resolve(tarfilepath);
+		OutputStream tarOutput = new FileOutputStream(new File(ptar.toString()));
+
+		ArchiveOutputStream tarArchive = new TarArchiveOutputStream(tarOutput);
+		((TarArchiveOutputStream) tarArchive).setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
+
+		Path asgtag = pkgdir.resolve(gtag);
+		Path tarbasedir = rootdir.resolve(pkgdir);
+		Path asgbasedir = rootdir.resolve(asgtag);
+		log.debug("The root directory of the tar ASG is " + asgtag);
+		log.debug("The tarbasedir dir is " + tarbasedir);
+		log.debug("The asgbase dir is " + asgbasedir);
+
+		for (Path path : pathEntries) {
+			log.debug("Adding entry to tar: " + path);
+			Path savedlink = getLink(path, rootdir);
+			if (savedlink != null) {
+				Path relativepath = rootdir.relativize(path);
+				archieve(tarArchive, null, relativepath, savedlink.toString(), true);
+			}
+			Path pkg = getPackageFromLink(savedlink);
+			Path pkgasgrelpath = null;
+			
+			File file = rootdir.resolve(path).toFile();
+			if (file.isDirectory()) {
+				log.debug("Entry " + file.getAbsolutePath() + " is directory...open it");
+				List<File> files = new ArrayList<File>();
+				files.addAll(this.recurseDirectory(file));
+				for (File dirfile : files) {
+					Path dirfpath = Paths.get(dirfile.getPath());
+					Path relativepath = rootdir.relativize(dirfpath);
+					if (pkg != null) {
+						Path tmppath = rootdir.resolve(pkg);
+						log.debug(" == Package path is " + tmppath);
+						Path relativepkgpath = asgbasedir.relativize(dirfpath);
+						log.debug(" == Package entry is " + relativepkgpath + " from " + dirfpath);
+						pkgasgrelpath = tmppath.resolve(relativepkgpath);
+						relativepath = rootdir.relativize(pkgasgrelpath);
+					}
+					log.debug("Directory entry is " + relativepath + " from " + dirfpath);
+					archieve(tarArchive, dirfile, relativepath, null, false);
+				}
+				continue;
+			}
+			log.debug("Now storing " + file.getName() + " in path " + path);
+			archieve(tarArchive, file, path, null, false);
+		}
+		tarArchive.finish();
+		tarOutput.close();
+		return ptar.toString();
+	}
+
+	
+	protected Path getLink(Path path, Path rootdir) throws IOException {
+		// Add the link to the tar...
+		boolean islink = Files.isSymbolicLink(path);
+		if (islink) {
+			Path relativepath = rootdir.relativize(path);
+			Path link = Files.readSymbolicLink(path);
+			File filelink = rootdir.resolve(link).toFile();
+			log.debug(
+					"File link is " + filelink.getName() + " in relative path " + relativepath + " from link " + link);
+			return link;
+		}
+		return null;
+	}
+
+	protected void archieve(ArchiveOutputStream tarArchive, File file, Path path, String linkname, boolean islink) {
+		if (!islink) {
+			try {
+				TarArchiveEntry tarArchiveEntry = new TarArchiveEntry(file, path.toString());
+				tarArchive.putArchiveEntry(tarArchiveEntry);
+				FileInputStream fileInputStream = new FileInputStream(file);
+				IOUtils.copy(fileInputStream, tarArchive);
+				fileInputStream.close();
+				tarArchive.closeArchiveEntry();
+				log.debug("Entered file in tar " + path);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		} else {
+			try {
+				TarArchiveEntry entry = new TarArchiveEntry(path.toString(), TarConstants.LF_SYMLINK);
+				entry.setLinkName(linkname);
+				tarArchive.putArchiveEntry(entry);
+				tarArchive.closeArchiveEntry();
+				log.debug("Entered link in tar " + path);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+	protected Path getPackageFromLink(Path link) {
+		if (link != null) {
+			int count = link.getNameCount();
+			return link.getName(count - 2);
+		}
+		return null;
+	}
+
 
 	public String getLocalrootdir() {
 		return localrootdir;

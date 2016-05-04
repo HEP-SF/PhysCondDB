@@ -280,7 +280,8 @@ public class CalibrationRestController extends BaseController {
 				directoryMapperService.dumpAsgGlobalTagOnDisk(globaltag,packagedir);
 			}
 			log.debug("Creating tar file...");
-			File f = directoryMapperService.createTar(globaltag,packagedir);
+			File f = directoryMapperService.createTar(globaltagname,packagedir);
+			log.debug("Created tar file with name "+f.getName());
 			final InputStream in = new FileInputStream(f);
 			StreamingOutput stream = new StreamingOutput() {
 				public void write(OutputStream out) throws IOException, WebApplicationException {
@@ -304,6 +305,7 @@ public class CalibrationRestController extends BaseController {
 			String msg = "Error dumping tree structure for global tag " + globaltagname;
 			throw buildException(msg, msg + ": " + e.getMessage(), Response.Status.INTERNAL_SERVER_ERROR);
 		} catch (FileNotFoundException e1) {
+			e1.printStackTrace();
 			String msg = "Error dumping tree structure for global tag " + globaltagname + ": file not found ";
 			throw buildException(msg, msg + ": " + e1.getMessage(), Response.Status.NOT_FOUND);
 		}
