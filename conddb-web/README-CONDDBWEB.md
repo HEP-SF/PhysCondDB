@@ -29,7 +29,7 @@
 
 - tomcat deployment: `mvn clean tomcat7:redeploy`
 In case tomcat container has been started, and provided you have correctly told maven how to access it, the deployment is pretty straightforward. Here is an example of the *setting.xml* file that should be present in `<user_home>/.m2/`... :
-```
+```no-highlight
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <settings xmlns="http://maven.apache.org/SETTINGS/1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd">
   <servers>

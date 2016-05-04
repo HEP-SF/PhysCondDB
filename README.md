@@ -118,12 +118,12 @@ Start tomcat server:
 `<$CATALINA_HOME>/$ ./bin/catalina.sh start `
    
 Go to project ROOT directory and choose the web module to install:
-```
+```no-highlight
    <prj_home>/$ cd conddb-cool
    <prj_home>/conddb-cool$ mvn tomcat7:redeploy
 ```   
 or
-```
+```no-highlight
    <prj_home>/$ cd conddb-web
    <prj_home>/conddb-web$ mvn tomcat7:redeploy
 ```   
@@ -134,12 +134,12 @@ This command suppose that tomcat is running under: `http://localhost:8080`
 Jetty is a small server embedded within the application. Single modules can be deployed in Jetty by using the following command:
 
 Go to project ROOT directory and choose the web module to install:
-```
+```no-highlight
    <prj_home>/$ cd conddb-cool
    <prj_home>/conddb-cool$ mvn -Dspring.profiles.active=jetty,h2,basic jetty:run
 ```   
 or
-```
+```no-highlight
    <prj_home>/$ cd conddb-web
    <prj_home>/conddb-web$ mvn -Dspring.profiles.active=jetty,h2,basic jetty:run
 ```   
@@ -164,7 +164,7 @@ The passwords (condreader, devuser, devpassword) are used in the Web modules (e.
 Change the configuration files of *conddb-web* module in order to write your own DB connection. 
 For example in case of jetty deployment you can modify the content of `conddb-web/src/main/webapp/WEB-INF/jetty-env.xml`, if you intend to set a connection to a DB server which is not a local H2 database. The external server connection is something like this for Oracle:
 
-```
+```no-highlight
 <New id="oradevdatasource" class="org.eclipse.jetty.plus.jndi.Resource">
         <Arg>jdbc/OraDB</Arg>
         <Arg>
@@ -204,7 +204,7 @@ We can then use an environment variable to set the appropriate profile:
    
 The variable can be set at command line level or using `JAVA_OPTS` or `CATALINA_OPTS` variables.
 For production, the best is to set the property in the `web.xml` file of the module `conddb-web`.
-```
+```no-highlight
      <context-param> 
             <param-name>spring.profiles.active</param-name>
             <param-value>prod,oracle</param-value>
