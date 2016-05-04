@@ -84,7 +84,7 @@ The products of the build are stored in the `target` directory of every sub-modu
               Go to the conddb-cool/README.txt for more informations.
               
 2. conddb-web => Web application that is used to access the PhysCondDB conditions DB core services
-              Go to the conddb-web/README.txt for more informations.
+              Go to the [README file](conddb-web/README-CONDDBWEB.md) for more informations.
 
 3. conddb-svc => Jar file containing spring repositories.
 
