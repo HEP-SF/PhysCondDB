@@ -1,5 +1,0 @@
-python CalibAdmin.py COMMIT JavaDocPkg /Users/aformic/Documents/Computing/Java/SWAGGER/swagger-core/README.md /JavaDocPkg/Computing/Swagger
-python CalibAdmin.py TAG JavaDocPkg JavaDocPkg-00-03
-python CalibAdmin.py LS JavaDocPkg-00-03
-python CalibAdmin.py LOCK JavaDocPkg-00-03 locked
-python CalibAdmin.py COLLECT JavaDocPkg-00-03
