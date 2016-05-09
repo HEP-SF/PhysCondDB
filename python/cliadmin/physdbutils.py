@@ -288,3 +288,15 @@ class PhysDbUtils():
             
         self.dumpmodellist(rowlist,True,['row','name','description','record','label'])
 
+class RESTResponse(object):
+    def __init__(self):
+        print 'create response object'
+        self.__data = None
+
+    def data(self):
+        return self.__data
+
+    def data(self, data):
+        self.__data = data
+        print 'create data field ',self.__data
+# process command line options

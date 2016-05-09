@@ -238,12 +238,12 @@ class PhysDBDriver():
                 object=self.args[0]
                 msg = ('ADD: selected object is %s ') % (object)
                 if object in [ 'globaltags', 'tags', 'systems' ]:
-                    self.printmsg(msg,'cyan')
+                    self.phtools.printmsg(msg,'cyan')
                 else:
                     msg = ('ADD: cannot apply command to object %s ') % (object)
-                    self.printmsg(msg,'red')
+                    self.phtools.printmsg(msg,'red')
                     msg = ('ADD: to insert an IOV + Payload use STORE, see --help')
-                    self.printmsg(msg,'cyan')
+                    self.phtools.printmsg(msg,'cyan')
                     
                     return
                 
@@ -252,33 +252,33 @@ class PhysDBDriver():
                     objparams=self.args[1]
             
                 msg = ('ADD: object parameters %s ') % (objparams)
-                self.printmsg(msg,'cyan')
+                self.phtools.printmsg(msg,'cyan')
                 
                 data = {}
                 if objparams is None:
                     msg = 'Cannot create object without a list of parameters, which should be separated by ;'
-                    self.printmsg(msg,'cyan')
+                    self.phtools.printmsg(msg,'cyan')
                     return
         # Parameters have been provided in command line, try to create the json entity
                 expapi = ExpertApi(self.api_client)
                 if object == 'globaltags':
                     objparams = ('%s;lockstatus=UNLOCKED') % (objparams)
-                    gtag = self.createobject(objparams,'GlobalTag')
+                    gtag = self.phtools.createobject(objparams,'GlobalTag')
                     gtagcreated = expapi.create_global_tag(body=gtag)
                     print 'Object ',object,' added to db and response is :'
-                    self.dumpmodelobject(gtagcreated,True,['name','snapshot_time','validity','description','lockstatus'])
+                    self.phtools.dumpmodelobject(gtagcreated,True,['name','snapshot_time','validity','description','lockstatus'])
 
                 elif object == 'tags':
-                    tag = self.createobject(objparams,'Tag')
+                    tag = self.phtools.createobject(objparams,'Tag')
                     tagcreated = expapi.create_tag(body=tag)
                     print 'Object ',object,' added to db and response is :'
-                    self.dumpmodelobject(tagcreated,True,['name','time_type','object_type','description','last_validated_time'])
+                    self.phtools.dumpmodelobject(tagcreated,True,['name','time_type','object_type','description','last_validated_time'])
 
                 elif object == 'systems':
-                    system = self.createobject(objparams,'SystemDescription')
+                    system = self.phtools.createobject(objparams,'SystemDescription')
                     syscreated = expapi.create_system_description(body=system)
                     print 'Object ',object,' added to db and response is :'
-                    self.dumpmodelobject(syscreated,True,['schema_name','node_fullpath','node_description','tag_name_root'])
+                    self.phtools.dumpmodelobject(syscreated,True,['schema_name','node_fullpath','node_description','tag_name_root'])
 
                 else:
                     print 'Cannot create object of type ',object
@@ -301,23 +301,23 @@ class PhysDBDriver():
                 tag = tapis.find_tag(tagname,expand=self.expand,trace=self.trace)
                 if tag.name is None:
                     msg = ('STORE: error, cannot find tag with name %s') % tagname
-                    self.printmsg(msg,'red')
+                    self.phtools.printmsg(msg,'red')
                     return -1
                     
                 msg = ('STORE: retrieved tag from database %s ') % (tag.name)
-                self.printmsg(msg,'cyan') 
+                self.phtools.printmsg(msg,'cyan') 
                 
                 if len(self.args) != 4:
                     msg = ('STORE: error, cannot find enough parameters for completing the request')
-                    self.printmsg(msg,'red')          
+                    self.phtools.printmsg(msg,'red')          
                     
                 filename=self.args[1]
                 iovobjparams=self.args[2]
                 pyldobjparams=self.args[3]
 
-                iov = self.createobject(iovobjparams,'Iov')
+                iov = self.phtools.createobject(iovobjparams,'Iov')
                 print 'parsed arguments for iov :',iov
-                pyld = self.createobject(pyldobjparams,'Payload')
+                pyld = self.phtools.createobject(pyldobjparams,'Payload')
                 print 'parsed arguments for pyld :',pyld
                 since=0
                 sinceDescription=''
@@ -448,7 +448,7 @@ class PhysDBDriver():
                 gtagobject=self.args[0]
                 tagobject=self.args[1]
                 msg = ('LINK: perform association between %s and %s ') % (gtagobject,tagobject)
-                self.printmsg(msg,'cyan')
+                self.phtools.printmsg(msg,'cyan')
                 
                 objparams = '';
                 if len(self.args)>2: 
@@ -456,7 +456,7 @@ class PhysDBDriver():
                 else:
                     objparams = ('globalTagName=%s;tagName=%s') % (gtagobject,tagobject)
                 expapi = ExpertApi(self.api_client)
-                gtagmap = self.createobject(objparams,'GlobalTagMap')
+                gtagmap = self.phtools.createobject(objparams,'GlobalTagMap')
                 gtagmapcreated = expapi.create_global_tag_map(body=gtagmap)
                 print 'Object globaltagmap created and response is ',gtagmapcreated
                     
@@ -470,7 +470,7 @@ class PhysDBDriver():
                 gtagobject=self.args[0]
                 tagobject=self.args[1]
                 msg = ('UNLINK: perform association removal between %s and %s ') % (gtagobject,tagobject)
-                self.printmsg(msg,'cyan')
+                self.phtools.printmsg(msg,'cyan')
                 
                 objparams = ('globalTag_name:%s,systemTag_name:%s') % (gtagobject,tagobject);
                 mapapi = MapsApi(self.api_client)
@@ -492,10 +492,10 @@ class PhysDBDriver():
                 object=self.args[0]
                 msg = ('UPD: selected object is %s ') % (object)
                 if object in [ 'globaltags', 'tags', 'systems' ]:
-                    self.printmsg(msg,'cyan')
+                    self.phtools.printmsg(msg,'cyan')
                 else:
                     msg = ('UPD: cannot apply command to object %s ') % (object)
-                    self.printmsg(msg,'red')
+                    self.phtools.printmsg(msg,'red')
                     return
                 
                 objparams = None
@@ -503,25 +503,25 @@ class PhysDBDriver():
                     objparams=self.args[1]
             
                 msg = ('UPD: object parameters %s ') % (objparams)
-                self.printmsg(msg,'cyan')
+                self.phtools.printmsg(msg,'cyan')
                 expapi = ExpertApi(self.api_client)
 
                 data = {}
                 if objparams is None:
                     msg = 'Cannot create object without a list of parameters, which should be separated by ;'
-                    self.printmsg(msg,'cyan')
+                    self.phtools.printmsg(msg,'cyan')
                     return
             # Parameters have been provided in command line, try to create the json entity
                 if object == 'globaltags':
-                    gtag = self.createobject(objparams,'GlobalTag')
+                    gtag = self.phtools.createobject(objparams,'GlobalTag')
                     gtagcreated = expapi.update_global_tag(gtag.name,body=gtag)
                     print 'Object ',object,' updated and response is '
-                    self.dumpmodelobject(gtagcreated,True,['name','snapshot_time','validity','description','lockstatus'])
+                    self.phtools.dumpmodelobject(gtagcreated,True,['name','snapshot_time','validity','description','lockstatus'])
                 elif object == 'tags':
-                    tag = self.createobject(objparams,'Tag')
+                    tag = self.phtools.createobject(objparams,'Tag')
                     tagcreated = expapi.update_tag(tag.name,body=tag)
                     print 'Object ',object,' updated to db and response is '
-                    self.dumpmodelobject(tagcreated,True,['name','time_type','object_type','description','last_validated_time'])
+                    self.phtools.dumpmodelobject(tagcreated,True,['name','time_type','object_type','description','last_validated_time'])
                 elif object == 'systems':
                     #system = self.createobject(objparams,'SystemDescription')
                     #syscreated = expapi.update_system_description(body=system)
@@ -537,20 +537,20 @@ class PhysDBDriver():
                 print 'Action DESCRIBE is used to get help on fields for the given object type'
                 objecttype=self.args[0]
                 msg = ('DESCRIBE: get help on %s') % (objecttype)
-                self.printmsg(msg,'cyan')
+                self.phtools.printmsg(msg,'cyan')
                 
                 if objecttype == 'globaltag':
                     gtag = GlobalTag()
-                    self.helpmodel(gtag,['name','validity','description','release'])
+                    self.phtools.helpmodel(gtag,['name','validity','description','release'])
                 elif objecttype == 'tag':
                     tag = Tag()
-                    self.helpmodel(tag,['name','time_type','object_type','description','last_validated_time','synchronization','end_of_validity'])
+                    self.phtools.helpmodel(tag,['name','time_type','object_type','description','last_validated_time','synchronization','end_of_validity'])
                 elif objecttype == 'system':
                     system = SystemDescription()
-                    self.helpmodel(system,['schema_name','tag_name_root','node_fullpath','node_description'])
+                    self.phtools.helpmodel(system,['schema_name','tag_name_root','node_fullpath','node_description'])
                 elif objecttype == 'map':
                     maps = GlobalTagMap()
-                    self.helpmodel(maps,['record','label'])
+                    self.phtools.helpmodel(maps,['record','label'])
                 else:
                     print 'Missing help on ',objecttype
                 
@@ -564,20 +564,6 @@ class PhysDBDriver():
 
         tend=datetime.now()
         print 'Time spent (ms): ',tend-start
-
-
-class RESTResponse(object):
-    def __init__(self):
-        print 'create response object'
-        self.__data = None
-
-    def data(self):
-        return self.__data
-
-    def data(self, data):
-        self.__data = data
-        print 'create data field ',self.__data
-# process command line options
 
 
 if __name__ == '__main__':

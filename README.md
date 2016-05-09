@@ -92,7 +92,8 @@ The products of the build are stored in the `target` directory of every sub-modu
 
 5. conddb-js => Javascript web application
 
-6. python => Python client libraries (based on a swagger generated api). Includes also some command line tools.
+6. python => Python client libraries (based on a swagger generated api). Includes also some command line tools. Go to the [REDME file](python/cliadmin/README.md) for more informations.
+
 
 ## Deployment
 We can deploy the application in several environments. Below we list instructions for Tomcat and Jetty.
