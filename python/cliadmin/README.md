@@ -19,7 +19,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ```
 
-This project contains utility libraries for the interaction with the server of conditions data. 
+# Table of Contents
+1. [Installation instructions](#installation-instructions)
+2. [General options](#general-options)
+3. [Calibration client](#calibration-client)
+4. [Administration client](#administration-client)
 
 ## Installation instructions
 Install the sagger client API. Go to `<prj_home>/python/swagger-physcond` and run the installation script:
@@ -27,7 +31,7 @@ Install the sagger client API. Go to `<prj_home>/python/swagger-physcond` and ru
 python setup.py install
 ``` 
 
-## General options for clients
+## General options
 List of options available for command line clients.
 1. `--url="http:<hostname>:<port>/physconddb/api/rest"` : allow to select a specific host for the server.
 2. `--by=<field><op><value> ` : allow to filter results by selecting a specific value for the given field.
@@ -98,6 +102,7 @@ Example:
 ```
 calibcli.py TAR JavaDocPkg-00-03
 ```
+
 ## Administration client:
 In the following we assume that the path is : `<prj_home>/python/cliadmin`.
 The file phcli.py can be used for managing the conditions data. It uses all services delivered by the server, allowing to insert, update and retrieve metadata informations. Type -h for a detailed list of options.
