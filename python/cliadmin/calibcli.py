@@ -230,18 +230,18 @@ class PhysDBDriver():
                 systemname=self.args[0]
                 systemsglobaltag=self.args[1]
                 msg = ('TAG: calling tag with args: %s %s') % (systemname,systemsglobaltag)
-                self.printmsg(msg,'cyan')   
+                self.phtools.printmsg(msg,'cyan')   
                 expcalapi = ExpertcalibrationApi(self.api_client)
                 gtag = expcalapi.tag_file(systemsglobaltag,systemname)
                 ## print 'Response: ',gtag
                 msg = ('Tag package %s: name=%s, lockstatus=%s') %(systemname,gtag.name,gtag.lockstatus)
-                self.printmsg(msg,'cyan') 
+                self.phtools.printmsg(msg,'cyan') 
                 rowlist = []
                 for maps in gtag.global_tag_maps:
                     row = {}
                     row = {'file' : maps.system_tag.object_type, 'name': maps.system_tag.name }
                     rowlist.append(row)
-                self.dumpmodellist(rowlist,True,['file','name'])
+                self.phtools.dumpmodellist(rowlist,True,['file','name'])
                 
             except Exception, e:
                 sys.exit("TAG failed: %s" % (str(e)))

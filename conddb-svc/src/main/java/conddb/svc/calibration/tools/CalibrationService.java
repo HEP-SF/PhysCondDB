@@ -107,15 +107,20 @@ public class CalibrationService {
 			throws ConddbServiceException {
 		try {
 			Set<GlobalTagMap> maplist = new HashSet<GlobalTagMap>();
+			String gtagbeg = entity.getName().split("-")[0];
 			for (SystemDescription systemDescription : systemlist) {
 				String tagnameroot = systemDescription.getTagNameRoot();
+				if (!tagnameroot.startsWith(gtagbeg)) {
+					log.debug("Skip tagnameroot "+tagnameroot);
+					continue;
+				}
 				Tag systemtag = tagRepository.findByName(tagnameroot + Tag.DEFAULT_TAG_EXTENSION);
 				if (systemtag == null) {
 					throw new ConddbServiceException("Cannot associate global tag : one of the system tags is null "
 							+ tagnameroot + Tag.DEFAULT_TAG_EXTENSION);
 				}
 				log.debug("Use tagnameroot and systemtag to generate a map entry: " + tagnameroot + " "
-						+ systemtag.getName());
+						+ systemtag.getName()+" and system "+systemDescription);
 				GlobalTagMap globaltagmap = new GlobalTagMap(entity, systemtag, systemDescription.getSchemaName(),
 						tagnameroot);
 				globaltagmap = globalTagMapRepository.save(globaltagmap);
@@ -124,6 +129,7 @@ public class CalibrationService {
 			entity.setGlobalTagMaps(maplist);
 			return entity;
 		} catch (Exception e) {
+			e.printStackTrace();
 			throw new ConddbServiceException(e.getMessage());
 		}
 	}

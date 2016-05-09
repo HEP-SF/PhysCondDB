@@ -228,7 +228,7 @@ public class CalibrationRestController extends BaseController {
 			builder.with("tagNameRoot", ":", packageName);
 			Specification<SystemDescription> spec = builder.build();
 			List<SystemDescription> systemlist = systemNodeService.getSystemNodeRepository().findAll(spec);
-
+			log.debug("Found system list of size "+systemlist.size());
 			globaltag = calibrationService.createMapFromSystemTags(globaltag, systemlist);
 			GenericPojoResource<GlobalTag> resource = new GenericPojoResource<GlobalTag>(info, globaltag, 2, null);
 			return ok(resource);
