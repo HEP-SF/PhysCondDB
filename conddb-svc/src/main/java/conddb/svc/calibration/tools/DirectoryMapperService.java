@@ -383,18 +383,18 @@ public class DirectoryMapperService {
 			// Now you can create the tar file
 			Resource tarresource = new FileSystemResource(rootdir.resolve(pmainpkg).toRealPath().toString());
 			if (!tarresource.exists()) {
-				System.out.println("Cannot create a tar, directory does not yet exists");
+				log.debug("Cannot create a tar, directory does not yet exists");
 			}
 
 			List<Path> pathlist = new ArrayList<>();
 			DirectoryStream<Path> dstream = Files.newDirectoryStream(rootdir.resolve(pmainpkg));
 			try {
 				for (Path file : dstream) {
-					System.out.println("Found file or directory: " + file.getFileName());
+					log.debug("Found file or directory: " + file.getFileName());
 					boolean islink = Files.isSymbolicLink(file);
 					if (islink) {
 						Path link = Files.readSymbolicLink(file);
-						System.out.println("this is a link: " + link);
+						log.debug("this is a link: " + link);
 						// pathlist.add(link);
 					}
 					pathlist.add(file);
@@ -402,7 +402,7 @@ public class DirectoryMapperService {
 			} catch (DirectoryIteratorException x) {
 				// IOException can never be thrown by the iteration.
 				// In this snippet, it can only be thrown by newDirectoryStream.
-				System.out.println("DirectoryStream produced an error: " + x.getMessage());
+				log.debug("DirectoryStream produced an error: " + x.getMessage());
 			}
 
 			String tardir = "../tar-files";
@@ -410,7 +410,7 @@ public class DirectoryMapperService {
 			boolean tardirexists = Files.exists(rootdir.resolve(ptar));
 			if (!tardirexists) {
 				Path tardirresource = Files.createDirectories(rootdir.resolve(ptar));
-				System.out.println("Created path for tar directory: " + tardirresource);
+				log.debug("Created path for tar directory: " + tardirresource);
 			}
 			String tarname = globaltagname + ".tar";
 			String createdtarpath = fillFinalTar(tarname, globaltagname, rootdir, schemapath, ptar, pathlist);
