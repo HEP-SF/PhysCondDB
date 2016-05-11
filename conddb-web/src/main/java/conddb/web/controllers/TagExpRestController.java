@@ -143,7 +143,7 @@ public class TagExpRestController extends BaseController {
 				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 			}
 			Tag entitywithmaps = globalTagService.getTagFetchGlobalTagsWithLock(entity.getName());
-			if (entitywithmaps.getGlobalTagMaps() != null && entitywithmaps.getGlobalTagMaps().size()>0) {
+			if (entitywithmaps != null && entitywithmaps.getGlobalTagMaps() != null && entitywithmaps.getGlobalTagMaps().size()>0) {
 				String msg = "Error in removing a tag resource: there is a global tag locked associated to it "+id;
 				throw buildException(msg, msg, Response.Status.PRECONDITION_FAILED);				
 			}

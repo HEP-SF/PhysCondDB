@@ -332,13 +332,13 @@ class PhysDBDriver():
                     sinceDescription = iov.since_string
                     
                 msg = ('STORE: input parameters are file=%s, streamer_info=%s, object_type=%s, backend_info=%s, version=%s, since=%s, tag=%s') % (filename,pyld.streamer_info,pyld.object_type,pyld.backend_info,pyld.version,int(since),tag.name)
-                self.printmsg(msg,'cyan')
+                self.phtools.printmsg(msg,'cyan')
                 
                 expapi = ExpertApi(self.api_client)
                 retiov = expapi.create_iov_with_payload(filename,pyld.streamer_info,pyld.object_type,pyld.backend_info,pyld.version,int(since),sinceDescription,tag.name)
             
                 msg = ('STORE: new payload has been stored in tag %s, since=%d, hash=%s') % (tag.name,int(retiov.since),retiov.hash)
-                self.printmsg(msg,'blue')
+                self.phtools.printmsg(msg,'blue')
 
             except Exception, e:
                 sys.exit("STORE failed: %s" % (str(e)))
@@ -352,12 +352,25 @@ class PhysDBDriver():
                 if len(self.args) == 2:
                     snapt=self.args[1]
                 msg = ('LS: use tag %s and snapshot time %s !') % (tag,snapt)
-                self.printmsg(msg,'cyan')
+                self.phtools.printmsg(msg,'cyan')
       
                 iovapi = IovsApi(self.api_client)
-                iovlist = iovapi.get_iovs_in_tag(tag,expand=self.expand,since=self.t0,until=self.tMax)
-                [ self.printmsg((' >>> since=%d hash=%s') % (int(aniov.since),aniov.hash),'cyan') for aniov in iovlist.items]
-                print 'Retrieved iov list of length ',len(iovlist.items)
+                iovlist = iovapi.get_iovs_in_tag(tag,payload=True,expand=self.expand,since=self.t0,until=self.tMax)
+                rowlist = []
+                j=0
+                for aniov in iovlist.items:
+                    j+=1
+                    row = {'row':j,'since' : int(aniov.since), 'insertion_time': aniov.insertion_time, 'hash' : aniov.hash, 'file' : aniov.payload.object_type,'size' : int(aniov.payload.datasize)}
+                    rowlist.append(row)
+                        
+                    if j <= 1:
+                        self.phtools.dumpmodellist(rowlist,True,['row','since','insertion_time','hash','file','size'])
+                    else:
+                        self.phtools.dumpmodellist(rowlist,False,['row','since','insertion_time','hash','file','size'])
+
+
+#            [ self.phtools.printmsg((' >>> since=%d hash=%s') % (int(aniov.since),aniov.hash),'cyan') for aniov in iovlist.items]
+#                print 'Retrieved iov list of length ',len(iovlist.items)
                 
             except Exception, e:
                 sys.exit("LS failed: %s" % (str(e)))
@@ -368,7 +381,7 @@ class PhysDBDriver():
                 print 'Action GET is used to retrieve a blob using the hash.'
                 hashstr=self.args[0]
                 msg = ('GET: use hash %s !') % (hashstr)
-                self.printmsg(msg,'cyan')
+                self.phtools.printmsg(msg,'cyan')
       
                 pyldapi = PayloadApi(self.api_client)
                 resp = pyldapi.get_blob(hashstr)
@@ -386,7 +399,7 @@ class PhysDBDriver():
                 print 'Action LOCK is used to lock or unlock a global tag'
                 lockargs=self.args
                 msg = '>>> Call method %s using arguments %s ' % (self.action,lockargs)
-                self.printmsg(msg,'cyan')
+                self.phtools.printmsg(msg,'cyan')
                 
                 if len(lockargs) < 2:
                     print 'Set default option for lockstatus to LOCKED (type -h for help)'
@@ -394,10 +407,10 @@ class PhysDBDriver():
                 
                 expapi = ExpertApi(self.api_client)
                 objparams = ('name=%s;lockstatus=%s') % (lockargs[0],lockargs[1])
-                gtag = self.createobject(objparams,'GlobalTag')
+                gtag = self.phtools.createobject(objparams,'GlobalTag')
                 gtagcreated = expapi.update_global_tag(gtag.name,body=gtag)
                 print 'GlobalTag ',lockargs[0],' lockstatus modified and response is ',gtagcreated
-                self.dumpmodelobject(gtagcreated,True,['name','lockstatus','validity','description','release'])
+                self.phtools.dumpmodelobject(gtagcreated,True,['name','lockstatus','validity','description','release'])
             
             except Exception, e:
                 sys.exit("failed: %s" % (str(e)))
@@ -409,10 +422,10 @@ class PhysDBDriver():
                 object=self.args[0]
                 msg = ('DELETE: selected object is %s ') % (object)
                 if object in [ 'globaltags', 'tags', 'systems' ]:
-                    self.printmsg(msg,'green')
+                    self.phtools.printmsg(msg,'green')
                 else:
                     msg = ('DELETE: cannot apply command to object %s ') % (object)
-                    self.printmsg(msg,'red')
+                    self.phtools.printmsg(msg,'red')
                     return
                 
                 expapi = ExpertApi(self.api_client)
@@ -422,17 +435,17 @@ class PhysDBDriver():
                 if object == 'globaltags':
                     gtagremoved = expapi.delete_global_tag(id)
                     print 'Object ',object,' removed and response is '
-                    self.dumpmodelobject(gtagremoved,True,['name','snapshot_time','validity','description','lockstatus'])
+                    self.phtools.dumpmodelobject(gtagremoved,True,['name','snapshot_time','validity','description','lockstatus'])
 
                 elif object == 'tags':
                     tagremoved = expapi.delete_tag(id)
                     print 'Object ',object,' removed and response is '
-                    self.dumpmodelobject(tagremoved,True,['name','time_type','object_type','description','last_validated_time'])
+                    self.phtools.dumpmodelobject(tagremoved,True,['name','time_type','object_type','description','last_validated_time'])
 
                 elif object == 'systems':
                     sysremoved = expapi.delete_system_description(id)
                     print 'Object ',object,' removed and response is '
-                    self.dumpmodelobject(sysremoved,True,['schema_name','node_fullpath','node_description','tag_name_root'])
+                    self.phtools.dumpmodelobject(sysremoved,True,['schema_name','node_fullpath','node_description','tag_name_root'])
 
                 else:
                     print 'Cannot remove object of type ',object
