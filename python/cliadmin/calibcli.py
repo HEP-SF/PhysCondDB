@@ -38,6 +38,7 @@ class PhysDBDriver():
         try:
             self._command = sys.argv[0]
             self.useSocks = False
+            self.snap = -1
             self.t0 = 0
             self.tMax = 'Inf'
             self.debug = False
@@ -55,7 +56,7 @@ class PhysDBDriver():
             self.api_client=None
             self.phtools=None
             self.urlsvc='http://localhost:8080/physconddb/api/rest'
-            longopts=['help','socks','out=','jsondump','t0=','tMax=','url=','debug','trace=','expand=','by=','page=','pagesize=','iovspan=','user=','pass=']
+            longopts=['help','socks','out=','jsondump','t0=','tMax=','snap=','url=','debug','trace=','expand=','by=','page=','pagesize=','iovspan=','user=','pass=']
             opts,args=getopt.getopt(sys.argv[1:],'',longopts)
             print opts, args
             self.procopts(opts,args)
@@ -119,6 +120,7 @@ class PhysDBDriver():
         print "  --url [localhost:8080/physconddb]: use a specific server "
         print "  --t0={t0 for iovs}. DEFAULT=",self.t0
         print "  --tMax={tMax for iovs}. DEFAULT=",self.tMax
+        print "  --snap={snapshot time in milli seconds since EPOCH}. DEFAULT=",self.snap
         print "  --iovspan={time|date|runlb|timerun|daterun}. DEFAULT=",self.iovspan
         print "         time: iov in COOL format, allows Inf for infinity"
         print "         date: iov in yyyyMMddHHmmss format"
@@ -144,6 +146,8 @@ class PhysDBDriver():
                 self.jsondump=True
             if (o=='--url'):
                 self.urlsvc=a
+            if (o=='--snap'):
+                self.snap=a
             if (o=='--t0'):
                 self.t0=a
             if (o=='--tMax'):
