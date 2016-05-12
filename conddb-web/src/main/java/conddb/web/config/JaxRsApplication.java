@@ -144,7 +144,7 @@ public class JaxRsApplication extends ResourceConfig {
 		            return Response.ok("This is a response to an OPTIONS method.").build();
 		        }
 		    });
-		final Resource resource = resourceBuilder.build();
+//		final Resource resource = resourceBuilder.build();
 //		registerResources(resource);
 	}
 

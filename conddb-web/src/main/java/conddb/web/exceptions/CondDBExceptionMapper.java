@@ -29,6 +29,14 @@ public class CondDBExceptionMapper implements ExceptionMapper<ConddbWebException
 	@Override
 	public Response toResponse(ConddbWebException ex) {
 		
+		if (ex == null) {
+			ErrorMessage errorMessage = new ErrorMessage("Unknown exception...is null");		
+			errorMessage.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
+			return Response.status(errorMessage.getCode())
+					.entity(errorMessage)
+					.type(MediaType.APPLICATION_JSON)
+					.build();
+		}
 		log.debug("Calling Exception mapper on exception "+ex.getMessage());
 		Throwable nested = ex.getCause();
 		setHttpStatus(nested, ex.getErrMessage());
@@ -40,15 +48,20 @@ public class CondDBExceptionMapper implements ExceptionMapper<ConddbWebException
 	}
 	
 	private void setHttpStatus(Throwable ex, ErrorMessage errorMessage) {
-		
+		log.debug("CondDBExceptionMapper: received exception "+ex);
+		if (ex == null)
+			return;
 		if (ex instanceof ConddbServiceDataIntegrityException) {
+			log.debug("CondDBExceptionMapper: exception of instance ConddbServiceDataIntegrityException "+ex);
 			errorMessage.setCode(Response.Status.CONFLICT.getStatusCode()); //defaults to data integrity server error 409
 			errorMessage.setUserMessage("Data integrity violation inside conditions DB");
+		} else if (ex instanceof ConddbWebException) {
+			log.debug("CondDBExceptionMapper: exception of instance ConddbWebException "+ex);
+			errorMessage.setCode(((ConddbWebException) ex).getStatus().getStatusCode()); //
+			errorMessage.setUserMessage(((ConddbWebException) ex).getErrMessage().getUserMessage());
 		} else {
+			log.debug("CondDBExceptionMapper: exception of instance unknown "+ex);
 			errorMessage.setCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode()); //defaults to internal server error 500
-//			StringWriter errorStackTrace = new StringWriter();
-//			ex.printStackTrace(new PrintWriter(errorStackTrace));
-//			errorMessage.setUserMessage(errorStackTrace.toString());
 			errorMessage.setUserMessage("Internal server exception.");
 		}
 	}
