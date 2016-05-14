@@ -113,6 +113,8 @@ public class IovExpRestController extends BaseController {
 			@FormDataParam("tag") String tagname
 			) throws ConddbWebException {
 		try {
+			log.info("IovExpRestController: create iov with payload has arguments " + tagname+" "+since+" "+fileDetail.getFileName());
+
 			Tag entity = globalTagService.getTag(tagname);
 			entity.setModificationTime(null); // This will be re-set later during the update
 			
