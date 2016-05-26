@@ -60,19 +60,19 @@
         )
 )" />
 
-<!-- 
-	<Resource name="java/OraInt8r" 
+ 
+	<Resource name="java/AsgInt8r" 
 		auth="Container" 
 		type="javax.sql.DataSource"
 		factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
-		maxActive="20" maxIdle="10" maxWait="30000" 
+		maxActive="5" maxIdle="2" maxWait="30000" 
         testWhileIdle="false"
         testOnBorrow="true"
         testOnReturn="false"
         validationQuery="SELECT 1 FROM DUAL"
         validationInterval="30000"
         timeBetweenEvictionRunsMillis="30000"
-        initialSize="10"
+        initialSize="2"
         removeAbandonedTimeout="60"
         removeAbandoned="true"
         logAbandoned="true"
@@ -81,8 +81,8 @@
         jmxEnabled="true"
         jdbcInterceptors="org.apache.tomcat.jdbc.pool.interceptor.ConnectionState;
             org.apache.tomcat.jdbc.pool.interceptor.StatementFinalizer;ResetAbandonedTimer"
-		username="${devuser}"
-		password="${devpassword}" 
+		username="${calibuser}"
+		password="${calibpassword}" 
 		driverClassName="oracle.jdbc.OracleDriver"
 		url="jdbc:oracle:thin:@(
         DESCRIPTION=
@@ -95,7 +95,7 @@
                 (INSTANCE_NAME=INT8R1)
         )
 )" />
- -->
+
 	<Resource name="java/HSQLDB" auth="Container" type="javax.sql.DataSource"
 		maxActive="100" maxIdle="30" maxWait="10000" username="SA" password=""
 		driverClassName="org.hsqldb.jdbcDriver" url="jdbc:hsqldb:mem:spring-playground" />

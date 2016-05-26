@@ -17,6 +17,8 @@
  **/
 package conddb.data.utils.json.serializers;
 
+import java.sql.Timestamp;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
 import org.slf4j.Logger;
@@ -71,4 +73,12 @@ public class TimestampFormat {
 		log.info("Setting pattern "+pattern);
 	}
 
+	public static void main(String[] args) {
+		TimestampFormat ts = new TimestampFormat("ISO_OFFSET_DATE_TIME");
+		DateTimeFormatter frm = ts.getLocformatter();
+		String adate = "2016-05-16T11:46:47.946000+02:00";
+		ZonedDateTime zdt = ZonedDateTime.parse(adate, frm);
+		Timestamp tstamp = new Timestamp(zdt.toInstant().toEpochMilli());
+		System.out.println("Parsed date is "+tstamp);
+	}
 }
