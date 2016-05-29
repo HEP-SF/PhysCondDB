@@ -148,6 +148,8 @@ class ExpertcalibrationApi(object):
         :param str package: name of the package (required)
         :param str path: path where to store the file (required)
         :param file file: filename of the file to be uploaded (required)
+        :param str dbfname: Database file name (allows to overwrite the local file name used)
+        :param str tagext: Tag name extension
         :param float since: since time (default=0)
         :param str description: since time string representation (default=t0)
         :return: Iov
@@ -155,7 +157,7 @@ class ExpertcalibrationApi(object):
                  returns the request thread.
         """
 
-        all_params = ['package', 'path', 'file', 'since', 'description']
+        all_params = ['package', 'path', 'file', 'dbfname', 'tagext', 'since', 'description']
         all_params.append('callback')
 
         params = locals()
@@ -193,6 +195,10 @@ class ExpertcalibrationApi(object):
             form_params['package'] = params['package']
         if 'path' in params:
             form_params['path'] = params['path']
+        if 'dbfname' in params:
+            form_params['dbfname'] = params['dbfname']
+        if 'tagext' in params:
+            form_params['tagext'] = params['tagext']
         if 'since' in params:
             form_params['since'] = params['since']
         if 'description' in params:
@@ -309,7 +315,98 @@ class ExpertcalibrationApi(object):
                                             callback=params.get('callback'))
         return response
 
-    def tag_file(self, globaltag, package, **kwargs):
+    def replacetag_file(self, globaltag, package, tagfilter, **kwargs):
+        """
+        Replace tags in a package using a filter.
+        This method will replace links in a global tag for every file associated to the filter string.The tag name is build using an extension appended to the tagrootname.
+
+        This method makes a synchronous HTTP request by default. To make an
+        asynchronous HTTP request, please define a `callback` function
+        to be invoked when receiving the response.
+        >>> def callback_function(response):
+        >>>     pprint(response)
+        >>>
+        >>> thread = api.replacetag_file(globaltag, package, tagfilter, callback=callback_function)
+
+        :param callback function: The callback function
+            for asynchronous request. (optional)
+        :param str globaltag: global tag name; it should start with package name and have the format xxx-version-subversion (required)
+        :param str package: package name (required)
+        :param str tagfilter: tag name filter (required)
+        :return: GlobalTag
+                 If the method is called asynchronously,
+                 returns the request thread.
+        """
+
+        all_params = ['globaltag', 'package', 'tagfilter']
+        all_params.append('callback')
+
+        params = locals()
+        for key, val in iteritems(params['kwargs']):
+            if key not in all_params:
+                raise TypeError(
+                    "Got an unexpected keyword argument '%s'"
+                    " to method replacetag_file" % key
+                )
+            params[key] = val
+        del params['kwargs']
+
+        # verify the required parameter 'globaltag' is set
+        if ('globaltag' not in params) or (params['globaltag'] is None):
+            raise ValueError("Missing the required parameter `globaltag` when calling `replacetag_file`")
+        # verify the required parameter 'package' is set
+        if ('package' not in params) or (params['package'] is None):
+            raise ValueError("Missing the required parameter `package` when calling `replacetag_file`")
+        # verify the required parameter 'tagfilter' is set
+        if ('tagfilter' not in params) or (params['tagfilter'] is None):
+            raise ValueError("Missing the required parameter `tagfilter` when calling `replacetag_file`")
+
+        resource_path = '/expert/calibration/replacetag'.replace('{format}', 'json')
+        method = 'POST'
+
+        path_params = {}
+
+        query_params = {}
+        if 'globaltag' in params:
+            query_params['globaltag'] = params['globaltag']
+        if 'package' in params:
+            query_params['package'] = params['package']
+        if 'tagfilter' in params:
+            query_params['tagfilter'] = params['tagfilter']
+
+        header_params = {}
+
+        form_params = {}
+        files = {}
+
+        body_params = None
+
+        # HTTP header `Accept`
+        header_params['Accept'] = self.api_client.\
+            select_header_accept(['application/json', 'application/xml'])
+        if not header_params['Accept']:
+            del header_params['Accept']
+
+        # HTTP header `Content-Type`
+        header_params['Content-Type'] = self.api_client.\
+            select_header_content_type(['application/json'])
+
+        # Authentication setting
+        auth_settings = []
+
+        response = self.api_client.call_api(resource_path, method,
+                                            path_params,
+                                            query_params,
+                                            header_params,
+                                            body=body_params,
+                                            post_params=form_params,
+                                            files=files,
+                                            response_type='GlobalTag',
+                                            auth_settings=auth_settings,
+                                            callback=params.get('callback'))
+        return response
+
+    def tag_file(self, globaltag, package, tagfilter, **kwargs):
         """
         Tag a package.
         This method will create a global tag for every file created in the given package.The tag name is in general hidden to the user, and is automatically generated by the 'commit' command. The description field is generated, and the global tag will have maximum snapshot time before the locking step.
@@ -320,18 +417,19 @@ class ExpertcalibrationApi(object):
         >>> def callback_function(response):
         >>>     pprint(response)
         >>>
-        >>> thread = api.tag_file(globaltag, package, callback=callback_function)
+        >>> thread = api.tag_file(globaltag, package, tagfilter, callback=callback_function)
 
         :param callback function: The callback function
             for asynchronous request. (optional)
         :param str globaltag: global tag name; it should start with package name and have the format xxx-version-subversion (required)
         :param str package: package name (required)
+        :param str tagfilter: tag name filter (required)
         :return: GlobalTag
                  If the method is called asynchronously,
                  returns the request thread.
         """
 
-        all_params = ['globaltag', 'package']
+        all_params = ['globaltag', 'package', 'tagfilter']
         all_params.append('callback')
 
         params = locals()
@@ -350,6 +448,9 @@ class ExpertcalibrationApi(object):
         # verify the required parameter 'package' is set
         if ('package' not in params) or (params['package'] is None):
             raise ValueError("Missing the required parameter `package` when calling `tag_file`")
+        # verify the required parameter 'tagfilter' is set
+        if ('tagfilter' not in params) or (params['tagfilter'] is None):
+            raise ValueError("Missing the required parameter `tagfilter` when calling `tag_file`")
 
         resource_path = '/expert/calibration/tag'.replace('{format}', 'json')
         method = 'POST'
@@ -361,6 +462,8 @@ class ExpertcalibrationApi(object):
             query_params['globaltag'] = params['globaltag']
         if 'package' in params:
             query_params['package'] = params['package']
+        if 'tagfilter' in params:
+            query_params['tagfilter'] = params['tagfilter']
 
         header_params = {}
 
