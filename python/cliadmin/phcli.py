@@ -66,7 +66,7 @@ class PhysDBDriver():
             sys.exit(-1)
             
         self.api_client = ApiClient(host=self.urlsvc)
-        self.phtools = PhysDbUtils(host=self.urlsvc,expand=self.expand,trace=self.trace,debug=self.debug,page=self.page,pagesize=self.pagesize)
+        self.phtools = PhysDbUtils(host=self.urlsvc,expand=self.expand,trace=self.trace,jsondump=self.jsondump,outfile=self.outfilename,debug=self.debug,page=self.page,pagesize=self.pagesize)
         self.execute()
 
     def usage(self):

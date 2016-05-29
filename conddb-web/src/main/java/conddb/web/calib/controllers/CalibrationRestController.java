@@ -105,6 +105,10 @@ public class CalibrationRestController extends BaseController {
 			@FormDataParam("package") final String packageName, 
 			@ApiParam(value = "path where to store the file", required = true)
 			@FormDataParam("path") final String path,
+			@ApiParam(value = "Database file name (allows to overwrite the local file name used)", required = false)
+			@DefaultValue("none") @FormDataParam("dbfname") final String dbfname,
+			@ApiParam(value = "Tag name extension", required = false)
+			@DefaultValue("none") @FormDataParam("tagext") final String tagext,
 			@ApiParam(value = "since time (default=0)", required = false)
 			@DefaultValue("0") @FormDataParam("since") final BigDecimal since,
 			@ApiParam(value = "since time string representation (default=t0)", required = false)
@@ -115,8 +119,10 @@ public class CalibrationRestController extends BaseController {
 			@FormDataParam("file") FormDataContentDisposition fileDetail) throws ConddbWebException {
 		try {
 			log.debug("Calibration controller has received arguments: "+path+" "+packageName+" "+since+" "+sincestr);
-			// Check if path and tag do exists
 			String filename = fileDetail.getFileName();
+			if (!dbfname.equals("none")) {
+				filename = dbfname;
+			}
 			if (filename.contains(PATH_SEPARATOR)) {
 				// Extract the filename only...not the path
 				filename = filename.substring(filename.lastIndexOf(PATH_SEPARATOR)+1,filename.length());
@@ -124,7 +130,8 @@ public class CalibrationRestController extends BaseController {
 			String filenamenoext = filename.substring(0, filename.lastIndexOf("."));
 			String extension = filename.substring(filename.lastIndexOf("."),filename.length());
 			log.debug("Calibration controller has digested arguments: "+filename+" "+path+" "+packageName);
-			
+
+			// Check if path and tag do exists
 			String nodefullpath = (path.concat(PATH_SEPARATOR + filenamenoext));
 			nodefullpath = nodefullpath.replaceAll("//", "/");
 			if (!nodefullpath.startsWith("/")) {
@@ -135,13 +142,14 @@ public class CalibrationRestController extends BaseController {
 			SystemDescription sd = systemNodeService.getSystemNodesByNodeFullpath(nodefullpath);
 			if (sd == null) {
 				log.debug("System with path " + nodefullpath + " not found....create new system");
-				sd = new SystemDescription(nodefullpath, packageName, "New file for system " + packageName);
-
+//				sd = new SystemDescription(nodefullpath, packageName, "New file for system " + packageName);
+				String msg = "Cannot find system with path " + nodefullpath + ": create it before adding files...";
+				throw buildException(msg, msg, Response.Status.NOT_FOUND);
 				// Start from 1 because the first word in the nodefullpath is the package name
-				String tagnameroot = getUniqueTagNameRoot(nodefullpath, packageName, filenamenoext, 1);
-				sd.setTagNameRoot(tagnameroot);
-				sd.setGroupSize(new BigDecimal(10000));
-				sd = systemNodeService.insertSystemDescription(sd);
+//				String tagnameroot = getUniqueTagNameRoot(nodefullpath, packageName, filenamenoext, 1);
+//				sd.setTagNameRoot(tagnameroot);
+//				sd.setGroupSize(new BigDecimal(10000));
+//				sd = systemNodeService.insertSystemDescription(sd);
 			}
 			// Use the default HEAD tag for upload of the files...
 			// The first time this will create it, in future we will only add
@@ -149,6 +157,9 @@ public class CalibrationRestController extends BaseController {
 			// The logic suppose that every system with a reasonable tag name
 			// was created before
 			tag = sd.getTagNameRoot() + Tag.DEFAULT_TAG_EXTENSION;
+			if (!tagext.equals("none")) {
+				tag = sd.getTagNameRoot() + "_" + tagext;
+			}
 
 			// The tag name requested is compatible with the existing tag name
 			// for the specified path
@@ -164,7 +175,7 @@ public class CalibrationRestController extends BaseController {
 			tagstored.setModificationTime(null);
 			// We now add the file to the HEAD tag by overwriting the IOV with
 			// since = 0
-			Payload storable = new Payload(null,filename,"database",extension,"1.0");
+			Payload storable = new Payload(null,filename,fileDetail.getFileName(),extension,tagext);
 			storable = iovService.createStorablePayload(filename, uploadedInputStream, storable);
 //			storable = iovService.createStorablePayloadInMemory(uploadedInputStream, storable);
 
@@ -204,7 +215,9 @@ public class CalibrationRestController extends BaseController {
 			@ApiParam(value = "global tag name; it should start with package name and have the format xxx-version-subversion", required = true)
 			@QueryParam("globaltag") final String globaltagname, 
 			@ApiParam(value = "package name", required = true)
-			@QueryParam("package") final String packageName) throws ConddbWebException {
+			@QueryParam("package") final String packageName,
+			@ApiParam(value = "tag name filter", required = true)
+			@QueryParam("tagfilter") final String filterTagName) throws ConddbWebException {
 		try {
 			GlobalTag globaltag = globalTagService.getGlobalTag(globaltagname);
 			if (globaltag == null) {
@@ -229,7 +242,7 @@ public class CalibrationRestController extends BaseController {
 			Specification<SystemDescription> spec = builder.build();
 			List<SystemDescription> systemlist = systemNodeService.getSystemNodeRepository().findAll(spec);
 			log.debug("Found system list of size "+systemlist.size());
-			globaltag = calibrationService.createMapFromSystemTags(globaltag, systemlist);
+			globaltag = calibrationService.createMapFromSystemTags(globaltag, systemlist,filterTagName);
 			GenericPojoResource<GlobalTag> resource = new GenericPojoResource<GlobalTag>(info, globaltag, 2, null);
 			return ok(resource);
 
@@ -239,6 +252,46 @@ public class CalibrationRestController extends BaseController {
 		}
 	}
 
+	@POST
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Path("/replacetag")
+	@ApiOperation(value = "Replace tags in a package using a filter.", notes = "This method will replace links in a global tag for every file associated to the filter string."
+			+ "The tag name is build using an extension appended to the tagrootname.", response = GlobalTag.class)
+	public Response replacetagFile(
+			@Context UriInfo info,
+			@ApiParam(value = "global tag name; it should start with package name and have the format xxx-version-subversion", required = true)
+			@QueryParam("globaltag") final String globaltagname, 
+			@ApiParam(value = "package name", required = true)
+			@QueryParam("package") final String packageName,
+			@ApiParam(value = "tag name filter", required = true)
+			@QueryParam("tagfilter") final String filterTagName) throws ConddbWebException {
+		try {
+			GlobalTag globaltag = globalTagService.getGlobalTag(globaltagname);
+			if (globaltag == null) {
+				String msg = "Global tag does not yet exists: " + globaltagname;
+				throw buildException(msg, msg, Response.Status.INTERNAL_SERVER_ERROR);
+			}
+			if (globaltag.islocked()) {
+				String msg = "Cannot modify global tag because it is locked";
+				throw buildException(msg, msg, Response.Status.NOT_MODIFIED);					
+			}
+			log.debug("Load systems entries having tag name root "+packageName);
+			// TODO: evaluate if it is better to search for schemaname
+			GenericSpecBuilder<SystemDescription> builder = new GenericSpecBuilder<>();
+			builder.with("tagNameRoot", ":", packageName);
+			Specification<SystemDescription> spec = builder.build();
+			List<SystemDescription> systemlist = systemNodeService.getSystemNodeRepository().findAll(spec);
+			log.debug("Found system list of size "+systemlist.size());
+			globaltag = calibrationService.replaceMapFromSystemTags(globaltag, systemlist, filterTagName);
+			GenericPojoResource<GlobalTag> resource = new GenericPojoResource<GlobalTag>(info, globaltag, 2, null);
+			return ok(resource);
+
+		} catch (ConddbServiceException e) {
+			String msg = "Cannot create tag mappings for " + globaltagname;
+			throw buildException(msg, msg, Response.Status.INTERNAL_SERVER_ERROR);
+		}
+	}
 
 	@GET
 	@Produces({ MediaType.APPLICATION_OCTET_STREAM })

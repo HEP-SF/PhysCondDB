@@ -108,38 +108,31 @@ public class DirectoryMapperService {
 	}
 
 	
-	protected String getFilenameExtension(Tag tag) throws ConddbServiceException {
+	protected String getNodeFullPath(String tagnameroot) throws ConddbServiceException {
 		// TODO: make this code more general ? what constraints are needed on names ?
 		// Object type should be a string identifying the BLOB. 
 		// In the case of calibration files, this is a file name. Not sure this works outside the
 		// calibration files use case !!!
-		String tagNameRoot = tag.getName().split(Tag.DEFAULT_TAG_EXTENSION)[0];
+//		String tagNameRoot = tag.getName().split(Tag.DEFAULT_TAG_EXTENSION)[0];
 //		String filename = tag.getObjectType();
 //		filename = filename.substring(0, filename.lastIndexOf("."));
 //		log.debug("Extracted file name and extension..." + filename);
-		SystemDescription system = systemNodeService.getSystemNodesByTagname(tagNameRoot);
+		SystemDescription system = systemNodeService.getSystemNodesByTagname(tagnameroot);
 		log.debug("Extracted system information..." + system.getNodeFullpath());
 		String nodefullpath = system.getNodeFullpath().substring(1);
 		return nodefullpath;
 	}
 	
-	protected void dumpIovsInTag(Tag tag, Timestamp snapshot, Path tagrealpath,Path rootdir) {
+	protected void dumpIovsInTag(Tag tag, Timestamp snapshot, Path tagresource, Path rootdir, String tagnameroot) {
 		OutputStream out = null;
 		try {
 			List<Iov> iovlist = iovService.getIovsByTag(tag, null, snapshot);
 			log.debug("Retrieved list of iovs for tag " + tag.getName()+" of size "+iovlist.size());
-			log.debug("Use tagrealpath directory : "+tagrealpath);
 
 			String fileext = tag.getObjectType();
 			fileext = fileext.substring(fileext.lastIndexOf(".") + 1, fileext.length());
 			log.debug("Extracted filename extension...used with the iov string : "+fileext);
-			String node = getFilenameExtension(tag); // this should not have a slash at the beginning
-			Path nodepath = Paths.get(node);
-			log.debug("Use nodepath directory : "+nodepath);
-
-			log.debug("Create tag resource path as directory : "+tagrealpath.resolve(nodepath));
-			Path filepath = tagrealpath.resolve(nodepath);
-			Path tagresource = Files.createDirectories(rootdir.resolve(filepath));
+			
 			for (Iov iov : iovlist) {
 				PayloadData data = iovService.getPayloadData(iov.getPayload().getHash());
 				Payload info = iov.getPayload();
@@ -152,7 +145,7 @@ public class DirectoryMapperService {
 				log.debug("Dump blob for tag " + tag.getName() + " into output file " + outfilename);
 				
 				// Check if the blob is on disk
-				java.nio.file.Path path = Paths.get(data.getUri());
+				Path path = Paths.get(data.getUri());
 				out = new FileOutputStream(new File(outfilename));
 				if (Files.notExists(path)) {
 					log.debug("Blob is stored in memory as string....dump it directly on output");
@@ -216,21 +209,46 @@ public class DirectoryMapperService {
 				//
 				// If labelisgtag is equal to tagnameroot it means that we are dumping a normal tag
 				// associated to the input global tag
-				String tagNameRoot = tag.getName().split(Tag.DEFAULT_TAG_EXTENSION)[0];
+				String tagNameRoot = labelisgtag;
+				if (tag.getName().contains(Tag.DEFAULT_TAG_EXTENSION)) {
+					tagNameRoot = tag.getName().split(Tag.DEFAULT_TAG_EXTENSION)[0];					
+				}
+				log.debug("Checking tagnameroot "+tagNameRoot);
+				GlobalTag gtag = globalTagService.getGlobalTag(tagNameRoot);
+				if (gtag != null) {
+					tagNameRoot = "";
+				}
 				if (labelisgtag.equals(tagNameRoot) || labelisgtag.equals("none")) {
 					// dump this tag under the rootdir/schemadir/globaltag/xxx 
 					log.debug("This seems to be a normal global tag, try to dump "+tag.getName());
+					// remove tagrootname from tag name
 					String subpkg = tag.getName();
-					Path psubpkg = pmainpkg.resolve(subpkg); //schemadir/globaltag/tagname
-					log.debug("created path "+psubpkg.toString());
+					String tagpkg = subpkg.replaceFirst(tagNameRoot+"_", "");
+//					subpkg = subpkg.replaceFirst("_"+tagpkg, "");
+					log.debug("Use subpkg as tagname directory "+subpkg);
+					log.debug("Use tagpkg as file directory "+tagpkg);
+					Path ptag = Paths.get(tagpkg);
+					log.debug("Create tag path "+ptag);
+					
+					String node = getNodeFullPath(tagNameRoot); // this should not have a slash at the beginning
+					Path nodepath = Paths.get(node);
+					log.debug("Create nodepath : "+nodepath);
+
+					log.debug("Create tag and node resource path as directory : "+ptag.resolve(nodepath));
+					Path filepath = ptag.resolve(nodepath);
+					Path psubpkg = pmainpkg.resolve(filepath);
+					//Path psubpkg = pmainpkg.resolve(subpkg); //schemadir/globaltag/tagname
+//					Path psubpkg = pmainpkg.resolve(ptag.toString()); //schemadir/globaltag/tagname
+					log.debug("create path "+psubpkg.toString());
 					boolean fileexists = Files.exists(rootdir.resolve(psubpkg));
 					log.debug("Check existence of "+rootdir.resolve(psubpkg).toString()+" result in "+fileexists);
+//					Path tagresource = Files.createDirectories(rootdir.resolve(filepath));
 					if (!fileexists) {
 						// dump the tag content in Path psubpkg
 						log.debug("file does not exists, dump the iovs using snapshot: "+snapshot);
 						Path tagresource = Files.createDirectories(rootdir.resolve(psubpkg));
 						log.debug("created tag resource: "+tagresource);
-						this.dumpIovsInTag(tag, snapshot, psubpkg, rootdir);
+						this.dumpIovsInTag(tag, snapshot, tagresource, rootdir,tagNameRoot);
 					}
 					log.debug("end of actions for tag "+tag.getName());
 				} else {

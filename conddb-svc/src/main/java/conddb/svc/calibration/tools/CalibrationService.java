@@ -103,7 +103,7 @@ public class CalibrationService {
 	 * @throws ConddbServiceException
 	 */
 	@Transactional(rollbackOn = ConddbServiceException.class)
-	public GlobalTag createMapFromSystemTags(GlobalTag entity, List<SystemDescription> systemlist)
+	public GlobalTag createMapFromSystemTags(GlobalTag entity, List<SystemDescription> systemlist,String filterTagName)
 			throws ConddbServiceException {
 		try {
 			Set<GlobalTagMap> maplist = new HashSet<GlobalTagMap>();
@@ -114,17 +114,31 @@ public class CalibrationService {
 					log.debug("Skip tagnameroot "+tagnameroot);
 					continue;
 				}
-				Tag systemtag = tagRepository.findByName(tagnameroot + Tag.DEFAULT_TAG_EXTENSION);
-				if (systemtag == null) {
-					throw new ConddbServiceException("Cannot associate global tag : one of the system tags is null "
-							+ tagnameroot + Tag.DEFAULT_TAG_EXTENSION);
+				//Tag systemtag = tagRepository.findByName(tagnameroot + Tag.DEFAULT_TAG_EXTENSION);
+				if (filterTagName == null || filterTagName.equals("")) {
+					throw new ConddbServiceException("Cannot use tag filter "
+							+ filterTagName);
 				}
-				log.debug("Use tagnameroot and systemtag to generate a map entry: " + tagnameroot + " "
-						+ systemtag.getName()+" and system "+systemDescription);
-				GlobalTagMap globaltagmap = new GlobalTagMap(entity, systemtag, systemDescription.getSchemaName(),
-						tagnameroot);
-				globaltagmap = globalTagMapRepository.save(globaltagmap);
-				maplist.add(globaltagmap);
+				List<Tag> systemtaglist = tagRepository.findByNameLike(tagnameroot+"%"+filterTagName);
+				if (systemtaglist == null) {
+					throw new ConddbServiceException("Cannot associate global tag : system tags list is null for "
+							+ tagnameroot);
+				}
+				for (Tag systemtag : systemtaglist) {
+					log.debug("Use tagnameroot and systemtag to generate a map entry: " + tagnameroot + " "
+							+ systemtag.getName()+" and system "+systemDescription);
+					GlobalTagMap globaltagmap = new GlobalTagMap(entity, systemtag, systemDescription.getSchemaName(),
+							tagnameroot);
+					// Verify if a tag having the same tag name root exists...in this case do not insert the mapping
+					List<GlobalTagMap> existingglobaltagmaps = globalTagMapRepository.findByGlobalTagAndTagNameLike(entity.getName(), tagnameroot+"%");
+					if (existingglobaltagmaps != null && !existingglobaltagmaps.isEmpty()) {
+						log.debug("Cannot add tag "+systemtag+" : an existing association on the same tag root name exists");
+					} else {
+						globaltagmap = globalTagMapRepository.save(globaltagmap);
+						maplist.add(globaltagmap);	
+					}
+				}
+				
 			}
 			entity.setGlobalTagMaps(maplist);
 			return entity;
@@ -133,6 +147,53 @@ public class CalibrationService {
 			throw new ConddbServiceException(e.getMessage());
 		}
 	}
+	
+	/**
+	 * @param entity
+	 * @param systemlist
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	@Transactional(rollbackOn = ConddbServiceException.class)
+	public GlobalTag replaceMapFromSystemTags(GlobalTag entity, List<SystemDescription> systemlist,String filterTagName)
+			throws ConddbServiceException {
+		try {
+			Set<GlobalTagMap> maplist = new HashSet<GlobalTagMap>();
+			String gtagbeg = entity.getName().split("-")[0];
+			for (SystemDescription systemDescription : systemlist) {
+				String tagnameroot = systemDescription.getTagNameRoot();
+				if (!tagnameroot.startsWith(gtagbeg)) {
+					log.debug("Skip tagnameroot "+tagnameroot);
+					continue;
+				}
+				//Tag systemtag = tagRepository.findByName(tagnameroot + Tag.DEFAULT_TAG_EXTENSION);
+				if (filterTagName == null || filterTagName.equals("")) {
+					throw new ConddbServiceException("Cannot use tag filter "
+							+ filterTagName);
+				}
+				log.debug("Search list of system tags using "+tagnameroot+"%"+filterTagName);
+				List<Tag> systemtaglist = tagRepository.findByNameLike(tagnameroot+"%"+filterTagName);
+				if (systemtaglist == null) {
+					throw new ConddbServiceException("Cannot associate global tag : system tags list is null for "
+							+ tagnameroot);
+				}
+				log.debug("Found list of system tags of size "+systemtaglist.size());
+
+				for (Tag systemtag : systemtaglist) {
+					log.debug("Use tagnameroot and systemtag to replace a map entry: " + tagnameroot + " "
+							+ systemtag.getName()+" and system "+systemDescription);
+					GlobalTagMap globaltagmap = globalTagService.mapReplaceTag(systemtag, entity, tagnameroot);
+					maplist.add(globaltagmap);	
+				}
+			}
+			entity.setGlobalTagMaps(maplist);
+			return entity;
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ConddbServiceException(e.getMessage());
+		}
+	}
+	
 
 	/**
 	 * @param entity

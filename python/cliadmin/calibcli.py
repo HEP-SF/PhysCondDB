@@ -81,7 +81,7 @@ class PhysDBDriver():
         print "    Creates an entry for the new file in the systemdescription table if not already there."
         print "    Creates a tag using package name and filename (appending _HEAD_00) if not already there."
         print " "
-        print " - TAG <package-name> <global tag name>"
+        print " - TAG <package-name> <global tag name> [description]"
         print "        ex: MyNewPkg MyNewPkg-00-01 : creates new global tag and associate all tags (files) found in package MyNewPkg."
         print "     Creates new global tag <global tag name> associated to all files in package <package-name>."
         print " "
@@ -194,7 +194,7 @@ class PhysDBDriver():
                 print 'Found N arguments ',len(self.args)
                 pkgname=self.args[0]
                 msg = ('COMMIT: use package name %s ') % (pkgname)
-                if len(self.args) >= 3 :
+                if len(self.args) >= 4 :
                     self.phtools.printmsg(msg,'cyan')
                 else:
                     msg = ('COMMIT: cannot apply command because number of arguments is not enough, type -h for help %')
@@ -203,21 +203,23 @@ class PhysDBDriver():
  
                 filename=self.args[1]
                 destpath=self.args[2]
-                since=0
-                sinceDescription=''
+                destfname='none'
+                tagexten='none'
                 if (len(self.args) > 3):
-                    since = int(self.args[3])
+                    tagexten=self.args[3]
                 if (len(self.args) > 4):
-                    sinceDescription = self.args[4]
-                else:
-                    sinceDescription = ('t%d') % since
+                    destfname=self.args[4]
+                
+                since=self.t0
+                sinceDescription = ('t%d') % since
+                
                 # load arguments and prepare the data structure for the GET request
                 # optional parameters like trace and expand are added
 
-                msg = ('COMMIT: calling commit with args: %s %s %s %s %s') % (filename,pkgname,destpath,str(since),sinceDescription)
+                msg = ('COMMIT: calling commit with args: %s %s %s %s %s %s %s') % (filename,pkgname,destpath,str(since),sinceDescription,destfname,tagexten)
                 self.phtools.printmsg(msg,'cyan')   
                 expcalapi = ExpertcalibrationApi(self.api_client)
-                iov = expcalapi.commit_file(pkgname,destpath,file=filename,since=since,description=sinceDescription)    
+                iov = expcalapi.commit_file(pkgname,destpath,file=filename,dbfname=destfname, tagext=tagexten, since=since,description=sinceDescription)    
 #                print 'Response: ',iov                
                 msg = ('Store in path %s: since=%d, hash=%s, file=%s, size=%d [identified by tag=%s, url=%s]') %(destpath,int(iov.since),iov.hash,iov.payload.object_type,int(iov.payload.datasize),iov.tag.name,iov.payload.data.href)
                 self.phtools.printmsg(msg,'green')                            
@@ -233,12 +235,23 @@ class PhysDBDriver():
                 print 'Action TAG is used to provide a global tag for a package, associating all subfolders to it.'
                 systemname=self.args[0]
                 systemsglobaltag=self.args[1]
-                msg = ('TAG: calling tag with args: %s %s') % (systemname,systemsglobaltag)
+                tagfilter=self.args[2]
+                gtagdescription = ("New tag for package %s") % (systemname)
+                if len(self.args) > 3:
+                    gtagdescription = self.args[2]
+                msg = ('TAG: calling tag with args: %s %s %s') % (systemname,systemsglobaltag,gtagdescription)
                 self.phtools.printmsg(msg,'cyan')   
                 expcalapi = ExpertcalibrationApi(self.api_client)
-                gtag = expcalapi.tag_file(systemsglobaltag,systemname)
+                gtag = expcalapi.tag_file(systemsglobaltag,systemname,tagfilter)
+                # Now set the global tag description
+                expapi = ExpertApi(self.api_client)
+                objparams = ('description=%s') % (gtagdescription)
+                gtagforupd = self.phtools.createobject(objparams,'GlobalTag')
+                gtagforupd.name=gtag.name
+                gtagupd = expapi.update_global_tag(gtag.name,body=gtagforupd)
+
                 ## print 'Response: ',gtag
-                msg = ('Tag package %s: name=%s, lockstatus=%s') %(systemname,gtag.name,gtag.lockstatus)
+                msg = ('Tag package %s: name=%s, lockstatus=%s, description=%s') %(systemname,gtagupd.name,gtagupd.lockstatus,gtagupd.description)
                 self.phtools.printmsg(msg,'cyan') 
                 rowlist = []
                 for maps in gtag.global_tag_maps:
@@ -249,6 +262,31 @@ class PhysDBDriver():
                 
             except Exception, e:
                 sys.exit("TAG failed: %s" % (str(e)))
+                raise
+
+        elif (self.action=='REPLACE'):
+            try:
+                print 'Action REPLACE is used to replace some global tag mappings for a package, using the tagfilter to choose new ones.'
+                systemname=self.args[0]
+                systemsglobaltag=self.args[1]
+                tagfilter=self.args[2]
+                msg = ('REPLACE: calling replace with args: %s %s %s') % (systemname,systemsglobaltag,tagfilter)
+                self.phtools.printmsg(msg,'cyan')   
+                expcalapi = ExpertcalibrationApi(self.api_client)
+                gtag = expcalapi.replacetag_file(systemsglobaltag,systemname,tagfilter)
+                
+                ## print 'Response: ',gtag
+                msg = ('Replaced tags for package %s: name=%s, lockstatus=%s, description=%s') %(systemname,gtag.name,gtag.lockstatus,gtag.description)
+                self.phtools.printmsg(msg,'cyan') 
+                rowlist = []
+                for maps in gtag.global_tag_maps:
+                    row = {}
+                    row = {'file' : maps.system_tag.object_type, 'name': maps.system_tag.name }
+                    rowlist.append(row)
+                self.phtools.dumpmodellist(rowlist,True,['file','name'])
+                
+            except Exception, e:
+                sys.exit("REPLACE failed: %s" % (str(e)))
                 raise
 
         elif self.action == 'LS':
@@ -337,6 +375,40 @@ class PhysDBDriver():
                 sys.exit("DIR failed: %s" % (str(e)))
                 raise
 
+        elif (self.action=='ADD'):
+            try:
+                print 'Action ADD is used to add a new file type to be tracked. It takes the package name, filename, path and description as entries.'
+                systemname=self.args[0]
+                systempath=self.args[1]
+                systemfilename=self.args[2]
+                systemdesc=self.args[3]
+                
+                msg = ('ADD: calling add with args: %s %s %s') % (systemname,systempath,systemfilename)
+                self.phtools.printmsg(msg,'cyan')
+                
+                nodefp = ('%s/%s') % (systempath,systemfilename)
+                tagnameroot = ('%s-%s') % (systemname,systemfilename)
+                sysapis = SystemsApi(self.api_client)
+                try:
+                    system = sysapis.find_system(tagnameroot,expand=self.expand,trace=self.trace)
+                    if system is not None:
+                        msg = ('ADD: ERROR, system %s %s already exists') % (system.id, system.tag_name_root)
+                        self.phtools.printmsg(msg,'red')
+                        return -1
+                except Exception, e:
+                    print 'System file not found, proceed with creation...'
+                
+                expapi = ExpertApi(self.api_client)
+                objparams = ('%s=%s;%s=%s;%s=%s;%s=%s') % ('schemaName',systemname,'nodeFullpath',nodefp,'nodeDescription',systemdesc,'tagNameRoot',tagnameroot)
+                system = self.phtools.createobject(objparams,'SystemDescription')
+                syscreated = expapi.create_system_description(body=system)
+                print 'Object ',object,' added to db and response is :'
+                self.phtools.dumpmodelobject(syscreated,True,['schema_name','node_fullpath','node_description','tag_name_root'])                
+                
+            except Exception, e:
+                sys.exit("ADD failed: %s" % (str(e)))
+                raise
+                
         elif self.action == 'LOCK':
             try:
                 print 'Action LOCK is used to lock or unlock a global tag'

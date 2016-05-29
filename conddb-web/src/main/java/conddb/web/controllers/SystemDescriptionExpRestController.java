@@ -112,6 +112,7 @@ public class SystemDescriptionExpRestController extends BaseController {
 
 	@Path(Link.SYSTEMS+"/{id}")
 	@DELETE
+	@Produces({ MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML })
 	@ApiOperation(value = "Delete a system description.",
     notes = "It should be used one system at the time. This method is meant for administration purposes.",
     response=SystemDescription.class)

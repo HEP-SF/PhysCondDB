@@ -112,7 +112,7 @@ public class GlobalTag extends AfEntity implements java.io.Serializable {
 
 	@Href
 	@Column(name = "NAME", unique = true, nullable = false, length = 100)
-	@Pattern(regexp="^([A-Z]+[A-Za-z0-9]+)-([A-Z0-9]+)-([0-9])++$",
+	@Pattern(regexp="^([A-Z]+[A-Za-z0-9]+)-([A-Z0-9]+)-([0-9]+)-([0-9]+)++$",
 	         message="{invalid.name}")
 	public String getName() {
 		return this.name;

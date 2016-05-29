@@ -34,14 +34,19 @@ from swagger_client import ApiClient
 class PhysDbUtils():
 
 
-    def __init__(self,host='http://localhost:8080/physconddb/api/rest',expand='true',trace='on',debug=False,page=0,pagesize=1000):
+    def __init__(self,host='http://localhost:8080/physconddb/api/rest',expand='true',trace='on',jsondump=False,outfile=None,debug=False,page=0,pagesize=1000):
     # process command line options
         self.host=host
         self.expand=expand
         self.trace=trace
+        self.jsondump=jsondump
+        self.outfile=outfile
         self.debug=debug
         self.page=page
         self.pagesize=pagesize
+        if self.jsondump:
+            self.outf = open(self.outfile,"w")
+        
         self.api_client = ApiClient(host=self.host)
         print 'Creating class PhysDBUtils'
     
@@ -60,17 +65,21 @@ class PhysDbUtils():
         except:
           print msg
 
+    def close(self):
+        if self.jsondump:
+            self.outf.close()
+
     def getsystems(self,by):
         sysapis = SystemsApi(self.api_client)
         coll = sysapis.list_systems(by,page=self.page,size=self.pagesize)
         syslist = coll.items
-        self.dumpmodellist(syslist,True,['schema_name','node_fullpath','node_description','tag_name_root'])
+        self.dumpmodellist(syslist,True,['id','schema_name','node_fullpath','node_description','tag_name_root'])
         print 'List of retrieved systems : ',len(syslist)
 
     def fetchsystem(self,name):
         sysapis = SystemsApi(self.api_client)
         system = sysapis.find_system(name,expand=self.expand,trace=self.trace)
-        self.dumpmodelobject(system,True,['schema_name','node_fullpath','node_description','tag_name_root'])
+        self.dumpmodelobject(system,True,['id','schema_name','node_fullpath','node_description','tag_name_root'])
 
     def getglobaltags(self,by):
         gtapis = GlobaltagsApi(self.api_client)
@@ -114,6 +123,29 @@ class PhysDbUtils():
         ##print 'using row format ',row_format
         return row_format.format(**objdict)
 
+    def printrownoformat(self, objdict, keys=[]):
+        (head_format, row_format) = self.getsimpleformat(objdict,keys)
+        for akey in keys:
+            val = objdict[akey]
+            if 'time' in akey:
+                objdict[akey] = str(objdict[akey])
+        ##print 'using row format ',row_format
+        return row_format.format(**objdict)
+    
+    def getsimpleformat(self, objdict, keys=[]):
+        ##print objdict
+        if self.debug:
+            print 'Get simple format using objdict and keys ',objdict,keys
+        head_format = ''
+        row_format = ''
+        i=0
+        for akey in keys:
+            val = objdict[akey]
+            akey_format='{%s} | ' % (akey)
+            head_format += '{0[%d]} | ' % (int(i))
+            row_format += akey_format
+        return head_format,row_format
+    
     def getformat(self, objdict, keys=[]):
         ##print objdict
         if self.debug:
@@ -125,7 +157,7 @@ class PhysDbUtils():
             val = objdict[akey]
             num = 30
             if (akey == 'name'):
-                num=50
+                num=80
             if ('_time' in akey):
                 num=19
             if ('node_' in akey):
@@ -136,6 +168,8 @@ class PhysDbUtils():
                 num=15
             if ('_type' in akey):
                 num=30
+            if ('time_type' in akey):
+                num=10
             if ('description' in akey):
                 num=70
             if ('hash' in akey):
@@ -161,14 +195,6 @@ class PhysDbUtils():
         (head_format, row_format) = self.getformat(objdict,keys)
         return head_format.format(keys)
 
-
-    def helpmodel(self,obj,keylist=[]):
-        attrs = obj.attribute_map
-        msg = ''
-        for key in keylist:
-            msg = ('%s%s=...;') % (msg,attrs[key])
-        self.printmsg(msg[:-1],'cyan')
-        
     
     def cleanmodellist(self,objdict,keylist):
         if self.debug:
@@ -243,6 +269,9 @@ class PhysDbUtils():
         
         msg = self.printrow(objdict,reducedlist)
         self.printmsg(msg,'cyan')
+        if self.jsondump:
+            dumpmsg = self.printrownoformat(objdict,reducedlist)
+            self.outf.write(dumpmsg+"\n")
 
     def fetchglobaltag(self,name):
         gtapis = GlobaltagsApi(self.api_client)

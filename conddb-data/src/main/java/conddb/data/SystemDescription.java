@@ -72,6 +72,7 @@ public class SystemDescription extends conddb.data.AfEntity implements Serializa
 	 */
 	@Id
 	@GeneratedValue(strategy=GenerationType.AUTO)
+	@Column(name = "NODE_ID")
 	public Long getId() {
 		return id;
 	}

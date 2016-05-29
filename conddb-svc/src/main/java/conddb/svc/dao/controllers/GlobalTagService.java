@@ -19,12 +19,14 @@ import org.springframework.transaction.annotation.Transactional;
 import conddb.data.GlobalTag;
 import conddb.data.GlobalTagMap;
 import conddb.data.GlobalTagStatus;
+import conddb.data.SystemDescription;
 import conddb.data.Tag;
 import conddb.svc.annotations.ProfileExecution;
 import conddb.svc.dao.exceptions.ConddbServiceDataIntegrityException;
 import conddb.svc.dao.exceptions.ConddbServiceException;
 import conddb.svc.dao.repositories.GlobalTagMapRepository;
 import conddb.svc.dao.repositories.GlobalTagRepository;
+import conddb.svc.dao.repositories.SystemNodeRepository;
 import conddb.svc.dao.repositories.TagRepository;
 
 /**
@@ -41,10 +43,10 @@ public class GlobalTagService {
 	@Autowired
 	private GlobalTagMapRepository globalTagMapRepository;
 	@Autowired
+	private SystemNodeRepository systemRepository;
+	@Autowired
 	private TagRepository tagRepository;
 
-	
-	
 	/**
 	 * @return the globalTagRepository
 	 */
@@ -59,7 +61,6 @@ public class GlobalTagService {
 		return tagRepository;
 	}
 
-	
 	/**
 	 * @return the globalTagMapRepository
 	 */
@@ -104,7 +105,7 @@ public class GlobalTagService {
 			throw new ConddbServiceException("Cannot find global tag map element " + e.getMessage());
 		}
 	}
-	
+
 	/**
 	 * @return
 	 * @throws ConddbServiceException
@@ -160,8 +161,9 @@ public class GlobalTagService {
 	public GlobalTag getGlobalTagFetchTags(String globaltagname) throws ConddbServiceException {
 		try {
 			GlobalTag gtag = null;
-			/////gtag = this.globalTagRepository.findOne(globaltagname);
-			// I have modified the sql query to try to load maps+systemTag in one select
+			///// gtag = this.globalTagRepository.findOne(globaltagname);
+			// I have modified the sql query to try to load maps+systemTag in
+			///// one select
 			gtag = this.globalTagRepository.findByNameAndFetchTagsEagerly(globaltagname);
 			return gtag;
 		} catch (Exception e) {
@@ -193,7 +195,7 @@ public class GlobalTagService {
 	@ProfileExecution
 	public List<GlobalTag> getGlobalTagByNameLikeFetchTags(String globaltagnamepattern) throws ConddbServiceException {
 		try {
-			List<GlobalTag> gtaglist =  null;
+			List<GlobalTag> gtaglist = null;
 			gtaglist = this.globalTagRepository.findByNameLikeAndFetchTagsEagerly(globaltagnamepattern);
 			return gtaglist;
 		} catch (Exception e) {
@@ -355,13 +357,49 @@ public class GlobalTagService {
 		if (atag == null || gtag == null) {
 			throw new ConddbServiceException("Cannot associate...there are null elements");
 		}
-		GlobalTagMap entity = new GlobalTagMap(gtag, atag, record, label);
 		if (gtag.islocked()) {
 			log.debug("Global tag lock string is " + gtag.getLockstatus() + ";");
 			log.debug("   compared with " + GlobalTagStatus.LOCKED.name() + ";");
 			throw new ConddbServiceException("Cannot add tags to a locked global tag..");
 		}
+		
+		GlobalTagMap entity = new GlobalTagMap(gtag, atag, record, label);
 		return globalTagMapRepository.save(entity);
+	}
+
+	/**
+	 * @param atag
+	 * @param gtag
+	 * @return
+	 * @throws ConddbServiceException
+	 */
+	@Transactional
+	public GlobalTagMap mapReplaceTag(Tag atag, GlobalTag gtag, String tagnameroot) throws ConddbServiceException {
+		if (atag == null || gtag == null) {
+			throw new ConddbServiceException("Cannot associate...there are null elements");
+		}
+		if (gtag.islocked()) {
+			log.debug("Global tag lock string is " + gtag.getLockstatus() + ";");
+			log.debug("   compared with " + GlobalTagStatus.LOCKED.name() + ";");
+			throw new ConddbServiceException("Cannot replace tags into a locked global tag..");
+		}
+		
+		log.debug("Search for existing association using " + gtag.getName() + " and " + tagnameroot);
+		List<GlobalTagMap> existing = globalTagMapRepository.findByGlobalTagAndTagNameLike(gtag.getName(),
+				tagnameroot + "%");
+		
+		SystemDescription systemDescription = systemRepository.findByTagNameRoot(tagnameroot);
+		GlobalTagMap globaltagmap = new GlobalTagMap(gtag, atag, systemDescription.getSchemaName(), tagnameroot);
+		if (existing == null || existing.isEmpty()) {
+			// Here we should add the mapping
+			return globalTagMapRepository.save(globaltagmap);
+		} else if (existing.size() == 1){
+			GlobalTagMap entity = existing.get(0);
+			this.removeGlobalTagMap(entity);
+			return globalTagMapRepository.save(globaltagmap);
+		} else {
+			throw new ConddbServiceException("Cannot replace tags : list of existing > 1  => "+existing.size());
+		}
 	}
 
 	/**
