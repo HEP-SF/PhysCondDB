@@ -65,13 +65,15 @@ public class GlobalTagExpertService {
 		this.globalTagRepository.save(newgtag);
 		GlobalTag stored = this.globalTagRepository.findByName(destgtag);
 		
-		Set<GlobalTagMap> newmaps = new HashSet<GlobalTagMap>();
+//		Set<GlobalTagMap> newmaps = new HashSet<GlobalTagMap>();
 		for (GlobalTagMap globalTagMap : sgtagmap) {
 			Tag atag = globalTagMap.getSystemTag();
-			GlobalTagMap amap = new GlobalTagMap(stored, atag);
-			newmaps.add(amap);
+			GlobalTagMap amap = new GlobalTagMap(stored, atag, globalTagMap.getRecord(),globalTagMap.getLabel());
+			this.log.debug("Save new map entry : " + amap.toString());
+			this.globalTagMapRepository.save(amap);
+//			newmaps.add(amap);
 		}
-		this.globalTagMapRepository.save(newmaps);
+//		this.globalTagMapRepository.save(newmaps);
 	}
 
 	/**

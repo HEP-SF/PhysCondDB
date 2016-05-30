@@ -27,7 +27,7 @@ from xml.dom import minidom
 #from clint.textui import colored
 from datetime import datetime
 
-from swagger_client.apis import GlobaltagsApi, TagsApi, IovsApi, SystemsApi, ExpertApi, MapsApi, PayloadApi
+from swagger_client.apis import GlobaltagsApi, TagsApi, IovsApi, SystemsApi, ExpertApi, MapsApi, PayloadApi, AdminApi
 from swagger_client.models import GlobalTag, Tag, GlobalTagMap, SystemDescription
 from swagger_client import ApiClient
 from physdbutils import PhysDbUtils
@@ -284,6 +284,43 @@ class PhysDBDriver():
                     print 'Object ',object,' added to db and response is :'
                     self.phtools.dumpmodelobject(syscreated,True,['schema_name','node_fullpath','node_description','tag_name_root'])
 
+                else:
+                    print 'Cannot create object of type ',object
+
+            except Exception, e:
+                sys.exit("ADD failed: %s" % (str(e)))
+                raise
+                
+        elif (self.action=='CLONE'):
+            try:
+                print 'Action CLONE is used to insert a metadata object (globaltags,tags,systems,...) into the DB'
+                object=self.args[0]
+                msg = ('CLONE: selected object is %s ') % (object)
+                if object in [ 'globaltags', 'tags' ]:
+                    self.phtools.printmsg(msg,'cyan')
+                else:
+                    msg = ('CLONE: cannot apply command to object %s ') % (object)
+                    self.phtools.printmsg(msg,'red')                    
+                    return
+                
+                sourcename = self.args[1]
+                destname = self.args[2]
+            
+                msg = ('CLONE: clone %s => source %s into destination %s ') % (object,sourcename,destname)
+                self.phtools.printmsg(msg,'cyan')
+                
+                data = {}
+        # Parameters have been provided in command line, try to create the json entity
+                admapi = AdminApi(self.api_client)
+                if object == 'globaltags':
+                    gtagcreated = admapi.clone_global_tag(sourcename,destname)
+                    print 'Object ',object,' added to db and response is :'
+                    self.phtools.dumpmodelobject(gtagcreated,True,['name','snapshot_time','validity','description','lockstatus'])
+
+                elif object == 'tags':
+                    tagcreated = admapi.clone_tag(sourcename,destname)
+                    print 'Object ',object,' added to db and response is :'
+                    self.phtools.dumpmodelobject(tagcreated,True,['name','time_type','object_type','description','last_validated_time'])
                 else:
                     print 'Cannot create object of type ',object
 

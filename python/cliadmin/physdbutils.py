@@ -69,6 +69,33 @@ class PhysDbUtils():
         if self.jsondump:
             self.outf.close()
 
+    def getuniquetagnameroot(self,nodefullpath,pkgname,filename,pathindex):
+        
+        tagnameroot = '-'.join((pkgname,filename))
+        print 'Try using tagnameroot ',tagnameroot
+        sysapis = SystemsApi(self.api_client)
+        try:
+            system = sysapis.find_system(tagnameroot,expand=self.expand,trace=self.trace)
+            if system is None:
+                return tagnameroot
+            else:
+                print 'System already exists: need another tagnameroot ',pathindex,' ',pkgname
+                path = nodefullpath.split('/'); 
+                print 'Found path list ',path,' ',path[pathindex]
+                if pathindex < len(path):
+                    pkgname = '-'.join((pkgname,path[pathindex]))
+                    print 'Change pkgname into ',pkgname
+
+                    tagnameroot = self.getuniquetagnameroot(nodefullpath,pkgname,filename,int(pathindex+1))
+                    print 'Generated new tagnameroot ',tagnameroot
+                    return tagnameroot
+                else:
+                    return None 
+        except Exception, e:
+            print 'System file not found, proceed with creation...'
+            return tagnameroot
+                
+        
     def getsystems(self,by):
         sysapis = SystemsApi(self.api_client)
         coll = sysapis.list_systems(by,page=self.page,size=self.pagesize)
