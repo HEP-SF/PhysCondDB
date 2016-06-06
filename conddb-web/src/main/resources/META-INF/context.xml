@@ -28,7 +28,7 @@
 -->
 <!-- removed to test -->
 <!-- 		factory="org.apache.tomcat.jdbc.pool.DataSourceFactory" -->
-
+<!--  
 	<Resource name="java/OraIntr" 
 		auth="Container" 
 		type="javax.sql.DataSource"
@@ -59,8 +59,7 @@
                 (SERVICE_NAME=intr.cern.ch)
         )
 )" />
-
- 
+ -->
 	<Resource name="java/AsgInt8r" 
 		auth="Container" 
 		type="javax.sql.DataSource"
@@ -111,10 +110,10 @@
 	<!-- Tomcat in memory database should be defined inside conf/server.xml??? 
 		This is true IF we want to share the connection at server level. The variable 
 		used is set in the .properties file contained in spring/sql/xxx.properties 
-		and depends on the chosen system for persistency. -->
+		and depends on the chosen system for persistency. 
 	<ResourceLink name="${tomcat.datasource}" global="${tomcat.datasource}"
 		auth="Container" type="javax.sql.DataSource" />
-
+-->
 	<!-- e.g. for file based DB url="jdbc:h2:/tmp/condspringdb"/> -->
 	<!-- e.g. for in memory based DB url="jdbc:h2:mem:condspring-testdb" 
 
