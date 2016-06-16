@@ -307,7 +307,8 @@ class PhysDBDriver():
                 sysapis = SystemsApi(self.api_client)
                 for map in coll:
                     tagname = map.system_tag.name
-                    tagnameroot = tagname.replace(default_tag_extension,'')
+                    tagnameroot = tagname.split('_')[0]
+                    #tagnameroot = tagname.replace(default_tag_extension,'')
                     system = sysapis.find_system(tagnameroot,expand=self.expand)
                     if self.debug:
                         print 'found tag ',tagname
@@ -352,6 +353,7 @@ class PhysDBDriver():
                 for asys in syslist.items:
                     #print asys
                     tagnameroot = asys.tag_name_root
+                    ## The following does not work: we need to create the tag name from a loop....
                     tagname = ('%s%s') % (tagnameroot,default_tag_extension)
                     iovlist = iovapi.get_iovs_in_tag(tagname,payload=True,expand=self.expand,since=self.t0,until=self.tMax)
                     rowlist = []
@@ -394,7 +396,14 @@ class PhysDBDriver():
                     if system is not None:
                         msg = ('ADD: ERROR, system %s %s already exists') % (system.id, system.tag_name_root)
                         self.phtools.printmsg(msg,'red')
-                        return -1
+                        msg = ('ADD: compare paths to see if the system is really the same => %s / %s') % (system.node_fullpath, nodefp)
+                        self.phtools.printmsg(msg,'red')
+                        tagnameroot = None
+                        if system.node_fullpath != nodefp:
+                            print 'generate new tag name root...'
+                            tagnameroot = self.phtools.getuniquetagnameroot(nodefp,systemname,systemfilename,2)
+                        if tagnameroot is None:
+                            return -1
                 except Exception, e:
                     print 'System file not found, proceed with creation...'
                 

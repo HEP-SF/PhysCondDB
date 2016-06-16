@@ -1,18 +1,11 @@
 package conddb.test.repositories;
 
 
-import static org.hamcrest.CoreMatchers.hasItems;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-
 import java.math.BigDecimal;
-import java.util.List;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;

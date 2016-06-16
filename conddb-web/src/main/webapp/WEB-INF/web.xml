@@ -16,12 +16,12 @@ http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
 		<param-value>classpath:spring/services-context.xml</param-value>
 	</context-param>
 <!-- CAREFUL : this should be uncommented for MW on DEMAND AT CERN
--->
+
      <context-param> 
             <param-name>spring.profiles.active</param-name>
             <param-value>prod,oracle</param-value>
      </context-param> 
-
+-->
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
 	</listener>

@@ -4,7 +4,9 @@
 package conddb.client;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Random;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
@@ -39,16 +41,19 @@ public class TestCondDBPayload {
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 
 		try {
-            HttpPost httppost = new HttpPost("http://localhost:8080/physconddb/conddbweb/uploadPayload");
+            HttpPost httppost = new HttpPost("http://localhost:8080/physconddb/api/rest/expert/payload");
 
-//            FileBody bin = new FileBody(new File(args[0]));
-    	    File file = new File("/tmp/test.png");
+    	    File file = generateBinary(10000);
     	    FileBody bin = new FileBody(file);
             StringBody comment = new StringBody("A binary file of some kind", ContentType.TEXT_PLAIN);
+            StringBody stream = new StringBody("random", ContentType.TEXT_PLAIN);
+            StringBody version = new StringBody("1.0", ContentType.TEXT_PLAIN);
 
             HttpEntity reqEntity = MultipartEntityBuilder.create()
                     .addPart("file", bin)
-                    .addPart("comment", comment)
+                    .addPart("type", comment)
+                    .addPart("streamer", stream)
+                    .addPart("version", version)
                     .build();
 
 
@@ -81,6 +86,23 @@ public class TestCondDBPayload {
 				e.printStackTrace();
 			}
         }
+	}
+
+	protected File generateBinary(int size) {
+		byte[] barr = new byte[size];
+		Random rnd = new Random();
+		rnd.nextBytes(barr);
+		File bf = new File("random.bin");
+		FileOutputStream fos = null;
+		try {
+			fos = new FileOutputStream(bf);
+			fos.write(barr);
+			fos.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return bf;
 	}
 
 }

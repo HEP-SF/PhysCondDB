@@ -3,30 +3,21 @@
  */
 package conddb.controllers.test;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.List;
+import java.util.Random;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpVersion;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.ContentBody;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.params.CoreProtocolPNames;
 import org.apache.http.util.EntityUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,16 +41,20 @@ public class PayloadControllerTest {
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 
 		try {
-            HttpPost httppost = new HttpPost("http://localhost:8080/conddbweb/uploadPayload");
+            HttpPost httppost = new HttpPost("http://localhost:8080/physconddb/api/rest/expert/payload");
 
 //            FileBody bin = new FileBody(new File(args[0]));
-    	    File file = new File("/tmp/test.png");
+    	    File file = generateBinary(10000);
     	    FileBody bin = new FileBody(file);
             StringBody comment = new StringBody("A binary file of some kind", ContentType.TEXT_PLAIN);
+            StringBody stream = new StringBody("random", ContentType.TEXT_PLAIN);
+            StringBody version = new StringBody("1.0", ContentType.TEXT_PLAIN);
 
             HttpEntity reqEntity = MultipartEntityBuilder.create()
                     .addPart("file", bin)
-                    .addPart("comment", comment)
+                    .addPart("type", comment)
+                    .addPart("streamer", stream)
+                    .addPart("version", version)
                     .build();
 
 
@@ -94,4 +89,20 @@ public class PayloadControllerTest {
         }
 	}
 
+	protected File generateBinary(int size) {
+		byte[] barr = new byte[size];
+		Random rnd = new Random();
+		rnd.nextBytes(barr);
+		File bf = new File("random.bin");
+		FileOutputStream fos = null;
+		try {
+			fos = new FileOutputStream(bf);
+			fos.write(barr);
+			fos.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return bf;
+	}
 }
